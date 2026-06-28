@@ -18,13 +18,10 @@
     "db:local": "turbo -F @openstarter/db db:local"
   },
   "dependencies": {
-    "@openstarter/env": "workspace:*",
     "dotenv": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "catalog:",
-    "@openstarter/config": "workspace:*",
     "@types/node": "catalog:",
     "turbo": "^2.9.16",
     "typescript": "catalog:"

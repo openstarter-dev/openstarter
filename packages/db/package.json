@@ -25,7 +25,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@openstarter/config": "workspace:*",
     "drizzle-kit": "^0.31.8",
     "typescript": "catalog:"
   }

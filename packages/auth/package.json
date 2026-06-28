@@ -19,7 +19,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@openstarter/config": "workspace:*",
     "typescript": "catalog:"
   }
 }
