@@ -1,16 +1,16 @@
 # openstarter
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Start, Hono, TRPC, and more.
+This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Start, Hono, and more.
 
 ## Features
 
 - **TypeScript** - For type safety and improved developer experience
-- **TanStack Start** - SSR framework with TanStack Router
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **Shared UI package** - shadcn/ui primitives live in `packages/ui`
-- **Hono** - Lightweight, performant server framework
-- **tRPC** - End-to-end type-safe APIs
-- **workers** - Runtime environment
+- **TanStack Start** - Full-stack SSR framework on TanStack Router (unified front + back)
+- **TailwindCSS** - Utility-first CSS
+- **Shared UI package** - shadcn/ui primitives in `packages/ui`
+- **Hono** - Lightweight backend framework (in `packages/api`)
+- **Hono RPC** - End-to-end type-safe client/server calls
+- **Node** - Platform-agnostic runtime
 - **Drizzle** - TypeScript-first ORM
 - **SQLite/Turso** - Database engine
 - **Authentication** - Better-Auth
@@ -34,7 +34,7 @@ This project uses SQLite with Drizzle ORM.
 pnpm run db:local
 ```
 
-2. Update your `.env` file in the `apps/server` directory with the appropriate connection details if needed.
+2. Update your `.env` file in the `apps/web` directory with the appropriate connection details if needed.
 
 3. Apply the schema to your database:
 
@@ -48,8 +48,8 @@ Then, run the development server:
 pnpm run dev
 ```
 
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+The API is served from the same origin under `/api/*`.
 
 ## UI Customization
 
@@ -79,38 +79,31 @@ If you want to add app-specific blocks instead of shared primitives, run the sha
 
 ## Deployment
 
-### Cloudflare via Alchemy
+The app builds to a standard Node server (`apps/web/dist/server/server.js`).
 
-- Target: web + server
-- Dev: pnpm run dev
-- Deploy: pnpm run deploy
-- Destroy: pnpm run destroy
+1. Build: `pnpm build`
+2. Start: `pnpm --filter web start`
 
-For more details, see the guide on [Deploying to Cloudflare with Alchemy](https://www.better-t-stack.dev/docs/guides/cloudflare-alchemy).
+Provide `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` as environment
+variables on your host. Deploy anywhere Node runs (Docker, VPS, Vercel, Netlify).
 
 ## Project Structure
 
 ```
 openstarter/
 ├── apps/
-│   ├── web/         # Frontend application (React + TanStack Start)
-│   └── server/      # Backend API (Hono, TRPC)
+│   └── web/         # Full-stack app (TanStack Start + Hono via server routes)
 ├── packages/
 │   ├── ui/          # Shared shadcn/ui components and styles
-│   ├── api/         # API layer / business logic
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
+│   ├── api/         # Hono app (auth + routes) + AppType for RPC
+│   ├── auth/        # Better-Auth configuration
+│   └── db/          # Database schema & client
 ```
 
 ## Available Scripts
 
-- `pnpm run dev`: Start all applications in development mode
-- `pnpm run build`: Build all applications
-- `pnpm run dev:web`: Start only the web application
-- `pnpm run dev:server`: Start only the server
-- `pnpm run check-types`: Check TypeScript types across all apps
-- `pnpm run db:push`: Push schema changes to database
-- `pnpm run db:generate`: Generate database client/types
-- `pnpm run db:migrate`: Run database migrations
-- `pnpm run db:studio`: Open database studio UI
-- `pnpm run db:local`: Start the local SQLite database
+- `pnpm dev`: Start the app in development mode (http://localhost:3000)
+- `pnpm build`: Build the app for production
+- `pnpm --filter web start`: Run the production Node server
+- `pnpm check-types`: Type-check across the workspace
+- `pnpm db:push` / `db:generate` / `db:migrate` / `db:studio` / `db:local`: Drizzle commands

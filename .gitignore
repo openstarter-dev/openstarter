@@ -57,3 +57,7 @@ temp
 .kiro/
 .claude/
 .superpowers/
+
+# 本地 SQLite 数据库
+local.db
+local.db-*
