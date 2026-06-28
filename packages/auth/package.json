@@ -1,0 +1,24 @@
+{
+  "name": "@openstarter/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@openstarter/db": "workspace:*",
+    "@openstarter/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@openstarter/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

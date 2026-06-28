@@ -1,0 +1,3 @@
+{
+  "extends": "@openstarter/config/tsconfig.base.json"
+}
