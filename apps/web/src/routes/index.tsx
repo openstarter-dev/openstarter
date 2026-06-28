@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useTRPC } from "@/utils/trpc";
+import { client } from "@/lib/api";
 
 export const Route = createFileRoute("/")({
   component: HomeComponent,
@@ -24,8 +24,15 @@ const TITLE_TEXT = `
  `;
 
 function HomeComponent() {
-  const trpc = useTRPC();
-  const healthCheck = useQuery(trpc.healthCheck.queryOptions());
+  const healthCheck = useQuery({
+    queryKey: ["health"],
+    queryFn: async () => {
+      const res = await client.api.health.$get();
+      return res.json();
+    },
+  });
+
+  const connected = healthCheck.data?.status === "ok";
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-2">
@@ -35,12 +42,12 @@ function HomeComponent() {
           <h2 className="mb-2 font-medium">API Status</h2>
           <div className="flex items-center gap-2">
             <div
-              className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
+              className={`h-2 w-2 rounded-full ${connected ? "bg-green-500" : "bg-red-500"}`}
             />
             <span className="text-muted-foreground text-sm">
               {healthCheck.isLoading
                 ? "Checking..."
-                : healthCheck.data
+                : connected
                   ? "Connected"
                   : "Disconnected"}
             </span>

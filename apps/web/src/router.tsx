@@ -1,15 +1,14 @@
-import type { AppRouter } from "@openstarter/api/routers/index";
-import { env } from "@openstarter/env/web";
-import { QueryCache, QueryClient } from "@tanstack/react-query";
+import {
+  QueryCache,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
-import { createTRPCOptionsProxy } from "@trpc/tanstack-react-query";
 import { toast } from "sonner";
 
 import Loader from "./components/loader";
 import { routeTree } from "./routeTree.gen";
-import { TRPCProvider } from "./utils/trpc";
 
 function createQueryClient() {
   return new QueryClient({
@@ -29,38 +28,20 @@ function createQueryClient() {
   });
 }
 
-const trpcClient = createTRPCClient<AppRouter>({
-  links: [
-    httpBatchLink({
-      url: `${env.VITE_SERVER_URL}/trpc`,
-      fetch(url, options) {
-        return fetch(url, {
-          ...options,
-          credentials: "include",
-        });
-      },
-    }),
-  ],
-});
-
 export const getRouter = () => {
   const queryClient = createQueryClient();
-  const trpc = createTRPCOptionsProxy({
-    client: trpcClient,
-    queryClient,
-  });
 
   const router = createTanStackRouter({
     routeTree,
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
-    context: { trpc, queryClient },
+    context: { queryClient },
     defaultPendingComponent: () => <Loader />,
     defaultNotFoundComponent: () => <div>Not Found</div>,
     Wrap: ({ children }) => (
-      <TRPCProvider trpcClient={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
         {children}
-      </TRPCProvider>
+      </QueryClientProvider>
     ),
   });
 

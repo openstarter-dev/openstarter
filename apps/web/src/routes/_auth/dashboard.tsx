@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useTRPC } from "@/utils/trpc";
+import { client } from "@/lib/api";
 
 export const Route = createFileRoute("/_auth/dashboard")({
   component: RouteComponent,
@@ -10,8 +10,13 @@ export const Route = createFileRoute("/_auth/dashboard")({
 function RouteComponent() {
   const { session } = Route.useRouteContext();
 
-  const trpc = useTRPC();
-  const privateData = useQuery(trpc.privateData.queryOptions());
+  const privateData = useQuery({
+    queryKey: ["private-data"],
+    queryFn: async () => {
+      const res = await client.api["private-data"].$get();
+      return res.json();
+    },
+  });
 
   return (
     <div>
