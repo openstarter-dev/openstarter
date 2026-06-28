@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - 包管理器:pnpm 10.25;monorepo 用 Turborepo,保留 `turbo`。
-- 运行时:Node、平台无关。生产构建产物为 `apps/web/.output/server/index.mjs`,用 `node` 启动。
+- 运行时:Node、平台无关。生产构建产物为 `apps/web/dist/server/server.js`,用 `node` 启动。
 - 同源:前后端同源、无 CORS。开发端口统一 `3000`。
 - 环境变量(策略 X·各包自校验):`packages/db` 校验 `DATABASE_URL`;`packages/auth` 校验 `BETTER_AUTH_SECRET`、`BETTER_AUTH_URL`;client 用 `import.meta.env`。
 - 移除:tRPC 全套(`@trpc/*`、`@hono/trpc-server`)、Cloudflare/Alchemy 全套(`alchemy`、`wrangler`、`@cloudflare/vite-plugin`、`@cloudflare/workers-types`)、`@t3-oss/env-core`、`tsdown`。
@@ -733,7 +733,7 @@ export const authClient = createAuthClient();
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "node .output/server/index.mjs",
+    "start": "node dist/server/server.js",
     "serve": "vite preview"
   },
 ```
@@ -814,7 +814,7 @@ dotenv.config({
 pnpm install
 pnpm --filter web build
 ```
-Expected: 安装成功;构建成功,生成 `apps/web/src/routeTree.gen.ts`(含新 `/api/$` 路由)与 `apps/web/.output/server/index.mjs`。
+Expected: 安装成功;构建成功,生成 `apps/web/src/routeTree.gen.ts`(含新 `/api/$` 路由)与 `apps/web/dist/server/server.js`。
 
 - [ ] **Step 22: 全量类型检查**
 
@@ -1052,7 +1052,7 @@ openstarter/
 ```markdown
 ## Deployment
 
-The app builds to a standard Node server (`apps/web/.output/server/index.mjs`).
+The app builds to a standard Node server (`apps/web/dist/server/server.js`).
 
 1. Build: `pnpm build`
 2. Start: `pnpm --filter web start`
@@ -1100,4 +1100,4 @@ git commit -m "docs: 更新 README 为 Node 部署与 Hono RPC 架构"
 - [ ] `pnpm check-types` 与 `pnpm build` 通过。
 - [ ] `pnpm dev` 单端口 3000 启动;首页 health=Connected;注册/登录/`/dashboard` 正常。
 - [ ] 前后端同源,`/api/*` 由 `packages/api` 的 Hono app 处理,前端经 `hc<AppType>` 类型安全调用。
-- [ ] 生产:`pnpm build` 产出 `.output/server/index.mjs`,`pnpm --filter web start` 可启动。
+- [ ] 生产:`pnpm build` 产出 `dist/server/server.js`,`pnpm --filter web start` 可启动。
