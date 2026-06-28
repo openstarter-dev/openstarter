@@ -52,3 +52,8 @@ coverage
 .cache
 tmp
 temp
+.agents/
+.codebuddy/
+.kiro/
+.claude/
+.superpowers/
