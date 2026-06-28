@@ -31,21 +31,27 @@ This project uses SQLite with Drizzle ORM.
 1. Start the local SQLite database (optional):
 
 ```bash
-pnpm run db:local
+pnpm db:local
 ```
 
-2. Update your `.env` file in the `apps/web` directory with the appropriate connection details if needed.
-
-3. Apply the schema to your database:
+2. Copy the example environment file:
 
 ```bash
-pnpm run db:push
+cp apps/web/.env.example apps/web/.env
+```
+
+3. Update your `.env` file in the `apps/web` directory with the appropriate connection details if needed.
+
+4. Apply the schema to your database:
+
+```bash
+pnpm db:push
 ```
 
 Then, run the development server:
 
 ```bash
-pnpm run dev
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
