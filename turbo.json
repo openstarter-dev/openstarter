@@ -33,12 +33,6 @@
     },
     "db:local": {
       "cache": false
-    },
-    "deploy": {
-      "cache": false
-    },
-    "destroy": {
-      "cache": false
     }
   }
 }

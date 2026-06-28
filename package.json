@@ -11,14 +11,11 @@
     "build": "turbo build",
     "check-types": "turbo check-types",
     "dev:web": "turbo -F web dev",
-    "dev:server": "turbo -F server dev",
     "db:push": "turbo -F @openstarter/db db:push",
     "db:studio": "turbo -F @openstarter/db db:studio",
     "db:generate": "turbo -F @openstarter/db db:generate",
     "db:migrate": "turbo -F @openstarter/db db:migrate",
-    "db:local": "turbo -F @openstarter/db db:local",
-    "deploy": "turbo -F @openstarter/infra deploy",
-    "destroy": "turbo -F @openstarter/infra destroy"
+    "db:local": "turbo -F @openstarter/db db:local"
   },
   "dependencies": {
     "@openstarter/env": "workspace:*",
