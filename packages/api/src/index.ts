@@ -1,25 +1,14 @@
-import { initTRPC, TRPCError } from "@trpc/server";
+import { createAuth } from "@openstarter/auth";
+import { Hono } from "hono";
 
-import type { Context } from "./context";
+import { healthRoute } from "./routes/health";
+import { privateDataRoute } from "./routes/private-data";
 
-export const t = initTRPC.context<Context>().create();
+const app = new Hono();
 
-export const router = t.router;
+app.on(["POST", "GET"], "/api/auth/*", (c) => createAuth().handler(c.req.raw));
 
-export const publicProcedure = t.procedure;
+const routes = app.route("/", healthRoute).route("/", privateDataRoute);
 
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.session) {
-    throw new TRPCError({
-      code: "UNAUTHORIZED",
-      message: "Authentication required",
-      cause: "No session",
-    });
-  }
-  return next({
-    ctx: {
-      ...ctx,
-      session: ctx.session,
-    },
-  });
-});
+export { app };
+export type AppType = typeof routes;

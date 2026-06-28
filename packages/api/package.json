@@ -9,19 +9,18 @@
       "default": "./src/*.ts"
     }
   },
-  "scripts": {},
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
   "dependencies": {
+    "@hono/zod-validator": "^0.8.0",
     "@openstarter/auth": "workspace:*",
     "@openstarter/db": "workspace:*",
-    "@openstarter/env": "workspace:*",
-    "@trpc/client": "catalog:",
-    "@trpc/server": "catalog:",
-    "dotenv": "catalog:",
+    "hono": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@openstarter/config": "workspace:*",
-    "hono": "catalog:",
     "typescript": "catalog:"
   }
 }

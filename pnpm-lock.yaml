@@ -199,24 +199,18 @@ importers:
 
   packages/api:
     dependencies:
+      '@hono/zod-validator':
+        specifier: ^0.8.0
+        version: 0.8.0(hono@4.12.27)(zod@4.4.3)
       '@openstarter/auth':
         specifier: workspace:*
         version: link:../auth
       '@openstarter/db':
         specifier: workspace:*
         version: link:../db
-      '@openstarter/env':
-        specifier: workspace:*
-        version: link:../env
-      '@trpc/client':
+      hono:
         specifier: 'catalog:'
-        version: 11.18.0(@trpc/server@11.18.0(typescript@6.0.3))(typescript@6.0.3)
-      '@trpc/server':
-        specifier: 'catalog:'
-        version: 11.18.0(typescript@6.0.3)
-      dotenv:
-        specifier: 'catalog:'
-        version: 17.4.2
+        version: 4.12.27
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -224,9 +218,6 @@ importers:
       '@openstarter/config':
         specifier: workspace:*
         version: link:../config
-      hono:
-        specifier: 'catalog:'
-        version: 4.12.27
       typescript:
         specifier: 'catalog:'
         version: 6.0.3
@@ -236,9 +227,6 @@ importers:
       '@openstarter/db':
         specifier: workspace:*
         version: link:../db
-      '@openstarter/env':
-        specifier: workspace:*
-        version: link:../env
       better-auth:
         specifier: 'catalog:'
         version: 1.6.11(@cloudflare/workers-types@4.20260628.1)(@tanstack/react-start@1.168.26(esbuild@0.28.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rolldown@1.1.3)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0)))(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260628.1)(@libsql/client@0.15.15)(kysely@0.28.17))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -263,9 +251,6 @@ importers:
       '@libsql/client':
         specifier: 0.15.15
         version: 0.15.15
-      '@openstarter/env':
-        specifier: workspace:*
-        version: link:../env
       dotenv:
         specifier: 'catalog:'
         version: 17.4.2
@@ -1378,6 +1363,12 @@ packages:
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
+
+  '@hono/zod-validator@0.8.0':
+    resolution: {integrity: sha512-5uS4S1/LKtZQYvD4BtpPUFkOv8d1wNxHHrChm26buMiEYc1FrHWvDUaKVBwkiVtvSExHSpLGDvcnpI2Copyj9w==}
+    peerDependencies:
+      hono: '>=4.10.0'
+      zod: ^3.25.0 || ^4.0.0
 
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -5524,6 +5515,11 @@ snapshots:
   '@hono/node-server@1.19.14(hono@4.12.27)':
     dependencies:
       hono: 4.12.27
+
+  '@hono/zod-validator@0.8.0(hono@4.12.27)(zod@4.4.3)':
+    dependencies:
+      hono: 4.12.27
+      zod: 4.4.3
 
   '@iarna/toml@2.2.5': {}
 
