@@ -6,7 +6,8 @@
     "dev": "vite dev",
     "build": "vite build",
     "start": "node dist/server/server.js",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@openstarter/api": "workspace:*",
