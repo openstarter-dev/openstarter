@@ -8,6 +8,8 @@ import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query
 import { toast } from "sonner";
 
 import Loader from "./components/loader";
+import { ErrorPage } from "./components/system/error";
+import { NotFound } from "./components/system/not-found";
 import { routeTree } from "./routeTree.gen";
 
 function createQueryClient() {
@@ -37,7 +39,8 @@ export const getRouter = () => {
     defaultPreloadStaleTime: 0,
     context: { queryClient },
     defaultPendingComponent: () => <Loader />,
-    defaultNotFoundComponent: () => <div>Not Found</div>,
+    defaultNotFoundComponent: () => <NotFound />,
+    defaultErrorComponent: ({ error }) => <ErrorPage error={error} />,
     Wrap: ({ children }) => (
       <QueryClientProvider client={queryClient}>
         {children}
