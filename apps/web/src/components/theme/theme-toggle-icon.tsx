@@ -21,7 +21,11 @@ export function ThemeToggleIcon() {
       aria-label="Toggle theme"
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
-      {mounted && isDark ? <Sun /> : <Moon />}
+      {mounted && isDark ? (
+        <Sun aria-hidden="true" />
+      ) : (
+        <Moon aria-hidden="true" />
+      )}
     </Button>
   );
 }

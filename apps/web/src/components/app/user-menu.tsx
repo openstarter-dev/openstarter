@@ -14,7 +14,7 @@ import { LogOut, Settings, User } from "lucide-react";
 import { ThemeMenuItems } from "@/components/theme/theme-menu-items";
 import { authClient } from "@/lib/auth-client";
 
-export function UserMenu() {
+export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const { data: session, isPending } = authClient.useSession();
 
@@ -51,7 +51,7 @@ export function UserMenu() {
         <DropdownMenuLabel>Theme</DropdownMenuLabel>
         <ThemeMenuItems />
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link to="/settings" />}>
+        <DropdownMenuItem onClick={onNavigate} render={<Link to="/settings" />}>
           <Settings aria-hidden="true" className="size-4" />
           Settings
         </DropdownMenuItem>

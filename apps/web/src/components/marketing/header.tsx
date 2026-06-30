@@ -81,7 +81,7 @@ export function MarketingHeader() {
             aria-expanded={open}
             onClick={() => setOpen(true)}
           >
-            <Menu />
+            <Menu aria-hidden="true" />
           </Button>
         </div>
       </div>
@@ -104,7 +104,7 @@ export function MarketingHeader() {
                 aria-label="Close menu"
                 onClick={() => setOpen(false)}
               >
-                <X />
+                <X aria-hidden="true" />
               </Button>
             </div>
             <nav className="flex flex-col gap-3">

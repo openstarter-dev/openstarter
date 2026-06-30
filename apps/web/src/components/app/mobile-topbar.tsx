@@ -31,7 +31,7 @@ export function MobileTopbar() {
           aria-expanded={open}
           onClick={() => setOpen(true)}
         >
-          <Menu />
+          <Menu aria-hidden="true" />
         </Button>
         <Link to="/dashboard" className="font-semibold">
           {BRAND_NAME}
@@ -56,14 +56,14 @@ export function MobileTopbar() {
                 aria-label="Close menu"
                 onClick={() => setOpen(false)}
               >
-                <X />
+                <X aria-hidden="true" />
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto p-2">
               <SidebarNav onNavigate={() => setOpen(false)} />
             </div>
             <div className="border-t p-2">
-              <UserMenu />
+              <UserMenu onNavigate={() => setOpen(false)} />
             </div>
           </div>
         </div>
