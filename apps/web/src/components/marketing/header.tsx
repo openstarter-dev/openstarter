@@ -2,8 +2,9 @@ import { Button } from "@openstarter/ui/components/button";
 import { Skeleton } from "@openstarter/ui/components/skeleton";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
+import { Drawer } from "@/components/drawer";
 import { ThemeToggleIcon } from "@/components/theme/theme-toggle-icon";
 import { authClient } from "@/lib/auth-client";
 import { BRAND_NAME } from "@/lib/branding";
@@ -35,16 +36,7 @@ function AuthCta() {
 
 export function MarketingHeader() {
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
+  const close = useCallback(() => setOpen(false), []);
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
@@ -86,44 +78,40 @@ export function MarketingHeader() {
         </div>
       </div>
 
-      {open ? (
-        <div className="fixed inset-0 z-50 md:hidden">
-          <button
+      <Drawer
+        open={open}
+        onClose={close}
+        side="right"
+        label="Menu"
+        className="gap-4 p-4"
+      >
+        <div className="flex items-center justify-between">
+          <span className="font-semibold">{BRAND_NAME}</span>
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             aria-label="Close menu"
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setOpen(false)}
-          />
-          <div className="absolute top-0 right-0 flex h-full w-72 flex-col gap-4 bg-background p-4 shadow-lg">
-            <div className="flex items-center justify-between">
-              <span className="font-semibold">{BRAND_NAME}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Close menu"
-                onClick={() => setOpen(false)}
-              >
-                <X aria-hidden="true" />
-              </Button>
-            </div>
-            <nav className="flex flex-col gap-3">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.label}
-                  to={link.to}
-                  hash={link.hash}
-                  onClick={() => setOpen(false)}
-                  className="text-sm"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-            <AuthCta />
-          </div>
+            onClick={close}
+          >
+            <X aria-hidden="true" />
+          </Button>
         </div>
-      ) : null}
+        <nav className="flex flex-col gap-3">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.label}
+              to={link.to}
+              hash={link.hash}
+              onClick={close}
+              className="text-sm"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+        <AuthCta />
+      </Drawer>
     </header>
   );
 }

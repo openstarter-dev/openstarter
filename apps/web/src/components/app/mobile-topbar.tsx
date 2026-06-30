@@ -1,24 +1,16 @@
 import { Button } from "@openstarter/ui/components/button";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { SidebarNav } from "@/components/app/sidebar-nav";
 import { UserMenu } from "@/components/app/user-menu";
+import { Drawer } from "@/components/drawer";
 import { BRAND_NAME } from "@/lib/branding";
 
 export function MobileTopbar() {
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, []);
+  const close = useCallback(() => setOpen(false), []);
 
   return (
     <div className="md:hidden">
@@ -38,36 +30,26 @@ export function MobileTopbar() {
         </Link>
       </div>
 
-      {open ? (
-        <div className="fixed inset-0 z-50">
-          <button
+      <Drawer open={open} onClose={close} side="left" label="Navigation" className="bg-sidebar">
+        <div className="flex h-12 items-center justify-between border-b px-3">
+          <span className="font-semibold">{BRAND_NAME}</span>
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             aria-label="Close menu"
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setOpen(false)}
-          />
-          <div className="absolute top-0 left-0 flex h-full w-72 flex-col bg-sidebar">
-            <div className="flex h-12 items-center justify-between border-b px-3">
-              <span className="font-semibold">{BRAND_NAME}</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label="Close menu"
-                onClick={() => setOpen(false)}
-              >
-                <X aria-hidden="true" />
-              </Button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-2">
-              <SidebarNav onNavigate={() => setOpen(false)} />
-            </div>
-            <div className="border-t p-2">
-              <UserMenu onNavigate={() => setOpen(false)} />
-            </div>
-          </div>
+            onClick={close}
+          >
+            <X aria-hidden="true" />
+          </Button>
         </div>
-      ) : null}
+        <div className="flex-1 overflow-y-auto p-2">
+          <SidebarNav onNavigate={close} />
+        </div>
+        <div className="border-t p-2">
+          <UserMenu onNavigate={close} />
+        </div>
+      </Drawer>
     </div>
   );
 }
