@@ -32,13 +32,13 @@
 - Consumes: 无
 - Produces: 仓库不再有 `apps/server`,根脚本不再引用 server/infra 部署
 
-- [ ] **Step 1: 删除 server 应用目录**
+- [x] **Step 1: 删除 server 应用目录**
 
 ```bash
 git rm -r apps/server
 ```
 
-- [ ] **Step 2: 删除根 package.json 中的 server/部署脚本**
+- [x] **Step 2: 删除根 package.json 中的 server/部署脚本**
 
 打开 `package.json`,删除以下三行脚本(保留其余):
 
@@ -50,7 +50,7 @@ git rm -r apps/server
 
 注意删除后确保上一行 `"dev:web": "turbo -F web dev",` 与后续 `db:*` 脚本之间逗号合法(`dev:web` 行末尾保留逗号)。
 
-- [ ] **Step 3: 删除 turbo.json 中的部署任务**
+- [x] **Step 3: 删除 turbo.json 中的部署任务**
 
 打开 `turbo.json`,在 `tasks` 中删除 `deploy` 与 `destroy` 两个任务块:
 
@@ -63,7 +63,7 @@ git rm -r apps/server
     }
 ```
 
-- [ ] **Step 4: 重新安装并确认 workspace 正常**
+- [x] **Step 4: 重新安装并确认 workspace 正常**
 
 Run: `pnpm install`
 Expected: 安装成功,无 `apps/server` 相关报错。
@@ -72,7 +72,7 @@ Expected: 安装成功,无 `apps/server` 相关报错。
 Run: `ls apps`
 Expected: 仅输出 `web`。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add apps package.json turbo.json pnpm-lock.yaml
@@ -94,7 +94,7 @@ git commit -m "refactor: 删除独立 server 应用与 Cloudflare 部署脚本"
 **Interfaces:**
 - Produces: `createDb()` 签名不变;新增内部 `env`(含 `DATABASE_URL: string`)
 
-- [ ] **Step 1: 新建 db 的 env 自校验**
+- [x] **Step 1: 新建 db 的 env 自校验**
 
 `packages/db/src/env.ts`:
 
@@ -109,7 +109,7 @@ const schema = z.object({
 export const env = schema.parse(process.env);
 ```
 
-- [ ] **Step 2: 改 index.ts 使用本地 env**
+- [x] **Step 2: 改 index.ts 使用本地 env**
 
 `packages/db/src/index.ts` 全文替换为:
 
@@ -126,7 +126,7 @@ export function createDb() {
 }
 ```
 
-- [ ] **Step 3: 调整 db 的 package.json**
+- [x] **Step 3: 调整 db 的 package.json**
 
 `packages/db/package.json`:在 `dependencies` 删除 `"@openstarter/env": "workspace:*",`;在 `scripts` 增加 `check-types`(置于 `db:migrate` 之后):
 
@@ -135,7 +135,7 @@ export function createDb() {
     "check-types": "tsc --noEmit"
 ```
 
-- [ ] **Step 4: 简化 db 的 tsconfig 以支持独立类型检查**
+- [x] **Step 4: 简化 db 的 tsconfig 以支持独立类型检查**
 
 `packages/db/tsconfig.json` 全文替换为:
 
@@ -148,7 +148,7 @@ export function createDb() {
 }
 ```
 
-- [ ] **Step 5: 独立类型检查**
+- [x] **Step 5: 独立类型检查**
 
 Run: `pnpm --filter @openstarter/db check-types`
 Expected: PASS,无类型错误,且不再引用 `@openstarter/env`。
@@ -157,7 +157,7 @@ Expected: PASS,无类型错误,且不再引用 `@openstarter/env`。
 Run: `grep -rn "@openstarter/env" packages/db/src`
 Expected: 无输出。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add packages/db
@@ -178,7 +178,7 @@ git commit -m "refactor(db): 用本地 zod 校验 DATABASE_URL,移除 @openstart
 - Consumes: `createDb()`(来自 Task 2)
 - Produces: `createAuth()` 签名不变(返回 better-auth 实例,含 `.handler`、`.api.getSession`)
 
-- [ ] **Step 1: 新建 auth 的 env 自校验**
+- [x] **Step 1: 新建 auth 的 env 自校验**
 
 `packages/auth/src/env.ts`:
 
@@ -194,7 +194,7 @@ const schema = z.object({
 export const env = schema.parse(process.env);
 ```
 
-- [ ] **Step 2: 改写 auth/index.ts(本地 env + 同源 cookie)**
+- [x] **Step 2: 改写 auth/index.ts(本地 env + 同源 cookie)**
 
 `packages/auth/src/index.ts` 全文替换为:
 
@@ -232,7 +232,7 @@ export function createAuth() {
 
 说明:删除了 `trustedOrigins`(同源不需要)与所有 Cloudflare `*.workers.dev` 注释配置;`sameSite` 由 `none` 改为 `lax`,`secure` 仅生产开启。
 
-- [ ] **Step 3: 调整 auth 的 package.json**
+- [x] **Step 3: 调整 auth 的 package.json**
 
 `packages/auth/package.json`:在 `dependencies` 删除 `"@openstarter/env": "workspace:*",`;在 `scripts` 增加:
 
@@ -242,7 +242,7 @@ export function createAuth() {
   },
 ```
 
-- [ ] **Step 4: 简化 auth 的 tsconfig**
+- [x] **Step 4: 简化 auth 的 tsconfig**
 
 `packages/auth/tsconfig.json` 全文替换为:
 
@@ -255,7 +255,7 @@ export function createAuth() {
 }
 ```
 
-- [ ] **Step 5: 独立类型检查**
+- [x] **Step 5: 独立类型检查**
 
 Run: `pnpm --filter @openstarter/auth check-types`
 Expected: PASS。
@@ -263,7 +263,7 @@ Expected: PASS。
 Run: `grep -rn "@openstarter/env" packages/auth/src`
 Expected: 无输出。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add packages/auth
@@ -289,13 +289,13 @@ git commit -m "refactor(auth): 自校验 BETTER_AUTH_* 并改为同源 lax cooki
   - 路由:`GET /api/health` → `{ status: "ok" }`;`GET /api/private-data` → `{ message: string; user?: User }`(401 时 `{ message: "Unauthorized" }`);`/api/auth/*` → better-auth
   - 前端:`client = hc<AppType>("/")`,调用 `client.api.health.$get()`、`client.api["private-data"].$get()`
 
-- [ ] **Step 1: 删除 api 旧 tRPC 文件**
+- [x] **Step 1: 删除 api 旧 tRPC 文件**
 
 ```bash
 git rm packages/api/src/context.ts packages/api/src/routers/index.ts
 ```
 
-- [ ] **Step 2: 新建 session 注入中间件**
+- [x] **Step 2: 新建 session 注入中间件**
 
 `packages/api/src/middleware/auth.ts`:
 
@@ -318,7 +318,7 @@ export const authMiddleware = createMiddleware<{
 });
 ```
 
-- [ ] **Step 3: 新建 health 路由(public)**
+- [x] **Step 3: 新建 health 路由(public)**
 
 `packages/api/src/routes/health.ts`:
 
@@ -330,7 +330,7 @@ export const healthRoute = new Hono().get("/api/health", (c) =>
 );
 ```
 
-- [ ] **Step 4: 新建 private-data 路由(protected)**
+- [x] **Step 4: 新建 private-data 路由(protected)**
 
 `packages/api/src/routes/private-data.ts`:
 
@@ -352,7 +352,7 @@ export const privateDataRoute = new Hono().get(
 );
 ```
 
-- [ ] **Step 5: 改写 api/index.ts 为 Hono app 并导出 AppType**
+- [x] **Step 5: 改写 api/index.ts 为 Hono app 并导出 AppType**
 
 `packages/api/src/index.ts` 全文替换为:
 
@@ -375,7 +375,7 @@ export type AppType = typeof routes;
 
 说明:`app.fetch(request)` 由 web 的 catch-all server route 调用;`AppType` 仅包含链式业务路由(health/private-data),供 `hc` 推断,auth 通配路由不参与 RPC。
 
-- [ ] **Step 6a: 改 api/package.json**
+- [x] **Step 6a: 改 api/package.json**
 
 `packages/api/package.json` 全文替换为(hono 移入 dependencies,删 tRPC 与 env,新增 check-types):
 
@@ -407,7 +407,7 @@ export type AppType = typeof routes;
 }
 ```
 
-- [ ] **Step 6b: 简化 api/tsconfig.json**
+- [x] **Step 6b: 简化 api/tsconfig.json**
 
 `packages/api/tsconfig.json` 全文替换为:
 
@@ -420,7 +420,7 @@ export type AppType = typeof routes;
 }
 ```
 
-- [ ] **Step 7: 安装 Hono 校验器并重装依赖**
+- [x] **Step 7: 安装 Hono 校验器并重装依赖**
 
 ```bash
 pnpm --filter @openstarter/api add @hono/zod-validator
@@ -429,19 +429,19 @@ pnpm install
 
 说明:`@hono/zod-validator` 为模板预置的入参校验中间件,供后续业务路由使用(示例路由暂未用到)。
 
-- [ ] **Step 8: api 独立类型检查**
+- [x] **Step 8: api 独立类型检查**
 
 Run: `pnpm --filter @openstarter/api check-types`
 Expected: PASS。
 
-- [ ] **Step 9: 提交 api 改造**
+- [x] **Step 9: 提交 api 改造**
 
 ```bash
 git add packages/api pnpm-lock.yaml pnpm-workspace.yaml
 git commit -m "refactor(api): 用 Hono + Hono RPC 重写,导出 app 与 AppType"
 ```
 
-- [ ] **Step 10: 新建前端 Hono RPC 客户端**
+- [x] **Step 10: 新建前端 Hono RPC 客户端**
 
 `apps/web/src/lib/api.ts`:
 
@@ -452,7 +452,7 @@ import { hc } from "hono/client";
 export const client = hc<AppType>("/");
 ```
 
-- [ ] **Step 11: 新建 catch-all server route(委托给 Hono app)**
+- [x] **Step 11: 新建 catch-all server route(委托给 Hono app)**
 
 `apps/web/src/routes/api/$.ts`:
 
@@ -473,7 +473,7 @@ export const Route = createFileRoute("/api/$")({
 });
 ```
 
-- [ ] **Step 12: 首页改用 Hono RPC 调 health**
+- [x] **Step 12: 首页改用 Hono RPC 调 health**
 
 在 `apps/web/src/routes/index.tsx`,把这行 import:
 
@@ -526,7 +526,7 @@ function HomeComponent() {
 }
 ```
 
-- [ ] **Step 13: dashboard 改用 Hono RPC 调 private-data**
+- [x] **Step 13: dashboard 改用 Hono RPC 调 private-data**
 
 `apps/web/src/routes/_auth/dashboard.tsx` 全文替换为:
 
@@ -561,7 +561,7 @@ function RouteComponent() {
 }
 ```
 
-- [ ] **Step 14: 清理 router.tsx 的 tRPC 接线(三处改动)**
+- [x] **Step 14: 清理 router.tsx 的 tRPC 接线(三处改动)**
 
 改动 1 — 替换顶部 import 块:
 
@@ -658,7 +658,7 @@ const trpcClient = createTRPCClient<AppRouter>({
   });
 ```
 
-- [ ] **Step 15: 清理 __root.tsx 的 tRPC context**
+- [x] **Step 15: 清理 __root.tsx 的 tRPC context**
 
 在 `apps/web/src/routes/__root.tsx`,把顶部到 `RouterAppContext` 接口这一段:
 
@@ -697,13 +697,13 @@ export interface RouterAppContext {
 }
 ```
 
-- [ ] **Step 16: 删除前端 tRPC 工具文件**
+- [x] **Step 16: 删除前端 tRPC 工具文件**
 
 ```bash
 git rm apps/web/src/utils/trpc.ts
 ```
 
-- [ ] **Step 17: auth-client 改为同源**
+- [x] **Step 17: auth-client 改为同源**
 
 `apps/web/src/lib/auth-client.ts` 全文替换为:
 
@@ -715,7 +715,7 @@ export const authClient = createAuthClient();
 
 说明:省略 `baseURL`,better-auth client 默认请求当前 origin 的 `/api/auth/*`,与后端同源挂载点一致。
 
-- [ ] **Step 18a: 改 web 的 scripts(dev/start)**
+- [x] **Step 18a: 改 web 的 scripts(dev/start)**
 
 `apps/web/package.json` 的 `scripts` 块:
 
@@ -738,7 +738,7 @@ export const authClient = createAuthClient();
   },
 ```
 
-- [ ] **Step 18b: 改 web 的依赖(删 tRPC/env,加 hono)**
+- [x] **Step 18b: 改 web 的依赖(删 tRPC/env,加 hono)**
 
 在 `apps/web/package.json` 的 `dependencies` 中删除这四行:
 
@@ -755,7 +755,7 @@ export const authClient = createAuthClient();
     "hono": "catalog:",
 ```
 
-- [ ] **Step 19: 清理 vite.config.ts(移除 alchemy/cloudflare,端口 3000)**
+- [x] **Step 19: 清理 vite.config.ts(移除 alchemy/cloudflare,端口 3000)**
 
 `apps/web/vite.config.ts` 全文替换为:
 
@@ -778,7 +778,7 @@ export default defineConfig({
 
 说明:删除了 alchemy 插件、`.alchemy/local/wrangler.jsonc` 检测与 `cloudflare:workers` shim alias;端口固定 3000。
 
-- [ ] **Step 20: 设置 apps/web/.env(开发用,本地文件)**
+- [x] **Step 20: 设置 apps/web/.env(开发用,本地文件)**
 
 将 `apps/web/.env` 内容设为:
 
@@ -790,7 +790,7 @@ BETTER_AUTH_URL=http://localhost:3000
 
 说明:`file:../../local.db` 相对 cwd 解析,使 `packages/db`(drizzle-kit)与 `apps/web`(应用)都指向仓库根同一个 `local.db`。
 
-- [ ] **Step 20b: 修正 drizzle.config 的 env 路径**
+- [x] **Step 20b: 修正 drizzle.config 的 env 路径**
 
 `packages/db/drizzle.config.ts` 中:
 
@@ -808,7 +808,7 @@ dotenv.config({
 });
 ```
 
-- [ ] **Step 21: 重装并构建(生成 routeTree)**
+- [x] **Step 21: 重装并构建(生成 routeTree)**
 
 ```bash
 pnpm install
@@ -816,7 +816,7 @@ pnpm --filter web build
 ```
 Expected: 安装成功;构建成功,生成 `apps/web/src/routeTree.gen.ts`(含新 `/api/$` 路由)与 `apps/web/dist/server/server.js`。
 
-- [ ] **Step 22: 全量类型检查**
+- [x] **Step 22: 全量类型检查**
 
 Run: `pnpm check-types`
 Expected: PASS(web、ui、api、auth、db 全部通过;不再有 tRPC 相关引用)。
@@ -825,14 +825,14 @@ Expected: PASS(web、ui、api、auth、db 全部通过;不再有 tRPC 相关引�
 Run: `grep -rn "@trpc/\|utils/trpc\|VITE_SERVER_URL" apps/web/src packages/api/src`
 Expected: 无输出。
 
-- [ ] **Step 23: 提交 web 改造**
+- [x] **Step 23: 提交 web 改造**
 
 ```bash
 git add apps/web packages pnpm-lock.yaml
 git commit -m "refactor(web): 切换到 Hono RPC 与同源 API,移除 tRPC 接线"
 ```
 
-- [ ] **Step 24: 端到端手动验证**
+- [x] **Step 24: 端到端手动验证**
 
 ```bash
 pnpm db:push
@@ -865,7 +865,7 @@ pnpm --filter web dev
 
 **Interfaces:** 无新增接口(纯清理与配置迁移)
 
-- [ ] **Step 1: 把 tsconfig.base.json 提到仓库根**
+- [x] **Step 1: 把 tsconfig.base.json 提到仓库根**
 
 新建仓库根 `tsconfig.base.json`(内容来自 `packages/config/tsconfig.base.json`,`types` 去掉 `@cloudflare/workers-types`):
 
@@ -894,7 +894,7 @@ pnpm --filter web dev
 }
 ```
 
-- [ ] **Step 2: 改根 tsconfig.json 的 extends**
+- [x] **Step 2: 改根 tsconfig.json 的 extends**
 
 `tsconfig.json`(根)全文替换为:
 
@@ -904,7 +904,7 @@ pnpm --filter web dev
 }
 ```
 
-- [ ] **Step 3: 改四个包 tsconfig 的 extends**
+- [x] **Step 3: 改四个包 tsconfig 的 extends**
 
 在 `packages/api/tsconfig.json`、`packages/auth/tsconfig.json`、`packages/db/tsconfig.json`、`packages/ui/tsconfig.json` 中,把这一行:
 
@@ -920,7 +920,7 @@ pnpm --filter web dev
 
 （`apps/web/tsconfig.json` 本就不 extends,无需改动。）
 
-- [ ] **Step 4: 移除对 config/env 与 Cloudflare 包的依赖**
+- [x] **Step 4: 移除对 config/env 与 Cloudflare 包的依赖**
 
 ```bash
 pnpm --filter @openstarter/api --filter @openstarter/auth --filter @openstarter/db --filter @openstarter/ui remove @openstarter/config
@@ -930,13 +930,13 @@ pnpm remove -w @openstarter/env @openstarter/config @cloudflare/workers-types
 
 说明:以上命令会更新各 `package.json` 与 lockfile。此时 `config/env/infra` 目录仍在,但已无人依赖。
 
-- [ ] **Step 5: 删除三个包目录**
+- [x] **Step 5: 删除三个包目录**
 
 ```bash
 git rm -r packages/config packages/env packages/infra
 ```
 
-- [ ] **Step 6: 清理 pnpm catalog**
+- [x] **Step 6: 清理 pnpm catalog**
 
 在 `pnpm-workspace.yaml` 的 `catalog:` 中删除以下五行(已无人引用):
 
@@ -950,14 +950,14 @@ git rm -r packages/config packages/env packages/infra
 
 保留 `dotenv`、`zod`、`typescript`、`@types/node`、`hono`、`better-auth`、`next-themes`、`react`、`react-dom`、`@types/react`、`@types/react-dom`。
 
-- [ ] **Step 7: 重装依赖**
+- [x] **Step 7: 重装依赖**
 
 ```bash
 pnpm install
 ```
 Expected: 安装成功,无对 `@openstarter/config`、`@openstarter/env`、`@openstarter/infra` 的解析错误。
 
-- [ ] **Step 8: 验证类型与构建**
+- [x] **Step 8: 验证类型与构建**
 
 Run: `pnpm check-types`
 Expected: PASS。
@@ -968,7 +968,7 @@ Expected: 构建成功。
 Run: `grep -rn "@openstarter/config\|@openstarter/env\|@openstarter/infra\|cloudflare:workers" apps packages --include=*.ts --include=*.tsx --include=*.json`
 Expected: 无输出。
 
-- [ ] **Step 9: 提交清理**
+- [x] **Step 9: 提交清理**
 
 ```bash
 git add tsconfig.base.json tsconfig.json packages apps/web/package.json package.json pnpm-workspace.yaml pnpm-lock.yaml
@@ -984,7 +984,7 @@ git commit -m "refactor: 删除 config/env/infra 包,tsconfig 提到仓库根"
 
 **Interfaces:** 无
 
-- [ ] **Step 1: 忽略本地数据库文件**
+- [x] **Step 1: 忽略本地数据库文件**
 
 在根 `.gitignore` 末尾追加:
 
@@ -994,7 +994,7 @@ local.db
 local.db-*
 ```
 
-- [ ] **Step 1b: 新建 apps/web/.env.example(纳入版本控制)**
+- [x] **Step 1b: 新建 apps/web/.env.example(纳入版本控制)**
 
 `apps/web/.env.example`:
 
@@ -1006,7 +1006,7 @@ BETTER_AUTH_URL=http://localhost:3000
 
 > 若该文件被 `apps/web/.gitignore` 的 `.env*` 规则忽略,在该 `.gitignore` 加一行 `!.env.example` 取消忽略。
 
-- [ ] **Step 2: 更新 README.md(替换以下四个章节的内容)**
+- [x] **Step 2: 更新 README.md(替换以下四个章节的内容)**
 
 替换 **Features** 列表为:
 
@@ -1063,7 +1063,7 @@ variables on your host. Deploy anywhere Node runs (Docker, VPS, Vercel, Netlify)
 
 同时把 **Database Setup** 中提到的 `apps/server/.env` 改为 `apps/web/.env`(环境变量集中在此文件)。删除原 README 中所有提到 Cloudflare / Alchemy / `pnpm run deploy` 的内容。
 
-- [ ] **Step 3: 最终端到端验证**
+- [x] **Step 3: 最终端到端验证**
 
 ```bash
 pnpm install
@@ -1083,7 +1083,7 @@ pnpm --filter web start
 
 > 注:生产构建中 `NODE_ENV=production`,cookie `secure=true` 需 HTTPS;本地用 `node` 启动仅验证服务可用与 health。登录/会话流程已在 Task 4 的 `pnpm --filter web dev`(`secure=false`)下验证。
 
-- [ ] **Step 4: 提交文档**
+- [x] **Step 4: 提交文档**
 
 ```bash
 git add .gitignore README.md apps/web/.env.example
@@ -1094,10 +1094,10 @@ git commit -m "docs: 更新 README 为 Node 部署与 Hono RPC 架构"
 
 ## 完成标准(验收)
 
-- [ ] 仓库仅含 `apps/web` 一个应用;`packages/` 仅 `api`/`auth`/`db`/`ui`。
-- [ ] 无 `apps/server`、`packages/config`、`packages/env`、`packages/infra`。
-- [ ] `grep` 无 tRPC、`@openstarter/{config,env,infra}`、Cloudflare/Alchemy、`cloudflare:workers` 残留。
-- [ ] `pnpm check-types` 与 `pnpm build` 通过。
-- [ ] `pnpm dev` 单端口 3000 启动;首页 health=Connected;注册/登录/`/dashboard` 正常。
-- [ ] 前后端同源,`/api/*` 由 `packages/api` 的 Hono app 处理,前端经 `hc<AppType>` 类型安全调用。
-- [ ] 生产:`pnpm build` 产出 `dist/server/server.js`,`pnpm --filter web start` 可启动。
+- [x] 仓库仅含 `apps/web` 一个应用;`packages/` 仅 `api`/`auth`/`db`/`ui`。
+- [x] 无 `apps/server`、`packages/config`、`packages/env`、`packages/infra`。
+- [x] `grep` 无 tRPC、`@openstarter/{config,env,infra}`、Cloudflare/Alchemy、`cloudflare:workers` 残留。
+- [x] `pnpm check-types` 与 `pnpm build` 通过。
+- [x] `pnpm dev` 单端口 3000 启动;首页 health=Connected;注册/登录/`/dashboard` 正常。
+- [x] 前后端同源,`/api/*` 由 `packages/api` 的 Hono app 处理,前端经 `hc<AppType>` 类型安全调用。
+- [x] 生产:`pnpm build` 产出 `dist/server/server.js`,`pnpm --filter web start` 可启动。

@@ -93,7 +93,7 @@ apps/web/src/
   - `pricing.ts`：`type PricingTier`、`PRICING_TIERS: PricingTier[]`
   - `faq.ts`：`type FaqEntry`、`FAQ_ENTRIES: FaqEntry[]`
 
-- [ ] **Step 1: 把 lucide-react 加入 catalog**
+- [x] **Step 1: 把 lucide-react 加入 catalog**
 
 编辑 `pnpm-workspace.yaml`，在 `catalog:` 块末尾追加一行（与现有缩进一致）：
 
@@ -101,7 +101,7 @@ apps/web/src/
   lucide-react: ^0.546.0
 ```
 
-- [ ] **Step 2: 让两个包引用 catalog**
+- [x] **Step 2: 让两个包引用 catalog**
 
 `apps/web/package.json` 中：
 
@@ -119,13 +119,13 @@ apps/web/src/
 
 （替换原 `"lucide-react": "^0.546.0",`）
 
-- [ ] **Step 3: 安装并确认单一版本**
+- [x] **Step 3: 安装并确认单一版本**
 
 Run: `pnpm install`
 然后 Run: `pnpm why lucide-react -r`
 Expected: 仅解析出 `lucide-react 0.546.0`（`apps/web` 与 `@openstarter/ui` 都指向它），无 `1.x`。
 
-- [ ] **Step 4: 写 `branding.ts`**
+- [x] **Step 4: 写 `branding.ts`**
 
 Create `apps/web/src/lib/branding.ts`:
 
@@ -148,7 +148,7 @@ export const SOCIAL_LINKS = {
 export const COPYRIGHT_YEAR_START = 2026;
 ```
 
-- [ ] **Step 5: 写 `marketing/pricing.ts`**
+- [x] **Step 5: 写 `marketing/pricing.ts`**
 
 Create `apps/web/src/lib/marketing/pricing.ts`:
 
@@ -206,7 +206,7 @@ export const PRICING_TIERS: PricingTier[] = [
 ];
 ```
 
-- [ ] **Step 6: 写 `marketing/faq.ts`**
+- [x] **Step 6: 写 `marketing/faq.ts`**
 
 Create `apps/web/src/lib/marketing/faq.ts`:
 
@@ -245,12 +245,12 @@ export const FAQ_ENTRIES: FaqEntry[] = [
 ];
 ```
 
-- [ ] **Step 7: 类型检查**
+- [x] **Step 7: 类型检查**
 
 Run: `pnpm -F web check-types`
 Expected: PASS（无错误）。三个常量文件暂未被引用，但会随 `**/*.ts` 一并被 tsc 校验。
 
-- [ ] **Step 8: 提交**
+- [x] **Step 8: 提交**
 
 ```bash
 git add pnpm-workspace.yaml apps/web/package.json packages/ui/package.json pnpm-lock.yaml apps/web/src/lib/branding.ts apps/web/src/lib/marketing/pricing.ts apps/web/src/lib/marketing/faq.ts
@@ -274,7 +274,7 @@ git commit -m "feat(web): add brand/pricing/faq constants and pin lucide-react v
   - `ThemeToggleIcon()` — 单图标按钮，light↔dark
   - `ThemeMenuItems()` — 一组 DropdownMenu 单选项（System/Light/Dark）
 
-- [ ] **Step 1: 写 `theme-provider.tsx`**
+- [x] **Step 1: 写 `theme-provider.tsx`**
 
 Create `apps/web/src/components/theme/theme-provider.tsx`:
 
@@ -296,7 +296,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 ```
 
-- [ ] **Step 2: 写 `theme-toggle-icon.tsx`**
+- [x] **Step 2: 写 `theme-toggle-icon.tsx`**
 
 Create `apps/web/src/components/theme/theme-toggle-icon.tsx`:
 
@@ -332,7 +332,7 @@ export function ThemeToggleIcon() {
 
 > `mounted` 守卫避免 SSR/CSR 图标不一致的水合告警；未挂载前固定显示 Moon。
 
-- [ ] **Step 3: 写 `theme-menu-items.tsx`**
+- [x] **Step 3: 写 `theme-menu-items.tsx`**
 
 Create `apps/web/src/components/theme/theme-menu-items.tsx`:
 
@@ -365,7 +365,7 @@ export function ThemeMenuItems() {
 }
 ```
 
-- [ ] **Step 4: 重构 `__root.tsx`**
+- [x] **Step 4: 重构 `__root.tsx`**
 
 把 `apps/web/src/routes/__root.tsx` 整体替换为：
 
@@ -430,12 +430,12 @@ function RootDocument() {
 
 > 变化要点：移除 `<Header />` 与外层 `grid h-svh`（布局交给各 shell 自己负责）；删去硬编码 `className="dark"`，改 `suppressHydrationWarning` + 主题脚本；`<title>` 改读 `BRAND_NAME`，新增 description meta。此时 `components/header.tsx` 变为未被引用（Task 7 删除）。
 
-- [ ] **Step 5: 类型检查**
+- [x] **Step 5: 类型检查**
 
 Run: `pnpm -F web check-types`
 Expected: PASS。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add apps/web/src/components/theme/theme-provider.tsx apps/web/src/components/theme/theme-toggle-icon.tsx apps/web/src/components/theme/theme-menu-items.tsx apps/web/src/routes/__root.tsx
@@ -455,7 +455,7 @@ git commit -m "feat(web): add theme provider/toggle and wire FOUC-safe theming i
 - Consumes: `BRAND_NAME`（Task 1）
 - Produces: `NotFound()`、`ErrorPage({ error }: { error: Error })`
 
-- [ ] **Step 1: 写 `system/not-found.tsx`**
+- [x] **Step 1: 写 `system/not-found.tsx`**
 
 Create `apps/web/src/components/system/not-found.tsx`:
 
@@ -479,7 +479,7 @@ export function NotFound() {
 }
 ```
 
-- [ ] **Step 2: 写 `system/error.tsx`**
+- [x] **Step 2: 写 `system/error.tsx`**
 
 Create `apps/web/src/components/system/error.tsx`:
 
@@ -511,7 +511,7 @@ export function ErrorPage({ error }: { error: Error }) {
 }
 ```
 
-- [ ] **Step 3: 在 `router.tsx` 挂载**
+- [x] **Step 3: 在 `router.tsx` 挂载**
 
 在 `apps/web/src/router.tsx` 顶部 import 区加入：
 
@@ -535,12 +535,12 @@ import { NotFound } from "./components/system/not-found";
 
 （保留同块内既有的 `defaultPendingComponent: () => <Loader />`。）
 
-- [ ] **Step 4: 类型检查**
+- [x] **Step 4: 类型检查**
 
 Run: `pnpm -F web check-types`
 Expected: PASS。
 
-- [ ] **Step 5: 提交**
+- [x] **Step 5: 提交**
 
 ```bash
 git add apps/web/src/components/system/not-found.tsx apps/web/src/components/system/error.tsx apps/web/src/router.tsx
@@ -571,7 +571,7 @@ git commit -m "feat(web): add shell-free 404 and error pages"
 - Consumes: `BRAND_NAME`/`BRAND_TAGLINE`/`SOCIAL_LINKS`/`COPYRIGHT_YEAR_START`、`PRICING_TIERS`、`FAQ_ENTRIES`（Task 1）；`ThemeToggleIcon`（Task 2）；`authClient`（现有 `@/lib/auth-client`）
 - Produces: `MarketingHeader()`、`MarketingFooter()`、`Hero()`、`Features()`、`PricingSection()`、`Faq()`；路由 `/`、`/pricing`、`/privacy`、`/terms`
 
-- [ ] **Step 1: 写 `marketing/header.tsx`**
+- [x] **Step 1: 写 `marketing/header.tsx`**
 
 Create `apps/web/src/components/marketing/header.tsx`:
 
@@ -707,7 +707,7 @@ export function MarketingHeader() {
 }
 ```
 
-- [ ] **Step 2: 写 `marketing/footer.tsx`**
+- [x] **Step 2: 写 `marketing/footer.tsx`**
 
 Create `apps/web/src/components/marketing/footer.tsx`:
 
@@ -816,7 +816,7 @@ export function MarketingFooter() {
 }
 ```
 
-- [ ] **Step 3: 写 `marketing/hero.tsx`**
+- [x] **Step 3: 写 `marketing/hero.tsx`**
 
 Create `apps/web/src/components/marketing/hero.tsx`:
 
@@ -862,7 +862,7 @@ export function Hero() {
 }
 ```
 
-- [ ] **Step 4: 写 `marketing/features.tsx`**
+- [x] **Step 4: 写 `marketing/features.tsx`**
 
 Create `apps/web/src/components/marketing/features.tsx`:
 
@@ -934,7 +934,7 @@ export function Features() {
 }
 ```
 
-- [ ] **Step 5: 写 `marketing/pricing-section.tsx`**
+- [x] **Step 5: 写 `marketing/pricing-section.tsx`**
 
 Create `apps/web/src/components/marketing/pricing-section.tsx`:
 
@@ -1027,7 +1027,7 @@ export function PricingSection() {
 }
 ```
 
-- [ ] **Step 6: 写 `marketing/faq.tsx`（原生 details 互斥手风琴）**
+- [x] **Step 6: 写 `marketing/faq.tsx`（原生 details 互斥手风琴）**
 
 Create `apps/web/src/components/marketing/faq.tsx`:
 
@@ -1069,7 +1069,7 @@ export function Faq() {
 
 > `name="faq"` 是原生互斥手风琴（同名 `<details>` 一次只开一个），无需 JS、无障碍由浏览器保证。
 
-- [ ] **Step 7: 写 `_marketing/route.tsx`（布局）**
+- [x] **Step 7: 写 `_marketing/route.tsx`（布局）**
 
 Create `apps/web/src/routes/_marketing/route.tsx`:
 
@@ -1096,7 +1096,7 @@ function MarketingLayout() {
 }
 ```
 
-- [ ] **Step 8: 写 `_marketing/index.tsx`（Landing 组合）**
+- [x] **Step 8: 写 `_marketing/index.tsx`（Landing 组合）**
 
 Create `apps/web/src/routes/_marketing/index.tsx`:
 
@@ -1124,7 +1124,7 @@ function LandingPage() {
 }
 ```
 
-- [ ] **Step 9: 写 `_marketing/pricing.tsx`**
+- [x] **Step 9: 写 `_marketing/pricing.tsx`**
 
 Create `apps/web/src/routes/_marketing/pricing.tsx`:
 
@@ -1152,7 +1152,7 @@ function PricingPage() {
 
 > Phase 0：`/pricing` 复用 `<PricingSection>`。Phase 3 再扩充特性对比表。
 
-- [ ] **Step 10: 写 `_marketing/privacy.tsx` 与 `_marketing/terms.tsx`**
+- [x] **Step 10: 写 `_marketing/privacy.tsx` 与 `_marketing/terms.tsx`**
 
 Create `apps/web/src/routes/_marketing/privacy.tsx`:
 
@@ -1200,18 +1200,18 @@ function TermsPage() {
 }
 ```
 
-- [ ] **Step 11: 删除旧首页**
+- [x] **Step 11: 删除旧首页**
 
 Delete `apps/web/src/routes/index.tsx`（其内容已被 `_marketing/index.tsx` 取代；`/` 现由营销 shell 提供）。
 
-- [ ] **Step 12: 重新生成路由树并类型检查**
+- [x] **Step 12: 重新生成路由树并类型检查**
 
 Run: `pnpm -F web build`
 Expected: 构建成功；`apps/web/src/routeTree.gen.ts` 被重写，含 `/_marketing`、`/_marketing/`、`/_marketing/pricing`、`/_marketing/privacy`、`/_marketing/terms`。
 Run: `pnpm -F web check-types`
 Expected: PASS。
 
-- [ ] **Step 13: 提交**
+- [x] **Step 13: 提交**
 
 ```bash
 git add apps/web/src/components/marketing apps/web/src/routes/_marketing
@@ -1236,7 +1236,7 @@ git commit -m "feat(web): build marketing shell with landing, pricing, and legal
 
 > 表单内部逻辑本期不重写（Phase 1 才做），仅移动位置并修正相对 import（`./loader` → `../loader`）。
 
-- [ ] **Step 1: 移动两个表单文件**
+- [x] **Step 1: 移动两个表单文件**
 
 用支持自动改 import 的方式移动（或手动移动后修正引用）：
 - `apps/web/src/components/sign-in-form.tsx` → `apps/web/src/components/auth/sign-in-form.tsx`
@@ -1244,7 +1244,7 @@ git commit -m "feat(web): build marketing shell with landing, pricing, and legal
 
 移动后，确认两文件内的 `import Loader from "./loader";` 改为 `import Loader from "../loader";`（`loader.tsx` 仍在 `components/` 根下）。其余 import（`@openstarter/ui/*`、`@/lib/auth-client`、`sonner`、`zod` 等）不变。
 
-- [ ] **Step 2: 写 `_auth-pages/route.tsx`（居中布局 + 反向守卫）**
+- [x] **Step 2: 写 `_auth-pages/route.tsx`（居中布局 + 反向守卫）**
 
 Create `apps/web/src/routes/_auth-pages/route.tsx`:
 
@@ -1279,7 +1279,7 @@ function AuthPagesLayout() {
 
 > `ssr: false` 让 `beforeLoad` 仅在客户端执行，`authClient.getSession()` 能带上浏览器 cookie，已登录用户访问 `/login` 即被跳转到 `/dashboard`。
 
-- [ ] **Step 3: 写 `_auth-pages/login.tsx`（迁移自 routes/login.tsx）**
+- [x] **Step 3: 写 `_auth-pages/login.tsx`（迁移自 routes/login.tsx）**
 
 Create `apps/web/src/routes/_auth-pages/login.tsx`:
 
@@ -1305,18 +1305,18 @@ function LoginPage() {
 }
 ```
 
-- [ ] **Step 4: 删除旧 login 路由**
+- [x] **Step 4: 删除旧 login 路由**
 
 Delete `apps/web/src/routes/login.tsx`（URL `/login` 不变，现由 `_auth-pages` 提供）。
 
-- [ ] **Step 5: 重新生成路由树并类型检查**
+- [x] **Step 5: 重新生成路由树并类型检查**
 
 Run: `pnpm -F web build`
 Expected: 成功；路由树含 `/_auth-pages`、`/_auth-pages/login`，URL 仍为 `/login`。
 Run: `pnpm -F web check-types`
 Expected: PASS。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git add apps/web/src/components/auth apps/web/src/routes/_auth-pages
@@ -1344,7 +1344,7 @@ git commit -m "feat(web): add centered auth-pages shell and relocate auth forms"
 - Consumes: `authClient`、`BRAND_NAME`、`ThemeMenuItems`（Task 2）、现有 `dropdown-menu`/`button`/`skeleton`
 - Produces: `SidebarNav({ onNavigate? })` + `APP_NAV_ITEMS`、`UserMenu()`、`Sidebar()`、`MobileTopbar()`；路由 `/dashboard`、`/settings`
 
-- [ ] **Step 1: 写 `app/sidebar-nav.tsx`**
+- [x] **Step 1: 写 `app/sidebar-nav.tsx`**
 
 Create `apps/web/src/components/app/sidebar-nav.tsx`:
 
@@ -1387,7 +1387,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 }
 ```
 
-- [ ] **Step 2: 写 `app/user-menu.tsx`（底部卡片 + 向上展开）**
+- [x] **Step 2: 写 `app/user-menu.tsx`（底部卡片 + 向上展开）**
 
 Create `apps/web/src/components/app/user-menu.tsx`:
 
@@ -1471,7 +1471,7 @@ export function UserMenu() {
 }
 ```
 
-- [ ] **Step 3: 写 `app/sidebar.tsx`（桌面）**
+- [x] **Step 3: 写 `app/sidebar.tsx`（桌面）**
 
 Create `apps/web/src/components/app/sidebar.tsx`:
 
@@ -1501,7 +1501,7 @@ export function Sidebar() {
 }
 ```
 
-- [ ] **Step 4: 写 `app/mobile-topbar.tsx`（移动顶栏 + 抽屉）**
+- [x] **Step 4: 写 `app/mobile-topbar.tsx`（移动顶栏 + 抽屉）**
 
 Create `apps/web/src/components/app/mobile-topbar.tsx`:
 
@@ -1581,7 +1581,7 @@ export function MobileTopbar() {
 }
 ```
 
-- [ ] **Step 5: 写 `_app/route.tsx`（守卫 + 布局）**
+- [x] **Step 5: 写 `_app/route.tsx`（守卫 + 布局）**
 
 Create `apps/web/src/routes/_app/route.tsx`:
 
@@ -1621,7 +1621,7 @@ function AppLayout() {
 
 > 与旧 `_auth/route.tsx` 等价的守卫（`ssr:false` + `getSession` + 无 session 跳 `/login`），并返回 `{ session }` 供子路由用。
 
-- [ ] **Step 6: 写 `_app/dashboard.tsx`**
+- [x] **Step 6: 写 `_app/dashboard.tsx`**
 
 Create `apps/web/src/routes/_app/dashboard.tsx`:
 
@@ -1678,7 +1678,7 @@ function DashboardPage() {
 }
 ```
 
-- [ ] **Step 7: 写 `_app/settings.tsx`（stub）**
+- [x] **Step 7: 写 `_app/settings.tsx`（stub）**
 
 Create `apps/web/src/routes/_app/settings.tsx`:
 
@@ -1703,18 +1703,18 @@ function SettingsPage() {
 }
 ```
 
-- [ ] **Step 8: 删除旧 `_auth/` 目录**
+- [x] **Step 8: 删除旧 `_auth/` 目录**
 
 Delete `apps/web/src/routes/_auth/route.tsx` 和 `apps/web/src/routes/_auth/dashboard.tsx`（URL `/dashboard` 不变，现由 `_app` 提供；新增 `/settings`）。
 
-- [ ] **Step 9: 重新生成路由树并类型检查**
+- [x] **Step 9: 重新生成路由树并类型检查**
 
 Run: `pnpm -F web build`
 Expected: 成功；路由树含 `/_app`、`/_app/dashboard`、`/_app/settings`，不再含 `/_auth*`。
 Run: `pnpm -F web check-types`
 Expected: PASS。
 
-- [ ] **Step 10: 提交**
+- [x] **Step 10: 提交**
 
 ```bash
 git add apps/web/src/components/app apps/web/src/routes/_app
@@ -1734,35 +1734,35 @@ git commit -m "feat(web): build app shell with sidebar, user menu, and mobile dr
 - Consumes: 无
 - Produces: 无（仅删除 + 校验）
 
-- [ ] **Step 1: 确认旧文件已无人引用**
+- [x] **Step 1: 确认旧文件已无人引用**
 
 Run: `grep -rn "components/header\|components/user-menu\|from \"./header\"\|from \"./user-menu\"" apps/web/src`
 Expected: 无输出（`__root.tsx` 已不再引入 Header；旧 user-menu 仅被旧 header 引用，均已弃用）。
 
-- [ ] **Step 2: 删除旧文件**
+- [x] **Step 2: 删除旧文件**
 
 Delete `apps/web/src/components/header.tsx` 与 `apps/web/src/components/user-menu.tsx`。
 
-- [ ] **Step 3: 品牌字面量残留校验（验收 #10）**
+- [x] **Step 3: 品牌字面量残留校验（验收 #10）**
 
 Run: `grep -rn "openstarter" apps/web/src | grep -v "@openstarter/"`
 Expected: 无输出（`apps/web/src` 内除 `@openstarter/*` import 路径外，不出现 `openstarter` 字面量；可见显示名全部经 `BRAND_NAME`）。
 
-- [ ] **Step 4: 营销占位 TODO 校验（验收 #11）**
+- [x] **Step 4: 营销占位 TODO 校验（验收 #11）**
 
 Run: `grep -rl "TODO" apps/web/src/components/marketing | wc -l`
 Expected: ≥ 5（hero/features/pricing-section/faq 数据源 + pricing CTA 注释等均含 TODO 提示）。
 
 > 注：FAQ 文案在 `lib/marketing/faq.ts`、定价在 `lib/marketing/pricing.ts` 的 TODO 也计入换皮提示；若上面只数 `components/marketing` 不足 5，再 Run `grep -rl "TODO" apps/web/src/components/marketing apps/web/src/lib/marketing` 应 ≥ 5。
 
-- [ ] **Step 5: 重新生成路由树并类型检查**
+- [x] **Step 5: 重新生成路由树并类型检查**
 
 Run: `pnpm -F web build`
 Expected: 成功。
 Run: `pnpm -F web check-types`
 Expected: PASS。
 
-- [ ] **Step 6: 提交**
+- [x] **Step 6: 提交**
 
 ```bash
 git rm apps/web/src/components/header.tsx apps/web/src/components/user-menu.tsx
@@ -1778,7 +1778,7 @@ git commit -m "chore(web): remove legacy header and user-menu components"
 
 **Interfaces:** 无代码接口。
 
-- [ ] **Step 1: 用以下内容整体替换 `README.md`**
+- [x] **Step 1: 用以下内容整体替换 `README.md`**
 
 ````markdown
 # openstarter
@@ -1887,7 +1887,7 @@ planned:
 - **Phase 4 — DX polish:** SEO (sitemap/robots/OG), CONTRIBUTING, docs. _coming soon_
 ````
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 git add README.md
@@ -1903,7 +1903,7 @@ git commit -m "docs: rewrite README as a SaaS starter quick-start guide"
 
 **Interfaces:** 无代码接口。
 
-- [ ] **Step 1: 写 `CUSTOMIZE.md`**
+- [x] **Step 1: 写 `CUSTOMIZE.md`**
 
 Create `CUSTOMIZE.md`:
 
@@ -2022,7 +2022,7 @@ real policy, or remove the routes and their footer links if you don't need them.
 See `docs/superpowers/specs/` for the design of each phase.
 ````
 
-- [ ] **Step 2: 提交**
+- [x] **Step 2: 提交**
 
 ```bash
 git add CUSTOMIZE.md
@@ -2035,14 +2035,14 @@ git commit -m "docs: add CUSTOMIZE.md rebranding checklist"
 
 **Files:** 无（仅验证）。
 
-- [ ] **Step 1: 全量类型检查 + 构建**
+- [x] **Step 1: 全量类型检查 + 构建**
 
 Run: `pnpm check-types`
 Expected: 整个 workspace PASS（turbo 会先 `build`，重生成路由树，再 `tsc`）。
 Run: `pnpm -F web build`
 Expected: 构建成功，产出 `apps/web/dist/server/server.js`。
 
-- [ ] **Step 2: 起开发服务器（后台）并烟雾测试 SSR 营销路由**
+- [x] **Step 2: 起开发服务器（后台）并烟雾测试 SSR 营销路由**
 
 后台启动 `pnpm dev`（用后台进程工具，勿前台阻塞），等待约 8 秒就绪后执行：
 
