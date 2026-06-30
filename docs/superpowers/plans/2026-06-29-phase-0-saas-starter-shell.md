@@ -2058,25 +2058,25 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:3000/this-route-does-n
 Expected: 前五行各打印一个 `PASS ...`；最后一行返回 404 状态。
 （`/login`、`/dashboard` 为 `ssr:false`，curl 拿不到完整文案，留待浏览器人工核验。）
 
-- [ ] **Step 3: 浏览器人工核验清单（对照 spec §12）**
+- [x] **Step 3: 浏览器人工核验清单（对照 spec §12）**
 
 打开 http://localhost:3000，逐项确认：
 
-- [ ] `/` 显示完整 Landing（Hero/Features/Pricing/FAQ/Footer），首屏无明显主题闪烁
-- [ ] Marketing Header 主题图标点击，light/dark 即时切换；刷新后保持
-- [ ] 未登录时 Header 右侧显示 Sign in / Sign up；注册并登录后，回到 `/` 显示 "Go to dashboard"
-- [ ] `/login` 已登录访问自动跳 `/dashboard`
-- [ ] `/dashboard` 未登录访问自动跳 `/login`；登录后显示左侧 Sidebar + 底部用户卡
-- [ ] App User Dropdown 内 System/Light/Dark 三项可切换并持久化；Sign out 生效
-- [ ] 窗口缩到 `< 768px`：Marketing 与 App 的汉堡抽屉均可开合（含 Esc 关闭）
-- [ ] FAQ 一次只展开一项（原生互斥）
-- [ ] 访问 `/nope` 显示无 shell 的 404，"Back home" 可回首页
+- [x] `/` 显示完整 Landing（Hero/Features/Pricing/FAQ/Footer），首屏无明显主题闪烁
+- [x] Marketing Header 主题图标点击，light/dark 即时切换；刷新后保持
+- [x] 未登录时 Header 右侧显示 Sign in / Sign up；注册并登录后，回到 `/` 显示 "Go to dashboard"
+- [x] `/login` 已登录访问自动跳 `/dashboard`
+- [x] `/dashboard` 未登录访问自动跳 `/login`；登录后显示左侧 Sidebar + 底部用户卡
+- [x] App User Dropdown 内 System/Light/Dark 三项可切换并持久化；Sign out 生效
+- [x] 窗口缩到 `< 768px`：Marketing 与 App 的汉堡抽屉均可开合（含 Esc 关闭）
+- [x] FAQ 一次只展开一项（原生互斥）
+- [x] 访问 `/nope` 显示无 shell 的 404，"Back home" 可回首页
 
-- [ ] **Step 4: 停止开发服务器，清理**
+- [x] **Step 4: 停止开发服务器，清理**
 
 停止后台 `pnpm dev` 进程。确认无临时文件遗留（`git status` 干净，`.env`/`local.db` 仍被忽略）。
 
-- [ ] **Step 5: （如有最终零散改动）提交**
+- [x] **Step 5: （如有最终零散改动）提交**
 
 仅当本任务期间修了 bug 才提交：
 
