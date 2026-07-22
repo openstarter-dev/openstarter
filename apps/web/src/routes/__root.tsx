@@ -10,7 +10,10 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { getAnalyticsConfigFn } from "@/functions/analytics";
+import { buildAnalyticsHeadScripts } from "@/lib/analytics";
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
+import { getLocale } from "@/paraglide/runtime.js";
 
 import appCss from "../index.css?url";
 
@@ -22,7 +25,9 @@ export interface RouterAppContext {
 const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;var d=t==='dark'||((t==='system'||!t)&&m);var c=document.documentElement.classList;c.toggle('dark',d);c.toggle('light',!d);}catch(e){}})();`;
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
-  head: () => ({
+  // 读取分析供应商配置（SSR），供 head() 依据其条件注入采集脚本（R25.1/R25.2）。
+  loader: () => getAnalyticsConfigFn(),
+  head: ({ loaderData }) => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
@@ -30,13 +35,16 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       { name: "description", content: BRAND_DESCRIPTION },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
+    // 依据 Config 供应商标识注入且仅注入对应供应商脚本；未配置则为空数组、不注入（R25.1/R25.2）。
+    // 脚本来自受控白名单模板、度量 ID 已校验，经框架 head().scripts 机制注入（非危险 innerHTML）。
+    scripts: buildAnalyticsHeadScripts(loaderData),
   }),
   component: RootDocument,
 });
 
 function RootDocument() {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={getLocale()} suppressHydrationWarning>
       <head>
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: required pre-hydration theme script to prevent FOUC */}
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />

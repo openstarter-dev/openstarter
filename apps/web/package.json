@@ -5,12 +5,18 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "node dist/server/server.js",
+    "start": "node .output/server/index.mjs",
     "serve": "vite preview",
+    "cf:build": "NITRO_PRESET=cloudflare_module vite build",
+    "cf:deploy": "pnpm cf:build && wrangler deploy",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/passkey": "catalog:",
+    "@mdx-js/react": "catalog:",
     "@openstarter/api": "workspace:*",
+    "@openstarter/auth": "workspace:*",
+    "@openstarter/i18n": "workspace:*",
     "@openstarter/ui": "workspace:*",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-form": "^1.28.0",
@@ -23,6 +29,7 @@
     "hono": "catalog:",
     "lucide-react": "catalog:",
     "next-themes": "catalog:",
+    "qrcode.react": "4.2.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "sonner": "^2.0.7",
@@ -30,16 +37,21 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@inlang/paraglide-js": "catalog:",
+    "@mdx-js/rollup": "catalog:",
     "@tanstack/react-query-devtools": "^5.91.1",
     "@tanstack/react-router-devtools": "^1.166.13",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
+    "@types/mdx": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^6.0.1",
     "jsdom": "^29.0.2",
+    "nitro": "3.0.260603-beta",
     "typescript": "catalog:",
     "vite": "^8.0.8",
-    "web-vitals": "^5.2.0"
+    "web-vitals": "^5.2.0",
+    "wrangler": "^4.98.0"
   }
 }

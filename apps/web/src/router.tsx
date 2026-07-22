@@ -7,6 +7,8 @@ import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { toast } from "sonner";
 
+import { deLocalizeUrl, localizeUrl } from "@/paraglide/runtime.js";
+
 import Loader from "./components/loader";
 import { ErrorPage } from "./components/system/error";
 import { NotFound } from "./components/system/not-found";
@@ -38,6 +40,14 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreloadStaleTime: 0,
     context: { queryClient },
+    // Paraglide owns locale prefixes: incoming URLs are de-localized before
+    // route matching (the route tree is locale-free) and outgoing hrefs are
+    // re-localized, so links stay locale-agnostic and resolve to the active
+    // locale automatically (R23.3, R23.4).
+    rewrite: {
+      input: ({ url }) => deLocalizeUrl(url),
+      output: ({ url }) => localizeUrl(url),
+    },
     defaultPendingComponent: () => <Loader />,
     defaultNotFoundComponent: () => <NotFound />,
     defaultErrorComponent: ({ error }) => <ErrorPage error={error} />,

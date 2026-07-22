@@ -5,6 +5,13 @@ import {
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
+import { tDynamic } from "@/lib/i18n";
+
+// Theme values map to `common.nav.theme_{value}` message keys. This is a keyed
+// list, so labels are resolved with tDynamic (R23.2) rather than one static
+// `m[...]()` call per branch.
+const THEME_OPTIONS = ["system", "light", "dark"] as const;
+
 export function ThemeMenuItems() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -15,12 +22,14 @@ export function ThemeMenuItems() {
 
   return (
     <DropdownMenuRadioGroup
-      value={mounted ? theme : undefined}
       onValueChange={(value) => setTheme(String(value))}
+      value={mounted ? theme : undefined}
     >
-      <DropdownMenuRadioItem value="system">System</DropdownMenuRadioItem>
-      <DropdownMenuRadioItem value="light">Light</DropdownMenuRadioItem>
-      <DropdownMenuRadioItem value="dark">Dark</DropdownMenuRadioItem>
+      {THEME_OPTIONS.map((value) => (
+        <DropdownMenuRadioItem key={value} value={value}>
+          {tDynamic(`common.nav.theme_${value}`)}
+        </DropdownMenuRadioItem>
+      ))}
     </DropdownMenuRadioGroup>
   );
 }

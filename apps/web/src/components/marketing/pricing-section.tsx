@@ -8,10 +8,21 @@ import {
   CardTitle,
 } from "@openstarter/ui/components/card";
 import { cn } from "@openstarter/ui/lib/utils";
-import { Link } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Check } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
-import { PRICING_TIERS } from "@/lib/marketing/pricing";
+import { client } from "@/lib/api";
+import { authClient } from "@/lib/auth-client";
+import {
+  PRICING_TIERS,
+  type PricingCheckout,
+  type PricingTier,
+} from "@/lib/marketing/pricing";
+
+import { WechatQrOverlay, type WechatQr } from "./wechat-qr-overlay";
 
 function formatPrice(price: number | "custom"): string {
   if (price === "custom") {
@@ -23,9 +34,136 @@ function formatPrice(price: number | "custom"): string {
   return `$${price}/mo`;
 }
 
-export function PricingSection() {
+// 经类型化 Hono RPC 客户端发起结账；解包 `{ code, message, data }` 信封，
+// 失败（含校验失败、渠道不可用）抛出可读错误交由调用方 toast 呈现。
+async function requestCheckout(checkout: PricingCheckout) {
+  const res = await client.api.checkout.$post({
+    json: {
+      productId: checkout.productId,
+      productName: checkout.planName ?? checkout.productId,
+      planName: checkout.planName,
+      amount: checkout.amount,
+      currency: checkout.currency,
+      type: checkout.type,
+      credits: checkout.credits,
+      creditsValidDays: checkout.creditsValidDays,
+      interval: checkout.interval,
+      intervalCount: checkout.intervalCount,
+    },
+  });
+  const json = await res.json();
+  if ("code" in json && json.code === 0 && json.data) {
+    return json.data;
+  }
+  const message =
+    "message" in json && typeof json.message === "string"
+      ? json.message
+      : "Checkout failed";
+  throw new Error(message);
+}
+
+function TierCard({
+  tier,
+  pending,
+  onCheckout,
+}: {
+  tier: PricingTier;
+  pending: boolean;
+  onCheckout: (checkout: PricingCheckout) => void;
+}) {
+  const Icon = tier.icon;
+  const { cta } = tier;
   return (
-    <section id="pricing" className="mx-auto max-w-6xl px-4 py-20">
+    <Card className={cn(tier.highlight && "ring-2 ring-primary")}>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <Icon aria-hidden="true" className="size-5 text-primary" />
+          {tier.highlight ? (
+            <span className="rounded-full bg-primary px-2 py-0.5 text-primary-foreground text-xs">
+              Most popular
+            </span>
+          ) : null}
+        </div>
+        <CardTitle className="mt-2 text-lg">{tier.name}</CardTitle>
+        <CardDescription>{tier.description}</CardDescription>
+        <div className="mt-2 font-bold text-2xl">
+          {formatPrice(tier.priceMonthly)}
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1">
+        <ul className="flex flex-col gap-2">
+          {tier.features.map((feature) => (
+            <li key={feature} className="flex items-center gap-2">
+              <Check aria-hidden="true" className="size-4 text-primary" />
+              <span>{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+      <CardFooter>
+        {cta.kind === "link" ? (
+          <Button
+            className="w-full"
+            render={<Link to={cta.to} />}
+            variant={tier.highlight ? "default" : "outline"}
+          >
+            {cta.label}
+          </Button>
+        ) : (
+          <Button
+            className="w-full"
+            disabled={pending}
+            onClick={() => onCheckout(cta.checkout)}
+            type="button"
+            variant={tier.highlight ? "default" : "outline"}
+          >
+            {cta.label}
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
+  );
+}
+
+export function PricingSection() {
+  const navigate = useNavigate();
+  const { data: session } = authClient.useSession();
+  const [wechatQr, setWechatQr] = useState<WechatQr | null>(null);
+
+  const checkoutMutation = useMutation({
+    mutationFn: requestCheckout,
+    onSuccess: (data) => {
+      // 微信 Native 渠道：渲染二维码扫码支付；其余渠道：跳转结账链接（R10.3）。
+      if (data.qrData?.codeUrl) {
+        setWechatQr({
+          codeUrl: data.qrData.codeUrl,
+          amount: data.qrData.amount,
+          orderNo: data.orderNo,
+        });
+        return;
+      }
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+      toast.error("Checkout failed");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  function handleCheckout(checkout: PricingCheckout) {
+    // 未登录用户发起结账 → 重定向到登录页（R10.2）。
+    if (!session?.user) {
+      navigate({ to: "/login" });
+      return;
+    }
+    checkoutMutation.mutate(checkout);
+  }
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 py-20" id="pricing">
       <div className="mb-12 text-center">
         <h2 className="font-bold text-3xl tracking-tight">
           Simple, transparent pricing
@@ -35,52 +173,18 @@ export function PricingSection() {
         </p>
       </div>
       <div className="grid gap-6 lg:grid-cols-3">
-        {PRICING_TIERS.map((tier) => {
-          const Icon = tier.icon;
-          return (
-            <Card
-              key={tier.id}
-              className={cn(tier.highlight && "ring-2 ring-primary")}
-            >
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <Icon aria-hidden="true" className="size-5 text-primary" />
-                  {tier.highlight ? (
-                    <span className="rounded-full bg-primary px-2 py-0.5 text-primary-foreground text-xs">
-                      Most popular
-                    </span>
-                  ) : null}
-                </div>
-                <CardTitle className="mt-2 text-lg">{tier.name}</CardTitle>
-                <CardDescription>{tier.description}</CardDescription>
-                <div className="mt-2 font-bold text-2xl">
-                  {formatPrice(tier.priceMonthly)}
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <ul className="flex flex-col gap-2">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2">
-                      <Check aria-hidden="true" className="size-4 text-primary" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              {/* TODO(phase-3): wire CTA to Stripe checkout */}
-              <CardFooter>
-                <Button
-                  className="w-full"
-                  variant={tier.highlight ? "default" : "outline"}
-                  render={<Link to={tier.cta.to} />}
-                >
-                  {tier.cta.label}
-                </Button>
-              </CardFooter>
-            </Card>
-          );
-        })}
+        {PRICING_TIERS.map((tier) => (
+          <TierCard
+            key={tier.id}
+            onCheckout={handleCheckout}
+            pending={checkoutMutation.isPending}
+            tier={tier}
+          />
+        ))}
       </div>
+      {wechatQr ? (
+        <WechatQrOverlay onClose={() => setWechatQr(null)} qr={wechatQr} />
+      ) : null}
     </section>
   );
 }

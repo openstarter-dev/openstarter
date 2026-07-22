@@ -12,6 +12,11 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
 
+    /* Paraglide emits JSDoc-typed .js (no .d.ts); allowJs lets tsc resolve the
+       generated src/paraglide runtime. checkJs stays off so the generated
+       files are not error-checked. */
+    "allowJs": true,
+
     /* Linting */
     "skipLibCheck": true,
     "strict": true,
