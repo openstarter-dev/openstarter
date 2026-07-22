@@ -57,6 +57,7 @@ temp
 .kiro/
 .claude/
 .superpowers/
+semantic-review/
 
 # 本地 SQLite 数据库
 local.db
