@@ -5,16 +5,20 @@
     ".": {
       "default": "./src/index.ts"
     },
+    "./schema": {
+      "default": "./src/schema/index.ts"
+    },
     "./*": {
       "default": "./src/*.ts"
     }
   },
   "scripts": {
+    "db:setup": "node scripts/setup-schema.mjs",
     "db:local": "turso dev --db-file local.db",
-    "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate",
-    "db:studio": "drizzle-kit studio",
-    "db:migrate": "drizzle-kit migrate",
+    "db:push": "node scripts/setup-schema.mjs && drizzle-kit push",
+    "db:generate": "node scripts/setup-schema.mjs && drizzle-kit generate",
+    "db:studio": "node scripts/setup-schema.mjs && drizzle-kit studio",
+    "db:migrate": "node scripts/setup-schema.mjs && drizzle-kit migrate",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -22,6 +26,8 @@
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
     "libsql": "0.5.22",
+    "mysql2": "catalog:",
+    "postgres": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -1,10 +1,11 @@
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
+/**
+ * `@openstarter/db` root entry.
+ *
+ * Server-side database access — the `db()` singleton accessor — lives in
+ * `@openstarter/db/server`; table definitions live in `@openstarter/db/schema`.
+ * This root re-exports the connection factory and shared types for
+ * convenience.
+ */
 
-import { env } from "./env";
-import * as schema from "./schema";
-
-export function createDb() {
-  const client = createClient({ url: env.DATABASE_URL });
-  return drizzle({ client, schema });
-}
+export { closeDb, createDb } from "./create-db";
+export type { Database, DbConfig, DbProvider } from "./types";
