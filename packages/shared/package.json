@@ -1,0 +1,23 @@
+{
+  "name": "@openstarter/shared",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openstarter/db": "workspace:*",
+    "simple-flakeid": "catalog:",
+    "uuid": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

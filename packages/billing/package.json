@@ -1,0 +1,27 @@
+{
+  "name": "@openstarter/billing",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./payment": {
+      "default": "./src/payment/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openstarter/db": "workspace:*",
+    "@openstarter/shared": "workspace:*",
+    "drizzle-orm": "^0.45.1",
+    "stripe": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}
