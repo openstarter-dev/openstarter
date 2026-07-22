@@ -1,6 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    // api 依赖 @openstarter/auth → @openstarter/email/server，传递性编译 email 的 React Email
+    // 模板（.tsx）与 fetch/Response 等 Web 类型；源码互引架构下消费方需具备 jsx 与 DOM lib
+    // 才能编译依赖侧源码（与 packages/email、packages/ui、packages/auth 保持一致）。
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
   }
 }

@@ -15,7 +15,11 @@
   "dependencies": {
     "@hono/zod-validator": "^0.8.0",
     "@openstarter/auth": "workspace:*",
+    "@openstarter/billing": "workspace:*",
     "@openstarter/db": "workspace:*",
+    "@openstarter/shared": "workspace:*",
+    "aws4fetch": "catalog:",
+    "drizzle-orm": "^0.45.1",
     "hono": "catalog:",
     "zod": "catalog:"
   },
