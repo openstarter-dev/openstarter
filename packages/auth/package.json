@@ -13,9 +13,18 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "catalog:",
+    "@better-auth/expo": "catalog:",
+    "@better-auth/passkey": "catalog:",
+    "@openstarter/billing": "workspace:*",
     "@openstarter/db": "workspace:*",
+    "@openstarter/email": "workspace:*",
+    "@openstarter/i18n": "workspace:*",
+    "@openstarter/shared": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.1",
+    "envin": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
