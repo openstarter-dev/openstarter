@@ -30,6 +30,11 @@ import { hooks } from "./hooks";
 import { getUrl } from "./lib/utils";
 import { ac, roles } from "./rbac";
 import { AuthProvider, SocialProvider, VerificationType } from "./types";
+import {
+  MAGIC_LINK_EXPIRES_IN,
+  OTP_EXPIRES_IN,
+  REQUIRE_EMAIL_VERIFICATION,
+} from "./auth.config";
 
 // better-auth 的邮件回调契约要求返回 Promise<void>，而 @openstarter/email 的 sendEmail 返回
 // 结构化 EmailSendResult（R22.3，供程序化调用方判断成败）。此轻量适配器丢弃返回值
@@ -95,7 +100,7 @@ export const auth = betterAuth({
   ],
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification: REQUIRE_EMAIL_VERIFICATION,
     sendResetPassword: async ({ user, url }, request) =>
       sendEmail({
         to: user.email,
@@ -132,6 +137,7 @@ export const auth = betterAuth({
   },
   plugins: [
     magicLink({
+      expiresIn: MAGIC_LINK_EXPIRES_IN,
       sendMagicLink: async ({ email, url }, ctx) =>
         sendEmail({
           to: email,
@@ -147,6 +153,7 @@ export const auth = betterAuth({
         }),
     }),
     emailOTP({
+      expiresIn: OTP_EXPIRES_IN,
       async sendVerificationOTP({ email, otp, type }, ctx) {
         if (type !== "sign-in") {
           /* Handle other types if you want to use OTP verification
@@ -210,20 +217,35 @@ export const auth = betterAuth({
     expo(),
     nextCookies(),
   ],
+  // 条件注册：仅当对应 OAuth 的 client id 与 secret 都齐备时才注册该 provider，
+  // 避免给 Better-Auth 传空字符串触发未配置 provider 的告警/报错。
+  // 使用对象字面量 + 条件 spread，保留 Better-Auth 对 socialProviders 键集合的静态推断。
   socialProviders: {
-    [SocialProvider.APPLE]: {
-      clientId: env.APPLE_CLIENT_ID,
-      clientSecret: env.APPLE_CLIENT_SECRET,
-      appBundleIdentifier: env.APPLE_APP_BUNDLE_IDENTIFIER,
-    },
-    [SocialProvider.GOOGLE]: {
-      clientId: env.GOOGLE_CLIENT_ID,
-      clientSecret: env.GOOGLE_CLIENT_SECRET,
-    },
-    [SocialProvider.GITHUB]: {
-      clientId: env.GITHUB_CLIENT_ID,
-      clientSecret: env.GITHUB_CLIENT_SECRET,
-    },
+    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+      ? {
+          [SocialProvider.GOOGLE]: {
+            clientId: env.GOOGLE_CLIENT_ID,
+            clientSecret: env.GOOGLE_CLIENT_SECRET,
+          },
+        }
+      : {}),
+    ...(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
+      ? {
+          [SocialProvider.GITHUB]: {
+            clientId: env.GITHUB_CLIENT_ID,
+            clientSecret: env.GITHUB_CLIENT_SECRET,
+          },
+        }
+      : {}),
+    ...(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET
+      ? {
+          [SocialProvider.APPLE]: {
+            clientId: env.APPLE_CLIENT_ID,
+            clientSecret: env.APPLE_CLIENT_SECRET,
+            appBundleIdentifier: env.APPLE_APP_BUNDLE_IDENTIFIER,
+          },
+        }
+      : {}),
   },
   advanced: {
     cookiePrefix: "turbostarter",
