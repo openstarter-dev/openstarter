@@ -1,40 +1,42 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { expo } from "@better-auth/expo";
 import { passkey } from "@better-auth/passkey";
-import { betterAuth } from "better-auth/minimal";
-import { nextCookies } from "better-auth/next-js";
-import {
-  anonymous,
-  emailOTP,
-  magicLink,
-  twoFactor,
-  organization,
-  admin,
-  oneTap,
-  lastLoginMethod,
-} from "better-auth/plugins";
-
-import * as schema from "@openstarter/db/schema";
 import { db, getAuthAdapterProvider } from "@openstarter/db/server";
 import { EmailTemplate } from "@openstarter/email";
 import {
-  type SendEmailParams,
   sendEmail as deliverEmail,
+  type SendEmailParams,
 } from "@openstarter/email/server";
 import { getLocaleFromRequest } from "@openstarter/i18n/server";
 import { NodeEnv } from "@openstarter/shared/constants";
 import { logger } from "@openstarter/shared/logger";
-
-import { env } from "./env";
-import { hooks } from "./hooks";
-import { getUrl } from "./lib/utils";
-import { ac, roles } from "./rbac";
-import { AuthProvider, SocialProvider, VerificationType } from "./types";
+import { betterAuth } from "better-auth/minimal";
+import { nextCookies } from "better-auth/next-js";
+import {
+  admin,
+  anonymous,
+  emailOTP,
+  lastLoginMethod,
+  magicLink,
+  oneTap,
+  organization,
+  twoFactor,
+} from "better-auth/plugins";
 import {
   MAGIC_LINK_EXPIRES_IN,
   OTP_EXPIRES_IN,
   REQUIRE_EMAIL_VERIFICATION,
 } from "./auth.config";
+import { authSchema, organizationTeams } from "./auth-database-schema";
+import {
+  createAuthEmailCallbacks,
+  createChangeEmailOptions,
+} from "./email-callbacks";
+import { env } from "./env";
+import { hooks } from "./hooks";
+import { getUrl } from "./lib/utils";
+import { ac, roles } from "./rbac";
+import { AuthProvider, SocialProvider, VerificationType } from "./types";
 
 // better-auth 的邮件回调契约要求返回 Promise<void>，而 @openstarter/email 的 sendEmail 返回
 // 结构化 EmailSendResult（R22.3，供程序化调用方判断成败）。此轻量适配器丢弃返回值
@@ -44,127 +46,76 @@ const sendEmail = async (params: SendEmailParams): Promise<void> => {
   await deliverEmail(params);
 };
 
+const emailCallbacks = createAuthEmailCallbacks(sendEmail);
+const LOGIN_METHOD_BY_PATH = new Map<string, AuthProvider>([
+  ["/magic-link/verify", AuthProvider.MAGIC_LINK],
+  ["/passkey/verify-authentication", AuthProvider.PASSKEY],
+  ["/sign-in/email-otp", AuthProvider.EMAIL_OTP],
+]);
+
 export const auth = betterAuth({
+  advanced: {
+    cookiePrefix: "turbostarter",
+    cookies: {
+      state: {
+        attributes: {
+          sameSite: "none",
+          secure: true,
+        },
+      },
+    },
+  },
   appName: "TurboStarter",
-  session: {
-    cookieCache: {
-      enabled: true,
-      maxAge: 5 * 60, // 5 minutes
-    },
-  },
-  user: {
-    deleteUser: {
-      enabled: true,
-      sendDeleteAccountVerification: async ({ user, url }, request) =>
-        sendEmail({
-          to: user.email,
-          template: EmailTemplate.DELETE_ACCOUNT,
-          locale: getLocaleFromRequest(request),
-          variables: {
-            url: getUrl({
-              request,
-              url,
-              type: VerificationType.DELETE_ACCOUNT,
-            }).toString(),
-          },
-        }),
-      ...hooks.deleteUser,
-    },
-    changeEmail: {
-      enabled: true,
-      updateEmailWithoutVerification: true,
-      sendChangeEmailConfirmation: async ({ user, newEmail, url }, request) =>
-        sendEmail({
-          to: user.email,
-          template: EmailTemplate.CHANGE_EMAIL,
-          locale: getLocaleFromRequest(request),
-          variables: {
-            url: getUrl({
-              request,
-              url,
-              type: VerificationType.CONFIRM_EMAIL,
-            }).toString(),
-            newEmail,
-          },
-        }),
-    },
-  },
-  trustedOrigins: [
-    "chrome-extension://",
-    "turbostarter://",
-    /* Needed only for Apple ID authentication */
-    "https://appleid.apple.com",
-    ...(env.NODE_ENV === NodeEnv.DEVELOPMENT
-      ? ["http://localhost*", "https://localhost*"]
-      : []),
-  ],
-  emailAndPassword: {
-    enabled: true,
-    requireEmailVerification: REQUIRE_EMAIL_VERIFICATION,
-    sendResetPassword: async ({ user, url }, request) =>
-      sendEmail({
-        to: user.email,
-        template: EmailTemplate.RESET_PASSWORD,
-        locale: getLocaleFromRequest(request),
-        variables: {
-          url,
-        },
-      }),
-  },
-  emailVerification: {
-    sendOnSignUp: true,
-    autoSignInAfterVerification: true,
-    sendVerificationEmail: async ({ user, url }, request) =>
-      sendEmail({
-        to: user.email,
-        template: EmailTemplate.CONFIRM_EMAIL,
-        locale: getLocaleFromRequest(request),
-        variables: {
-          url: getUrl({
-            request,
-            url,
-            type: VerificationType.CONFIRM_EMAIL,
-          }).toString(),
-        },
-      }),
-  },
   database: drizzleAdapter(db, {
     provider: getAuthAdapterProvider(),
-    schema,
+    schema: authSchema,
   }),
   databaseHooks: {
     user: hooks.user,
+  },
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: REQUIRE_EMAIL_VERIFICATION,
+    sendResetPassword: emailCallbacks.sendResetPassword,
+  },
+  emailVerification: {
+    autoSignInAfterVerification: true,
+    sendOnSignUp: true,
+    sendVerificationEmail: emailCallbacks.sendVerificationEmail,
+  },
+  logger: {
+    log: (level, ...args) => logger[level](...args),
   },
   plugins: [
     magicLink({
       expiresIn: MAGIC_LINK_EXPIRES_IN,
       sendMagicLink: async ({ email, url }, ctx) =>
         sendEmail({
-          to: email,
-          template: EmailTemplate.MAGIC_LINK,
           locale: getLocaleFromRequest(ctx?.request),
+          template: EmailTemplate.MAGIC_LINK,
+          to: email,
           variables: {
             url: getUrl({
               request: ctx?.request,
-              url,
               type: VerificationType.MAGIC_LINK,
+              url,
             }).toString(),
           },
         }),
     }),
     emailOTP({
       expiresIn: OTP_EXPIRES_IN,
-      async sendVerificationOTP({ email, otp, type }, ctx) {
+      sendVerificationOTP({ email, otp, type }, ctx) {
         if (type !== "sign-in") {
           /* Handle other types if you want to use OTP verification
           for other purposes (e.g. change email, delete account, etc.) */
-          return;
+          return Promise.resolve();
         }
 
         return sendEmail({
-          to: email,
-          template: EmailTemplate.SIGN_IN_OTP,
           locale: getLocaleFromRequest(ctx?.request),
+          template: EmailTemplate.SIGN_IN_OTP,
+          to: email,
           variables: { otp, url: getUrl({ request: ctx?.request }).toString() },
         });
       },
@@ -174,9 +125,12 @@ export const auth = betterAuth({
     anonymous(),
     admin(),
     organization({
-      sendInvitationEmail: async (
-        { invitation, inviter, organization },
-        request,
+      ac,
+      organizationHooks: hooks.organization,
+      roles,
+      sendInvitationEmail: (
+        { invitation, inviter, organization: invitedOrganization },
+        request
       ) => {
         const url = getUrl({
           request,
@@ -185,38 +139,31 @@ export const auth = betterAuth({
         url.searchParams.set("email", invitation.email);
 
         return sendEmail({
-          to: invitation.email,
-          template: EmailTemplate.ORGANIZATION_INVITATION,
           locale: getLocaleFromRequest(request),
+          template: EmailTemplate.ORGANIZATION_INVITATION,
+          to: invitation.email,
           variables: {
-            url: url.toString(),
             inviter: inviter.user.name,
-            organization: organization.name,
+            organization: invitedOrganization.name,
+            url: url.toString(),
           },
         });
       },
-      ac,
-      roles,
-      organizationHooks: hooks.organization,
+      teams: organizationTeams,
     }),
     lastLoginMethod({
-      customResolveMethod: (ctx) => {
-        switch (ctx.path) {
-          case "/magic-link/verify":
-            return AuthProvider.MAGIC_LINK;
-          case "/passkey/verify-authentication":
-            return AuthProvider.PASSKEY;
-          case "/sign-in/email-otp":
-            return AuthProvider.EMAIL_OTP;
-          default:
-            return null;
-        }
-      },
+      customResolveMethod: (ctx) => LOGIN_METHOD_BY_PATH.get(ctx.path) ?? null,
     }),
     oneTap(),
     expo(),
     nextCookies(),
   ],
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 5 * 60, // 5 minutes
+    },
+  },
   // 条件注册：仅当对应 OAuth 的 client id 与 secret 都齐备时才注册该 provider，
   // 避免给 Better-Auth 传空字符串触发未配置 provider 的告警/报错。
   // 使用对象字面量 + 条件 spread，保留 Better-Auth 对 socialProviders 键集合的静态推断。
@@ -240,26 +187,32 @@ export const auth = betterAuth({
     ...(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET
       ? {
           [SocialProvider.APPLE]: {
+            appBundleIdentifier: env.APPLE_APP_BUNDLE_IDENTIFIER,
             clientId: env.APPLE_CLIENT_ID,
             clientSecret: env.APPLE_CLIENT_SECRET,
-            appBundleIdentifier: env.APPLE_APP_BUNDLE_IDENTIFIER,
           },
         }
       : {}),
   },
-  advanced: {
-    cookiePrefix: "turbostarter",
-    cookies: {
-      state: {
-        attributes: {
-          sameSite: "none",
-          secure: true,
-        },
-      },
+  trustedOrigins: [
+    "chrome-extension://",
+    "turbostarter://",
+    /* Needed only for Apple ID authentication */
+    "https://appleid.apple.com",
+    ...(env.NODE_ENV === NodeEnv.DEVELOPMENT
+      ? ["http://localhost*", "https://localhost*"]
+      : []),
+  ],
+  user: {
+    changeEmail: createChangeEmailOptions(
+      emailCallbacks.sendChangeEmailConfirmation
+    ),
+    deleteUser: {
+      enabled: true,
+      sendDeleteAccountVerification:
+        emailCallbacks.sendDeleteAccountVerification,
+      ...hooks.deleteUser,
     },
-  },
-  logger: {
-    log: (level, ...args) => logger[level](...args),
   },
 });
 
@@ -284,6 +237,3 @@ export type Permissions = NonNullable<
     Parameters<typeof auth.api.hasPermission>[0]
   >["body"]["permissions"]
 >;
-
-export * from "./hooks";
-export * from "./lib/server";

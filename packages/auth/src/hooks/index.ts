@@ -11,22 +11,20 @@
 // 新用户初始化（任务 15.1，R5.5 / R7.6 / R13.7）：`hooks.user.create.after` 在**保留**既有
 // 钩子结构的基础上**叠加**初始角色与初始积分授予——better-auth 对 OAuth 首登与邮箱注册
 // 两条首次创建路径均触发 `create.after`，故两者一并覆盖。两项授予均受 Config 开关控制
-// （`grant*ForNewUser` 内部判定 `initial_role_enabled` / `initial_credits_enabled`），且对
-// 同一用户幂等：`create.after` 每个用户仅在创建时触发一次，此外授予前检查该用户是否已有
-// 角色 / 积分记录，已有则跳过，避免重复授予（积分尤其不可重复叠加）。授予为异步副作用，
-// 其失败经 `@openstarter/shared/logger` 记录且**不中断用户创建主流程**（叠加而非裁剪）。
+// （`grant*ForNewUser` 内部判定 `initial_role_enabled` / `initial_credits_enabled`）。并发
+// 幂等由数据库强约束保证：`user_role(user_id, role_id)` 唯一，welcome credit 使用稳定
+// `transaction_no`；授予失败经 `@openstarter/shared/logger` 记录且**不中断用户创建主流程**。
 //
 // 依赖方向合法：auth(L3) → billing(L2)（`grantCreditsForNewUser`）、auth 内 `./rbac`
 // （`grantRoleForNewUser`）；billing 不反向依赖 auth，无 import 环。
 
+import { grantCreditsForNewUser } from "@openstarter/billing";
+import { getAllConfigs } from "@openstarter/shared/config";
+import { logger } from "@openstarter/shared/logger";
 import type { BetterAuthOptions } from "better-auth";
 import type { OrganizationOptions } from "better-auth/plugins/organization";
 
-import { getHistory, grantCreditsForNewUser } from "@openstarter/billing";
-import { getAllConfigs } from "@openstarter/shared/config";
-import { logger } from "@openstarter/shared/logger";
-
-import { getUserRoles, grantRoleForNewUser } from "../rbac";
+import { grantRoleForNewUser } from "../rbac";
 
 /** `databaseHooks.user`：用户表的 create / update / delete 生命周期钩子。 */
 type DatabaseUserHooks = NonNullable<
@@ -62,42 +60,28 @@ type OrganizationHooks = NonNullable<OrganizationOptions["organizationHooks"]>;
 // ─── 新用户初始化（New user initialization，R5.5 / R7.6 / R13.7）──────────────────
 
 /**
- * 为新用户授予初始角色（受 Config 开关控制且幂等）。
- *
- * 幂等保护：新用户在 `create.after` 时应无任何角色；若已存在角色记录则视为已初始化并跳过。
- * 是否授予及授予何角色由 {@link grantRoleForNewUser} 依 Config
- * （`initial_role_enabled` / `initial_role_name`）内部判定。
+ * 为新用户授予初始角色。并发幂等由 `user_role(user_id, role_id)` 唯一约束与原子 upsert
+ * 保证，避免“先查再写”的竞态窗口。
  */
-async function initializeNewUserRole(
+function initializeNewUserRole(
   userId: string,
   configs: Record<string, string>
 ): Promise<void> {
-  const existingRoles = await getUserRoles(userId);
-  if (existingRoles.length > 0) {
-    return;
-  }
-  await grantRoleForNewUser({ userId, configs });
+  return grantRoleForNewUser({ configs, userId });
 }
 
 /**
- * 为新用户授予初始积分（受 Config 开关控制且幂等）。
- *
- * 幂等保护：新用户在 `create.after` 时应无任何积分流水；若已存在积分记录则视为已初始化并
- * 跳过，避免重复叠加（积分不可重复授予）。是否授予及数量 / 有效期由
- * {@link grantCreditsForNewUser} 依 Config（`initial_credits_*`）内部判定。
+ * 为新用户授予初始积分。稳定交易号 `welcome-credit:<userId>` 与
+ * `credit.transaction_no` 唯一约束共同保证并发调用只落一笔。
  */
 async function initializeNewUserCredits(
-  user: CreatedUser,
+  createdUser: CreatedUser,
   configs: Record<string, string>
 ): Promise<void> {
-  const existingCredits = await getHistory(user.id, { limit: 1 });
-  if (existingCredits.length > 0) {
-    return;
-  }
   await grantCreditsForNewUser({
-    userId: user.id,
-    userEmail: user.email,
     configs,
+    userEmail: createdUser.email,
+    userId: createdUser.id,
   });
 }
 
@@ -109,27 +93,27 @@ async function initializeNewUserCredits(
  * 用户此时已创建成功，初始化属异步副作用，其失败不应中断用户创建主流程。角色与积分
  * 相互独立、并行执行（`allSettled`），单项失败不影响另一项。
  */
-const runNewUserInitialization: UserCreateAfterHook = async (user) => {
+const runNewUserInitialization: UserCreateAfterHook = async (createdUser) => {
   let configs: Record<string, string>;
   try {
     configs = await getAllConfigs();
   } catch (error) {
     logger.error(
-      `[auth] new user initialization: failed to read configs for user ${user.id}`,
+      `[auth] new user initialization: failed to read configs for user ${createdUser.id}`,
       error
     );
     return;
   }
 
   const results = await Promise.allSettled([
-    initializeNewUserRole(user.id, configs),
-    initializeNewUserCredits(user, configs),
+    initializeNewUserRole(createdUser.id, configs),
+    initializeNewUserCredits(createdUser, configs),
   ]);
 
   for (const result of results) {
     if (result.status === "rejected") {
       logger.error(
-        `[auth] new user initialization step failed for user ${user.id}`,
+        `[auth] new user initialization step failed for user ${createdUser.id}`,
         result.reason
       );
     }
@@ -137,7 +121,7 @@ const runNewUserInitialization: UserCreateAfterHook = async (user) => {
 };
 
 // 用户数据库钩子：结构 + 新用户初始化（create.after）。update / delete 暂无叠加逻辑。
-const user: DatabaseUserHooks = {
+const databaseUserHooks: DatabaseUserHooks = {
   create: {
     after: runNewUserInitialization,
   },
@@ -153,7 +137,7 @@ const organization: OrganizationHooks = {};
  * 认证生命周期钩子集合，供 `server.ts` 装配 better-auth。
  */
 export const hooks = {
-  user,
   deleteUser,
   organization,
+  user: databaseUserHooks,
 } as const;

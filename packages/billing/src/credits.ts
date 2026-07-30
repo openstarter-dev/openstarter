@@ -9,7 +9,7 @@
 // 任务 14.3 追加：`revoke`（原子返还并软删）、`getHistory`（分页流水）。
 // 任务 14.4 追加：`grantCreditsForNewUser`（受 Config 开关控制的新用户初始积分）。
 
-import { credit, type Credit, type NewCredit } from "@openstarter/db/schema";
+import { type Credit, credit, type NewCredit } from "@openstarter/db/schema";
 import { type Database, db } from "@openstarter/db/server";
 import { getSnowId, getUuid } from "@openstarter/shared/id";
 import { and, asc, desc, eq, gt, isNull, or, sql, sum } from "drizzle-orm";
@@ -21,8 +21,8 @@ import { and, asc, desc, eq, gt, isNull, or, sql, sum } from "drizzle-orm";
  */
 export const CreditStatus = {
   ACTIVE: "active",
-  EXPIRED: "expired",
   DELETED: "deleted",
+  EXPIRED: "expired",
 } as const;
 
 export type CreditStatus = (typeof CreditStatus)[keyof typeof CreditStatus];
@@ -31,8 +31,8 @@ export type CreditStatus = (typeof CreditStatus)[keyof typeof CreditStatus];
  * 积分交易类型：授予（grant）与消费（consume）。
  */
 export const CreditTransactionType = {
-  GRANT: "grant",
   CONSUME: "consume",
+  GRANT: "grant",
 } as const;
 
 export type CreditTransactionType =
@@ -42,11 +42,11 @@ export type CreditTransactionType =
  * 积分交易场景，用于区分积分来源（支付 / 订阅 / 续费 / 赠送 / 奖励）。
  */
 export const CreditTransactionScene = {
-  PAYMENT: "payment",
-  SUBSCRIPTION: "subscription",
-  RENEWAL: "renewal",
   GIFT: "gift",
+  PAYMENT: "payment",
+  RENEWAL: "renewal",
   REWARD: "reward",
+  SUBSCRIPTION: "subscription",
 } as const;
 
 export type CreditTransactionScene =
@@ -90,21 +90,23 @@ export function calculateCreditExpirationTime(params: {
 /**
  * `grant` 的入参。除 `userId` 与 `credits` 外均为可选，可选项集中放在末尾。
  */
-export type GrantCreditsParams = {
-  userId: string;
+export interface GrantCreditsParams {
   credits: number;
-  userEmail?: string;
   description?: string;
-  orderNo?: string;
-  subscriptionNo?: string;
-  scene?: string;
   expiresAt?: Date | null;
+  orderNo?: string;
+  scene?: string;
+  subscriptionNo?: string;
+  /** 可选稳定幂等键；缺省仍生成普通积分流水号。 */
+  transactionNo?: string;
   /**
    * 可选注入的事务句柄；提供时在该事务内写入，否则直接经 `db()` 写入。
    * 供 Webhook 成功编排（18.2）在「建订阅 + 授积分 + 置订单 paid」的同一事务内授予。
    */
   tx?: BillingTransaction;
-};
+  userEmail?: string;
+  userId: string;
+}
 
 /**
  * 授予积分：创建一条 `grant` 类型的积分流水（对应 R13.1）。
@@ -120,19 +122,19 @@ export type GrantCreditsParams = {
  */
 export async function grant(params: GrantCreditsParams): Promise<NewCredit> {
   const newCredit: NewCredit = {
-    id: getUuid(),
-    userId: params.userId,
-    userEmail: params.userEmail ?? "",
-    transactionNo: getSnowId(),
-    transactionType: CreditTransactionType.GRANT,
-    transactionScene: params.scene ?? CreditTransactionScene.GIFT,
     credits: params.credits,
+    description: params.description ?? "Grant credit",
+    expiresAt: params.expiresAt ?? null,
+    id: getUuid(),
+    orderNo: params.orderNo ?? "",
     remainingCredits: params.credits,
     status: CreditStatus.ACTIVE,
-    description: params.description ?? "Grant credit",
-    orderNo: params.orderNo ?? "",
     subscriptionNo: params.subscriptionNo ?? "",
-    expiresAt: params.expiresAt ?? null,
+    transactionNo: params.transactionNo ?? getSnowId(),
+    transactionScene: params.scene ?? CreditTransactionScene.GIFT,
+    transactionType: CreditTransactionType.GRANT,
+    userEmail: params.userEmail ?? "",
+    userId: params.userId,
   };
 
   if (params.tx) {
@@ -189,10 +191,10 @@ export async function getBalance(userId: string): Promise<number> {
  * 单批扣减明细：记录被扣减的批次 id 与扣减额。
  * 明细之和恒等于本次消费额（金额守恒），`revoke` 据此逐条返还（R13.4、R13.6）。
  */
-export type ConsumedDetailItem = {
-  creditId: string;
+export interface ConsumedDetailItem {
   amount: number;
-};
+  creditId: string;
+}
 
 /**
  * 事务句柄类型：从 `Database.transaction` 回调参数萃取，保证与 `db().transaction`
@@ -203,21 +205,21 @@ export type BillingTransaction = Parameters<
   Parameters<Database["transaction"]>[0]
 >[0];
 
-export type ConsumeCreditsParams = {
-  userId: string;
+export interface ConsumeCreditsParams {
   credits: number;
-  userEmail?: string;
-  scene?: string;
   description?: string;
   metadata?: string;
+  scene?: string;
   /** 可选注入的事务句柄；提供时在该事务内执行，否则自行开启事务。 */
   tx?: BillingTransaction;
-};
+  userEmail?: string;
+  userId: string;
+}
 
-export type ConsumeCreditsResult = {
-  success: boolean;
+export interface ConsumeCreditsResult {
   consumedCredit?: NewCredit;
-};
+  success: boolean;
+}
 
 /**
  * 在给定事务句柄内执行消费（余额核对 → FIFO 扣减 → 写 consume 流水）。
@@ -264,9 +266,9 @@ async function consumeWithinTransaction(
     }
     const take = Math.min(remaining, batch.remainingCredits);
     plan.push({
+      amount: take,
       creditId: batch.id,
       newRemaining: batch.remainingCredits - take,
-      amount: take,
     });
     remaining -= take;
   }
@@ -283,26 +285,26 @@ async function consumeWithinTransaction(
 
   // 5. 写入一条 consume 流水，`consumedDetail` 保存逐批明细 `[{ creditId, amount }]`。
   const detail: ConsumedDetailItem[] = plan.map((item) => ({
-    creditId: item.creditId,
     amount: item.amount,
+    creditId: item.creditId,
   }));
   const consumedCredit: NewCredit = {
-    id: getUuid(),
-    userId,
-    userEmail: params.userEmail ?? "",
-    transactionNo: getSnowId(),
-    transactionType: CreditTransactionType.CONSUME,
-    transactionScene: params.scene ?? "",
+    consumedDetail: JSON.stringify(detail),
     credits: -amount,
+    description: params.description ?? "",
+    id: getUuid(),
+    metadata: params.metadata ?? "",
     remainingCredits: 0,
     status: CreditStatus.ACTIVE,
-    description: params.description ?? "",
-    consumedDetail: JSON.stringify(detail),
-    metadata: params.metadata ?? "",
+    transactionNo: getSnowId(),
+    transactionScene: params.scene ?? "",
+    transactionType: CreditTransactionType.CONSUME,
+    userEmail: params.userEmail ?? "",
+    userId,
   };
   await tx.insert(credit).values(consumedCredit);
 
-  return { success: true, consumedCredit };
+  return { consumedCredit, success: true };
 }
 
 /**
@@ -322,10 +324,10 @@ export function consume(
 
 // ─── 撤销（Revoke，14.3 / R13.6） ─────────────────────────────────────────────
 
-export type RevokeCreditsParams = {
+export interface RevokeCreditsParams {
   /** 目标 `consume` 流水的记录 id。 */
   consumeCreditId: string;
-};
+}
 
 /**
  * 撤销一条消费记录（R13.6）。
@@ -383,10 +385,10 @@ export async function revoke(params: RevokeCreditsParams): Promise<void> {
 
 const DEFAULT_HISTORY_PAGE_SIZE = 50;
 
-export type GetHistoryOptions = {
+export interface GetHistoryOptions {
   limit?: number;
   offset?: number;
-};
+}
 
 /**
  * 分页返回该用户的积分流水（grant 与 consume），按创建时间倒序。
@@ -417,11 +419,11 @@ const INITIAL_CREDITS_VALID_DAYS_KEY = "initial_credits_valid_days";
 const INITIAL_CREDITS_DESCRIPTION_KEY = "initial_credits_description";
 const DEFAULT_INITIAL_CREDITS_DESCRIPTION = "Initial credits";
 
-export type GrantCreditsForNewUserParams = {
-  userId: string;
+export interface GrantCreditsForNewUserParams {
   configs: Record<string, string>;
   userEmail?: string;
-};
+  userId: string;
+}
 
 /**
  * 新用户初始积分授予（R13.7）。
@@ -433,18 +435,18 @@ export type GrantCreditsForNewUserParams = {
  *
  * 仅为独立函数——auth `databaseHooks` 的装配（幂等叠加于 `create.after`）属任务 15。
  */
-export function grantCreditsForNewUser(
+export async function grantCreditsForNewUser(
   params: GrantCreditsForNewUserParams
 ): Promise<NewCredit | undefined> {
   const { userId, configs, userEmail } = params;
 
   if (configs[INITIAL_CREDITS_ENABLED_KEY] !== "true") {
-    return Promise.resolve(undefined);
+    return;
   }
 
   const amount = Number.parseInt(configs[INITIAL_CREDITS_AMOUNT_KEY] ?? "", 10);
   if (Number.isNaN(amount) || amount <= 0) {
-    return Promise.resolve(undefined);
+    return;
   }
 
   const parsedValidDays = Number.parseInt(
@@ -453,16 +455,34 @@ export function grantCreditsForNewUser(
   );
   const creditsValidDays = Number.isNaN(parsedValidDays) ? 0 : parsedValidDays;
   const description =
-    configs[INITIAL_CREDITS_DESCRIPTION_KEY] ?? DEFAULT_INITIAL_CREDITS_DESCRIPTION;
-
+    configs[INITIAL_CREDITS_DESCRIPTION_KEY] ??
+    DEFAULT_INITIAL_CREDITS_DESCRIPTION;
   const expiresAt = calculateCreditExpirationTime({ creditsValidDays });
+  const transactionNo = `welcome-credit:${userId}`;
 
-  return grant({
-    userId,
-    userEmail,
-    credits: amount,
-    description,
-    scene: CreditTransactionScene.GIFT,
-    expiresAt,
-  });
+  try {
+    return await grant({
+      credits: amount,
+      description,
+      expiresAt,
+      scene: CreditTransactionScene.GIFT,
+      transactionNo,
+      userEmail,
+      userId,
+    });
+  } catch (error) {
+    const [existing] = await db()
+      .select()
+      .from(credit)
+      .where(eq(credit.transactionNo, transactionNo))
+      .limit(1);
+    if (
+      existing?.userId === userId &&
+      existing.transactionType === CreditTransactionType.GRANT &&
+      existing.transactionScene === CreditTransactionScene.GIFT
+    ) {
+      return existing;
+    }
+    throw error;
+  }
 }

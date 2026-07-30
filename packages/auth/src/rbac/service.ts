@@ -10,8 +10,13 @@
 // 数据访问：`@openstarter/db/server` 的 `db()` 单例访问器 + `@openstarter/db/schema` 表定义；
 // drizzle 参数化查询（无字符串拼接）。
 
-import { permission, role, rolePermission, userRole } from "@openstarter/db/schema";
 import type { Permission, Role } from "@openstarter/db/schema";
+import {
+  permission,
+  role,
+  rolePermission,
+  userRole,
+} from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
 import { and, desc, eq, gt, inArray, isNull, or } from "drizzle-orm";
@@ -134,13 +139,15 @@ export async function assignPermissionsToRole(
   permissionIds: string[]
 ): Promise<void> {
   const database = db();
-  await database.delete(rolePermission).where(eq(rolePermission.roleId, roleId));
+  await database
+    .delete(rolePermission)
+    .where(eq(rolePermission.roleId, roleId));
   if (permissionIds.length > 0) {
     await database.insert(rolePermission).values(
       permissionIds.map((permissionId) => ({
         id: getUuid(),
-        roleId,
         permissionId,
+        roleId,
       }))
     );
   }
@@ -160,9 +167,9 @@ export function getUserRoles(userId: string): Promise<
 > {
   return db()
     .select({
+      expiresAt: userRole.expiresAt,
       id: userRole.id,
       roleId: userRole.roleId,
-      expiresAt: userRole.expiresAt,
       roleName: role.name,
       roleTitle: role.title,
     })
@@ -177,9 +184,14 @@ export async function assignRoleToUser(
   roleId: string,
   expiresAt?: Date
 ): Promise<void> {
+  const expiration = expiresAt ?? null;
   await db()
     .insert(userRole)
-    .values({ id: getUuid(), userId, roleId, expiresAt: expiresAt ?? null });
+    .values({ expiresAt: expiration, id: getUuid(), roleId, userId })
+    .onConflictDoUpdate({
+      set: { expiresAt: expiration },
+      target: [userRole.userId, userRole.roleId],
+    });
 }
 
 /** 移除用户的某个角色。 */
@@ -194,54 +206,137 @@ export async function removeRoleFromUser(
 
 // ─── 权限判定（Permission checks，R7.2–R7.5）───────────────────────────────────
 
+/** 平台角色经映射得到的权限；到期时间来自对应 user_role。 */
+export interface PlatformPermissionGrant {
+  code: string;
+  expiresAt: Date | null;
+}
+
+/** 平台授权的数据访问边界；不包含任何 organization 成员关系或团队角色。 */
+export interface PlatformAuthorizationRepository {
+  listUserPermissionGrants: (
+    userId: string,
+    now: Date
+  ) => Promise<PlatformPermissionGrant[]>;
+}
+
+export interface PlatformAuthorizationService {
+  getPermissionCodes: (userId: string) => Promise<string[]>;
+  hasAnyPermission: (
+    userId: string,
+    permissionCodes: string[]
+  ) => Promise<boolean>;
+  hasPermission: (userId: string, permissionCode: string) => Promise<boolean>;
+}
+
+/**
+ * 构造平台授权服务。repository 与 clock 均可注入，供属性测试使用确定性数据，
+ * 且接口刻意不接收 organization 授权源，维持 R7.7/R7.8 的数据面隔离。
+ */
+export function createPlatformAuthorizationService(options: {
+  repository: PlatformAuthorizationRepository;
+  now?: () => Date;
+}): PlatformAuthorizationService {
+  const { repository, now = () => new Date() } = options;
+
+  const getPermissionCodes = async (userId: string): Promise<string[]> => {
+    const currentTime = now();
+    const grants = await repository.listUserPermissionGrants(
+      userId,
+      currentTime
+    );
+    const activeCodes = grants
+      .filter(
+        (grant) =>
+          grant.expiresAt === null ||
+          grant.expiresAt.getTime() > currentTime.getTime()
+      )
+      .map((grant) => grant.code);
+    return [...new Set(activeCodes)];
+  };
+
+  return {
+    getPermissionCodes,
+    hasAnyPermission: async (userId, permissionCodes) => {
+      const codes = await getPermissionCodes(userId);
+      return matchAnyPermission(permissionCodes, codes);
+    },
+    hasPermission: async (userId, permissionCode) => {
+      const codes = await getPermissionCodes(userId);
+      return matchPermission(permissionCode, codes);
+    },
+  };
+}
+
+const databasePlatformAuthorizationRepository: PlatformAuthorizationRepository =
+  {
+    listUserPermissionGrants: async (userId, now) => {
+      const database = db();
+      const activeRoles = await database
+        .select({
+          expiresAt: userRole.expiresAt,
+          roleId: userRole.roleId,
+        })
+        .from(userRole)
+        .where(
+          and(
+            eq(userRole.userId, userId),
+            or(isNull(userRole.expiresAt), gt(userRole.expiresAt, now))
+          )
+        );
+
+      if (activeRoles.length === 0) {
+        return [];
+      }
+
+      const roleIds = activeRoles.map((activeRole) => activeRole.roleId);
+      const expirationByRoleId = new Map(
+        activeRoles.map((activeRole) => [
+          activeRole.roleId,
+          activeRole.expiresAt,
+        ])
+      );
+      const grants = await database
+        .select({
+          code: permission.code,
+          roleId: rolePermission.roleId,
+        })
+        .from(rolePermission)
+        .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
+        .where(inArray(rolePermission.roleId, roleIds));
+
+      return grants.map((grant) => ({
+        code: grant.code,
+        expiresAt: expirationByRoleId.get(grant.roleId) ?? null,
+      }));
+    },
+  };
+
+const platformAuthorizationService = createPlatformAuthorizationService({
+  repository: databasePlatformAuthorizationRepository,
+});
+
 /**
  * 取用户全部有效角色（排除已过期 user_role）经映射的权限码集合（去重）。R7.5
  */
-export async function getUserPermissionCodes(userId: string): Promise<string[]> {
-  const now = new Date();
-  const database = db();
-
-  // 有效角色：expiresAt 为空（永不过期）或 expiresAt > now。
-  const activeRoles = await database
-    .select({ roleId: userRole.roleId })
-    .from(userRole)
-    .where(
-      and(
-        eq(userRole.userId, userId),
-        or(isNull(userRole.expiresAt), gt(userRole.expiresAt, now))
-      )
-    );
-
-  if (activeRoles.length === 0) {
-    return [];
-  }
-
-  const roleIds = activeRoles.map((r) => r.roleId);
-  const perms = await database
-    .select({ code: permission.code })
-    .from(rolePermission)
-    .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
-    .where(inArray(rolePermission.roleId, roleIds));
-
-  return [...new Set(perms.map((p) => p.code))];
+export function getUserPermissionCodes(userId: string): Promise<string[]> {
+  return platformAuthorizationService.getPermissionCodes(userId);
 }
 
 /** 判定用户是否具备某权限码（含通配符）。 */
-export async function hasPermission(
+export function hasPermission(
   userId: string,
   permissionCode: string
 ): Promise<boolean> {
-  const codes = await getUserPermissionCodes(userId);
-  return matchPermission(permissionCode, codes);
+  return platformAuthorizationService.hasPermission(userId, permissionCode);
 }
 
 /** 判定用户是否具备给定权限码中的任一项（含通配符）。 */
-export async function hasAnyPermission(
+export function hasAnyPermission(
   userId: string,
   permissionCodes: string[]
 ): Promise<boolean> {
-  const codes = await getUserPermissionCodes(userId);
-  return matchAnyPermission(permissionCodes, codes);
+  return platformAuthorizationService.hasAnyPermission(userId, permissionCodes);
 }
 
 // ─── 新用户初始角色授予（R7.6）─────────────────────────────────────────────────

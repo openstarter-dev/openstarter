@@ -6,12 +6,13 @@
 // 数据访问：`@openstarter/db/server` 的 `db()` + `@openstarter/db/schema`；兑换与多步写
 // 在单个事务内完成（R9.3）。
 
-import { inviteCode, subscription, userInvite } from "@openstarter/db/schema";
+import { randomBytes } from "node:crypto";
+import { env as databaseEnv } from "@openstarter/db/env";
 import type { InviteCode } from "@openstarter/db/schema";
+import { inviteCode, subscription, userInvite } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
-import { and, asc, eq, sql } from "drizzle-orm";
-import { randomBytes } from "node:crypto";
+import { and, asc, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
 
 // 邀请码字母表：32 个无易混字符（去除 I/O/0/1 等），长度用于拒绝采样计算。
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -55,13 +56,13 @@ function buildInviteCodeValues(params: {
   expiresAt?: Date | null;
 }) {
   return {
-    id: getUuid(),
     code: params.code || generateCode(),
-    maxUses: params.maxUses ?? DEFAULT_MAX_USES,
-    trialDays: params.trialDays ?? DEFAULT_TRIAL_DAYS,
-    note: params.note ?? "",
     createdBy: params.createdBy ?? null,
     expiresAt: params.expiresAt ?? null,
+    id: getUuid(),
+    maxUses: params.maxUses ?? DEFAULT_MAX_USES,
+    note: params.note ?? "",
+    trialDays: params.trialDays ?? DEFAULT_TRIAL_DAYS,
   };
 }
 
@@ -96,11 +97,11 @@ export function createInviteCodesBatch(params: {
 }): Promise<InviteCode[]> {
   const values = Array.from({ length: params.count }, () =>
     buildInviteCodeValues({
-      maxUses: params.maxUses,
-      trialDays: params.trialDays,
-      note: params.note,
       createdBy: params.createdBy,
       expiresAt: params.expiresAt,
+      maxUses: params.maxUses,
+      note: params.note,
+      trialDays: params.trialDays,
     })
   );
   return db().insert(inviteCode).values(values).returning();
@@ -118,10 +119,10 @@ export async function deleteInviteCode(id: string): Promise<void> {
 
 /** 邀请码校验结果。 */
 export interface InviteCodeValidation {
-  valid: boolean;
   error?: string;
   inviteCodeId?: string;
   trialDays?: number;
+  valid: boolean;
 }
 
 /**
@@ -137,44 +138,165 @@ export async function validateInviteCode(
     .limit(1);
 
   if (!row) {
-    return { valid: false, error: "Invalid invite code" };
+    return { error: "Invalid invite code", valid: false };
   }
-  if (row.expiresAt && row.expiresAt < new Date()) {
-    return { valid: false, error: "Invite code has expired" };
+  if (row.expiresAt && row.expiresAt.getTime() <= Date.now()) {
+    return { error: "Invite code has expired", valid: false };
   }
   if (row.usedCount >= row.maxUses) {
-    return { valid: false, error: "Invite code has been fully used" };
+    return { error: "Invite code has been fully used", valid: false };
   }
 
-  return { valid: true, inviteCodeId: row.id, trialDays: row.trialDays };
+  return { inviteCodeId: row.id, trialDays: row.trialDays, valid: true };
 }
 
 /** 邀请码兑换结果。 */
 export interface RedeemResult {
-  ok: boolean;
   error?: string;
+  ok: boolean;
   trialEndsAt?: Date;
 }
 
 /**
- * 原子兑换邀请码。R9.3/R9.4/R9.5
+ * SQLite / Turso / D1 的单批原子兑换。
  *
- * 事务内：
- *   1. 幂等——若该用户已有 `user_invite`，直接返回既有 `trialEndsAt`，不递增任何计数；
- *   2. 校验邀请码存在 / 未过期 / `usedCount < maxUses`，否则拒绝并返回原因；
- *   3. 同一事务插入 `user_invite`（`trialEndsAt = now + trialDays 天`）并 `usedCount += 1`。
- *
- * 说明：规范 Database 类型为 libsql（sqlite 家族），其查询构造器不暴露 `.for('update')`，
- * 且 sqlite 事务本身串行化写；跨方言的行锁差异由连接层兼容代理吸收，故此处依赖事务原子性
- * 与幂等前置检查保证不重复兑换。
+ * 第一条条件写仅在邀请码仍有效、有余量且用户尚未兑换时插入本次 attempt；第二条只为
+ * 该 attempt 递增计数。D1 的 `batch` 由绑定原生实现为单个原子事务，不依赖交互事务。
  */
-export function redeemInviteCode(params: {
-  userId: string;
+async function redeemWithSqliteBatch(params: {
   code: string;
+  userId: string;
+  now: Date;
+  row: InviteCode;
 }): Promise<RedeemResult> {
-  return db().transaction(async (tx) => {
-    // 1. 幂等：用户已有兑换记录 → 返回既有 trialEndsAt，不递增。
-    const [existing] = await tx
+  const database = db();
+  const redemptionId = getUuid();
+  const trialEndsAt = new Date(
+    params.now.getTime() + params.row.trialDays * MS_PER_DAY
+  );
+  const insertRedemption = database.run(sql`
+    insert or ignore into ${userInvite}
+      (id, user_id, invite_code_id, activated_at, trial_ends_at)
+    select
+      ${sql.param(redemptionId, userInvite.id)},
+      ${sql.param(params.userId, userInvite.userId)},
+      ${inviteCode.id},
+      ${sql.param(params.now, userInvite.activatedAt)},
+      ${sql.param(trialEndsAt, userInvite.trialEndsAt)}
+    from ${inviteCode}
+    where ${inviteCode.code} = ${params.code}
+      and (${inviteCode.expiresAt} is null or ${inviteCode.expiresAt} > ${sql.param(params.now, inviteCode.expiresAt)})
+      and ${inviteCode.usedCount} < ${inviteCode.maxUses}
+      and not exists (
+        select 1 from ${userInvite}
+        where ${userInvite.userId} = ${params.userId}
+      )
+  `);
+  const incrementUse = database.run(sql`
+    update ${inviteCode}
+    set used_count = used_count + 1
+    where ${inviteCode.id} = (
+      select ${userInvite.inviteCodeId}
+      from ${userInvite}
+      where ${userInvite.id} = ${redemptionId}
+    )
+      and ${inviteCode.usedCount} < ${inviteCode.maxUses}
+      and (${inviteCode.expiresAt} is null or ${inviteCode.expiresAt} > ${sql.param(params.now, inviteCode.expiresAt)})
+  `);
+
+  await database.batch([insertRedemption, incrementUse]);
+
+  const [stored] = await database
+    .select()
+    .from(userInvite)
+    .where(eq(userInvite.userId, params.userId))
+    .limit(1);
+  if (stored) {
+    return { ok: true, trialEndsAt: stored.trialEndsAt };
+  }
+
+  const [currentCode] = await database
+    .select()
+    .from(inviteCode)
+    .where(eq(inviteCode.code, params.code))
+    .limit(1);
+  if (!currentCode) {
+    return { error: "Invalid invite code", ok: false };
+  }
+  if (
+    currentCode.expiresAt &&
+    currentCode.expiresAt.getTime() <= params.now.getTime()
+  ) {
+    return { error: "Invite code has expired", ok: false };
+  }
+  return { error: "Invite code has been fully used", ok: false };
+}
+
+/** PostgreSQL / MySQL 的行锁事务兑换。 */
+async function redeemWithLockedTransaction(params: {
+  code: string;
+  userId: string;
+  now: Date;
+}): Promise<RedeemResult> {
+  const database = db();
+  try {
+    return await database.transaction(async (tx) => {
+      const [existing] = await tx
+        .select()
+        .from(userInvite)
+        .where(eq(userInvite.userId, params.userId))
+        .limit(1);
+      if (existing) {
+        return { ok: true, trialEndsAt: existing.trialEndsAt };
+      }
+
+      const query = tx
+        .select()
+        .from(inviteCode)
+        .where(eq(inviteCode.code, params.code))
+        .limit(1);
+      const lockableQuery = query as typeof query & {
+        for: (strength: "update") => typeof query;
+      };
+      const [row] = await lockableQuery.for("update");
+      if (!row) {
+        return { error: "Invalid invite code", ok: false };
+      }
+      if (row.expiresAt && row.expiresAt.getTime() <= params.now.getTime()) {
+        return { error: "Invite code has expired", ok: false };
+      }
+      if (row.usedCount >= row.maxUses) {
+        return { error: "Invite code has been fully used", ok: false };
+      }
+
+      const trialEndsAt = new Date(
+        params.now.getTime() + row.trialDays * MS_PER_DAY
+      );
+      await tx
+        .update(inviteCode)
+        .set({ usedCount: sql`${inviteCode.usedCount} + 1` })
+        .where(
+          and(
+            eq(inviteCode.id, row.id),
+            lt(inviteCode.usedCount, inviteCode.maxUses),
+            or(
+              isNull(inviteCode.expiresAt),
+              gt(inviteCode.expiresAt, params.now)
+            )
+          )
+        );
+      await tx.insert(userInvite).values({
+        activatedAt: params.now,
+        id: getUuid(),
+        inviteCodeId: row.id,
+        trialEndsAt,
+        userId: params.userId,
+      });
+
+      return { ok: true, trialEndsAt };
+    });
+  } catch (error) {
+    const [existing] = await database
       .select()
       .from(userInvite)
       .where(eq(userInvite.userId, params.userId))
@@ -182,39 +304,51 @@ export function redeemInviteCode(params: {
     if (existing) {
       return { ok: true, trialEndsAt: existing.trialEndsAt };
     }
+    throw error;
+  }
+}
 
-    // 2. 校验邀请码。
-    const [row] = await tx
-      .select()
-      .from(inviteCode)
-      .where(eq(inviteCode.code, params.code))
-      .limit(1);
-    if (!row) {
-      return { ok: false, error: "Invalid invite code" };
-    }
-    if (row.expiresAt && row.expiresAt < new Date()) {
-      return { ok: false, error: "Invite code has expired" };
-    }
-    if (row.usedCount >= row.maxUses) {
-      return { ok: false, error: "Invite code has been fully used" };
-    }
+/**
+ * 原子兑换邀请码。R9.3/R9.4/R9.5
+ *
+ * `user_invite.user_id` 唯一约束提供最终幂等保证；SQLite/Turso/D1 使用原生单批原子路径，
+ * PostgreSQL/MySQL 使用行锁事务与 `used_count < max_uses` 条件更新，防止最后名额超卖。
+ */
+export async function redeemInviteCode(params: {
+  userId: string;
+  code: string;
+}): Promise<RedeemResult> {
+  const now = new Date(Date.now());
+  const database = db();
+  const [existing] = await database
+    .select()
+    .from(userInvite)
+    .where(eq(userInvite.userId, params.userId))
+    .limit(1);
+  if (existing) {
+    return { ok: true, trialEndsAt: existing.trialEndsAt };
+  }
 
-    // 3. 插入兑换记录并递增计数（同一事务）。
-    const trialEndsAt = new Date(Date.now() + row.trialDays * MS_PER_DAY);
-    await tx.insert(userInvite).values({
-      id: getUuid(),
-      userId: params.userId,
-      inviteCodeId: row.id,
-      activatedAt: new Date(),
-      trialEndsAt,
-    });
-    await tx
-      .update(inviteCode)
-      .set({ usedCount: sql`${inviteCode.usedCount} + 1` })
-      .where(eq(inviteCode.id, row.id));
+  const [row] = await database
+    .select()
+    .from(inviteCode)
+    .where(eq(inviteCode.code, params.code))
+    .limit(1);
+  if (!row) {
+    return { error: "Invalid invite code", ok: false };
+  }
+  if (row.expiresAt && row.expiresAt.getTime() <= now.getTime()) {
+    return { error: "Invite code has expired", ok: false };
+  }
+  if (row.usedCount >= row.maxUses) {
+    return { error: "Invite code has been fully used", ok: false };
+  }
 
-    return { ok: true, trialEndsAt };
-  });
+  const provider = databaseEnv.DATABASE_PROVIDER;
+  if (provider === "d1" || provider === "sqlite" || provider === "turso") {
+    return redeemWithSqliteBatch({ ...params, now, row });
+  }
+  return redeemWithLockedTransaction({ ...params, now });
 }
 
 /** 用户方案状态。 */
