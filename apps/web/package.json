@@ -9,6 +9,9 @@
     "serve": "vite preview",
     "cf:build": "NITRO_PRESET=cloudflare_module vite build",
     "cf:deploy": "pnpm cf:build && wrangler deploy",
+    "generate:routes": "tsr generate",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -41,6 +44,7 @@
     "@mdx-js/rollup": "catalog:",
     "@tanstack/react-query-devtools": "^5.91.1",
     "@tanstack/react-router-devtools": "^1.166.13",
+    "@tanstack/router-cli": "1.167.21",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
     "@types/mdx": "catalog:",

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/tanstack",
+    "ultracite/biome/vitest"
+  ],
+  "files": {
+    "includes": ["!!apps/web/src/paraglide", "!!apps/web/.output", "!!coverage"]
+  },
+  "linter": {
+    "rules": {
+      "performance": {
+        "noJsxPropsBind": "off"
+      }
+    }
+  }
+}
