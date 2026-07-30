@@ -48,7 +48,6 @@ function ApiKeysPage() {
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
   const keysQuery = useQuery({
-    queryKey: QUERY_KEY,
     queryFn: async () => {
       const res = await client.api.apikeys.$get({ query: {} });
       if (!res.ok) {
@@ -57,6 +56,7 @@ function ApiKeysPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: QUERY_KEY,
   });
 
   const createMutation = useMutation({
@@ -71,6 +71,7 @@ function ApiKeysPage() {
       }
       return json.data;
     },
+    onError: (error: Error) => toast.error(error.message),
     onSuccess: (data) => {
       setRevealedKey(data.key);
       setTitle("");
@@ -78,7 +79,6 @@ function ApiKeysPage() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success("API key created");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 
   const revokeMutation = useMutation({
@@ -89,11 +89,11 @@ function ApiKeysPage() {
       }
       return id;
     },
+    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY });
       toast.success("API key revoked");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 
   const items = keysQuery.data?.items ?? [];

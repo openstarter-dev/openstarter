@@ -17,8 +17,8 @@ import type { VerificationType } from "../types";
  */
 export interface GetUrlParams {
   request?: Request;
-  url?: string;
   type?: VerificationType;
+  url?: string;
 }
 
 // 无请求且无环境变量可用时的开发兜底基址。

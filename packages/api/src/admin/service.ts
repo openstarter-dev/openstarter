@@ -7,21 +7,16 @@
 // 参数化查询（无字符串拼接）。分页统一 `{ items, total }`，供路由以 `respPage` 返回。
 // 访问由 routes 层的 `requireAuth + requirePermission("admin.*")` 通配符 RBAC 保障。
 
-import {
-  credit,
-  order,
-  subscription,
-  user,
-} from "@openstarter/db/schema";
 import type { Credit, Order, Subscription, User } from "@openstarter/db/schema";
+import { credit, order, subscription, user } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { and, count, desc, eq, isNull, like, type SQL } from "drizzle-orm";
 
 export interface AdminListParams {
   page: number;
   pageSize: number;
-  status?: string;
   search?: string;
+  status?: string;
 }
 
 export interface AdminListResult<TItem> {
@@ -39,9 +34,7 @@ export async function listUsers(
 ): Promise<AdminListResult<User>> {
   const { page, pageSize, search } = params;
   const database = db();
-  const where = search
-    ? like(user.email, `%${search}%`)
-    : undefined;
+  const where = search ? like(user.email, `%${search}%`) : undefined;
 
   const [items, totalRows] = await Promise.all([
     database

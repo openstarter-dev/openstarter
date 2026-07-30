@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 
 import { matchAnyPermission, matchPermission } from "@/lib/permissions";
 
-const permissionCodeArbitrary = fc.stringMatching(/^[a-z][a-z0-9_-]{0,11}\.[a-z][a-z0-9_-]{0,11}$/);
+const SEGMENT_REGEX = /^[a-z][a-z0-9_-]{0,11}$/;
+const FULL_CODE_REGEX = /^[a-z][a-z0-9_-]{0,11}\.[a-z][a-z0-9_-]{0,11}$/;
+const permissionCodeArbitrary = fc.stringMatching(FULL_CODE_REGEX);
+const segmentArbitrary = fc.stringMatching(SEGMENT_REGEX);
 
 describe("admin UI permission matcher (Property 51, 52)", () => {
   it("P51 global wildcard '*' satisfies any required permission", () => {
@@ -26,15 +29,11 @@ describe("admin UI permission matcher (Property 51, 52)", () => {
 
   it("P51 resource.* satisfies every permission sharing the resource prefix", () => {
     fc.assert(
-      fc.property(
-        fc.stringMatching(/^[a-z][a-z0-9_-]{0,11}$/),
-        fc.stringMatching(/^[a-z][a-z0-9_-]{0,11}$/),
-        (resource, action) => {
-          const required = `${resource}.${action}`;
+      fc.property(segmentArbitrary, segmentArbitrary, (resource, action) => {
+        const required = `${resource}.${action}`;
 
-          expect(matchPermission(required, [`${resource}.*`])).toBe(true);
-        }
-      ),
+        expect(matchPermission(required, [`${resource}.*`])).toBe(true);
+      }),
       { numRuns: 100 }
     );
   });
@@ -43,11 +42,13 @@ describe("admin UI permission matcher (Property 51, 52)", () => {
     fc.assert(
       fc.property(
         permissionCodeArbitrary,
-        fc.stringMatching(/^[a-z][a-z0-9_-]{0,11}$/),
-        fc.stringMatching(/^[a-z][a-z0-9_-]{0,11}$/),
+        segmentArbitrary,
+        segmentArbitrary,
         (required, otherResource, otherAction) => {
           const other = `${otherResource}.${otherAction}`;
-          fc.pre(required !== other && !required.startsWith(`${otherResource}.`));
+          fc.pre(
+            required !== other && !required.startsWith(`${otherResource}.`)
+          );
 
           expect(matchPermission(required, [other])).toBe(false);
         }
@@ -81,15 +82,13 @@ describe("admin UI permission matcher (Property 51, 52)", () => {
             (granted) =>
               !requiredCodes.includes(granted) &&
               granted !== "*" &&
-              !requiredCodes.some(
-                (required) => required.startsWith(`${granted.slice(0, -2)}.`)
+              !requiredCodes.some((required) =>
+                required.startsWith(`${granted.slice(0, -2)}.`)
               )
           );
           fc.pre(disjoint.length === grantedSet.length);
 
-          expect(
-            matchAnyPermission(requiredCodes, grantedSet)
-          ).toBe(false);
+          expect(matchAnyPermission(requiredCodes, grantedSet)).toBe(false);
         }
       ),
       { numRuns: 100 }
@@ -100,23 +99,28 @@ describe("admin UI permission matcher (Property 51, 52)", () => {
     // Mirror the ADMIN_NAV structure: every item carries permission + uses
     // matchPermission. Visibility must be derivable from matchPermission over
     // the permission set. This is the Property 52 entry-filtering contract.
-    const NAV_PERMISSIONS = ["admin.*", "taxonomy.read", "post.read", "ticket.read"];
+    const NAV_PERMISSIONS = [
+      "admin.*",
+      "taxonomy.read",
+      "post.read",
+      "ticket.read",
+    ];
     const adminUser = ["admin.*"];
     const editorUser = ["post.read", "post.write", "taxonomy.read"];
     const supportUser = ["ticket.read", "ticket.*"];
     const noPermissions: string[] = [];
 
-    expect(
-      NAV_PERMISSIONS.some((p) => matchPermission(p, adminUser))
-    ).toBe(true);
-    expect(
-      NAV_PERMISSIONS.some((p) => matchPermission(p, editorUser))
-    ).toBe(true);
-    expect(
-      NAV_PERMISSIONS.some((p) => matchPermission(p, supportUser))
-    ).toBe(true);
-    expect(
-      NAV_PERMISSIONS.some((p) => matchPermission(p, noPermissions))
-    ).toBe(false);
+    expect(NAV_PERMISSIONS.some((p) => matchPermission(p, adminUser))).toBe(
+      true
+    );
+    expect(NAV_PERMISSIONS.some((p) => matchPermission(p, editorUser))).toBe(
+      true
+    );
+    expect(NAV_PERMISSIONS.some((p) => matchPermission(p, supportUser))).toBe(
+      true
+    );
+    expect(NAV_PERMISSIONS.some((p) => matchPermission(p, noPermissions))).toBe(
+      false
+    );
   });
 });

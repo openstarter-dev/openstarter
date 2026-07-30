@@ -51,7 +51,6 @@ function PaymentsPage() {
   const [page, setPage] = useState(1);
 
   const ordersQuery = useQuery({
-    queryKey: ["user", "orders", page],
     placeholderData: keepPreviousData,
     queryFn: async () => {
       const res = await client.api.user.orders.$get({
@@ -63,6 +62,7 @@ function PaymentsPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["user", "orders", page],
   });
 
   const items = ordersQuery.data?.items ?? [];

@@ -4,6 +4,8 @@ import { describe, expect, it } from "vitest";
 import { md5, sha256 } from "./hash";
 
 const printableStringArbitrary = fc.string({ maxLength: 256, minLength: 1 });
+const SHA256_HEX_REGEX = /^[0-9a-f]{64}$/;
+const MD5_HEX_REGEX = /^[0-9a-f]{32}$/;
 
 describe("hash determinism (Property 4 hash side)", () => {
   it("P4 sha256 is deterministic for any input string", () => {
@@ -13,7 +15,7 @@ describe("hash determinism (Property 4 hash side)", () => {
         const second = sha256(value);
 
         expect(first).toBe(second);
-        expect(first).toMatch(/^[0-9a-f]{64}$/);
+        expect(first).toMatch(SHA256_HEX_REGEX);
       }),
       { numRuns: 100 }
     );
@@ -26,7 +28,7 @@ describe("hash determinism (Property 4 hash side)", () => {
         const second = md5(value);
 
         expect(first).toBe(second);
-        expect(first).toMatch(/^[0-9a-f]{32}$/);
+        expect(first).toMatch(MD5_HEX_REGEX);
       }),
       { numRuns: 100 }
     );

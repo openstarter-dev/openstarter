@@ -31,7 +31,6 @@ function AdminSubscriptionsPage() {
   const [page, setPage] = useState(1);
 
   const query = useQuery({
-    queryKey: ["admin", "subscriptions", page],
     placeholderData: keepPreviousData,
     queryFn: async () => {
       const res = await client.api.admin.subscriptions.$get({
@@ -43,6 +42,7 @@ function AdminSubscriptionsPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["admin", "subscriptions", page],
   });
 
   const items = query.data?.items ?? [];

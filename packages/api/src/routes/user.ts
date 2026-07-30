@@ -8,6 +8,7 @@
 //   - GET /api/user/credits        积分余额 + 流水历史（R13/R27.4）；
 //   - GET /api/user/orders         支付记录分页（R27.2）。
 
+import { zValidator } from "@hono/zod-validator";
 import { getUserPermissionCodes, getUserPlan } from "@openstarter/auth";
 import {
   getBalance,
@@ -15,7 +16,6 @@ import {
   getSubscriptionStatusView,
 } from "@openstarter/billing";
 import { respData, respPage } from "@openstarter/shared";
-import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
 
@@ -37,9 +37,12 @@ const listQuery = z.object({
 });
 
 const creditsQuery = z.object({
-  limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(
-    DEFAULT_HISTORY_LIMIT
-  ),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_PAGE_SIZE)
+    .default(DEFAULT_HISTORY_LIMIT),
   offset: z.coerce.number().int().min(0).default(0),
 });
 
@@ -79,9 +82,9 @@ export const userRoute = new Hono()
     async (c) => {
       const { page, pageSize } = c.req.valid("query");
       const { items, total } = await listUserOrders({
-        userId: c.get("userId"),
         page,
         pageSize,
+        userId: c.get("userId"),
       });
       return c.json(respPage(items, total));
     }

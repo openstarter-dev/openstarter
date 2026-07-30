@@ -36,7 +36,6 @@ function formatDate(value: string | null | undefined): string {
 
 function CreditsPage() {
   const creditsQuery = useQuery({
-    queryKey: ["user", "credits"],
     queryFn: async () => {
       const res = await client.api.user.credits.$get({ query: {} });
       if (!res.ok) {
@@ -45,6 +44,7 @@ function CreditsPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["user", "credits"],
   });
 
   const balance = creditsQuery.data?.balance ?? 0;
@@ -102,7 +102,7 @@ function CreditsPage() {
                       <TableCell className="tabular-nums">
                         {item.credits}
                       </TableCell>
-                      <TableCell className="tabular-nums text-muted-foreground">
+                      <TableCell className="text-muted-foreground tabular-nums">
                         {item.remainingCredits}
                       </TableCell>
                       <TableCell className="text-muted-foreground">

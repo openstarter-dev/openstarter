@@ -31,7 +31,6 @@ function AdminOrdersPage() {
   const [page, setPage] = useState(1);
 
   const ordersQuery = useQuery({
-    queryKey: ["admin", "orders", page],
     placeholderData: keepPreviousData,
     queryFn: async () => {
       const res = await client.api.admin.orders.$get({
@@ -43,6 +42,7 @@ function AdminOrdersPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["admin", "orders", page],
   });
 
   const items = ordersQuery.data?.items ?? [];

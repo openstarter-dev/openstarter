@@ -7,6 +7,7 @@
 // 全部挂 `requireAuth + requirePermission("admin.*")`：平台级授权仅由通配符 RBAC 判定
 // （授予 `admin.*` 或 `*` 即通行），与 better-auth `organization` 解耦。入参经 `zValidator` 校验。
 
+import { zValidator } from "@hono/zod-validator";
 import {
   createInviteCodesBatch,
   deleteInviteCode,
@@ -18,7 +19,6 @@ import {
   getSettings,
   saveConfigs,
 } from "@openstarter/shared/config";
-import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
 import { z } from "zod";
 
@@ -47,15 +47,15 @@ const listQuery = z.object({
     .min(1)
     .max(MAX_PAGE_SIZE)
     .default(DEFAULT_PAGE_SIZE),
-  status: z.string().min(1).optional(),
   search: z.string().min(1).optional(),
+  status: z.string().min(1).optional(),
 });
 
 const inviteBatchBody = z.object({
   count: z.number().int().min(1).max(MAX_INVITE_BATCH),
   maxUses: z.number().int().min(1).optional(),
-  trialDays: z.number().int().min(0).optional(),
   note: z.string().optional(),
+  trialDays: z.number().int().min(0).optional(),
 });
 
 const idParam = z.object({ id: z.string().min(1) });

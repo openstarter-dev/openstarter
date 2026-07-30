@@ -16,6 +16,7 @@ const validProviderArbitrary = fc.constantFrom(...VALID_PROVIDERS);
 const invalidProviderArbitrary = fc
   .string({ maxLength: 32, minLength: 1 })
   .filter((value) => !((value as string) in PROVIDER_TO_ADAPTER));
+const UNSUPPORTED_PROVIDER_REGEX = /Unsupported DATABASE_PROVIDER/;
 
 describe("auth adapter provider mapping (Property 54)", () => {
   it("P54 maps every supported DATABASE_PROVIDER to the accepted drizzleAdapter provider", () => {
@@ -24,9 +25,9 @@ describe("auth adapter provider mapping (Property 54)", () => {
         const result = getAuthAdapterProvider(provider);
 
         expect(result).toBe(PROVIDER_TO_ADAPTER[provider]);
-        expect(result === "pg" ||
-          result === "mysql" ||
-          result === "sqlite").toBe(true);
+        expect(
+          result === "pg" || result === "mysql" || result === "sqlite"
+        ).toBe(true);
       }),
       { numRuns: 100 }
     );
@@ -36,7 +37,7 @@ describe("auth adapter provider mapping (Property 54)", () => {
     fc.assert(
       fc.property(invalidProviderArbitrary, (provider) => {
         expect(() => getAuthAdapterProvider(provider)).toThrow(
-          /Unsupported DATABASE_PROVIDER/
+          UNSUPPORTED_PROVIDER_REGEX
         );
       }),
       { numRuns: 100 }

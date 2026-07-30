@@ -17,9 +17,9 @@ import { and, count, desc, eq, isNull } from "drizzle-orm";
 export type UserOrder = typeof order.$inferSelect;
 
 export interface ListUserOrdersParams {
-  userId: string;
   page: number;
   pageSize: number;
+  userId: string;
 }
 
 export interface ListUserOrdersResult {

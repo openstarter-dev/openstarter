@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  PROTECTED_CONFIG_KEYS,
   isMaskedConfigValue,
   isSecretConfigKey,
   maskConfigValue,
+  PROTECTED_CONFIG_KEYS,
 } from "./config";
 
 beforeEach(() => {

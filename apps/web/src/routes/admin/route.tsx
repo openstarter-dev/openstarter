@@ -27,39 +27,39 @@ type AdminPath =
   | "/admin/subscriptions"
   | "/admin/credits";
 
-type AdminNavItem = {
-  to: AdminPath;
+interface AdminNavItem {
   label: string;
   permission: string;
-};
+  to: AdminPath;
+}
 
-type AdminNavGroup = {
+interface AdminNavGroup {
   group: string;
   items: AdminNavItem[];
-};
+}
 
 export const ADMIN_NAV: AdminNavGroup[] = [
   {
     group: "Overview",
-    items: [{ to: "/admin", label: "Dashboard", permission: "admin.*" }],
+    items: [{ label: "Dashboard", permission: "admin.*", to: "/admin" }],
   },
   {
     group: "Access control",
     items: [
-      { to: "/admin/users", label: "Users", permission: "admin.*" },
-      { to: "/admin/roles", label: "Roles", permission: "admin.*" },
+      { label: "Users", permission: "admin.*", to: "/admin/users" },
+      { label: "Roles", permission: "admin.*", to: "/admin/roles" },
     ],
   },
   {
     group: "Billing",
     items: [
-      { to: "/admin/orders", label: "Orders", permission: "admin.*" },
+      { label: "Orders", permission: "admin.*", to: "/admin/orders" },
       {
-        to: "/admin/subscriptions",
         label: "Subscriptions",
         permission: "admin.*",
+        to: "/admin/subscriptions",
       },
-      { to: "/admin/credits", label: "Credits", permission: "admin.*" },
+      { label: "Credits", permission: "admin.*", to: "/admin/credits" },
     ],
   },
 ];
@@ -69,7 +69,6 @@ const ALL_ADMIN_PERMISSIONS = ADMIN_NAV.flatMap((g) =>
 );
 
 export const Route = createFileRoute("/admin")({
-  ssr: false,
   beforeLoad: async () => {
     const session = await authClient.getSession();
     if (!session.data) {
@@ -87,6 +86,7 @@ export const Route = createFileRoute("/admin")({
     return { permissions };
   },
   component: AdminLayout,
+  ssr: false,
 });
 
 function AdminLayout() {

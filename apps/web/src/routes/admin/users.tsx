@@ -29,7 +29,6 @@ function AdminUsersPage() {
   const [search, setSearch] = useState("");
 
   const usersQuery = useQuery({
-    queryKey: ["admin", "users", page, search],
     placeholderData: keepPreviousData,
     queryFn: async () => {
       const res = await client.api.admin.users.$get({
@@ -45,6 +44,7 @@ function AdminUsersPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["admin", "users", page, search],
   });
 
   const items = usersQuery.data?.items ?? [];
@@ -53,10 +53,7 @@ function AdminUsersPage() {
 
   return (
     <div>
-      <AdminHeader
-        description="All registered users."
-        title="Users"
-      />
+      <AdminHeader description="All registered users." title="Users" />
       <div className="mb-4 max-w-xs">
         <Input
           onChange={(e) => {

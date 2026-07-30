@@ -31,7 +31,6 @@ function AdminCreditsPage() {
   const [page, setPage] = useState(1);
 
   const query = useQuery({
-    queryKey: ["admin", "credits", page],
     placeholderData: keepPreviousData,
     queryFn: async () => {
       const res = await client.api.admin.credits.$get({
@@ -43,6 +42,7 @@ function AdminCreditsPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["admin", "credits", page],
   });
 
   const items = query.data?.items ?? [];
@@ -51,10 +51,7 @@ function AdminCreditsPage() {
 
   return (
     <div>
-      <AdminHeader
-        description="All credit transactions."
-        title="Credits"
-      />
+      <AdminHeader description="All credit transactions." title="Credits" />
 
       <StatusText
         empty={items.length === 0}
@@ -94,7 +91,7 @@ function AdminCreditsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="tabular-nums">{item.credits}</TableCell>
-                  <TableCell className="tabular-nums text-muted-foreground">
+                  <TableCell className="text-muted-foreground tabular-nums">
                     {item.remainingCredits}
                   </TableCell>
                   <TableCell className="text-muted-foreground">

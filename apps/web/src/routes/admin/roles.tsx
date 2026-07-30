@@ -37,7 +37,11 @@ export const Route = createFileRoute("/admin/roles")({
 const ROLES_KEY = ["admin", "roles"] as const;
 const PERMISSIONS_KEY = ["admin", "permissions"] as const;
 
-type RoleForm = { id: string | null; name: string; title: string };
+interface RoleForm {
+  id: string | null;
+  name: string;
+  title: string;
+}
 
 const EMPTY_FORM: RoleForm = { id: null, name: "", title: "" };
 
@@ -48,7 +52,6 @@ function AdminRolesPage() {
   const [selectedPerms, setSelectedPerms] = useState<Set<string>>(new Set());
 
   const rolesQuery = useQuery({
-    queryKey: ROLES_KEY,
     queryFn: async () => {
       const res = await client.api.admin.roles.$get();
       if (!res.ok) {
@@ -56,10 +59,10 @@ function AdminRolesPage() {
       }
       return (await res.json()).data ?? [];
     },
+    queryKey: ROLES_KEY,
   });
 
   const permissionsQuery = useQuery({
-    queryKey: PERMISSIONS_KEY,
     queryFn: async () => {
       const res = await client.api.admin.permissions.$get();
       if (!res.ok) {
@@ -67,11 +70,11 @@ function AdminRolesPage() {
       }
       return (await res.json()).data ?? [];
     },
+    queryKey: PERMISSIONS_KEY,
   });
 
   const rolePermsQuery = useQuery({
     enabled: permRoleId !== null,
-    queryKey: ["admin", "roles", permRoleId, "permissions"],
     queryFn: async () => {
       const res = await client.api.admin.roles[":id"].permissions.$get({
         param: { id: permRoleId ?? "" },
@@ -81,6 +84,7 @@ function AdminRolesPage() {
       }
       return (await res.json()).data ?? [];
     },
+    queryKey: ["admin", "roles", permRoleId, "permissions"],
   });
 
   useEffect(() => {
@@ -93,8 +97,8 @@ function AdminRolesPage() {
     mutationFn: async (input: RoleForm) => {
       if (input.id) {
         const res = await client.api.admin.roles[":id"].$put({
-          param: { id: input.id },
           json: { name: input.name, title: input.title },
+          param: { id: input.id },
         });
         if (!res.ok) {
           throw new Error("Failed to update role");
@@ -108,12 +112,12 @@ function AdminRolesPage() {
         throw new Error("Failed to create role");
       }
     },
+    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setForm(null);
       queryClient.invalidateQueries({ queryKey: ROLES_KEY });
       toast.success("Role saved");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 
   const deleteMutation = useMutation({
@@ -125,28 +129,28 @@ function AdminRolesPage() {
         throw new Error("Failed to delete role");
       }
     },
+    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ROLES_KEY });
       toast.success("Role deleted");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 
   const savePermsMutation = useMutation({
     mutationFn: async (input: { id: string; permissionIds: string[] }) => {
       const res = await client.api.admin.roles[":id"].permissions.$put({
-        param: { id: input.id },
         json: { permissionIds: input.permissionIds },
+        param: { id: input.id },
       });
       if (!res.ok) {
         throw new Error("Failed to save permissions");
       }
     },
+    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setPermRoleId(null);
       toast.success("Permissions updated");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 
   const roles = rolesQuery.data ?? [];
@@ -168,11 +172,7 @@ function AdminRolesPage() {
     <div>
       <AdminHeader
         action={
-          <Button
-            onClick={() => setForm(EMPTY_FORM)}
-            size="sm"
-            type="button"
-          >
+          <Button onClick={() => setForm(EMPTY_FORM)} size="sm" type="button">
             New role
           </Button>
         }
@@ -264,9 +264,7 @@ function AdminRolesPage() {
                 <Label htmlFor="role-name">Name</Label>
                 <Input
                   id="role-name"
-                  onChange={(e) =>
-                    setForm({ ...form, name: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="admin"
                   value={form.name}
                 />
@@ -275,9 +273,7 @@ function AdminRolesPage() {
                 <Label htmlFor="role-title">Title</Label>
                 <Input
                   id="role-title"
-                  onChange={(e) =>
-                    setForm({ ...form, title: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="Administrator"
                   value={form.title}
                 />

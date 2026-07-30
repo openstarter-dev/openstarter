@@ -21,10 +21,10 @@ export const Route = createFileRoute("/_app/settings/billing")({
 });
 
 const PLAN_LABEL: Record<string, string> = {
-  none: "Free",
-  trial: "Trial",
   expired: "Expired",
   member: "Member",
+  none: "Free",
+  trial: "Trial",
 };
 
 function formatDate(value: string | null | undefined): string {
@@ -36,7 +36,6 @@ function formatDate(value: string | null | undefined): string {
 
 function BillingPage() {
   const subscriptionQuery = useQuery({
-    queryKey: ["user", "subscription"],
     queryFn: async () => {
       const res = await client.api.user.subscription.$get();
       if (!res.ok) {
@@ -45,10 +44,10 @@ function BillingPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["user", "subscription"],
   });
 
   const planQuery = useQuery({
-    queryKey: ["user", "plan"],
     queryFn: async () => {
       const res = await client.api.user.plan.$get();
       if (!res.ok) {
@@ -57,6 +56,7 @@ function BillingPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["user", "plan"],
   });
 
   const subscription = subscriptionQuery.data;
@@ -104,9 +104,7 @@ function BillingPage() {
               </p>
             </div>
             <div className="rounded-lg border p-4">
-              <p className="text-muted-foreground text-xs">
-                Next billing date
-              </p>
+              <p className="text-muted-foreground text-xs">Next billing date</p>
               <p className="font-medium text-sm">
                 {formatDate(subscription?.nextBillingDate)}
               </p>

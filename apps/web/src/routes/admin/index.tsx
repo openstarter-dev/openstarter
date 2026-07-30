@@ -27,7 +27,6 @@ const METRIC_CARDS = [
 
 function AdminDashboard() {
   const metricsQuery = useQuery({
-    queryKey: ["admin", "metrics"],
     queryFn: async () => {
       const res = await client.api.admin.analytics.metrics.$get();
       if (!res.ok) {
@@ -36,6 +35,7 @@ function AdminDashboard() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["admin", "metrics"],
   });
 
   const metrics = metricsQuery.data;

@@ -26,48 +26,48 @@ describe("Better Auth database schema projection", () => {
   });
 });
 
-  it("matches the local Better Auth plugin runtime model fields", () => {
-    const passkeySchema = passkey().schema;
-    const twoFactorSchema = twoFactor().schema;
-    const anonymousSchema = anonymous().schema;
-    const adminSchema = admin().schema;
-    const organizationSchema = organization({
-      teams: organizationTeams,
-    }).schema;
-    const withGeneratedId = (fields: Record<string, object>) =>
-      ["id", ...Object.keys(fields)].sort();
+it("matches the local Better Auth plugin runtime model fields", () => {
+  const passkeySchema = passkey().schema;
+  const twoFactorSchema = twoFactor().schema;
+  const anonymousSchema = anonymous().schema;
+  const adminSchema = admin().schema;
+  const organizationSchema = organization({
+    teams: organizationTeams,
+  }).schema;
+  const withGeneratedId = (fields: Record<string, object>) =>
+    ["id", ...Object.keys(fields)].sort();
 
-    expect(Object.keys(getTableColumns(authSchema.passkey)).sort()).toEqual(
-      withGeneratedId(passkeySchema.passkey.fields)
-    );
-    expect(Object.keys(getTableColumns(authSchema.twoFactor)).sort()).toEqual(
-      withGeneratedId(twoFactorSchema.twoFactor.fields)
-    );
+  expect(Object.keys(getTableColumns(authSchema.passkey)).sort()).toEqual(
+    withGeneratedId(passkeySchema.passkey.fields)
+  );
+  expect(Object.keys(getTableColumns(authSchema.twoFactor)).sort()).toEqual(
+    withGeneratedId(twoFactorSchema.twoFactor.fields)
+  );
 
-    const organizationModels = [
-      [authSchema.organization, organizationSchema.organization.fields],
-      [authSchema.member, organizationSchema.member.fields],
-      [authSchema.invitation, organizationSchema.invitation.fields],
-      [authSchema.team, organizationSchema.team.fields],
-      [authSchema.teamMember, organizationSchema.teamMember.fields],
-    ] as const;
-    for (const [table, fields] of organizationModels) {
-      expect(Object.keys(getTableColumns(table)).sort()).toEqual(
-        withGeneratedId(fields)
-      );
-    }
+  const organizationModels = [
+    [authSchema.organization, organizationSchema.organization.fields],
+    [authSchema.member, organizationSchema.member.fields],
+    [authSchema.invitation, organizationSchema.invitation.fields],
+    [authSchema.team, organizationSchema.team.fields],
+    [authSchema.teamMember, organizationSchema.teamMember.fields],
+  ] as const;
+  for (const [table, fields] of organizationModels) {
+    expect(Object.keys(getTableColumns(table)).sort()).toEqual(
+      withGeneratedId(fields)
+    );
+  }
 
-    expect(Object.keys(getTableColumns(authSchema.user))).toEqual(
-      expect.arrayContaining([
-        ...Object.keys(twoFactorSchema.user.fields),
-        ...Object.keys(anonymousSchema.user.fields),
-        ...Object.keys(adminSchema.user.fields),
-      ])
-    );
-    expect(Object.keys(getTableColumns(authSchema.session))).toEqual(
-      expect.arrayContaining([
-        ...Object.keys(adminSchema.session.fields),
-        ...Object.keys(organizationSchema.session.fields),
-      ])
-    );
-  });
+  expect(Object.keys(getTableColumns(authSchema.user))).toEqual(
+    expect.arrayContaining([
+      ...Object.keys(twoFactorSchema.user.fields),
+      ...Object.keys(anonymousSchema.user.fields),
+      ...Object.keys(adminSchema.user.fields),
+    ])
+  );
+  expect(Object.keys(getTableColumns(authSchema.session))).toEqual(
+    expect.arrayContaining([
+      ...Object.keys(adminSchema.session.fields),
+      ...Object.keys(organizationSchema.session.fields),
+    ])
+  );
+});

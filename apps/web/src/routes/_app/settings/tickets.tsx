@@ -61,7 +61,6 @@ function TicketsPage() {
   const [reply, setReply] = useState("");
 
   const listQuery = useQuery({
-    queryKey: LIST_KEY,
     queryFn: async () => {
       const res = await client.api.tickets.$get({ query: {} });
       if (!res.ok) {
@@ -70,11 +69,11 @@ function TicketsPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: LIST_KEY,
   });
 
   const detailQuery = useQuery({
     enabled: selectedId !== null,
-    queryKey: ["user", "tickets", selectedId],
     queryFn: async () => {
       const res = await client.api.tickets[":id"].$get({
         param: { id: selectedId ?? "" },
@@ -85,6 +84,7 @@ function TicketsPage() {
       const json = await res.json();
       return json.data;
     },
+    queryKey: ["user", "tickets", selectedId],
   });
 
   const createMutation = useMutation({
@@ -96,6 +96,7 @@ function TicketsPage() {
       const json = await res.json();
       return json.data;
     },
+    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setTitle("");
       setContent("");
@@ -103,14 +104,13 @@ function TicketsPage() {
       queryClient.invalidateQueries({ queryKey: LIST_KEY });
       toast.success("Ticket created");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 
   const replyMutation = useMutation({
     mutationFn: async (input: { id: string; content: string }) => {
       const res = await client.api.tickets[":id"].messages.$post({
-        param: { id: input.id },
         json: { content: input.content },
+        param: { id: input.id },
       });
       if (!res.ok) {
         throw new Error("Failed to send reply");
@@ -118,6 +118,7 @@ function TicketsPage() {
       const json = await res.json();
       return json.data;
     },
+    onError: (error: Error) => toast.error(error.message),
     onSuccess: (_data, variables) => {
       setReply("");
       queryClient.invalidateQueries({
@@ -126,7 +127,6 @@ function TicketsPage() {
       queryClient.invalidateQueries({ queryKey: LIST_KEY });
       toast.success("Reply sent");
     },
-    onError: (error: Error) => toast.error(error.message),
   });
 
   const items = listQuery.data?.items ?? [];
@@ -231,7 +231,11 @@ function TicketsPage() {
               ))}
             </div>
 
-            {detail.ticket.status !== "closed" ? (
+            {detail.ticket.status === "closed" ? (
+              <p className="text-muted-foreground text-sm">
+                This ticket is closed.
+              </p>
+            ) : (
               <div className="space-y-2">
                 <Label htmlFor="ticket-reply">Reply</Label>
                 <Textarea
@@ -246,8 +250,8 @@ function TicketsPage() {
                   }
                   onClick={() =>
                     replyMutation.mutate({
-                      id: detail.ticket.id,
                       content: reply.trim(),
+                      id: detail.ticket.id,
                     })
                   }
                   size="sm"
@@ -256,10 +260,6 @@ function TicketsPage() {
                   {replyMutation.isPending ? "Sending..." : "Send reply"}
                 </Button>
               </div>
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                This ticket is closed.
-              </p>
             )}
           </CardContent>
         </Card>
@@ -302,8 +302,8 @@ function TicketsPage() {
               }
               onClick={() =>
                 createMutation.mutate({
-                  title: title.trim(),
                   content: content.trim(),
+                  title: title.trim(),
                 })
               }
               type="button"
