@@ -26,6 +26,7 @@ import {
   mysqlTable,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/mysql-core";
 
@@ -38,16 +39,22 @@ const varchar255 = (name: string) => varchar(name, { length: 255 });
 export const user = table(
   "user",
   {
-    id: varchar255("id").primaryKey(),
-    name: varchar255("name").notNull(),
+    banExpires: timestamp("ban_expires"),
+    banned: boolean("banned").default(false),
+    banReason: text("ban_reason"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
     email: varchar255("email").notNull().unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),
+    id: varchar255("id").primaryKey(),
     image: text("image"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    ip: varchar("ip", { length: 45 }).notNull().default(""),
+    isAnonymous: boolean("is_anonymous").default(false),
+    locale: varchar("locale", { length: 20 }).notNull().default(""),
+    name: varchar255("name").notNull(),
+    role: varchar255("role"),
+    twoFactorEnabled: boolean("two_factor_enabled").default(false),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     utmSource: varchar("utm_source", { length: 100 }).notNull().default(""),
-    ip: varchar("ip", { length: 45 }).notNull().default(""),
-    locale: varchar("locale", { length: 20 }).notNull().default(""),
   },
   (t) => [
     index("idx_user_name").on(t.name),
@@ -58,12 +65,15 @@ export const user = table(
 export const session = table(
   "session",
   {
-    id: varchar255("id").primaryKey(),
-    expiresAt: timestamp("expires_at").notNull(),
-    token: varchar255("token").notNull().unique(),
+    activeOrganizationId: varchar255("active_organization_id"),
+    activeTeamId: varchar255("active_team_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    id: varchar255("id").primaryKey(),
+    impersonatedBy: varchar255("impersonated_by"),
     ipAddress: varchar("ip_address", { length: 45 }),
+    token: varchar255("token").notNull().unique(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userAgent: text("user_agent"),
     userId: varchar255("user_id")
       .notNull()
@@ -75,21 +85,21 @@ export const session = table(
 export const account = table(
   "account",
   {
-    id: varchar255("id").primaryKey(),
+    accessToken: text("access_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at"),
     accountId: varchar255("account_id").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: varchar255("id").primaryKey(),
+    idToken: text("id_token"),
+    password: text("password"),
     providerId: varchar("provider_id", { length: 50 }).notNull(),
+    refreshToken: text("refresh_token"),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+    scope: varchar("scope", { length: 255 }),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    accessToken: text("access_token"),
-    refreshToken: text("refresh_token"),
-    idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at"),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
-    scope: varchar("scope", { length: 255 }),
-    password: text("password"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
   },
   (t) => [
     index("idx_account_user_id").on(t.userId),
@@ -100,14 +110,141 @@ export const account = table(
 export const verification = table(
   "verification",
   {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
     id: varchar255("id").primaryKey(),
     identifier: varchar255("identifier").notNull(),
-    value: text("value").notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    value: text("value").notNull(),
   },
   (t) => [index("idx_verification_identifier").on(t.identifier)]
+);
+
+export const passkey = table(
+  "passkey",
+  {
+    aaguid: varchar255("aaguid"),
+    backedUp: boolean("backed_up").notNull(),
+    counter: int("counter").notNull(),
+    createdAt: timestamp("created_at"),
+    credentialID: varchar255("credential_id").notNull(),
+    deviceType: varchar("device_type", { length: 50 }).notNull(),
+    id: varchar255("id").primaryKey(),
+    name: varchar255("name"),
+    publicKey: text("public_key").notNull(),
+    transports: text("transports"),
+    userId: varchar255("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    index("idx_passkey_user_id").on(t.userId),
+    index("idx_passkey_credential_id").on(t.credentialID),
+  ]
+);
+
+export const twoFactor = table(
+  "two_factor",
+  {
+    backupCodes: longtext("backup_codes").notNull(),
+    id: varchar255("id").primaryKey(),
+    secret: varchar255("secret").notNull(),
+    userId: varchar255("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    verified: boolean("verified").default(true),
+  },
+  (t) => [
+    index("idx_two_factor_secret").on(t.secret),
+    index("idx_two_factor_user_id").on(t.userId),
+  ]
+);
+
+export const organization = table(
+  "organization",
+  {
+    createdAt: timestamp("created_at").notNull(),
+    id: varchar255("id").primaryKey(),
+    logo: text("logo"),
+    metadata: longtext("metadata"),
+    name: varchar255("name").notNull(),
+    slug: varchar255("slug").notNull().unique(),
+  },
+  (t) => [index("idx_organization_slug").on(t.slug)]
+);
+
+export const member = table(
+  "member",
+  {
+    createdAt: timestamp("created_at").notNull(),
+    id: varchar255("id").primaryKey(),
+    organizationId: varchar255("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    role: varchar255("role").notNull().default("member"),
+    userId: varchar255("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    index("idx_member_organization_id").on(t.organizationId),
+    index("idx_member_user_id").on(t.userId),
+  ]
+);
+
+export const invitation = table(
+  "invitation",
+  {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    email: varchar255("email").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    id: varchar255("id").primaryKey(),
+    inviterId: varchar255("inviter_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: varchar255("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    role: varchar255("role"),
+    status: varchar("status", { length: 50 }).notNull().default("pending"),
+    teamId: varchar255("team_id"),
+  },
+  (t) => [
+    index("idx_invitation_organization_id").on(t.organizationId),
+    index("idx_invitation_email").on(t.email),
+  ]
+);
+
+export const team = table(
+  "team",
+  {
+    createdAt: timestamp("created_at").notNull(),
+    id: varchar255("id").primaryKey(),
+    name: varchar255("name").notNull(),
+    organizationId: varchar255("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    updatedAt: timestamp("updated_at").onUpdateNow(),
+  },
+  (t) => [index("idx_team_organization_id").on(t.organizationId)]
+);
+
+export const teamMember = table(
+  "team_member",
+  {
+    createdAt: timestamp("created_at"),
+    id: varchar255("id").primaryKey(),
+    teamId: varchar255("team_id")
+      .notNull()
+      .references(() => team.id, { onDelete: "cascade" }),
+    userId: varchar255("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    index("idx_team_member_team_id").on(t.teamId),
+    index("idx_team_member_user_id").on(t.userId),
+  ]
 );
 
 // ─── Content ─────────────────────────────────────────────────────────────────
@@ -120,22 +257,22 @@ export const config = table("config", {
 export const taxonomy = table(
   "taxonomy",
   {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
+    description: text("description"),
+    icon: varchar255("icon"),
     id: varchar255("id").primaryKey(),
+    image: text("image"),
+    parentId: varchar255("parent_id"),
+    slug: varchar255("slug").unique().notNull(),
+    sort: int("sort").default(0).notNull(),
+    status: varchar("status", { length: 50 }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    type: varchar("type", { length: 50 }).notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    parentId: varchar255("parent_id"),
-    slug: varchar255("slug").unique().notNull(),
-    type: varchar("type", { length: 50 }).notNull(),
-    title: varchar("title", { length: 255 }).notNull(),
-    description: text("description"),
-    image: text("image"),
-    icon: varchar255("icon"),
-    status: varchar("status", { length: 50 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    deletedAt: timestamp("deleted_at"),
-    sort: int("sort").default(0).notNull(),
   },
   (t) => [index("idx_taxonomy_type_status").on(t.type, t.status)]
 );
@@ -143,26 +280,26 @@ export const taxonomy = table(
 export const post = table(
   "post",
   {
+    authorImage: text("author_image"),
+    authorName: varchar255("author_name"),
+    categories: text("categories"),
+    content: longtext("content"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
+    description: text("description"),
     id: varchar255("id").primaryKey(),
+    image: text("image"),
+    parentId: varchar255("parent_id"),
+    slug: varchar255("slug").unique().notNull(),
+    sort: int("sort").default(0).notNull(),
+    status: varchar("status", { length: 50 }).notNull(),
+    tags: text("tags"),
+    title: varchar("title", { length: 255 }),
+    type: varchar("type", { length: 50 }).notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    parentId: varchar255("parent_id"),
-    slug: varchar255("slug").unique().notNull(),
-    type: varchar("type", { length: 50 }).notNull(),
-    title: varchar("title", { length: 255 }),
-    description: text("description"),
-    image: text("image"),
-    content: longtext("content"),
-    categories: text("categories"),
-    tags: text("tags"),
-    authorName: varchar255("author_name"),
-    authorImage: text("author_image"),
-    status: varchar("status", { length: 50 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    deletedAt: timestamp("deleted_at"),
-    sort: int("sort").default(0).notNull(),
   },
   (t) => [index("idx_post_type_status").on(t.type, t.status)]
 );
@@ -172,49 +309,49 @@ export const post = table(
 export const order = table(
   "order",
   {
+    amount: int("amount").notNull(),
+    callbackUrl: text("callback_url"),
+    checkoutInfo: text("checkout_info").notNull(),
+    checkoutResult: text("checkout_result"),
+    checkoutUrl: text("checkout_url"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    creditsAmount: int("credits_amount"),
+    creditsValidDays: int("credits_valid_days"),
+    currency: varchar("currency", { length: 10 }).notNull(),
+    deletedAt: timestamp("deleted_at"),
+    description: text("description"),
+    discountAmount: int("discount_amount"),
+    discountCode: varchar255("discount_code"),
+    discountCurrency: varchar("discount_currency", { length: 10 }),
     id: varchar255("id").primaryKey(),
+    invoiceId: varchar255("invoice_id"),
+    invoiceUrl: text("invoice_url"),
     orderNo: varchar255("order_no").unique().notNull(),
+    paidAt: timestamp("paid_at"),
+    paymentAmount: int("payment_amount"),
+    paymentCurrency: varchar("payment_currency", { length: 10 }),
+    paymentEmail: varchar255("payment_email"),
+    paymentInterval: varchar("payment_interval", { length: 50 }),
+    paymentProductId: varchar255("payment_product_id"),
+    paymentProvider: varchar("payment_provider", { length: 50 }).notNull(),
+    paymentResult: text("payment_result"),
+    paymentSessionId: varchar255("payment_session_id"),
+    paymentType: varchar("payment_type", { length: 50 }),
+    paymentUserId: varchar255("payment_user_id"),
+    paymentUserName: varchar255("payment_user_name"),
+    planName: varchar255("plan_name"),
+    productId: varchar255("product_id"),
+    productName: varchar("product_name", { length: 255 }),
+    status: varchar("status", { length: 50 }).notNull(),
+    subscriptionId: varchar255("subscription_id"),
+    subscriptionNo: varchar255("subscription_no"),
+    subscriptionResult: text("subscription_result"),
+    transactionId: varchar255("transaction_id"),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    userEmail: varchar255("user_email"),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    userEmail: varchar255("user_email"),
-    status: varchar("status", { length: 50 }).notNull(),
-    amount: int("amount").notNull(),
-    currency: varchar("currency", { length: 10 }).notNull(),
-    productId: varchar255("product_id"),
-    paymentType: varchar("payment_type", { length: 50 }),
-    paymentInterval: varchar("payment_interval", { length: 50 }),
-    paymentProvider: varchar("payment_provider", { length: 50 }).notNull(),
-    paymentSessionId: varchar255("payment_session_id"),
-    checkoutInfo: text("checkout_info").notNull(),
-    checkoutResult: text("checkout_result"),
-    paymentResult: text("payment_result"),
-    discountCode: varchar255("discount_code"),
-    discountAmount: int("discount_amount"),
-    discountCurrency: varchar("discount_currency", { length: 10 }),
-    paymentEmail: varchar255("payment_email"),
-    paymentAmount: int("payment_amount"),
-    paymentCurrency: varchar("payment_currency", { length: 10 }),
-    paidAt: timestamp("paid_at"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    deletedAt: timestamp("deleted_at"),
-    description: text("description"),
-    productName: varchar("product_name", { length: 255 }),
-    subscriptionId: varchar255("subscription_id"),
-    subscriptionResult: text("subscription_result"),
-    checkoutUrl: text("checkout_url"),
-    callbackUrl: text("callback_url"),
-    creditsAmount: int("credits_amount"),
-    creditsValidDays: int("credits_valid_days"),
-    planName: varchar255("plan_name"),
-    paymentProductId: varchar255("payment_product_id"),
-    invoiceId: varchar255("invoice_id"),
-    invoiceUrl: text("invoice_url"),
-    subscriptionNo: varchar255("subscription_no"),
-    transactionId: varchar255("transaction_id"),
-    paymentUserName: varchar255("payment_user_name"),
-    paymentUserId: varchar255("payment_user_id"),
   },
   (t) => [
     index("idx_order_user_status_payment_type").on(
@@ -233,39 +370,39 @@ export const order = table(
 export const subscription = table(
   "subscription",
   {
-    id: varchar255("id").primaryKey(),
-    subscriptionNo: varchar255("subscription_no").unique().notNull(),
-    userId: varchar255("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    userEmail: varchar255("user_email"),
-    status: varchar("status", { length: 50 }).notNull(),
-    paymentProvider: varchar("payment_provider", { length: 50 }).notNull(),
-    subscriptionId: varchar255("subscription_id").notNull(),
-    subscriptionResult: text("subscription_result"),
-    productId: varchar255("product_id"),
-    description: text("description"),
     amount: int("amount"),
-    currency: varchar("currency", { length: 10 }),
-    interval: varchar("interval", { length: 50 }),
-    intervalCount: int("interval_count"),
-    trialPeriodDays: int("trial_period_days"),
-    currentPeriodStart: timestamp("current_period_start"),
-    currentPeriodEnd: timestamp("current_period_end"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    deletedAt: timestamp("deleted_at"),
-    planName: varchar255("plan_name"),
     billingUrl: text("billing_url"),
-    productName: varchar("product_name", { length: 255 }),
-    creditsAmount: int("credits_amount"),
-    creditsValidDays: int("credits_valid_days"),
-    paymentProductId: varchar255("payment_product_id"),
-    paymentUserId: varchar255("payment_user_id"),
     canceledAt: timestamp("canceled_at"),
     canceledEndAt: timestamp("canceled_end_at"),
     canceledReason: text("canceled_reason"),
     canceledReasonType: varchar("canceled_reason_type", { length: 50 }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    creditsAmount: int("credits_amount"),
+    creditsValidDays: int("credits_valid_days"),
+    currency: varchar("currency", { length: 10 }),
+    currentPeriodEnd: timestamp("current_period_end"),
+    currentPeriodStart: timestamp("current_period_start"),
+    deletedAt: timestamp("deleted_at"),
+    description: text("description"),
+    id: varchar255("id").primaryKey(),
+    interval: varchar("interval", { length: 50 }),
+    intervalCount: int("interval_count"),
+    paymentProductId: varchar255("payment_product_id"),
+    paymentProvider: varchar("payment_provider", { length: 50 }).notNull(),
+    paymentUserId: varchar255("payment_user_id"),
+    planName: varchar255("plan_name"),
+    productId: varchar255("product_id"),
+    productName: varchar("product_name", { length: 255 }),
+    status: varchar("status", { length: 50 }).notNull(),
+    subscriptionId: varchar255("subscription_id").notNull(),
+    subscriptionNo: varchar255("subscription_no").unique().notNull(),
+    subscriptionResult: text("subscription_result"),
+    trialPeriodDays: int("trial_period_days"),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    userEmail: varchar255("user_email"),
+    userId: varchar255("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_subscription_user_status_interval").on(
@@ -284,26 +421,26 @@ export const subscription = table(
 export const credit = table(
   "credit",
   {
+    consumedDetail: text("consumed_detail"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    credits: int("credits").notNull(),
+    deletedAt: timestamp("deleted_at"),
+    description: text("description"),
+    expiresAt: timestamp("expires_at"),
     id: varchar255("id").primaryKey(),
+    metadata: text("metadata"),
+    orderNo: varchar255("order_no"),
+    remainingCredits: int("remaining_credits").notNull().default(0),
+    status: varchar("status", { length: 50 }).notNull(),
+    subscriptionNo: varchar255("subscription_no"),
+    transactionNo: varchar255("transaction_no").unique().notNull(),
+    transactionScene: varchar("transaction_scene", { length: 50 }),
+    transactionType: varchar("transaction_type", { length: 50 }).notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    userEmail: varchar255("user_email"),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    userEmail: varchar255("user_email"),
-    orderNo: varchar255("order_no"),
-    subscriptionNo: varchar255("subscription_no"),
-    transactionNo: varchar255("transaction_no").unique().notNull(),
-    transactionType: varchar("transaction_type", { length: 50 }).notNull(),
-    transactionScene: varchar("transaction_scene", { length: 50 }),
-    credits: int("credits").notNull(),
-    remainingCredits: int("remaining_credits").notNull().default(0),
-    description: text("description"),
-    expiresAt: timestamp("expires_at"),
-    status: varchar("status", { length: 50 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    deletedAt: timestamp("deleted_at"),
-    consumedDetail: text("consumed_detail"),
-    metadata: text("metadata"),
   },
   (t) => [
     index("idx_credit_consume_fifo").on(
@@ -321,17 +458,17 @@ export const credit = table(
 export const apikey = table(
   "apikey",
   {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
     id: varchar255("id").primaryKey(),
+    keyHash: varchar255("key_hash").notNull(),
+    keyPrefix: varchar255("key_prefix").notNull(),
+    status: varchar("status", { length: 50 }).notNull(),
+    title: varchar255("title").notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    keyHash: varchar255("key_hash").notNull(),
-    keyPrefix: varchar255("key_prefix").notNull(),
-    title: varchar255("title").notNull(),
-    status: varchar("status", { length: 50 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    deletedAt: timestamp("deleted_at"),
   },
   (t) => [
     index("idx_apikey_user_status").on(t.userId, t.status),
@@ -344,14 +481,14 @@ export const apikey = table(
 export const role = table(
   "role",
   {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    description: text("description"),
     id: varchar255("id").primaryKey(),
     name: varchar255("name").notNull().unique(),
-    title: varchar255("title").notNull(),
-    description: text("description"),
-    status: varchar("status", { length: 50 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     sort: int("sort").default(0).notNull(),
+    status: varchar("status", { length: 50 }).notNull(),
+    title: varchar255("title").notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
   },
   (t) => [index("idx_role_status").on(t.status)]
 );
@@ -359,13 +496,13 @@ export const role = table(
 export const permission = table(
   "permission",
   {
-    id: varchar255("id").primaryKey(),
-    code: varchar255("code").notNull().unique(),
-    resource: varchar("resource", { length: 50 }).notNull(),
     action: varchar("action", { length: 50 }).notNull(),
-    title: varchar255("title").notNull(),
-    description: text("description"),
+    code: varchar255("code").notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    description: text("description"),
+    id: varchar255("id").primaryKey(),
+    resource: varchar("resource", { length: 50 }).notNull(),
+    title: varchar255("title").notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
   },
   (t) => [index("idx_permission_resource_action").on(t.resource, t.action)]
@@ -374,16 +511,16 @@ export const permission = table(
 export const rolePermission = table(
   "role_permission",
   {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at"),
     id: varchar255("id").primaryKey(),
-    roleId: varchar255("role_id")
-      .notNull()
-      .references(() => role.id, { onDelete: "cascade" }),
     permissionId: varchar255("permission_id")
       .notNull()
       .references(() => permission.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    roleId: varchar255("role_id")
+      .notNull()
+      .references(() => role.id, { onDelete: "cascade" }),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    deletedAt: timestamp("deleted_at"),
   },
   (t) => [
     index("idx_role_permission_role_permission").on(t.roleId, t.permissionId),
@@ -393,18 +530,21 @@ export const rolePermission = table(
 export const userRole = table(
   "user_role",
   {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at"),
     id: varchar255("id").primaryKey(),
-    userId: varchar255("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
     roleId: varchar255("role_id")
       .notNull()
       .references(() => role.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    expiresAt: timestamp("expires_at"),
+    userId: varchar255("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
-  (t) => [index("idx_user_role_user_expires").on(t.userId, t.expiresAt)]
+  (t) => [
+    index("idx_user_role_user_expires").on(t.userId, t.expiresAt),
+    uniqueIndex("uq_user_role_user_role").on(t.userId, t.roleId),
+  ]
 );
 
 // ─── AI ──────────────────────────────────────────────────────────────────────
@@ -412,25 +552,25 @@ export const userRole = table(
 export const aiTask = table(
   "ai_task",
   {
-    id: varchar255("id").primaryKey(),
-    userId: varchar255("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    mediaType: varchar("media_type", { length: 50 }).notNull(),
-    provider: varchar("provider", { length: 50 }).notNull(),
-    model: varchar255("model").notNull(),
-    prompt: longtext("prompt").notNull(),
-    options: longtext("options"),
-    status: varchar("status", { length: 50 }).notNull(),
+    costCredits: int("cost_credits").notNull().default(0),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    creditId: varchar255("credit_id"),
     deletedAt: timestamp("deleted_at"),
+    id: varchar255("id").primaryKey(),
+    mediaType: varchar("media_type", { length: 50 }).notNull(),
+    model: varchar255("model").notNull(),
+    options: longtext("options"),
+    prompt: longtext("prompt").notNull(),
+    provider: varchar("provider", { length: 50 }).notNull(),
+    scene: varchar("scene", { length: 100 }).notNull().default(""),
+    status: varchar("status", { length: 50 }).notNull(),
     taskId: varchar255("task_id"),
     taskInfo: longtext("task_info"),
     taskResult: longtext("task_result"),
-    costCredits: int("cost_credits").notNull().default(0),
-    scene: varchar("scene", { length: 100 }).notNull().default(""),
-    creditId: varchar255("credit_id"),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    userId: varchar255("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_ai_task_user_media_type").on(t.userId, t.mediaType),
@@ -441,19 +581,19 @@ export const aiTask = table(
 export const chat = table(
   "chat",
   {
+    content: longtext("content"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
     id: varchar255("id").primaryKey(),
+    metadata: longtext("metadata"),
+    model: varchar255("model").notNull(),
+    parts: longtext("parts").notNull(),
+    provider: varchar("provider", { length: 50 }).notNull(),
+    status: varchar("status", { length: 50 }).notNull(),
+    title: varchar("title", { length: 255 }).notNull().default(""),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    status: varchar("status", { length: 50 }).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    model: varchar255("model").notNull(),
-    provider: varchar("provider", { length: 50 }).notNull(),
-    title: varchar("title", { length: 255 }).notNull().default(""),
-    parts: longtext("parts").notNull(),
-    metadata: longtext("metadata"),
-    content: longtext("content"),
   },
   (t) => [index("idx_chat_user_status").on(t.userId, t.status)]
 );
@@ -461,21 +601,21 @@ export const chat = table(
 export const chatMessage = table(
   "chat_message",
   {
-    id: varchar255("id").primaryKey(),
-    userId: varchar255("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
     chatId: varchar255("chat_id")
       .notNull()
       .references(() => chat.id, { onDelete: "cascade" }),
-    status: varchar("status", { length: 50 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
-    role: varchar("role", { length: 50 }).notNull(),
-    parts: longtext("parts").notNull(),
+    id: varchar255("id").primaryKey(),
     metadata: longtext("metadata"),
     model: varchar255("model").notNull(),
+    parts: longtext("parts").notNull(),
     provider: varchar("provider", { length: 50 }).notNull(),
+    role: varchar("role", { length: 50 }).notNull(),
+    status: varchar("status", { length: 50 }).notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+    userId: varchar255("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_chat_message_chat_id").on(t.chatId, t.status),
@@ -488,14 +628,14 @@ export const chatMessage = table(
 export const ticket = table(
   "ticket",
   {
+    createdAt: timestamp("created_at").defaultNow().notNull(),
     id: varchar255("id").primaryKey(),
+    status: varchar("status", { length: 50 }).notNull().default("open"),
+    title: varchar("title", { length: 255 }).notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id),
-    title: varchar("title", { length: 255 }).notNull(),
-    status: varchar("status", { length: 50 }).notNull().default("open"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
   },
   (t) => [
     index("idx_ticket_user").on(t.userId),
@@ -506,17 +646,17 @@ export const ticket = table(
 export const ticketMessage = table(
   "ticket_message",
   {
+    attachments: longtext("attachments").notNull().default("[]"),
+    content: longtext("content").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
     id: varchar255("id").primaryKey(),
+    role: varchar("role", { length: 50 }).notNull().default("user"),
     ticketId: varchar255("ticket_id")
       .notNull()
       .references(() => ticket.id),
     userId: varchar255("user_id")
       .notNull()
       .references(() => user.id),
-    role: varchar("role", { length: 50 }).notNull().default("user"),
-    content: longtext("content").notNull(),
-    attachments: longtext("attachments").notNull().default("[]"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (t) => [index("idx_ticket_message_ticket").on(t.ticketId)]
 );
@@ -526,15 +666,15 @@ export const ticketMessage = table(
 export const inviteCode = table(
   "invite_code",
   {
-    id: varchar255("id").primaryKey(),
     code: varchar255("code").notNull().unique(),
-    maxUses: int("max_uses").notNull().default(1),
-    usedCount: int("used_count").notNull().default(0),
-    trialDays: int("trial_days").notNull().default(15),
-    note: text("note").default(""),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
     createdBy: varchar255("created_by").references(() => user.id),
     expiresAt: timestamp("expires_at"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    id: varchar255("id").primaryKey(),
+    maxUses: int("max_uses").notNull().default(1),
+    note: text("note").default(""),
+    trialDays: int("trial_days").notNull().default(15),
+    usedCount: int("used_count").notNull().default(0),
   },
   (t) => [index("idx_invite_code_code").on(t.code)]
 );
@@ -542,15 +682,16 @@ export const inviteCode = table(
 export const userInvite = table(
   "user_invite",
   {
+    activatedAt: timestamp("activated_at").defaultNow().notNull(),
     id: varchar255("id").primaryKey(),
-    userId: varchar255("user_id")
-      .notNull()
-      .references(() => user.id),
     inviteCodeId: varchar255("invite_code_id")
       .notNull()
       .references(() => inviteCode.id),
-    activatedAt: timestamp("activated_at").defaultNow().notNull(),
     trialEndsAt: timestamp("trial_ends_at").notNull(),
+    userId: varchar255("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id),
   },
   (t) => [
     index("idx_user_invite_user").on(t.userId),
