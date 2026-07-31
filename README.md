@@ -40,6 +40,7 @@ openssl rand -hex 32
 | Theming      | next-themes (system/light/dark, no-FOUC)        |
 | Styling      | Tailwind CSS v4                                  |
 | Monorepo     | Turborepo + pnpm workspaces                     |
+| Desktop      | Electron 外壳（远程加载 + electron-builder 打包 + 自动更新），见 `apps/desktop/README.md` |
 | Email        | _planned (Phase 2)_                             |
 | Billing      | _planned (Phase 3)_                             |
 
@@ -75,6 +76,10 @@ pricing/FAQ data, and replace the placeholder marketing copy.
 - `pnpm --filter web start` — run the production Node server
 - `pnpm check-types` — type-check across the workspace
 - `pnpm db:push` / `db:generate` / `db:migrate` / `db:studio` / `db:local` — Drizzle commands
+- `pnpm dev:desktop` — 启动桌面端（同时起 web dev server 与 Electron 窗口）
+- `pnpm build:desktop` — 编译桌面端主进程/preload
+- `pnpm package:desktop` — 本机打包出三平台安装包（不发布）
+- `pnpm release:desktop` — 打包并发布到 GitHub Releases（需要 `GH_TOKEN`）
 
 ## Deployment
 
