@@ -12,6 +12,7 @@ import { usePublicConfig } from "@/lib/use-public-config";
 import Loader from "../loader";
 import { OAuthButtons } from "./oauth-buttons";
 import { getEnabledOAuthProviders } from "./oauth-provider-selection";
+import { PasswordlessForm } from "./passwordless-form";
 
 export default function SignUpForm({
   onSwitchToSignIn,
@@ -27,9 +28,13 @@ export default function SignUpForm({
   const enabledOAuthProviders = getEnabledOAuthProviders(configs);
   const googleEnabled = enabledOAuthProviders.includes("google");
   const githubEnabled = enabledOAuthProviders.includes("github");
+  const appleEnabled = enabledOAuthProviders.includes("apple");
+  const magicLinkEnabled = configs.magic_link_enabled === "true";
+  const emailOtpEnabled = configs.email_otp_enabled === "true";
   const emailVerificationEnabled =
     configs.email_verification_enabled === "true";
   const hasSocial = enabledOAuthProviders.length > 0;
+  const hasPasswordless = magicLinkEnabled || emailOtpEnabled;
 
   const form = useForm({
     defaultValues: {
@@ -80,13 +85,31 @@ export default function SignUpForm({
       {hasSocial && (
         <div className="mb-4">
           <OAuthButtons
+            appleEnabled={appleEnabled}
             githubEnabled={githubEnabled}
             googleEnabled={googleEnabled}
           />
         </div>
       )}
 
-      {hasSocial && emailEnabled ? (
+      {hasSocial && (emailEnabled || hasPasswordless) ? (
+        <div className="my-4 flex items-center gap-3 text-muted-foreground text-xs">
+          <span className="h-px flex-1 bg-border" />
+          or
+          <span className="h-px flex-1 bg-border" />
+        </div>
+      ) : null}
+
+      {hasPasswordless ? (
+        <div className="mb-4">
+          <PasswordlessForm
+            emailOtpEnabled={emailOtpEnabled}
+            magicLinkEnabled={magicLinkEnabled}
+          />
+        </div>
+      ) : null}
+
+      {hasPasswordless && emailEnabled ? (
         <div className="my-4 flex items-center gap-3 text-muted-foreground text-xs">
           <span className="h-px flex-1 bg-border" />
           or

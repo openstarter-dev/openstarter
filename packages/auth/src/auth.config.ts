@@ -5,8 +5,12 @@
 // 可调整认证能力。
 //
 // 注意：这些是**代码常量**（编译期/启动期生效），与 `getAllConfigs()` 返回的运行时
-// Config 不同维度；社交 provider 是否实际注册仍由 env 变量是否齐备决定
-// （见 server.ts 中 socialProviders 的条件 spread）。
+// Config 不同维度；以下情况按 Config 覆盖：
+//   - 社交 provider 是否实际注册由 `*_auth_enabled` 开关 + env 凭据共同决定
+//     （见 `server.ts` 中 `socialProviders` 的条件 spread）。
+//   - `magicLink` / `emailOTP` 插件是否挂载由 `magic_link_enabled` / `email_otp_enabled` 开关决定。
+//   - 链接/验证码过期时长优先取 `magic_link_expires_in` / `email_otp_expires_in`，缺失回退此处常量。
+// 仅 `requireEmailVerification` 仍为本处硬开关（`email_verification_enabled` 控制前端展示与发信与否）。
 
 /**
  * 是否强制邮箱验证门禁。

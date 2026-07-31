@@ -8,6 +8,7 @@ import {
   type SendEmailParams,
 } from "@openstarter/email/server";
 import { getLocaleFromRequest } from "@openstarter/i18n/server";
+import { getAllConfigs } from "@openstarter/shared/config";
 import { NodeEnv } from "@openstarter/shared/constants";
 import { logger } from "@openstarter/shared/logger";
 import { betterAuth } from "better-auth/minimal";
@@ -53,6 +54,41 @@ const LOGIN_METHOD_BY_PATH = new Map<string, AuthProvider>([
   ["/sign-in/email-otp", AuthProvider.EMAIL_OTP],
 ]);
 
+// ─── 运行时配置读取（Runtime config-driven enablement）──────────────────────────
+//
+// 此前 OAuth provider 与无密码插件是否注册仅由 `env` 决定（client_id/secret 是否齐备），
+// admin 后台的 `*_auth_enabled` / `magic_link_enabled` / `email_otp_enabled` 开关只用于前端
+// 是否渲染按钮。这导致「开关关闭但 env 已配置」时后端登录通路仍可达，是行为回退。
+//
+// 下面在模块加载期读取 `getAllConfigs()`（环境变量 + DB 合并，带 1h 缓存），与 `env` **共同**
+// 决定是否注册对应 provider / 插件：开关未开启或凭据缺失任一者不满足即跳过注册，
+// 使「开关关闭」在后端真正生效（better-auth 对未注册 provider/plugin 的端点返回 404）。
+//
+// 注意：这是**启动期一次读取 + 单例构造**——与现有 env 驱动语义一致（关闭需重启进程方能解注册）。
+// 管理员后台保存配置会失效 `getAllConfigs` 的缓存（见 `shared/config.ts`），
+// 但已构造的 better-auth 单例不会重建；运行期切换仍由前端按公开配置决定是否展示按钮兜底。
+// 将来如需运行期实时生效，需把 `auth` 改为按请求重建或加守卫中间件拦截已关闭端点。
+const runtimeConfigs = await getAllConfigs();
+const isEnabled = (key: string): boolean => runtimeConfigs[key] === "true";
+const googleEnabled =
+  isEnabled("google_auth_enabled") &&
+  Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
+const githubEnabled =
+  isEnabled("github_auth_enabled") &&
+  Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
+const appleEnabled =
+  isEnabled("apple_auth_enabled") &&
+  Boolean(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET);
+const magicLinkEnabled = isEnabled("magic_link_enabled");
+const emailOtpEnabled = isEnabled("email_otp_enabled");
+
+const magicLinkExpiresIn = runtimeConfigs.magic_link_expires_in
+  ? Number(runtimeConfigs.magic_link_expires_in)
+  : MAGIC_LINK_EXPIRES_IN;
+const otpExpiresIn = runtimeConfigs.email_otp_expires_in
+  ? Number(runtimeConfigs.email_otp_expires_in)
+  : OTP_EXPIRES_IN;
+
 export const auth = betterAuth({
   advanced: {
     cookiePrefix: "turbostarter",
@@ -66,7 +102,7 @@ export const auth = betterAuth({
     },
   },
   appName: "TurboStarter",
-  database: drizzleAdapter(db, {
+  database: drizzleAdapter(db(), {
     provider: getAuthAdapterProvider(),
     schema: authSchema,
   }),
@@ -87,39 +123,52 @@ export const auth = betterAuth({
     log: (level, ...args) => logger[level](...args),
   },
   plugins: [
-    magicLink({
-      expiresIn: MAGIC_LINK_EXPIRES_IN,
-      sendMagicLink: async ({ email, url }, ctx) =>
-        sendEmail({
-          locale: getLocaleFromRequest(ctx?.request),
-          template: EmailTemplate.MAGIC_LINK,
-          to: email,
-          variables: {
-            url: getUrl({
-              request: ctx?.request,
-              type: VerificationType.MAGIC_LINK,
-              url,
-            }).toString(),
-          },
-        }),
-    }),
-    emailOTP({
-      expiresIn: OTP_EXPIRES_IN,
-      sendVerificationOTP({ email, otp, type }, ctx) {
-        if (type !== "sign-in") {
-          /* Handle other types if you want to use OTP verification
-          for other purposes (e.g. change email, delete account, etc.) */
-          return Promise.resolve();
-        }
+    // Magic Link 与 Email OTP 插件按 `*_enabled` 开关条件注册——开关关闭时插件不挂载，
+    // 对应端点（/sign-in/magic-link、/sign-in/email-otp）随之不存在，避免「开关关闭后端仍可登录」。
+    ...(magicLinkEnabled
+      ? [
+          magicLink({
+            expiresIn: magicLinkExpiresIn,
+            sendMagicLink: async ({ email, url }, ctx) =>
+              sendEmail({
+                locale: getLocaleFromRequest(ctx?.request),
+                template: EmailTemplate.MAGIC_LINK,
+                to: email,
+                variables: {
+                  url: getUrl({
+                    request: ctx?.request,
+                    type: VerificationType.MAGIC_LINK,
+                    url,
+                  }).toString(),
+                },
+              }),
+          }),
+        ]
+      : []),
+    ...(emailOtpEnabled
+      ? [
+          emailOTP({
+            expiresIn: otpExpiresIn,
+            sendVerificationOTP({ email, otp, type }, ctx) {
+              if (type !== "sign-in") {
+                /* Handle other types if you want to use OTP verification
+                for other purposes (e.g. change email, delete account, etc.) */
+                return Promise.resolve();
+              }
 
-        return sendEmail({
-          locale: getLocaleFromRequest(ctx?.request),
-          template: EmailTemplate.SIGN_IN_OTP,
-          to: email,
-          variables: { otp, url: getUrl({ request: ctx?.request }).toString() },
-        });
-      },
-    }),
+              return sendEmail({
+                locale: getLocaleFromRequest(ctx?.request),
+                template: EmailTemplate.SIGN_IN_OTP,
+                to: email,
+                variables: {
+                  otp,
+                  url: getUrl({ request: ctx?.request }).toString(),
+                },
+              });
+            },
+          }),
+        ]
+      : []),
     passkey(),
     twoFactor(),
     anonymous(),
@@ -164,11 +213,11 @@ export const auth = betterAuth({
       maxAge: 5 * 60, // 5 minutes
     },
   },
-  // 条件注册：仅当对应 OAuth 的 client id 与 secret 都齐备时才注册该 provider，
-  // 避免给 Better-Auth 传空字符串触发未配置 provider 的告警/报错。
+  // 条件注册：仅当对应 OAuth 的 admin 开关开启且 env client id/secret 都齐备时才注册该 provider。
+  // 开关关闭即解注册（端点 404），凭据缺失亦跳过，避免给 Better-Auth 传空字符串触发未配置告警。
   // 使用对象字面量 + 条件 spread，保留 Better-Auth 对 socialProviders 键集合的静态推断。
   socialProviders: {
-    ...(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET
+    ...(googleEnabled
       ? {
           [SocialProvider.GOOGLE]: {
             clientId: env.GOOGLE_CLIENT_ID,
@@ -176,7 +225,7 @@ export const auth = betterAuth({
           },
         }
       : {}),
-    ...(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET
+    ...(githubEnabled
       ? {
           [SocialProvider.GITHUB]: {
             clientId: env.GITHUB_CLIENT_ID,
@@ -184,7 +233,7 @@ export const auth = betterAuth({
           },
         }
       : {}),
-    ...(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET
+    ...(appleEnabled
       ? {
           [SocialProvider.APPLE]: {
             appBundleIdentifier: env.APPLE_APP_BUNDLE_IDENTIFIER,
