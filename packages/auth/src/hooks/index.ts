@@ -18,7 +18,7 @@
 // 依赖方向合法：auth(L3) → billing(L2)（`grantCreditsForNewUser`）、auth 内 `./rbac`
 // （`grantRoleForNewUser`）；billing 不反向依赖 auth，无 import 环。
 
-import { grantCreditsForNewUser } from "@openstarter/billing";
+import { grantCreditsForNewUser } from "@openstarter/billing-web";
 import { getAllConfigs } from "@openstarter/shared/config";
 import { logger } from "@openstarter/shared/logger";
 import type { BetterAuthOptions } from "better-auth";

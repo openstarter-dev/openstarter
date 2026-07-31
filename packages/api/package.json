@@ -17,7 +17,7 @@
   "dependencies": {
     "@hono/zod-validator": "^0.8.0",
     "@openstarter/auth": "workspace:*",
-    "@openstarter/billing": "workspace:*",
+    "@openstarter/billing-web": "workspace:*",
     "@openstarter/db": "workspace:*",
     "@openstarter/shared": "workspace:*",
     "aws4fetch": "catalog:",

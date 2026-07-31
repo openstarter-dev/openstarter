@@ -9,7 +9,11 @@ export default defineConfig({
         "**/routeTree.gen.ts",
         "**/test/**",
       ],
-      include: ["apps/*/src/**/*.{ts,tsx}", "packages/*/src/**/*.{ts,tsx}"],
+      include: [
+        "apps/*/src/**/*.{ts,tsx}",
+        "packages/*/src/**/*.{ts,tsx}",
+        "packages/*/*/src/**/*.{ts,tsx}",
+      ],
       provider: "v8",
       reporter: ["text", "json-summary", "html"],
       reportsDirectory: "./coverage",
@@ -23,6 +27,7 @@ export default defineConfig({
     projects: [
       "apps/web/vitest.config.ts",
       "packages/*/vitest.config.ts",
+      "packages/*/*/vitest.config.ts",
       "scripts/vitest.config.ts",
     ],
   },

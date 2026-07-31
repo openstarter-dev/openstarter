@@ -18,7 +18,7 @@
     "@better-auth/drizzle-adapter": "catalog:",
     "@better-auth/expo": "catalog:",
     "@better-auth/passkey": "catalog:",
-    "@openstarter/billing": "workspace:*",
+    "@openstarter/billing-web": "workspace:*",
     "@openstarter/db": "workspace:*",
     "@openstarter/email": "workspace:*",
     "@openstarter/i18n": "workspace:*",

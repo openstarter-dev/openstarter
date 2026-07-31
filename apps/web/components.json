@@ -5,7 +5,7 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "../../packages/ui/src/styles/globals.css",
+    "css": "../../packages/ui/ui-web/src/styles/globals.css",
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
@@ -13,8 +13,8 @@
   "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
-    "utils": "@openstarter/ui/lib/utils",
-    "ui": "@openstarter/ui/components",
+    "utils": "@openstarter/ui-web/lib/utils",
+    "ui": "@openstarter/ui-web/components",
     "lib": "@/lib",
     "hooks": "@/hooks"
   },

@@ -14,7 +14,7 @@ import {
   createCheckout,
   type PaymentOrder,
   PaymentProviderUnavailableError,
-} from "@openstarter/billing/payment";
+} from "@openstarter/billing-web/payment";
 import { respData } from "@openstarter/shared";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -29,18 +29,18 @@ const PROVIDER_UNAVAILABLE_STATUS = 400;
 // 结账入参：所选产品/套餐（金额以最小货币单位，如「分」）与支付渠道。
 // `provider` 省略时由结账编排回退到默认渠道；`type=subscription` 需订阅周期信息。
 const checkoutBody = z.object({
-  productId: z.string().min(1),
-  productName: z.string().min(1).optional(),
-  planName: z.string().min(1).optional(),
   amount: z.number().int().nonnegative(),
-  currency: z.string().min(1).default(DEFAULT_CURRENCY),
-  type: z.enum(["one-time", "subscription", "renew"]).default("one-time"),
-  description: z.string().min(1).optional(),
   credits: z.number().int().nonnegative().optional(),
   creditsValidDays: z.number().int().nonnegative().optional(),
-  provider: z.string().min(1).optional(),
+  currency: z.string().min(1).default(DEFAULT_CURRENCY),
+  description: z.string().min(1).optional(),
   interval: z.enum(["day", "week", "month", "year"]).optional(),
   intervalCount: z.number().int().positive().optional(),
+  planName: z.string().min(1).optional(),
+  productId: z.string().min(1),
+  productName: z.string().min(1).optional(),
+  provider: z.string().min(1).optional(),
+  type: z.enum(["one-time", "subscription", "renew"]).default("one-time"),
 });
 
 export const checkoutRoute = new Hono().post(
@@ -53,39 +53,39 @@ export const checkoutRoute = new Hono().post(
     const origin = new URL(c.req.url).origin;
 
     const paymentOrder: PaymentOrder = {
-      type: body.type,
-      productId: body.productId,
-      price: { amount: body.amount, currency: body.currency },
-      description: body.description ?? body.productName ?? body.productId,
-      successUrl: `${origin}/dashboard?checkout=success`,
       cancelUrl: `${origin}/pricing`,
+      description: body.description ?? body.productName ?? body.productId,
+      price: { amount: body.amount, currency: body.currency },
+      productId: body.productId,
+      successUrl: `${origin}/dashboard?checkout=success`,
+      type: body.type,
     };
 
     if (body.type === "subscription") {
       paymentOrder.plan = {
-        name: body.planName ?? body.productName ?? body.productId,
         interval: body.interval ?? DEFAULT_INTERVAL,
         intervalCount: body.intervalCount,
+        name: body.planName ?? body.productName ?? body.productId,
       };
     }
 
     try {
       const result = await createCheckout({
-        userId: c.get("userId"),
-        userEmail: session?.user?.email,
-        paymentOrder,
-        provider: body.provider,
-        productName: body.productName,
-        planName: body.planName,
         credits: body.credits,
         creditsValidDays: body.creditsValidDays,
+        paymentOrder,
+        planName: body.planName,
+        productName: body.productName,
+        provider: body.provider,
+        userEmail: session?.user?.email,
+        userId: c.get("userId"),
       });
 
       return c.json(
         respData({
+          checkoutUrl: result.checkoutUrl,
           orderNo: result.orderNo,
           provider: result.provider,
-          checkoutUrl: result.checkoutUrl,
           qrData: result.qrData,
         })
       );

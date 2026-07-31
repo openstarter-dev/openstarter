@@ -1,6 +1,8 @@
 packages:
   - apps/*
   - packages/*
+  # 嵌套包(如 packages/billing/billing-web、packages/ui/ui-web)
+  - packages/*/*
 allowBuilds:
   esbuild: true
   msw: true

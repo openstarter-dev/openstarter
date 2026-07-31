@@ -26,7 +26,7 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@openstarter/ui/*": ["../../packages/ui/src/*"]
+      "@openstarter/ui-web/*": ["../../packages/ui/ui-web/src/*"]
     }
   }
 }

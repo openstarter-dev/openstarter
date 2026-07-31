@@ -16,7 +16,7 @@ import {
   getPaymentManager,
   handlePaymentEvent,
   type PaymentEvent,
-} from "@openstarter/billing/payment";
+} from "@openstarter/billing-web/payment";
 import { respData, respErr } from "@openstarter/shared";
 import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";

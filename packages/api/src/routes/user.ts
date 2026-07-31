@@ -14,7 +14,7 @@ import {
   getBalance,
   getHistory,
   getSubscriptionStatusView,
-} from "@openstarter/billing";
+} from "@openstarter/billing-web";
 import { respData, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 import { z } from "zod";

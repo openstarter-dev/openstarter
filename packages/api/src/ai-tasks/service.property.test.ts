@@ -8,7 +8,7 @@
 // (matching `packages/db/src/schema/schema.sqlite.ts`) right after the harness
 // is created. No other source file is touched.
 
-import { grant } from "@openstarter/billing";
+import { grant } from "@openstarter/billing-web";
 import { aiTask, credit } from "@openstarter/db/schema";
 import { type Database, db } from "@openstarter/db/server";
 import { sql } from "drizzle-orm";
