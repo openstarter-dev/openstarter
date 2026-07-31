@@ -56,4 +56,4 @@ for (const line of content.split("\n")) {
 }
 
 // 环境就位后再加载实现(envin 校验、drizzle 连接等均在此时安全执行)
-await import("./seed-admin-impl.ts");
+await import("./seed-admin-impl");

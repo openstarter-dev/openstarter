@@ -6,6 +6,6 @@ describe("web test environment", () => {
     const element = document.createElement("span");
     element.textContent = BRAND_NAME;
 
-    expect(element.textContent).toBe("Acme");
+    expect(element.textContent).toBe("openstarter");
   });
 });

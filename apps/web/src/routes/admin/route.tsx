@@ -25,7 +25,8 @@ type AdminPath =
   | "/admin/roles"
   | "/admin/orders"
   | "/admin/subscriptions"
-  | "/admin/credits";
+  | "/admin/credits"
+  | "/admin/settings";
 
 interface AdminNavItem {
   label: string;
@@ -48,6 +49,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { label: "Users", permission: "admin.*", to: "/admin/users" },
       { label: "Roles", permission: "admin.*", to: "/admin/roles" },
+      { label: "Settings", permission: "admin.*", to: "/admin/settings" },
     ],
   },
   {

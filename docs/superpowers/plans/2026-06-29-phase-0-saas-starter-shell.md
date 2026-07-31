@@ -132,7 +132,7 @@ Create `apps/web/src/lib/branding.ts`:
 ```ts
 // Single source of truth for brand identity.
 // TODO: replace these values with your own brand.
-export const BRAND_NAME = "Acme";
+export const BRAND_NAME = "openstarter";
 
 export const BRAND_TAGLINE = "Ship your SaaS in days, not months.";
 
@@ -2048,7 +2048,7 @@ Expected: 构建成功，产出 `apps/web/dist/server/server.js`。
 
 ```bash
 curl -s http://localhost:3000/ | grep -q "Start free trial" && echo "PASS landing"
-curl -s http://localhost:3000/ | grep -q "Acme" && echo "PASS brand"
+curl -s http://localhost:3000/ | grep -q "openstarter" && echo "PASS brand"
 curl -s http://localhost:3000/pricing | grep -q "Starter" && echo "PASS pricing"
 curl -s http://localhost:3000/privacy | grep -qi "privacy" && echo "PASS privacy"
 curl -s http://localhost:3000/terms | grep -qi "terms" && echo "PASS terms"

@@ -2,6 +2,7 @@ import { Button } from "@openstarter/ui/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -30,8 +31,8 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
       <DropdownMenuTrigger
         render={
           <Button
-            variant="ghost"
             className="h-auto w-full justify-start gap-2 px-2 py-2"
+            variant="ghost"
           />
         }
       >
@@ -47,9 +48,11 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
           </span>
         </span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="top" align="start" className="w-56 bg-card">
-        <DropdownMenuLabel>Theme</DropdownMenuLabel>
-        <ThemeMenuItems />
+      <DropdownMenuContent align="start" className="w-56 bg-card" side="top">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Theme</DropdownMenuLabel>
+          <ThemeMenuItems />
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onNavigate} render={<Link to="/settings" />}>
           <Settings aria-hidden="true" className="size-4" />
@@ -57,7 +60,6 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          variant="destructive"
           onClick={() => {
             authClient.signOut({
               fetchOptions: {
@@ -67,6 +69,7 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
               },
             });
           }}
+          variant="destructive"
         >
           <LogOut aria-hidden="true" className="size-4" />
           Sign out

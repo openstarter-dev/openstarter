@@ -241,7 +241,7 @@ User Dropdown 内容（自下向上展开）：
 
 ```ts
 // TODO: replace these with your brand values
-export const BRAND_NAME = "Acme";
+export const BRAND_NAME = "openstarter";
 export const BRAND_TAGLINE = "Ship your SaaS in days, not months.";
 export const SOCIAL_LINKS = {
   github: "https://github.com/your-org/your-repo",

@@ -152,8 +152,8 @@ describe("Better Auth plugin SQLite production schema", () => {
       id: "organization-1",
       logo: "https://example.com/logo.svg",
       metadata: JSON.stringify({ plan: "pro" }),
-      name: "Acme",
-      slug: "acme",
+      name: "openstarter",
+      slug: "openstarter",
     });
     await database.insert(team).values({
       createdAt: now,

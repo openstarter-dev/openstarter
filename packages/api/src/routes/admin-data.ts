@@ -16,7 +16,9 @@ import {
 import { respData, respOk, respPage } from "@openstarter/shared";
 import {
   getAdminConfigs,
+  getSettingGroups,
   getSettings,
+  getSettingTabs,
   saveConfigs,
 } from "@openstarter/shared/config";
 import { Hono } from "hono";
@@ -158,7 +160,9 @@ export const adminDataRoute = new Hono()
     async (c) => {
       const configs = await getAdminConfigs();
       const settings = getSettings();
-      return c.json(respData({ configs, settings }));
+      const groups = getSettingGroups();
+      const tabs = getSettingTabs();
+      return c.json(respData({ configs, groups, settings, tabs }));
     }
   )
   .post(

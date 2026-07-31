@@ -4,17 +4,21 @@
 // 供 `apps/web` 登录/注册页依据 Config 启用集合决定展示哪些 OAuth 按钮与邮箱能力。
 // 另派生 `password_reset_enabled` / `email_verification_enabled`（需邮件渠道已配置方为真）。
 
-import { getAllConfigs } from "@openstarter/shared/config";
 import { respData } from "@openstarter/shared";
+import { getAllConfigs } from "@openstarter/shared/config";
 import { Hono } from "hono";
 
-// 允许下发前端的公开键（仅认证相关的非敏感开关与 Google One Tap 的 client id）。
+// 允许下发前端的公开键(仅认证相关的非敏感开关与 Apple/Google client id)。
 const PUBLIC_AUTH_KEYS = [
   "email_auth_enabled",
   "google_auth_enabled",
   "google_one_tap_enabled",
   "google_client_id",
   "github_auth_enabled",
+  "apple_auth_enabled",
+  "apple_client_id",
+  "magic_link_enabled",
+  "email_otp_enabled",
   "invite_code_required",
 ] as const;
 

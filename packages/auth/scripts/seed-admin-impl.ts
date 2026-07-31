@@ -36,7 +36,7 @@ function parseArgs(argv: string[]): Partial<SeedOptions> {
   const options: Partial<SeedOptions> = {};
   let i = 0;
   while (i < argv.length) {
-    const arg = argv[i];
+    const arg = argv[i] ?? "";
     switch (arg) {
       case "--email":
       case "-e": {
@@ -97,13 +97,20 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
   const now = new Date();
 
   // 1) upsert user
-  const existing = await db()
+  const [existingUser] = await db()
     .select()
     .from(user)
     .where(eq(user.email, email))
     .limit(1);
   let userId: string;
-  if (existing.length === 0) {
+  if (existingUser) {
+    userId = existingUser.id;
+    await db()
+      .update(user)
+      .set({ emailVerified: true, name, updatedAt: now })
+      .where(eq(user.id, userId));
+    console.log(`[seed-admin] updated existing user: ${email}`);
+  } else {
     userId = getUuid();
     await db().insert(user).values({
       banned: false,
@@ -121,24 +128,24 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
       utmSource: "",
     });
     console.log(`[seed-admin] created user: ${email}`);
-  } else {
-    userId = existing[0].id;
-    await db()
-      .update(user)
-      .set({ emailVerified: true, name, updatedAt: now })
-      .where(eq(user.id, userId));
-    console.log(`[seed-admin] updated existing user: ${email}`);
   }
 
-  // 2) upsert credential account(对齐 Better-Auth sign-up:providerId=credential、accountId=userId)
-  const existingAccount = await db()
+  // 2) upsert credential account
+  //   对齐 Better-Auth sign-up:providerId=credential、accountId=userId
+  const [existingAccountRow] = await db()
     .select()
     .from(account)
     .where(
       and(eq(account.userId, userId), eq(account.providerId, "credential"))
     )
     .limit(1);
-  if (existingAccount.length === 0) {
+  if (existingAccountRow) {
+    await db()
+      .update(account)
+      .set({ password: passwordHash, updatedAt: now })
+      .where(eq(account.id, existingAccountRow.id));
+    console.log("[seed-admin] updated credential account password");
+  } else {
     await db().insert(account).values({
       accountId: userId,
       createdAt: now,
@@ -149,12 +156,6 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
       userId,
     });
     console.log("[seed-admin] created credential account");
-  } else {
-    await db()
-      .update(account)
-      .set({ password: passwordHash, updatedAt: now })
-      .where(eq(account.id, existingAccount[0].id));
-    console.log("[seed-admin] updated credential account password");
   }
 
   // 3) RBAC:admin 角色 + admin.* 权限
@@ -173,12 +174,16 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
     console.log("[seed-admin] created role: admin");
   }
 
-  let adminPermission = await db()
+  let adminPermissionId: string;
+  const [adminPerm] = await db()
     .select()
     .from(permission)
     .where(eq(permission.code, "admin.*"))
     .limit(1);
-  if (adminPermission.length === 0) {
+  if (adminPerm) {
+    adminPermissionId = adminPerm.id;
+    console.log("[seed-admin] permission exists: admin.*");
+  } else {
     const created = await createPermission({
       action: "*",
       code: "admin.*",
@@ -189,20 +194,18 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
     if (!created) {
       throw new Error("create permission 'admin.*' failed");
     }
-    adminPermission = [created];
+    adminPermissionId = created.id;
     console.log("[seed-admin] created permission: admin.*");
-  } else {
-    console.log("[seed-admin] permission exists: admin.*");
   }
 
-  // 4) 确保角色已绑定该权限(幂等:缺失时补,且复用现有的角色全部权限 id 以免误删)
+  // 4) 确保角色已绑定该权限(幂等:缺失时补,且复用现有的全部权限 id 以免误删)
   const alreadyLinked = await db()
     .select()
     .from(rolePermission)
     .where(
       and(
         eq(rolePermission.roleId, adminRole.id),
-        eq(rolePermission.permissionId, adminPermission[0].id)
+        eq(rolePermission.permissionId, adminPermissionId)
       )
     )
     .limit(1);
@@ -212,7 +215,7 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
       .from(rolePermission)
       .where(eq(rolePermission.roleId, adminRole.id));
     const permissionIds = new Set(current.map((row) => row.permissionId));
-    permissionIds.add(adminPermission[0].id);
+    permissionIds.add(adminPermissionId);
     await assignPermissionsToRole(adminRole.id, [...permissionIds]);
     console.log("[seed-admin] linked permission -> role");
   } else {
