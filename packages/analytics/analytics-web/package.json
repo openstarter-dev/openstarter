@@ -1,0 +1,25 @@
+{
+  "name": "@openstarter/analytics-web",
+  "type": "module",
+  "exports": {
+    "./scripts": {
+      "default": "./src/scripts.ts"
+    },
+    "./server": {
+      "default": "./src/server.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openstarter/api": "workspace:*",
+    "@tanstack/react-start": "^1.167.41",
+    "hono": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

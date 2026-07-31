@@ -1,0 +1,11 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    // server.ts 依赖 @tanstack/react-start（React 运行时）与 @openstarter/api（其传递依赖含 React Email
+    // 的 .tsx 模板与 Web 类型），源码互引架构下消费方需具备 jsx 与 DOM lib 才能编译依赖侧源码
+    //（与 packages/api、packages/auth 保持一致）。
+    "jsx": "react-jsx",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
+  }
+}
