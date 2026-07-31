@@ -18,6 +18,7 @@
     "@better-auth/passkey": "catalog:",
     "@mdx-js/react": "catalog:",
     "@openstarter/api": "workspace:*",
+    "@openstarter/analytics-web": "workspace:*",
     "@openstarter/auth": "workspace:*",
     "@openstarter/i18n": "workspace:*",
     "@openstarter/ui-web": "workspace:*",

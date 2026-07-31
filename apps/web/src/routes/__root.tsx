@@ -1,3 +1,5 @@
+import { buildAnalyticsHeadScripts } from "@openstarter/analytics-web/scripts";
+import { getAnalyticsConfigFn } from "@openstarter/analytics-web/server";
 import { Toaster } from "@openstarter/ui-web/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -10,8 +12,6 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { getAnalyticsConfigFn } from "@/functions/analytics";
-import { buildAnalyticsHeadScripts } from "@/lib/analytics";
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
 import { getLocale } from "@/paraglide/runtime.js";
 

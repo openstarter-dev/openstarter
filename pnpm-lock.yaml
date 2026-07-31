@@ -135,6 +135,9 @@ importers:
       '@mdx-js/react':
         specifier: 'catalog:'
         version: 3.1.1(@types/react@19.2.17)(react@19.2.7)
+      '@openstarter/analytics-web':
+        specifier: workspace:*
+        version: link:../../packages/analytics/analytics-web
       '@openstarter/api':
         specifier: workspace:*
         version: link:../../packages/api
@@ -250,6 +253,22 @@ importers:
       wrangler:
         specifier: ^4.98.0
         version: 4.112.0(@cloudflare/workers-types@4.20260628.1)
+
+  packages/analytics/analytics-web:
+    dependencies:
+      '@openstarter/api':
+        specifier: workspace:*
+        version: link:../../api
+      '@tanstack/react-start':
+        specifier: ^1.167.41
+        version: 1.168.26(crossws@0.4.10(srvx@0.11.22))(esbuild@0.28.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rolldown@1.1.3)(rollup@4.62.2)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))
+      hono:
+        specifier: 'catalog:'
+        version: 4.12.27
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
   packages/api:
     dependencies:
@@ -7651,7 +7670,6 @@ snapshots:
       - vite
       - vite-plugin-solid
       - webpack
-    optional: true
 
   '@tanstack/react-start-server@1.167.20(crossws@0.4.10(srvx@0.11.17))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
@@ -7672,7 +7690,6 @@ snapshots:
       react-dom: 19.2.7(react@19.2.7)
     transitivePeerDependencies:
       - crossws
-    optional: true
 
   '@tanstack/react-start@1.168.26(crossws@0.4.10(srvx@0.11.17))(esbuild@0.28.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(rolldown@1.1.3)(rollup@4.62.2)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.22.4)(yaml@2.9.0))':
     dependencies:
@@ -7731,7 +7748,6 @@ snapshots:
       - unloader
       - vite-plugin-solid
       - webpack
-    optional: true
 
   '@tanstack/react-store@0.11.0(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
@@ -7929,7 +7945,6 @@ snapshots:
       - unloader
       - vite-plugin-solid
       - webpack
-    optional: true
 
   '@tanstack/start-server-core@1.169.15(crossws@0.4.10(srvx@0.11.17))':
     dependencies:
@@ -7954,7 +7969,6 @@ snapshots:
       seroval: 1.5.4
     transitivePeerDependencies:
       - crossws
-    optional: true
 
   '@tanstack/start-storage-context@1.167.15':
     dependencies:
@@ -9219,7 +9233,6 @@ snapshots:
       srvx: 0.11.22
     optionalDependencies:
       crossws: 0.4.10(srvx@0.11.22)
-    optional: true
 
   h3@2.0.1-rc.25(crossws@0.4.10(srvx@0.11.17)):
     dependencies:
