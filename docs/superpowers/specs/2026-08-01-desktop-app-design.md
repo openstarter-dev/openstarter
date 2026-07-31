@@ -72,7 +72,7 @@ fail  任一模式下 did-fail-load → 加载 resources/offline.html（带重�
 进程边界三层：
 
 - **主进程**：持有全部 Node 权限。负责窗口生命周期、应用菜单、导航安全策略、更新检查。
-- **preload**：唯一的桥。通过 `contextBridge.exposeInMainWorld("desktop", …)` 暴露 `{ platform, version, retry() }`，不暴露任何 Node 原语。
+- **preload**：唯一的桥。通过 `contextBridge.exposeInMainWorld("desktop", …)` 暴露 `{ platform, retry() }`，不暴露任何 Node 原语。不暴露版本号——preload 运行在 renderer 进程，取不到 `app.getVersion()`，唯一"可用"的替代（`process.env.npm_package_version`）在打包后由用户双击启动的 app 里恒为空，与其暴露一个总是空的字段，不如等真正有消费者时再通过 IPC 正确实现。
 - **渲染进程**：远程 web 页面。保持 `sandbox: true`、`contextIsolation: true`、`nodeIntegration: false`。
 
 `retry()` 只服务于兜底页，通过 `ipcRenderer.invoke` 触发主进程重新 `loadURL`。远程站点页面虽然也能看到这个 API，但它只能重新加载已白名单的 URL，不构成额外攻击面。
@@ -81,23 +81,29 @@ fail  任一模式下 did-fail-load → 加载 resources/offline.html（带重�
 
 `apps/desktop/src/` 下每个文件一个职责。核心手法：判断逻辑写成不依赖 Electron 的纯函数，Electron API 调用留在薄薄的一层。这样 vitest 覆盖真正会出错的地方，无需在 CI 里启动 Electron。
 
-| 文件 | 职责 | 单测范围 |
-|---|---|---|
-| `config.ts` | 解析校验站点 URL、更新源配置、运行模式；非法输入返回带原因的失败结果（不抛异常，见 §8） | 全部 |
-| `security.ts` | `isInternalUrl(target, allowedOrigins)` 等纯判定 + `applyWebContentsPolicy()` 挂载 | 判定部分 |
-| `window.ts` | 创建窗口、加载、失败降级、窗口尺寸位置持久化 | 无（薄） |
-| `updater.ts` | `shouldCheckForUpdates()` 纯策略 + `electron-updater` 调用封装 | 策略部分 |
-| `menu.ts` | 菜单模板构造（纯数据）+ `Menu.setApplicationMenu()` | 模板部分 |
-| `main.ts` | 生命周期编排：单实例锁 → 菜单 → 窗口 → 延迟检查更新 | 无（薄） |
-| `preload.ts` | `contextBridge` 暴露最小 API | 无 |
+| 文件 | 职责 | 运行时依赖 Electron | 单测 |
+|---|---|---|---|
+| `config.ts` | 解析校验站点 URL、更新源开关、运行模式；非法输入返回带原因的失败结果（不抛异常，见 §8） | 否 | 有 |
+| `security.ts` | 导航白名单纯判定 + 三个决策处理器工厂（窗口打开 / 导航 / 权限请求） | 否 | 有 |
+| `window-state.ts` | 窗口尺寸位置的解析、校验、读写 | 否 | 有 |
+| `menu.ts` | 菜单模板构造（纯数据） | 否（仅 `import type`） | 有 |
+| `updater.ts` | 更新开关策略、更新源探测、延迟调度（检查函数由调用方注入） | 否 | 有 |
+| `log.ts` | 统一日志前缀，写 `process.stdout` / `process.stderr` | 否 | 无（一行封装） |
+| `window.ts` | 创建 `BrowserWindow`、加载、失败降级到兜底页 | 是 | 无（薄） |
+| `preload.ts` | `contextBridge` 暴露最小 API | 是 | 无 |
+| `main.ts` | 生命周期编排 + 把上面各模块的决策接到 Electron 事件上 | 是 | 无（薄） |
 
-三个需要说明的点：
+只有最后三个文件在运行时 `require("electron")`，其余六个都能在纯 Node 环境下被 vitest 直接导入。这不是巧合，是刻意约束：`menu.ts` 用 `import type` 拿 `MenuItemConstructorOptions`（类型导入编译后被擦除，不产生 require），`security.ts` 把 `shell.openExternal` 和 `event.preventDefault` 作为参数注入而不是自己去 import，`updater.ts` 把 `autoUpdater.checkForUpdatesAndNotify` 作为回调接收。electron-updater 的静态导入只出现在 `main.ts` 里。
+
+四个需要说明的点：
 
 **`security.ts` 是最该被测的模块。** 白名单判定要正确处理同 origin、子域、协议差异、端口与大小写差异、以及 `javascript:` / `file:` / `data:` 伪协议。写错一个分支，远端页面就能在 app 内拿到不该有的能力。这类判断靠手工点击验证不可靠。
 
 **`menu.ts` 不是可选项。** 远程加载的页面在 Electron 里默认拿不到 `Cmd+C` / `Cmd+V` / `Cmd+A`，这些快捷键依赖应用菜单中带 `role` 的菜单项存在。没有菜单，复制粘贴静默失效。因此菜单属于最小可用集。
 
-**窗口尺寸位置持久化**用 `app.getPath("userData")` 下的一个 JSON 文件实现，不引入 `electron-store`，与仓库既有的"零额外 dev 依赖"风格一致。
+**窗口尺寸位置持久化**用 `app.getPath("userData")` 下的一个 JSON 文件实现，不引入 `electron-store`，与仓库既有的"零额外 dev 依赖"风格一致。单独成文件是因为"解析一个可能已损坏的 JSON 状态文件"本身值得测——状态文件损坏导致启动崩溃是个真实故障模式。
+
+**`log.ts` 存在的唯一理由**是全仓库不用 `console`。`scripts/check-quality.mjs` 已经确立了这个先例（它全程用 `process.stdout.write`），桌面端主进程需要打不少日志，与其每处重复写前缀，不如收进一个三函数的模块。
 
 ## 6. 构建与打包
 
@@ -118,10 +124,12 @@ electron-builder 的默认输出目录也叫 `dist`，会和 esbuild 产物撞�
 |---|---|---|
 | `dist/` | esbuild 编译产物（`main.cjs` / `preload.cjs`） | 忽略 |
 | `release/` | electron-builder 安装包输出（`directories.output`） | 忽略 |
-| `build/` | 打包资源（`icon.png`），electron-builder 默认 `buildResources` | **需要提交** |
+| `build-resources/` | 打包资源（`icon.png`），显式配置为 `directories.buildResources` | **需要提交** |
 | `resources/` | 打进 app 的静态文件（`offline.html`） | 需要提交 |
 
-`apps/desktop/.gitignore` 当前忽略了 `/build`，必须去掉这一行，否则图标不会进版本库。同时补上 `/release`。
+图标目录不能用 electron-builder 的默认名 `build`：根 `.gitignore` 第 8 行的 `build` 规则会忽略任意层级的 `build` 目录（已实测确认），图标提交不进版本库，模板使用者 clone 后打包只会得到 Electron 默认图标。改名成 `build-resources` 比在两层 `.gitignore` 里做反向排除更省事——被父级规则排除的目录，子级 `.gitignore` 想重新纳入还得先反排除目录本身，容易出错且难以察觉。
+
+`apps/desktop/.gitignore` 需要补上 `/release`。
 
 ### esbuild 配置要点
 
@@ -138,9 +146,9 @@ electron-builder 的默认输出目录也叫 `dist`，会和 esbuild 产物撞�
 - `mac`：`dmg` + `zip`，`arm64` + `x64`。**zip 是必需项**——`electron-updater` 在 macOS 上取 zip 而非 dmg，只配 dmg 则无法更新。签名与公证字段留空并加注释。
 - `win`：`nsis`，`x64`
 - `linux`：`AppImage` + `deb`
-- `directories.output: release`（见上表）
+- `directories.output: release`、`directories.buildResources: build-resources`（见上表）
 - `publish`：`github`，`owner` / `repo` 用占位值；旁边注释掉一段 `generic` provider 配置供自建托管切换
-- 图标只放一张 `build/icon.png`（1024×1024），electron-builder 自行派生 icns / ico 与各尺寸
+- 图标只放一张 `build-resources/icon.png`（1024×1024），electron-builder 自行派生 icns / ico 与各尺寸
 
 ### 脚本分层
 
@@ -206,12 +214,13 @@ Squirrel.Mac 强制校验签名，配置绕不过。接入 Apple 证书之前，
 
 新增 `apps/desktop/vitest.config.ts`（`defineProject`，`environment: node`，`include: src/**/*.test.ts`，`name: desktop`），并加入根 `vitest.config.ts` 的 `test.projects` 数组——根配置是显式列举而非通配，这一行必须手动添加。
 
-四组用例：
+五组用例：
 
 - `config.ts`：URL 缺失、非法协议、尾斜杠归一化、运行时覆盖构建时默认值的优先级、dev 回退与生产返回失败结果的分支差异
-- `security.ts`：同 origin 放行；子域拒绝；`http`/`https` 差异；端口与大小写差异；`javascript:` / `file:` / `data:` 伪协议拒绝
-- `updater.ts`：`shouldCheckForUpdates(isPackaged, hasPublishConfig, disabled)` 真值表
+- `security.ts`：同 origin 放行；子域拒绝；`http`/`https` 差异；端口与大小写差异；`javascript:` / `file:` / `data:` 伪协议拒绝；三个决策处理器的行为（外链转发、导航拦截、权限拒绝）
+- `window-state.ts`：合法状态往返、损坏 JSON 回退到默认值、越界尺寸被夹紧
 - `menu.ts`：断言模板中存在 `copy` / `paste` / `selectAll` role。此条为防回归——菜单形似样板代码，最易被后来者当冗余删除，删后复制粘贴静默失效
+- `updater.ts`：`shouldCheckForUpdates` 真值表、更新源文件存在性探测、延迟调度在禁用时不排任务
 
 不测 Electron runtime、打包产物、真实更新下载，不引入 `playwright-electron`。
 
@@ -246,13 +255,13 @@ Squirrel.Mac 强制校验签名，配置绕不过。接入 Apple 证书之前，
 新增  apps/desktop/.env.example
 新增  apps/desktop/scripts/build.mjs
 新增  apps/desktop/resources/offline.html
-新增  apps/desktop/build/icon.png
-新增  apps/desktop/src/{main,preload,config,security,window,updater,menu}.ts
-新增  apps/desktop/src/{config,security,updater,menu}.test.ts
+新增  apps/desktop/build-resources/icon.png
+新增  apps/desktop/src/{main,preload,config,security,window,window-state,updater,menu,log}.ts
+新增  apps/desktop/src/{config,security,window-state,menu,updater}.test.ts
 删除  apps/desktop/src/main.cjs
 改动  apps/desktop/package.json      main 指向 dist/、脚本、精确版本依赖
-改动  apps/desktop/tsconfig.json     移除 allowJs/checkJs，纳入 TS strict
-改动  apps/desktop/.gitignore        去掉 /build（图标要提交），补上 /release
+改动  apps/desktop/tsconfig.json     继承 tsconfig.base.json，移除 allowJs/checkJs
+改动  apps/desktop/.gitignore        补上 /release
 改动  vitest.config.ts               projects 加 apps/desktop
 改动  package.json                   加 build:desktop / package:desktop / release:desktop
 改动  README.md                      能力表格 + 脚本列表
@@ -264,9 +273,7 @@ Squirrel.Mac 强制校验签名，配置绕不过。接入 Apple 证书之前，
 
 按依赖关系分四层，每层结束时仓库都处于可运行状态：
 
-1. **地基**：`config.ts` + `security.ts` + 两者的单测。纯逻辑，无 Electron 依赖，可独立验证。
-2. **可跑起来**：`preload.ts` + `window.ts` + `menu.ts` + `main.ts` + `resources/offline.html` + `scripts/build.mjs`，删除 `main.cjs`，改 `tsconfig.json` 与 `run-desktop.mjs`。此层结束时 `pnpm dev:desktop` 应通过验收清单第 1–5 条。
-3. **可分发**：`electron-builder.yml` + `build/icon.png` + `.gitignore` 调整 + 打包脚本。此层结束时通过第 6–7 条。
+1. **地基**：`log.ts` + `config.ts` + `security.ts` + `window-state.ts` + `menu.ts`，及各自单测。全部纯逻辑，无 Electron 依赖，可独立验证。`vitest.config.ts` 的新增与注册必须在这一层做，否则本层单测跑不到。
+2. **可跑起来**：`preload.ts` + `window.ts` + `main.ts` + `resources/offline.html` + `scripts/build.mjs`，删除 `main.cjs`，改 `tsconfig.json` 与 `run-desktop.mjs`。此层结束时 `pnpm dev:desktop` 应通过验收清单第 1–5 条。
+3. **可分发**：`electron-builder.yml` + `build-resources/icon.png` + `.gitignore` 调整 + 打包脚本。此层结束时通过第 6–7 条。
 4. **可更新 + 可交接**：`updater.ts` 及其单测、`.env.example`、两个 README。
-
-`vitest.config.ts` 的注册在第 1 层就要做，否则第 1 层的单测跑不到。
