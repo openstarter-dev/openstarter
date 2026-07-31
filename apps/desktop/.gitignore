@@ -15,3 +15,5 @@ pnpm-debug.log*
 
 # Turbo
 .turbo
+
+/release

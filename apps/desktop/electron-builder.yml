@@ -1,0 +1,57 @@
+# apps/desktop/electron-builder.yml
+#
+# 打包配置。esbuild 已把除 electron 外的全部依赖 bundle 进 dist/，因此 files 只需要
+# 编译产物、静态资源和 package.json —— 不需要 node_modules（显式声明 files 会覆盖
+# electron-builder 默认的 node_modules 收集行为）。
+# 详见 docs/superpowers/specs/2026-08-01-desktop-app-design.md §6。
+
+appId: com.openstarter.desktop
+productName: OpenStarter
+
+directories:
+  output: release
+  buildResources: build-resources
+
+files:
+  - dist/**
+  - resources/**
+  - package.json
+
+mac:
+  target:
+    - dmg
+    - zip
+  arch:
+    - arm64
+    - x64
+  # electron-updater 在 macOS 上读取 zip 而非 dmg 的元数据；只配 dmg 会导致自动更新
+  # 失效，zip 是必需项，不是可选项。
+  #
+  # 代码签名与公证（接入 Apple 证书后取消注释并填入实际值）：
+  # notarize: true
+  # identity: "Developer ID Application: Your Name (TEAMID)"
+
+win:
+  target:
+    - nsis
+  arch:
+    - x64
+  # 代码签名（接入证书后取消注释）：
+  # certificateFile: path/to/cert.pfx
+  # certificatePassword: ${env.WIN_CSC_KEY_PASSWORD}
+
+linux:
+  target:
+    - AppImage
+    - deb
+  arch:
+    - x64
+  category: Utility
+
+publish:
+  provider: github
+  owner: your-github-org
+  repo: your-repo-name
+  # 如需切换为自建静态托管（S3/R2/自有域名），改用 generic provider：
+  # provider: generic
+  # url: https://updates.yourdomain.com
