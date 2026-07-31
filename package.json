@@ -44,6 +44,12 @@
   },
   "packageManager": "pnpm@10.25.0",
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "msw", "sharp", "workerd", "electron"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "msw",
+      "sharp",
+      "workerd",
+      "electron"
+    ]
   }
 }
