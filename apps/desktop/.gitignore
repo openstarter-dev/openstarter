@@ -1,0 +1,17 @@
+/node_modules
+/dist
+/out
+/build
+*.tsbuildinfo
+
+# Environment & local files
+.env*
+!.env.example
+.DS_Store
+
+# Logs
+*.log
+pnpm-debug.log*
+
+# Turbo
+.turbo

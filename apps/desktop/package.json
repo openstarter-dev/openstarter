@@ -1,0 +1,16 @@
+{
+  "name": "desktop",
+  "private": true,
+  "type": "module",
+  "main": "src/main.cjs",
+  "scripts": {
+    "dev": "node ../../scripts/run-desktop.mjs",
+    "dev:electron": "cross-env NODE_ENV=development electron .",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "electron": "^33.2.0"
+  }
+}

@@ -16,6 +16,7 @@
     "generate:routes": "pnpm --filter web generate:routes",
     "check-types": "pnpm generate:routes && turbo check-types",
     "dev:web": "turbo -F web dev",
+    "dev:desktop": "turbo -F desktop dev",
     "db:push": "turbo -F @openstarter/db db:push",
     "db:studio": "turbo -F @openstarter/db db:studio",
     "db:generate": "turbo -F @openstarter/db db:generate",
@@ -38,5 +39,8 @@
     "ultracite": "7.9.4",
     "vitest": "4.1.10"
   },
-  "packageManager": "pnpm@10.25.0"
+  "packageManager": "pnpm@10.25.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "msw", "sharp", "workerd", "electron"]
+  }
 }
