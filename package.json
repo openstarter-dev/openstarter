@@ -9,7 +9,12 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "check-types": "turbo check-types",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "lint": "pnpm ultracite:check",
+    "ultracite:check": "node scripts/check-quality.mjs",
+    "generate:routes": "pnpm --filter web generate:routes",
+    "check-types": "pnpm generate:routes && turbo check-types",
     "dev:web": "turbo -F web dev",
     "db:push": "turbo -F @openstarter/db db:push",
     "db:studio": "turbo -F @openstarter/db db:studio",
@@ -22,9 +27,15 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.3",
     "@types/node": "catalog:",
+    "@vitest/coverage-v8": "4.1.10",
+    "fast-check": "4.9.0",
+    "jsdom": "29.1.1",
     "turbo": "^2.9.16",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "ultracite": "7.9.4",
+    "vitest": "4.1.10"
   },
   "packageManager": "pnpm@10.25.0"
 }

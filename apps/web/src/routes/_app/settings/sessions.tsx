@@ -9,9 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@openstarter/ui/components/card";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -20,29 +21,41 @@ export const Route = createFileRoute("/_app/settings/sessions")({
 });
 
 function SessionsPage() {
-  const { data: sessionsData, refetch: refetchSessions } =
-    authClient.useListSessions();
-  const sessions = sessionsData ?? [];
+  const { data: currentSessionData, isPending: isCurrentSessionPending } =
+    authClient.useSession();
+  const sessionsQuery = useQuery({
+    queryFn: async () => {
+      const result = await authClient.listSessions();
+      if (result.error) {
+        throw new Error(result.error.message || "Failed to load sessions");
+      }
+      return result.data ?? [];
+    },
+    queryKey: ["auth", "sessions"],
+  });
+  const sessions = sessionsQuery.data ?? [];
+  const currentSessionToken = currentSessionData?.session.token;
+  const canRevokeSession =
+    !isCurrentSessionPending && currentSessionToken !== undefined;
 
-  const [revokingId, setRevokingId] = useState<string | null>(null);
+  const [revokingToken, setRevokingToken] = useState<string | null>(null);
   const [revokingOthers, setRevokingOthers] = useState(false);
 
-  const handleRevoke = async (sessionId: string) => {
-    setRevokingId(sessionId);
+  const handleRevoke = async (token: string) => {
+    if (!canRevokeSession || token === currentSessionToken) {
+      return;
+    }
+    setRevokingToken(token);
     try {
-      const result = await authClient.revokeSession({
-        id: sessionId,
-      });
+      const result = await authClient.revokeSession({ token });
       if (result.error) {
-        toast.error(
-          result.error.message || "Failed to revoke session",
-        );
+        toast.error(result.error.message || "Failed to revoke session");
         return;
       }
       toast.success("Session revoked");
-      refetchSessions();
+      await sessionsQuery.refetch();
     } finally {
-      setRevokingId(null);
+      setRevokingToken(null);
     }
   };
 
@@ -51,20 +64,15 @@ function SessionsPage() {
     try {
       const result = await authClient.revokeOtherSessions();
       if (result.error) {
-        toast.error(
-          result.error.message || "Failed to revoke other sessions",
-        );
+        toast.error(result.error.message || "Failed to revoke other sessions");
         return;
       }
       toast.success("Other sessions revoked");
-      refetchSessions();
+      await sessionsQuery.refetch();
     } finally {
       setRevokingOthers(false);
     }
   };
-
-  // 找当前会话（通常为最新创建的）
-  const currentSession = sessions[0];
 
   return (
     <Card>
@@ -77,77 +85,77 @@ function SessionsPage() {
       <CardContent className="space-y-4">
         {sessions.length > 1 && (
           <Button
-            type="button"
-            variant="outline"
-            size="sm"
             disabled={revokingOthers}
             onClick={() => {
-              handleRevokeOthers().catch(() => undefined);
+              handleRevokeOthers().catch((error: Error) => {
+                toast.error(error.message);
+              });
             }}
+            size="sm"
+            type="button"
+            variant="outline"
           >
-            {revokingOthers
-              ? "Revoking..."
-              : "Revoke all other sessions"}
+            {revokingOthers ? "Revoking..." : "Revoke all other sessions"}
           </Button>
         )}
 
+        {sessionsQuery.isPending ? (
+          <p className="text-muted-foreground text-sm">Loading sessions...</p>
+        ) : null}
+        {sessionsQuery.error ? (
+          <p className="text-destructive text-sm">
+            {sessionsQuery.error.message}
+          </p>
+        ) : null}
         <div className="divide-y rounded-lg border">
           {sessions.map((session) => {
-            const isCurrent =
-              currentSession?.id === session.id;
+            const isCurrent = currentSessionToken === session.token;
             return (
               <div
-                key={session.id}
                 className="flex items-center justify-between px-4 py-3"
+                key={session.id}
               >
                 <div className="flex flex-col gap-0.5">
-                  <span className="text-sm font-medium">
-                    {session.userAgent
-                      ?.split("/")[0]
-                      ?.trim() ||
+                  <span className="font-medium text-sm">
+                    {session.userAgent?.split("/").at(0)?.trim() ||
                       "Unknown device"}
                     {isCurrent && (
-                      <span className="ml-2 text-primary text-xs">
-                        Current
-                      </span>
+                      <span className="ml-2 text-primary text-xs">Current</span>
                     )}
                   </span>
                   <span className="text-muted-foreground text-xs">
                     {session.createdAt
-                      ? new Date(
-                          session.createdAt,
-                        ).toLocaleDateString()
+                      ? new Date(session.createdAt).toLocaleDateString()
                       : ""}
-                    {session.ipAddress &&
-                      ` · ${session.ipAddress}`}
+                    {session.ipAddress ? ` · ${session.ipAddress}` : null}
                   </span>
                 </div>
                 <Button
+                  disabled={
+                    !canRevokeSession ||
+                    revokingToken === session.token ||
+                    isCurrent
+                  }
+                  onClick={() => {
+                    handleRevoke(session.token).catch((error: Error) => {
+                      toast.error(error.message);
+                    });
+                  }}
+                  size="sm"
+                  title={
+                    isCurrent ? "Cannot revoke current session" : undefined
+                  }
                   type="button"
                   variant="ghost"
-                  size="sm"
-                  disabled={
-                    revokingId === session.id || isCurrent
-                  }
-                  onClick={() =>
-                    handleRevoke(session.id)
-                  }
-                  title={
-                    isCurrent
-                      ? "Cannot revoke current session"
-                      : undefined
-                  }
                 >
-                  {revokingId === session.id
-                    ? "Revoking..."
-                    : "Revoke"}
+                  {revokingToken === session.token ? "Revoking..." : "Revoke"}
                 </Button>
               </div>
             );
           })}
         </div>
 
-        {sessions.length === 0 && (
+        {sessions.length === 0 && !sessionsQuery.isPending && (
           <p className="text-muted-foreground text-sm">
             No active sessions found.
           </p>

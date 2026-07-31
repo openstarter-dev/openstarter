@@ -5,20 +5,23 @@ import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 import { registerAiSaveFiles } from "./ai-tasks";
-import { healthRoute } from "./routes/health";
-import { privateDataRoute } from "./routes/private-data";
+import { adminRoute } from "./routes/admin";
+import { adminDataRoute } from "./routes/admin-data";
 import { aiTasksRoute } from "./routes/ai-tasks";
 import { analyticsRoute } from "./routes/analytics";
 import { apikeysRoute } from "./routes/apikeys";
+import { authAccountRoute } from "./routes/auth-accounts";
 import { blogRoute } from "./routes/blog";
 import { checkoutRoute } from "./routes/checkout";
 import { configRoute } from "./routes/config";
+import { healthRoute } from "./routes/health";
 import { postsRoute } from "./routes/posts";
+import { privateDataRoute } from "./routes/private-data";
 import { seoRoute } from "./routes/seo";
 import { storageRoute } from "./routes/storage";
 import { taxonomyRoute } from "./routes/taxonomy";
 import { ticketsRoute } from "./routes/tickets";
-import { adminRoute } from "./routes/admin";
+import { userRoute } from "./routes/user";
 import { webhookRoute } from "./routes/webhook";
 
 // AI 域存储回调接线（R19.1 收尾）：在 api 组合根一次性注入 setSaveFiles，使 AI 生成文件经
@@ -39,7 +42,11 @@ app.onError((err, c) => {
   return c.json(respErr("Internal Server Error"), 500);
 });
 
-// better-auth handler（R4.1）：/api/auth/* 全量委托给 better-auth，
+// 精确拦截原生 unlink-account：条件 DELETE 在数据库语句级维护“至少一个登录方式”不变量，
+// 必须先于 Better Auth wildcard 注册，防止并发直接 API 请求绕过。
+app.route("/", authAccountRoute);
+
+// better-auth handler（R4.1）：/api/auth/* 其余能力全量委托给 better-auth，
 // 现有登录/注册/OAuth/magicLink/emailOTP/passkey/twoFactor/organization 等能力经此 catch-all 暴露。
 app.on(["POST", "GET"], "/api/auth/*", (c) => createAuth().handler(c.req.raw));
 
@@ -70,9 +77,11 @@ const routes = app
   .route("/", storageRoute)
   .route("/", aiTasksRoute)
   .route("/", ticketsRoute)
+  .route("/", userRoute)
   .route("/", seoRoute)
   .route("/", analyticsRoute)
-  .route("/", adminRoute);
+  .route("/", adminRoute)
+  .route("/", adminDataRoute);
 
 export { app };
 export type AppType = typeof routes;

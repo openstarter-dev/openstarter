@@ -11,6 +11,7 @@ import { usePublicConfig } from "@/lib/use-public-config";
 
 import Loader from "../loader";
 import { OAuthButtons } from "./oauth-buttons";
+import { getEnabledOAuthProviders } from "./oauth-provider-selection";
 
 export default function SignUpForm({
   onSwitchToSignIn,
@@ -23,44 +24,46 @@ export default function SignUpForm({
   const configQuery = usePublicConfig();
   const configs = configQuery.data ?? {};
   const emailEnabled = configs.email_auth_enabled !== "false";
-  const googleEnabled = configs.google_auth_enabled === "true";
-  const githubEnabled = configs.github_auth_enabled === "true";
-  const emailVerificationEnabled = configs.email_verification_enabled === "true";
-  const hasSocial = googleEnabled || githubEnabled;
+  const enabledOAuthProviders = getEnabledOAuthProviders(configs);
+  const googleEnabled = enabledOAuthProviders.includes("google");
+  const githubEnabled = enabledOAuthProviders.includes("github");
+  const emailVerificationEnabled =
+    configs.email_verification_enabled === "true";
+  const hasSocial = enabledOAuthProviders.length > 0;
 
   const form = useForm({
     defaultValues: {
       email: "",
-      password: "",
       name: "",
+      password: "",
     },
     onSubmit: async ({ value }) => {
       await authClient.signUp.email(
         {
           email: value.email,
-          password: value.password,
           name: value.name,
+          password: value.password,
         },
         {
+          onError: (error) => {
+            toast.error(error.error.message || error.error.statusText);
+          },
           onSuccess: () => {
             if (emailVerificationEnabled) {
-              navigate({ to: "/verify-email", search: { email: value.email } });
+              navigate({ search: { email: value.email }, to: "/verify-email" });
               toast.success("Check your email to verify your account");
               return;
             }
             navigate({ to: "/dashboard" });
             toast.success("Sign up successful");
           },
-          onError: (error) => {
-            toast.error(error.error.message || error.error.statusText);
-          },
         }
       );
     },
     validators: {
       onSubmit: z.object({
-        name: z.string().min(2, "Name must be at least 2 characters"),
         email: z.email("Invalid email address"),
+        name: z.string().min(2, "Name must be at least 2 characters"),
         password: z.string().min(8, "Password must be at least 8 characters"),
       }),
     },
@@ -76,26 +79,29 @@ export default function SignUpForm({
 
       {hasSocial && (
         <div className="mb-4">
-          <OAuthButtons googleEnabled={googleEnabled} githubEnabled={githubEnabled} />
+          <OAuthButtons
+            githubEnabled={githubEnabled}
+            googleEnabled={googleEnabled}
+          />
         </div>
       )}
 
-      {hasSocial && emailEnabled && (
+      {hasSocial && emailEnabled ? (
         <div className="my-4 flex items-center gap-3 text-muted-foreground text-xs">
           <span className="h-px flex-1 bg-border" />
           or
           <span className="h-px flex-1 bg-border" />
         </div>
-      )}
+      ) : null}
 
       {emailEnabled && (
         <form
+          className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-4"
         >
           <div>
             <form.Field name="name">
@@ -105,12 +111,12 @@ export default function SignUpForm({
                   <Input
                     id={field.name}
                     name={field.name}
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    value={field.state.value}
                   />
                   {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-red-500">
+                    <p className="text-red-500" key={error?.message}>
                       {error?.message}
                     </p>
                   ))}
@@ -127,13 +133,13 @@ export default function SignUpForm({
                   <Input
                     id={field.name}
                     name={field.name}
-                    type="email"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    type="email"
+                    value={field.state.value}
                   />
                   {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-red-500">
+                    <p className="text-red-500" key={error?.message}>
                       {error?.message}
                     </p>
                   ))}
@@ -150,13 +156,13 @@ export default function SignUpForm({
                   <Input
                     id={field.name}
                     name={field.name}
-                    type="password"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    type="password"
+                    value={field.state.value}
                   />
                   {field.state.meta.errors.map((error) => (
-                    <p key={error?.message} className="text-red-500">
+                    <p className="text-red-500" key={error?.message}>
                       {error?.message}
                     </p>
                   ))}
@@ -173,9 +179,9 @@ export default function SignUpForm({
           >
             {({ canSubmit, isSubmitting }) => (
               <Button
-                type="submit"
                 className="w-full"
                 disabled={!canSubmit || isSubmitting}
+                type="submit"
               >
                 {isSubmitting ? "Submitting..." : "Sign Up"}
               </Button>
@@ -186,10 +192,10 @@ export default function SignUpForm({
 
       <div className="mt-4 text-center">
         <Button
+          className="text-indigo-600 hover:text-indigo-800"
+          onClick={onSwitchToSignIn}
           type="button"
           variant="link"
-          onClick={onSwitchToSignIn}
-          className="text-indigo-600 hover:text-indigo-800"
         >
           Already have an account? Sign In
         </Button>

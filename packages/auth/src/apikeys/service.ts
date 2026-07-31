@@ -10,148 +10,184 @@
 import { randomBytes } from "node:crypto";
 
 import { apikey } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import { type Database, db } from "@openstarter/db/server";
 import { sha256 } from "@openstarter/shared/hash";
 import { getUuid } from "@openstarter/shared/id";
 import { and, count, eq, isNull, like } from "drizzle-orm";
 
 const KEY_PREFIX = "sk_";
-// 前缀中保留的随机字符数，供用户在列表 UI 中识别密钥（不足以还原明文）。
 const KEY_PREVIEW_LENGTH = 8;
 const KEY_RANDOM_BYTES = 32;
-
 const DEFAULT_PAGE_SIZE = 10;
 const MAX_PAGE_SIZE = 100;
 
-/** 生成明文密钥、其 sha256 哈希与展示前缀。 */
-function generateKey(): { key: string; keyHash: string; keyPrefix: string } {
-  // 32 字节随机 → base64url（约 43 字符），加字面前缀 "sk_"。
-  const rand = randomBytes(KEY_RANDOM_BYTES).toString("base64url");
-  const key = `${KEY_PREFIX}${rand}`;
+interface GeneratedKey {
+  key: string;
+  keyHash: string;
+  keyPrefix: string;
+}
+
+export interface ApiKeyListItem {
+  createdAt: Date;
+  id: string;
+  keyPrefix: string;
+  status: string;
+  title: string;
+}
+
+export interface ApiKeyInsertValues {
+  id: string;
+  keyHash: string;
+  keyPrefix: string;
+  status: "active";
+  title: string;
+  userId: string;
+}
+
+export interface ApiKeyListParams {
+  page: number;
+  pageSize: number;
+  search?: string;
+  userId: string;
+}
+
+export interface ApiKeyRepository {
+  findActiveUserIdByHash: (keyHash: string) => Promise<string | null>;
+  insert: (
+    values: ApiKeyInsertValues
+  ) => Promise<{ id: string; title: string } | null>;
+  listActive: (
+    params: ApiKeyListParams
+  ) => Promise<{ items: ApiKeyListItem[]; total: number }>;
+  revoke: (params: {
+    keyId: string;
+    revokedAt: Date;
+    userId: string;
+  }) => Promise<void>;
+}
+
+function generateKey(): GeneratedKey {
+  const random = randomBytes(KEY_RANDOM_BYTES).toString("base64url");
+  const key = `${KEY_PREFIX}${random}`;
   return {
     key,
     keyHash: sha256(key),
-    keyPrefix: `${KEY_PREFIX}${rand.slice(0, KEY_PREVIEW_LENGTH)}`,
+    keyPrefix: `${KEY_PREFIX}${random.slice(0, KEY_PREVIEW_LENGTH)}`,
   };
 }
 
-/** API 密钥列表项（仅前缀，不含明文/哈希）。 */
-export interface ApiKeyListItem {
-  id: string;
-  keyPrefix: string;
-  title: string;
-  status: string;
-  createdAt: Date;
-}
-
-/**
- * 为用户创建 API 密钥。明文 `key` **仅此一次**返回（不落库，仅存哈希）。R8.1
- */
-export async function createApiKey(params: {
-  userId: string;
-  title: string;
-}): Promise<{ id: string; key: string; title: string }> {
-  const { userId, title } = params;
-  const { key, keyHash, keyPrefix } = generateKey();
-
-  const [row] = await db()
-    .insert(apikey)
-    .values({
+export function createApiKeyService(repository: ApiKeyRepository) {
+  const createApiKey = async (params: { userId: string; title: string }) => {
+    const { userId, title } = params;
+    const { key, keyHash, keyPrefix } = generateKey();
+    const row = await repository.insert({
       id: getUuid(),
-      userId,
       keyHash,
       keyPrefix,
-      title,
       status: "active",
-    })
-    .returning();
+      title,
+      userId,
+    });
 
-  if (!row) {
-    throw new Error("Failed to create API key");
-  }
+    if (!row) {
+      throw new Error("Failed to create API key");
+    }
 
-  return { id: row.id, key, title: row.title };
+    return { id: row.id, key, title: row.title };
+  };
+
+  const listApiKeys = async (
+    userId: string,
+    page = 1,
+    pageSize = DEFAULT_PAGE_SIZE,
+    search?: string
+  ) => {
+    const safePage = Math.max(1, page);
+    const safePageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, pageSize));
+    return await repository.listActive({
+      page: safePage,
+      pageSize: safePageSize,
+      search: search || undefined,
+      userId,
+    });
+  };
+
+  const revokeApiKey = async (params: { userId: string; keyId: string }) => {
+    await repository.revoke({ ...params, revokedAt: new Date() });
+  };
+
+  const validateApiKey = async (key: string) => {
+    if (!key) {
+      return null;
+    }
+    return await repository.findActiveUserIdByHash(sha256(key));
+  };
+
+  return { createApiKey, listApiKeys, revokeApiKey, validateApiKey };
 }
 
-/**
- * 分页列出用户的有效 API 密钥，可按标题模糊搜索。仅返回前缀。R8.4
- */
-export async function listApiKeys(
-  userId: string,
-  page = 1,
-  pageSize = DEFAULT_PAGE_SIZE,
-  search?: string
-): Promise<{ items: ApiKeyListItem[]; total: number }> {
-  const safePage = Math.max(1, page);
-  const safePageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, pageSize));
-
-  const conditions = [
-    eq(apikey.userId, userId),
-    eq(apikey.status, "active"),
-    isNull(apikey.deletedAt),
-  ];
-  if (search) {
-    conditions.push(like(apikey.title, `%${search}%`));
-  }
-  const where = and(...conditions);
-
-  const database = db();
-  const [totalResult] = await database
-    .select({ count: count() })
-    .from(apikey)
-    .where(where);
-
-  const items = await database
-    .select({
-      id: apikey.id,
-      keyPrefix: apikey.keyPrefix,
-      title: apikey.title,
-      status: apikey.status,
-      createdAt: apikey.createdAt,
-    })
-    .from(apikey)
-    .where(where)
-    .limit(safePageSize)
-    .offset((safePage - 1) * safePageSize);
-
-  return { items, total: totalResult?.count ?? 0 };
-}
-
-/**
- * 软删除（吊销）一个 API 密钥。仅限所属用户操作。R8.3
- */
-export async function revokeApiKey(params: {
-  userId: string;
-  keyId: string;
-}): Promise<void> {
-  const { userId, keyId } = params;
-  await db()
-    .update(apikey)
-    .set({ status: "deleted", deletedAt: new Date() })
-    .where(and(eq(apikey.id, keyId), eq(apikey.userId, userId)));
-}
-
-/**
- * 校验 API 密钥。有效则返回所属 userId，否则返回 null。R8.2/R8.5
- *
- * 按 `sha256(明文)` 查询 `active` 且未软删的记录；不存在或已吊销均返回 null。
- */
-export async function validateApiKey(key: string): Promise<string | null> {
-  if (!key) {
-    return null;
-  }
-  const keyHash = sha256(key);
-  const [row] = await db()
-    .select({ userId: apikey.userId })
-    .from(apikey)
-    .where(
-      and(
-        eq(apikey.keyHash, keyHash),
-        eq(apikey.status, "active"),
-        isNull(apikey.deletedAt)
+export const createDatabaseApiKeyRepository = (
+  getDatabase: () => Database = db
+): ApiKeyRepository => ({
+  findActiveUserIdByHash: async (keyHash) => {
+    const [row] = await getDatabase()
+      .select({ userId: apikey.userId })
+      .from(apikey)
+      .where(
+        and(
+          eq(apikey.keyHash, keyHash),
+          eq(apikey.status, "active"),
+          isNull(apikey.deletedAt)
+        )
       )
-    )
-    .limit(1);
+      .limit(1);
+    return row?.userId ?? null;
+  },
+  insert: async (values) => {
+    const [row] = await getDatabase().insert(apikey).values(values).returning();
+    if (!row) {
+      return null;
+    }
+    return { id: row.id, title: row.title };
+  },
+  listActive: async ({ page, pageSize, search, userId }) => {
+    const conditions = [
+      eq(apikey.userId, userId),
+      eq(apikey.status, "active"),
+      isNull(apikey.deletedAt),
+    ];
+    if (search) {
+      conditions.push(like(apikey.title, `%${search}%`));
+    }
+    const where = and(...conditions);
+    const database = getDatabase();
+    const [totalResult] = await database
+      .select({ count: count() })
+      .from(apikey)
+      .where(where);
+    const items = await database
+      .select({
+        createdAt: apikey.createdAt,
+        id: apikey.id,
+        keyPrefix: apikey.keyPrefix,
+        status: apikey.status,
+        title: apikey.title,
+      })
+      .from(apikey)
+      .where(where)
+      .limit(pageSize)
+      .offset((page - 1) * pageSize);
+    return { items, total: totalResult?.count ?? 0 };
+  },
+  revoke: async ({ keyId, revokedAt, userId }) => {
+    await getDatabase()
+      .update(apikey)
+      .set({ deletedAt: revokedAt, status: "deleted" })
+      .where(and(eq(apikey.id, keyId), eq(apikey.userId, userId)));
+  },
+});
 
-  return row?.userId ?? null;
-}
+const databaseApiKeyRepository = createDatabaseApiKeyRepository();
+
+export const { createApiKey, listApiKeys, revokeApiKey, validateApiKey } =
+  createApiKeyService(databaseApiKeyRepository);

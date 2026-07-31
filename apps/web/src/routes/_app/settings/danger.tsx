@@ -11,9 +11,9 @@ import {
 } from "@openstarter/ui/components/card";
 import { Input } from "@openstarter/ui/components/input";
 import { Label } from "@openstarter/ui/components/label";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { toast } from "sonner";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -24,7 +24,6 @@ export const Route = createFileRoute("/_app/settings/danger")({
 function DangerPage() {
   const { data: session } = authClient.useSession();
   const userEmail = session?.user?.email ?? "";
-  const navigate = useNavigate({ from: "/settings/danger" });
 
   const [confirmText, setConfirmText] = useState("");
   const [deleting, setDeleting] = useState(false);
@@ -34,7 +33,9 @@ function DangerPage() {
     confirmText.trim().toLowerCase() === userEmail.toLowerCase();
 
   const handleDelete = async () => {
-    if (!canSubmit) return;
+    if (!canSubmit) {
+      return;
+    }
     setDeleting(true);
     try {
       const result = await authClient.deleteUser({
@@ -44,9 +45,7 @@ function DangerPage() {
         toast.error(result.error.message || "Failed to delete account");
         return;
       }
-      // 若服务端不发邮件确认，直接 signed out
-      toast.success("Account deleted");
-      navigate({ to: "/login" });
+      toast.success(result.data?.message || "Verification email sent");
     } finally {
       setDeleting(false);
     }
@@ -64,7 +63,7 @@ function DangerPage() {
       <CardContent className="space-y-4">
         <div className="rounded-md bg-destructive/5 p-4 text-sm">
           <p className="font-medium">This will remove:</p>
-          <ul className="text-muted-foreground ml-4 list-disc">
+          <ul className="ml-4 list-disc text-muted-foreground">
             <li>Your profile, settings, and preferences</li>
             <li>Owned organizations (unless transferred)</li>
             <li>Active sessions and access tokens</li>
@@ -77,22 +76,22 @@ function DangerPage() {
             <span className="text-destructive">{userEmail}</span> to confirm
           </Label>
           <Input
+            disabled={deleting}
             id="confirm-email"
-            type="email"
-            value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder={userEmail}
-            disabled={deleting}
+            type="email"
+            value={confirmText}
           />
         </div>
 
         <Button
-          type="button"
-          variant="destructive"
           disabled={!canSubmit || deleting}
           onClick={() => {
             handleDelete().catch(() => undefined);
           }}
+          type="button"
+          variant="destructive"
         >
           {deleting ? "Deleting..." : "Delete my account"}
         </Button>

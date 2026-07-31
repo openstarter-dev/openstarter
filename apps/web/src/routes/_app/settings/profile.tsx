@@ -2,15 +2,21 @@
 // 编辑用户昵称（头像延后到后续阶段，留 TODO 注释）。
 
 import { Button } from "@openstarter/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@openstarter/ui/components/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@openstarter/ui/components/card";
 import { Input } from "@openstarter/ui/components/input";
 import { Label } from "@openstarter/ui/components/label";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
-import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
 import { useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_app/settings/profile")({
   component: ProfilePage,
@@ -47,18 +53,20 @@ function ProfilePage() {
     <Card>
       <CardHeader>
         <CardTitle>Profile</CardTitle>
-        <CardDescription>Your display name visible across the app.</CardDescription>
+        <CardDescription>
+          Your display name visible across the app.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {/* TODO: avatar upload (Phase ?, requires file storage) */}
 
         <form
+          className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
             e.stopPropagation();
             form.handleSubmit();
           }}
-          className="space-y-4"
         >
           <form.Field name="name">
             {(field) => (
@@ -67,12 +75,12 @@ function ProfilePage() {
                 <Input
                   id={field.name}
                   name={field.name}
-                  value={field.state.value}
                   onBlur={field.handleBlur}
                   onChange={(e) => field.handleChange(e.target.value)}
+                  value={field.state.value}
                 />
                 {field.state.meta.errors.map((err) => (
-                  <p key={err?.message} className="text-destructive text-sm">
+                  <p className="text-destructive text-sm" key={err?.message}>
                     {err?.message}
                   </p>
                 ))}
@@ -82,7 +90,7 @@ function ProfilePage() {
 
           <form.Subscribe selector={(s) => s.isSubmitting}>
             {(isSubmitting) => (
-              <Button type="submit" disabled={isSubmitting || submitting}>
+              <Button disabled={isSubmitting || submitting} type="submit">
                 {submitting ? "Saving..." : "Save"}
               </Button>
             )}

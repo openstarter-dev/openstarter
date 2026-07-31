@@ -13,8 +13,8 @@ import { Input } from "@openstarter/ui/components/input";
 import { Label } from "@openstarter/ui/components/label";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
@@ -30,9 +30,9 @@ function SecurityPage() {
 
   const passwordForm = useForm({
     defaultValues: {
+      confirmPassword: "",
       currentPassword: "",
       newPassword: "",
-      confirmPassword: "",
     },
     onSubmit: async ({ value }) => {
       if (value.newPassword !== value.confirmPassword) {
@@ -58,9 +58,11 @@ function SecurityPage() {
     },
     validators: {
       onSubmit: z.object({
-        currentPassword: z.string().min(1, "Current password is required"),
-        newPassword: z.string().min(8, "Password must be at least 8 characters"),
         confirmPassword: z.string().min(1, "Please confirm the new password"),
+        currentPassword: z.string().min(1, "Current password is required"),
+        newPassword: z
+          .string()
+          .min(8, "Password must be at least 8 characters"),
       }),
     },
   });
@@ -78,7 +80,7 @@ function SecurityPage() {
           return;
         }
         toast.success(
-          "Email update requested. Check your inbox to confirm the change.",
+          "Email update requested. Check your inbox to confirm the change."
         );
       } finally {
         setChangingEmail(false);
@@ -102,28 +104,28 @@ function SecurityPage() {
         </CardHeader>
         <CardContent>
           <form
+            className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
               passwordForm.handleSubmit();
             }}
-            className="space-y-4"
           >
             <passwordForm.Field name="currentPassword">
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Current password</Label>
                   <Input
+                    autoComplete="current-password"
                     id={field.name}
                     name={field.name}
-                    type="password"
-                    autoComplete="current-password"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    type="password"
+                    value={field.state.value}
                   />
                   {field.state.meta.errors.map((err) => (
-                    <p key={err?.message} className="text-destructive text-sm">
+                    <p className="text-destructive text-sm" key={err?.message}>
                       {err?.message}
                     </p>
                   ))}
@@ -136,16 +138,16 @@ function SecurityPage() {
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>New password</Label>
                   <Input
+                    autoComplete="new-password"
                     id={field.name}
                     name={field.name}
-                    type="password"
-                    autoComplete="new-password"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    type="password"
+                    value={field.state.value}
                   />
                   {field.state.meta.errors.map((err) => (
-                    <p key={err?.message} className="text-destructive text-sm">
+                    <p className="text-destructive text-sm" key={err?.message}>
                       {err?.message}
                     </p>
                   ))}
@@ -158,16 +160,16 @@ function SecurityPage() {
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>Confirm new password</Label>
                   <Input
+                    autoComplete="new-password"
                     id={field.name}
                     name={field.name}
-                    type="password"
-                    autoComplete="new-password"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    type="password"
+                    value={field.state.value}
                   />
                   {field.state.meta.errors.map((err) => (
-                    <p key={err?.message} className="text-destructive text-sm">
+                    <p className="text-destructive text-sm" key={err?.message}>
                       {err?.message}
                     </p>
                   ))}
@@ -175,7 +177,7 @@ function SecurityPage() {
               )}
             </passwordForm.Field>
 
-            <Button type="submit" disabled={changingPassword}>
+            <Button disabled={changingPassword} type="submit">
               {changingPassword ? "Updating..." : "Update password"}
             </Button>
           </form>
@@ -192,28 +194,28 @@ function SecurityPage() {
         </CardHeader>
         <CardContent>
           <form
+            className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
               emailForm.handleSubmit();
             }}
-            className="space-y-4"
           >
             <emailForm.Field name="newEmail">
               {(field) => (
                 <div className="space-y-2">
                   <Label htmlFor={field.name}>New email</Label>
                   <Input
+                    autoComplete="email"
                     id={field.name}
                     name={field.name}
-                    type="email"
-                    autoComplete="email"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    type="email"
+                    value={field.state.value}
                   />
                   {field.state.meta.errors.map((err) => (
-                    <p key={err?.message} className="text-destructive text-sm">
+                    <p className="text-destructive text-sm" key={err?.message}>
                       {err?.message}
                     </p>
                   ))}
@@ -221,7 +223,7 @@ function SecurityPage() {
               )}
             </emailForm.Field>
 
-            <Button type="submit" disabled={changingEmail}>
+            <Button disabled={changingEmail} type="submit">
               {changingEmail ? "Requesting..." : "Request email change"}
             </Button>
           </form>

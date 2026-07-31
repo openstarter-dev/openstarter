@@ -10,9 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@openstarter/ui/components/card";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { useState } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
@@ -20,59 +21,87 @@ export const Route = createFileRoute("/_app/settings/accounts")({
   component: AccountsPage,
 });
 
-/** 已知社交 provider 的显示名与图标区域（图标暂用 emoji 占位，后续接入 lucide 图标）。 */
+const LINKABLE_PROVIDERS = ["google", "github", "apple"] as const;
+
 const PROVIDER_META: Record<string, { label: string }> = {
-  google: { label: "Google" },
-  github: { label: "GitHub" },
   apple: { label: "Apple" },
   credential: { label: "Email & Password" },
+  github: { label: "GitHub" },
+  google: { label: "Google" },
   passkey: { label: "Passkey" },
+};
+
+const getLinkLabel = (
+  provider: (typeof LINKABLE_PROVIDERS)[number],
+  alreadyLinked: boolean,
+  isLinking: boolean
+) => {
+  if (isLinking) {
+    return "Redirecting...";
+  }
+  const label = PROVIDER_META[provider]?.label ?? provider;
+  return alreadyLinked ? `${label} linked` : `Link ${label}`;
 };
 
 function AccountsPage() {
   const { data: session } = authClient.useSession();
-  const { data: accountsData, refetch: refetchAccounts } =
-    authClient.useListAccounts();
-  const accounts = accountsData ?? [];
+  const accountsQuery = useQuery({
+    queryFn: async () => {
+      const result = await authClient.listAccounts();
+      if (result.error) {
+        throw new Error(result.error.message || "Failed to load accounts");
+      }
+      return result.data ?? [];
+    },
+    queryKey: ["auth", "accounts"],
+  });
+  const accounts = accountsQuery.data ?? [];
 
   const [linking, setLinking] = useState<string | null>(null);
   const [unlinking, setUnlinking] = useState<string | null>(null);
+  const unlinkInFlight = useRef(false);
 
-  const totalCredentials =
-    accounts.filter(
-      (a) => a.provider === "credential" || a.provider !== "passkey",
-    ).length;
-
-  const handleLink = (provider: "google" | "github" | "apple") => {
+  const handleLink = async (provider: (typeof LINKABLE_PROVIDERS)[number]) => {
     setLinking(provider);
-    authClient.linkSocial({
-      provider,
-      callbackURL: "/settings/accounts",
-    });
-    // 重定向后不再 setLinking(null)，组件卸载
+    try {
+      const result = await authClient.linkSocial({
+        callbackURL: "/settings/accounts",
+        provider,
+      });
+      if (result.error) {
+        toast.error(result.error.message || "Failed to link account");
+      }
+    } finally {
+      setLinking(null);
+    }
   };
 
-  const handleUnlink = async (accountId: string, provider: string) => {
+  const handleUnlink = async (accountId: string, providerId: string) => {
+    if (unlinkInFlight.current) {
+      return;
+    }
     if (accounts.length <= 1) {
       toast.error(
-        "Cannot unlink your last sign-in method. Add another one first.",
+        "Cannot unlink your last sign-in method. Add another one first."
       );
       return;
     }
 
+    unlinkInFlight.current = true;
     setUnlinking(accountId);
     try {
       const result = await authClient.unlinkAccount({
-        providerId: provider,
         accountId,
+        providerId,
       });
       if (result.error) {
         toast.error(result.error.message || "Failed to unlink account");
         return;
       }
       toast.success("Account unlinked");
-      refetchAccounts();
+      await accountsQuery.refetch();
     } finally {
+      unlinkInFlight.current = false;
       setUnlinking(null);
     }
   };
@@ -86,37 +115,53 @@ function AccountsPage() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* 已有账号列表 */}
+        {accountsQuery.isPending ? (
+          <p className="text-muted-foreground text-sm">Loading accounts...</p>
+        ) : null}
+        {accountsQuery.error ? (
+          <p className="text-destructive text-sm">
+            {accountsQuery.error.message}
+          </p>
+        ) : null}
         {accounts.length > 0 && (
           <div className="space-y-2">
-            <p className="text-sm font-medium">Linked accounts</p>
+            <p className="font-medium text-sm">Linked accounts</p>
             <div className="divide-y rounded-lg border">
               {accounts.map((account) => {
-                const meta = PROVIDER_META[account.provider] ?? {
-                  label: account.provider,
+                const meta = PROVIDER_META[account.providerId] ?? {
+                  label: account.providerId,
                 };
                 return (
                   <div
-                    key={account.id}
                     className="flex items-center justify-between px-4 py-3"
+                    key={account.id}
                   >
                     <span className="text-sm">{meta.label}</span>
                     <span className="text-muted-foreground text-xs">
-                      {account.email ?? ""}
+                      {account.accountId}
                     </span>
                     <Button
-                      type="button"
-                      variant="ghost"
+                      disabled={unlinking !== null || accounts.length <= 1}
+                      onClick={() => {
+                        handleUnlink(
+                          account.accountId,
+                          account.providerId
+                        ).catch((error: Error) => {
+                          toast.error(error.message);
+                        });
+                      }}
                       size="sm"
-                      disabled={unlinking === account.id || accounts.length <= 1}
-                      onClick={() => handleUnlink(account.id, account.provider)}
                       title={
                         accounts.length <= 1
                           ? "Cannot unlink your last sign-in method"
                           : undefined
                       }
+                      type="button"
+                      variant="ghost"
                     >
-                      {unlinking === account.id ? "Unlinking..." : "Unlink"}
+                      {unlinking === account.accountId
+                        ? "Unlinking..."
+                        : "Unlink"}
                     </Button>
                   </div>
                 );
@@ -125,37 +170,33 @@ function AccountsPage() {
           </div>
         )}
 
-        {/* 绑定入口 */}
         <div className="space-y-2">
-          <p className="text-sm font-medium">Link a new account</p>
+          <p className="font-medium text-sm">Link a new account</p>
           <div className="flex flex-wrap gap-2">
-            {["google", "github", "apple"].map((provider) => {
+            {LINKABLE_PROVIDERS.map((provider) => {
               const alreadyLinked = accounts.some(
-                (a) => a.provider === provider,
+                (account) => account.providerId === provider
               );
               return (
                 <Button
+                  disabled={alreadyLinked || linking === provider}
                   key={provider}
+                  onClick={() => {
+                    handleLink(provider).catch((error: Error) => {
+                      toast.error(error.message);
+                    });
+                  }}
+                  size="sm"
                   type="button"
                   variant="outline"
-                  size="sm"
-                  disabled={alreadyLinked || linking === provider}
-                  onClick={() =>
-                    handleLink(provider as "google" | "github" | "apple")
-                  }
                 >
-                  {linking === provider
-                    ? "Redirecting..."
-                    : alreadyLinked
-                      ? `${PROVIDER_META[provider]?.label ?? provider} linked`
-                      : `Link ${PROVIDER_META[provider]?.label ?? provider}`}
+                  {getLinkLabel(provider, alreadyLinked, linking === provider)}
                 </Button>
               );
             })}
           </div>
         </div>
 
-        {/* 匿名用户引导 */}
         {session?.user?.email === null && (
           <div className="rounded-md bg-muted p-4 text-sm">
             You're currently signed in anonymously. Link an account above to

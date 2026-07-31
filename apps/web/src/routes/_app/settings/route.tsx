@@ -2,19 +2,29 @@
 // 账户设置外壳：左侧二级导航 + <Outlet/>。
 // 子路由：profile / security / accounts / sessions / danger。
 
-import { Link, Outlet, createFileRoute, useRouterState } from "@tanstack/react-router";
 import { cn } from "@openstarter/ui/lib/utils";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useRouterState,
+} from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app/settings")({
   component: SettingsLayout,
 });
 
 const NAV_ITEMS = [
-  { to: "/settings/profile", label: "Profile" },
-  { to: "/settings/security", label: "Security" },
-  { to: "/settings/accounts", label: "Accounts" },
-  { to: "/settings/sessions", label: "Sessions" },
-  { to: "/settings/danger", label: "Danger zone" },
+  { label: "Profile", to: "/settings/profile" },
+  { label: "Billing", to: "/settings/billing" },
+  { label: "Credits", to: "/settings/credits" },
+  { label: "Payments", to: "/settings/payments" },
+  { label: "API keys", to: "/settings/apikeys" },
+  { label: "Tickets", to: "/settings/tickets" },
+  { label: "Security", to: "/settings/security" },
+  { label: "Accounts", to: "/settings/accounts" },
+  { label: "Sessions", to: "/settings/sessions" },
+  { label: "Danger zone", to: "/settings/danger" },
 ] as const;
 
 function SettingsLayout() {
@@ -39,14 +49,14 @@ function SettingsLayout() {
               pathname === item.to || pathname.startsWith(`${item.to}/`);
             return (
               <Link
-                key={item.to}
-                to={item.to}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm whitespace-nowrap transition-colors",
+                  "whitespace-nowrap rounded-md px-3 py-2 text-sm transition-colors",
                   active
                     ? "bg-muted font-medium text-foreground"
-                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                 )}
+                key={item.to}
+                to={item.to}
               >
                 {item.label}
               </Link>

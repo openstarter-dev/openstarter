@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  cancel-in-progress: true
+  group: ci-${{ github.ref }}
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.25.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Run tests
+        run: pnpm test
+      - name: Collect coverage
+        run: pnpm test:coverage
+      - name: Generate route tree
+        run: pnpm generate:routes
+      - name: Check types
+        run: pnpm exec turbo check-types
+      - name: Check formatting and lint
+        env:
+          ULTRACITE_BASE_SHA: ${{ github.event.before }}
+        run: pnpm ultracite:check
+      - name: Build Node target
+        run: pnpm build
+      - name: Build Cloudflare target
+        run: pnpm --filter web cf:build

@@ -19,6 +19,8 @@
     "db:generate": "node scripts/setup-schema.mjs && drizzle-kit generate",
     "db:studio": "node scripts/setup-schema.mjs && drizzle-kit studio",
     "db:migrate": "node scripts/setup-schema.mjs && drizzle-kit migrate",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {

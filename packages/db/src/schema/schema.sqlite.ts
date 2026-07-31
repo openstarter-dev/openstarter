@@ -13,7 +13,13 @@
  */
 
 import { sql } from "drizzle-orm";
-import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import {
+  index,
+  integer,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 const table = sqliteTable;
 
@@ -24,23 +30,31 @@ const sqliteNowMs = sql`(cast((julianday('now') - 2440587.5)*86400000 as integer
 export const user = table(
   "user",
   {
-    id: text("id").primaryKey(),
-    name: text("name").notNull(),
+    banExpires: integer("ban_expires", { mode: "timestamp_ms" }),
+    banned: integer("banned", { mode: "boolean" }).default(false),
+    banReason: text("ban_reason"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sqliteNowMs)
+      .notNull(),
     email: text("email").notNull().unique(),
     emailVerified: integer("email_verified", { mode: "boolean" })
       .default(false)
       .notNull(),
+    id: text("id").primaryKey(),
     image: text("image"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .notNull(),
+    ip: text("ip").notNull().default(""),
+    isAnonymous: integer("is_anonymous", { mode: "boolean" }).default(false),
+    locale: text("locale").notNull().default(""),
+    name: text("name").notNull(),
+    role: text("role"),
+    twoFactorEnabled: integer("two_factor_enabled", {
+      mode: "boolean",
+    }).default(false),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
     utmSource: text("utm_source").notNull().default(""),
-    ip: text("ip").notNull().default(""),
-    locale: text("locale").notNull().default(""),
   },
   (t) => [
     index("idx_user_name").on(t.name),
@@ -51,17 +65,20 @@ export const user = table(
 export const session = table(
   "session",
   {
-    id: text("id").primaryKey(),
-    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
-    token: text("token").notNull().unique(),
+    activeOrganizationId: text("active_organization_id"),
+    activeTeamId: text("active_team_id"),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    id: text("id").primaryKey(),
+    impersonatedBy: text("impersonated_by"),
+    ipAddress: text("ip_address"),
+    token: text("token").notNull().unique(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
     userId: text("user_id")
       .notNull()
@@ -73,30 +90,30 @@ export const session = table(
 export const account = table(
   "account",
   {
-    id: text("id").primaryKey(),
-    accountId: text("account_id").notNull(),
-    providerId: text("provider_id").notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
     accessToken: text("access_token"),
-    refreshToken: text("refresh_token"),
-    idToken: text("id_token"),
     accessTokenExpiresAt: integer("access_token_expires_at", {
       mode: "timestamp_ms",
     }),
+    accountId: text("account_id").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sqliteNowMs)
+      .notNull(),
+    id: text("id").primaryKey(),
+    idToken: text("id_token"),
+    password: text("password"),
+    providerId: text("provider_id").notNull(),
+    refreshToken: text("refresh_token"),
     refreshTokenExpiresAt: integer("refresh_token_expires_at", {
       mode: "timestamp_ms",
     }),
     scope: text("scope"),
-    password: text("password"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_account_user_id").on(t.userId),
@@ -107,19 +124,150 @@ export const account = table(
 export const verification = table(
   "verification",
   {
-    id: text("id").primaryKey(),
-    identifier: text("identifier").notNull(),
-    value: text("value").notNull(),
-    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    id: text("id").primaryKey(),
+    identifier: text("identifier").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
+    value: text("value").notNull(),
   },
   (t) => [index("idx_verification_identifier").on(t.identifier)]
+);
+
+export const passkey = table(
+  "passkey",
+  {
+    aaguid: text("aaguid"),
+    backedUp: integer("backed_up", { mode: "boolean" }).notNull(),
+    counter: integer("counter").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" }),
+    credentialID: text("credential_id").notNull(),
+    deviceType: text("device_type").notNull(),
+    id: text("id").primaryKey(),
+    name: text("name"),
+    publicKey: text("public_key").notNull(),
+    transports: text("transports"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    index("idx_passkey_user_id").on(t.userId),
+    index("idx_passkey_credential_id").on(t.credentialID),
+  ]
+);
+
+export const twoFactor = table(
+  "two_factor",
+  {
+    backupCodes: text("backup_codes").notNull(),
+    id: text("id").primaryKey(),
+    secret: text("secret").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    verified: integer("verified", { mode: "boolean" }).default(true),
+  },
+  (t) => [
+    index("idx_two_factor_secret").on(t.secret),
+    index("idx_two_factor_user_id").on(t.userId),
+  ]
+);
+
+export const organization = table(
+  "organization",
+  {
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    id: text("id").primaryKey(),
+    logo: text("logo"),
+    metadata: text("metadata"),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+  },
+  (t) => [index("idx_organization_slug").on(t.slug)]
+);
+
+export const member = table(
+  "member",
+  {
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    role: text("role").notNull().default("member"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    index("idx_member_organization_id").on(t.organizationId),
+    index("idx_member_user_id").on(t.userId),
+  ]
+);
+
+export const invitation = table(
+  "invitation",
+  {
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sqliteNowMs)
+      .notNull(),
+    email: text("email").notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    id: text("id").primaryKey(),
+    inviterId: text("inviter_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    role: text("role"),
+    status: text("status").notNull().default("pending"),
+    teamId: text("team_id"),
+  },
+  (t) => [
+    index("idx_invitation_organization_id").on(t.organizationId),
+    index("idx_invitation_email").on(t.email),
+  ]
+);
+
+export const team = table(
+  "team",
+  {
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).$onUpdate(
+      () => new Date()
+    ),
+  },
+  (t) => [index("idx_team_organization_id").on(t.organizationId)]
+);
+
+export const teamMember = table(
+  "team_member",
+  {
+    createdAt: integer("created_at", { mode: "timestamp_ms" }),
+    id: text("id").primaryKey(),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => team.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    index("idx_team_member_team_id").on(t.teamId),
+    index("idx_team_member_user_id").on(t.userId),
+  ]
 );
 
 // ─── Content ─────────────────────────────────────────────────────────────────
@@ -132,27 +280,27 @@ export const config = table("config", {
 export const taxonomy = table(
   "taxonomy",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    parentId: text("parent_id"),
-    slug: text("slug").unique().notNull(),
-    type: text("type").notNull(),
-    title: text("title").notNull(),
-    description: text("description"),
-    image: text("image"),
-    icon: text("icon"),
-    status: text("status").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    description: text("description"),
+    icon: text("icon"),
+    id: text("id").primaryKey(),
+    image: text("image"),
+    parentId: text("parent_id"),
+    slug: text("slug").unique().notNull(),
+    sort: integer("sort").default(0).notNull(),
+    status: text("status").notNull(),
+    title: text("title").notNull(),
+    type: text("type").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    sort: integer("sort").default(0).notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [index("idx_taxonomy_type_status").on(t.type, t.status)]
 );
@@ -160,31 +308,31 @@ export const taxonomy = table(
 export const post = table(
   "post",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    parentId: text("parent_id"),
-    slug: text("slug").unique().notNull(),
-    type: text("type").notNull(),
-    title: text("title"),
-    description: text("description"),
-    image: text("image"),
-    content: text("content"),
-    categories: text("categories"),
-    tags: text("tags"),
-    authorName: text("author_name"),
     authorImage: text("author_image"),
-    status: text("status").notNull(),
+    authorName: text("author_name"),
+    categories: text("categories"),
+    content: text("content"),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    description: text("description"),
+    id: text("id").primaryKey(),
+    image: text("image"),
+    parentId: text("parent_id"),
+    slug: text("slug").unique().notNull(),
+    sort: integer("sort").default(0).notNull(),
+    status: text("status").notNull(),
+    tags: text("tags"),
+    title: text("title"),
+    type: text("type").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    sort: integer("sort").default(0).notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [index("idx_post_type_status").on(t.type, t.status)]
 );
@@ -194,54 +342,54 @@ export const post = table(
 export const order = table(
   "order",
   {
-    id: text("id").primaryKey(),
-    orderNo: text("order_no").unique().notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    userEmail: text("user_email"),
-    status: text("status").notNull(),
     amount: integer("amount").notNull(),
-    currency: text("currency").notNull(),
-    productId: text("product_id"),
-    paymentType: text("payment_type"),
-    paymentInterval: text("payment_interval"),
-    paymentProvider: text("payment_provider").notNull(),
-    paymentSessionId: text("payment_session_id"),
+    callbackUrl: text("callback_url"),
     checkoutInfo: text("checkout_info").notNull(),
     checkoutResult: text("checkout_result"),
-    paymentResult: text("payment_result"),
-    discountCode: text("discount_code"),
-    discountAmount: integer("discount_amount"),
-    discountCurrency: text("discount_currency"),
-    paymentEmail: text("payment_email"),
-    paymentAmount: integer("payment_amount"),
-    paymentCurrency: text("payment_currency"),
-    paidAt: integer("paid_at", { mode: "timestamp_ms" }),
+    checkoutUrl: text("checkout_url"),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    creditsAmount: integer("credits_amount"),
+    creditsValidDays: integer("credits_valid_days"),
+    currency: text("currency").notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    description: text("description"),
+    discountAmount: integer("discount_amount"),
+    discountCode: text("discount_code"),
+    discountCurrency: text("discount_currency"),
+    id: text("id").primaryKey(),
+    invoiceId: text("invoice_id"),
+    invoiceUrl: text("invoice_url"),
+    orderNo: text("order_no").unique().notNull(),
+    paidAt: integer("paid_at", { mode: "timestamp_ms" }),
+    paymentAmount: integer("payment_amount"),
+    paymentCurrency: text("payment_currency"),
+    paymentEmail: text("payment_email"),
+    paymentInterval: text("payment_interval"),
+    paymentProductId: text("payment_product_id"),
+    paymentProvider: text("payment_provider").notNull(),
+    paymentResult: text("payment_result"),
+    paymentSessionId: text("payment_session_id"),
+    paymentType: text("payment_type"),
+    paymentUserId: text("payment_user_id"),
+    paymentUserName: text("payment_user_name"),
+    planName: text("plan_name"),
+    productId: text("product_id"),
+    productName: text("product_name"),
+    status: text("status").notNull(),
+    subscriptionId: text("subscription_id"),
+    subscriptionNo: text("subscription_no"),
+    subscriptionResult: text("subscription_result"),
+    transactionId: text("transaction_id"),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    description: text("description"),
-    productName: text("product_name"),
-    subscriptionId: text("subscription_id"),
-    subscriptionResult: text("subscription_result"),
-    checkoutUrl: text("checkout_url"),
-    callbackUrl: text("callback_url"),
-    creditsAmount: integer("credits_amount"),
-    creditsValidDays: integer("credits_valid_days"),
-    planName: text("plan_name"),
-    paymentProductId: text("payment_product_id"),
-    invoiceId: text("invoice_id"),
-    invoiceUrl: text("invoice_url"),
-    subscriptionNo: text("subscription_no"),
-    transactionId: text("transaction_id"),
-    paymentUserName: text("payment_user_name"),
-    paymentUserId: text("payment_user_id"),
+    userEmail: text("user_email"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_order_user_status_payment_type").on(
@@ -260,46 +408,46 @@ export const order = table(
 export const subscription = table(
   "subscription",
   {
-    id: text("id").primaryKey(),
-    subscriptionNo: text("subscription_no").unique().notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    userEmail: text("user_email"),
-    status: text("status").notNull(),
-    paymentProvider: text("payment_provider").notNull(),
-    subscriptionId: text("subscription_id").notNull(),
-    subscriptionResult: text("subscription_result"),
-    productId: text("product_id"),
-    description: text("description"),
     amount: integer("amount"),
-    currency: text("currency"),
-    interval: text("interval"),
-    intervalCount: integer("interval_count"),
-    trialPeriodDays: integer("trial_period_days"),
-    currentPeriodStart: integer("current_period_start", {
-      mode: "timestamp_ms",
-    }),
-    currentPeriodEnd: integer("current_period_end", { mode: "timestamp_ms" }),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    planName: text("plan_name"),
     billingUrl: text("billing_url"),
-    productName: text("product_name"),
-    creditsAmount: integer("credits_amount"),
-    creditsValidDays: integer("credits_valid_days"),
-    paymentProductId: text("payment_product_id"),
-    paymentUserId: text("payment_user_id"),
     canceledAt: integer("canceled_at", { mode: "timestamp_ms" }),
     canceledEndAt: integer("canceled_end_at", { mode: "timestamp_ms" }),
     canceledReason: text("canceled_reason"),
     canceledReasonType: text("canceled_reason_type"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sqliteNowMs)
+      .notNull(),
+    creditsAmount: integer("credits_amount"),
+    creditsValidDays: integer("credits_valid_days"),
+    currency: text("currency"),
+    currentPeriodEnd: integer("current_period_end", { mode: "timestamp_ms" }),
+    currentPeriodStart: integer("current_period_start", {
+      mode: "timestamp_ms",
+    }),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    description: text("description"),
+    id: text("id").primaryKey(),
+    interval: text("interval"),
+    intervalCount: integer("interval_count"),
+    paymentProductId: text("payment_product_id"),
+    paymentProvider: text("payment_provider").notNull(),
+    paymentUserId: text("payment_user_id"),
+    planName: text("plan_name"),
+    productId: text("product_id"),
+    productName: text("product_name"),
+    status: text("status").notNull(),
+    subscriptionId: text("subscription_id").notNull(),
+    subscriptionNo: text("subscription_no").unique().notNull(),
+    subscriptionResult: text("subscription_result"),
+    trialPeriodDays: integer("trial_period_days"),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(sqliteNowMs)
+      .$onUpdate(() => new Date())
+      .notNull(),
+    userEmail: text("user_email"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_subscription_user_status_interval").on(
@@ -318,31 +466,31 @@ export const subscription = table(
 export const credit = table(
   "credit",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    userEmail: text("user_email"),
-    orderNo: text("order_no"),
-    subscriptionNo: text("subscription_no"),
-    transactionNo: text("transaction_no").unique().notNull(),
-    transactionType: text("transaction_type").notNull(),
-    transactionScene: text("transaction_scene"),
-    credits: integer("credits").notNull(),
-    remainingCredits: integer("remaining_credits").notNull().default(0),
-    description: text("description"),
-    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
-    status: text("status").notNull(),
+    consumedDetail: text("consumed_detail"),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    credits: integer("credits").notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    description: text("description"),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+    id: text("id").primaryKey(),
+    metadata: text("metadata"),
+    orderNo: text("order_no"),
+    remainingCredits: integer("remaining_credits").notNull().default(0),
+    status: text("status").notNull(),
+    subscriptionNo: text("subscription_no"),
+    transactionNo: text("transaction_no").unique().notNull(),
+    transactionScene: text("transaction_scene"),
+    transactionType: text("transaction_type").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    consumedDetail: text("consumed_detail"),
-    metadata: text("metadata"),
+    userEmail: text("user_email"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_credit_consume_fifo").on(
@@ -360,22 +508,22 @@ export const credit = table(
 export const apikey = table(
   "apikey",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    keyHash: text("key_hash").notNull(),
-    keyPrefix: text("key_prefix").notNull(),
-    title: text("title").notNull(),
-    status: text("status").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    id: text("id").primaryKey(),
+    keyHash: text("key_hash").notNull(),
+    keyPrefix: text("key_prefix").notNull(),
+    status: text("status").notNull(),
+    title: text("title").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_apikey_user_status").on(t.userId, t.status),
@@ -388,19 +536,19 @@ export const apikey = table(
 export const role = table(
   "role",
   {
-    id: text("id").primaryKey(),
-    name: text("name").notNull().unique(),
-    title: text("title").notNull(),
-    description: text("description"),
-    status: text("status").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    description: text("description"),
+    id: text("id").primaryKey(),
+    name: text("name").notNull().unique(),
+    sort: integer("sort").default(0).notNull(),
+    status: text("status").notNull(),
+    title: text("title").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    sort: integer("sort").default(0).notNull(),
   },
   (t) => [index("idx_role_status").on(t.status)]
 );
@@ -408,15 +556,15 @@ export const role = table(
 export const permission = table(
   "permission",
   {
-    id: text("id").primaryKey(),
-    code: text("code").notNull().unique(),
-    resource: text("resource").notNull(),
     action: text("action").notNull(),
-    title: text("title").notNull(),
-    description: text("description"),
+    code: text("code").notNull().unique(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    description: text("description"),
+    id: text("id").primaryKey(),
+    resource: text("resource").notNull(),
+    title: text("title").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
@@ -428,21 +576,21 @@ export const permission = table(
 export const rolePermission = table(
   "role_permission",
   {
-    id: text("id").primaryKey(),
-    roleId: text("role_id")
-      .notNull()
-      .references(() => role.id, { onDelete: "cascade" }),
-    permissionId: text("permission_id")
-      .notNull()
-      .references(() => permission.id, { onDelete: "cascade" }),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    id: text("id").primaryKey(),
+    permissionId: text("permission_id")
+      .notNull()
+      .references(() => permission.id, { onDelete: "cascade" }),
+    roleId: text("role_id")
+      .notNull()
+      .references(() => role.id, { onDelete: "cascade" }),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
   },
   (t) => [
     index("idx_role_permission_role_permission").on(t.roleId, t.permissionId),
@@ -452,23 +600,26 @@ export const rolePermission = table(
 export const userRole = table(
   "user_role",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    roleId: text("role_id")
-      .notNull()
-      .references(() => role.id, { onDelete: "cascade" }),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+    id: text("id").primaryKey(),
+    roleId: text("role_id")
+      .notNull()
+      .references(() => role.id, { onDelete: "cascade" }),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
-  (t) => [index("idx_user_role_user_expires").on(t.userId, t.expiresAt)]
+  (t) => [
+    index("idx_user_role_user_expires").on(t.userId, t.expiresAt),
+    uniqueIndex("uq_user_role_user_role").on(t.userId, t.roleId),
+  ]
 );
 
 // ─── AI ──────────────────────────────────────────────────────────────────────
@@ -476,30 +627,30 @@ export const userRole = table(
 export const aiTask = table(
   "ai_task",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    mediaType: text("media_type").notNull(),
-    provider: text("provider").notNull(),
-    model: text("model").notNull(),
-    prompt: text("prompt").notNull(),
-    options: text("options"),
-    status: text("status").notNull(),
+    costCredits: integer("cost_credits").notNull().default(0),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    creditId: text("credit_id"),
+    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
+    id: text("id").primaryKey(),
+    mediaType: text("media_type").notNull(),
+    model: text("model").notNull(),
+    options: text("options"),
+    prompt: text("prompt").notNull(),
+    provider: text("provider").notNull(),
+    scene: text("scene").notNull().default(""),
+    status: text("status").notNull(),
+    taskId: text("task_id"),
+    taskInfo: text("task_info"),
+    taskResult: text("task_result"),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    taskId: text("task_id"),
-    taskInfo: text("task_info"),
-    taskResult: text("task_result"),
-    costCredits: integer("cost_credits").notNull().default(0),
-    scene: text("scene").notNull().default(""),
-    creditId: text("credit_id"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_ai_task_user_media_type").on(t.userId, t.mediaType),
@@ -510,24 +661,24 @@ export const aiTask = table(
 export const chat = table(
   "chat",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-    status: text("status").notNull(),
+    content: text("content"),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    id: text("id").primaryKey(),
+    metadata: text("metadata"),
+    model: text("model").notNull(),
+    parts: text("parts").notNull(),
+    provider: text("provider").notNull(),
+    status: text("status").notNull(),
+    title: text("title").notNull().default(""),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    model: text("model").notNull(),
-    provider: text("provider").notNull(),
-    title: text("title").notNull().default(""),
-    parts: text("parts").notNull(),
-    metadata: text("metadata"),
-    content: text("content"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [index("idx_chat_user_status").on(t.userId, t.status)]
 );
@@ -535,26 +686,26 @@ export const chat = table(
 export const chatMessage = table(
   "chat_message",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
     chatId: text("chat_id")
       .notNull()
       .references(() => chat.id, { onDelete: "cascade" }),
-    status: text("status").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .notNull(),
+    id: text("id").primaryKey(),
+    metadata: text("metadata"),
+    model: text("model").notNull(),
+    parts: text("parts").notNull(),
+    provider: text("provider").notNull(),
+    role: text("role").notNull(),
+    status: text("status").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp_ms" })
       .default(sqliteNowMs)
       .$onUpdate(() => new Date())
       .notNull(),
-    role: text("role").notNull(),
-    parts: text("parts").notNull(),
-    metadata: text("metadata"),
-    model: text("model").notNull(),
-    provider: text("provider").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
     index("idx_chat_message_chat_id").on(t.chatId, t.status),
@@ -567,18 +718,18 @@ export const chatMessage = table(
 export const ticket = table(
   "ticket",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id),
-    title: text("title").notNull(),
-    status: text("status").notNull().default("open"),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
+    id: text("id").primaryKey(),
+    status: text("status").notNull().default("open"),
+    title: text("title").notNull(),
     updatedAt: integer("updated_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id),
   },
   (t) => [
     index("idx_ticket_user").on(t.userId),
@@ -589,19 +740,19 @@ export const ticket = table(
 export const ticketMessage = table(
   "ticket_message",
   {
+    attachments: text("attachments").notNull().default("[]"),
+    content: text("content").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
     id: text("id").primaryKey(),
+    role: text("role").notNull().default("user"),
     ticketId: text("ticket_id")
       .notNull()
       .references(() => ticket.id),
     userId: text("user_id")
       .notNull()
       .references(() => user.id),
-    role: text("role").notNull().default("user"),
-    content: text("content").notNull(),
-    attachments: text("attachments").notNull().default("[]"),
-    createdAt: integer("created_at", { mode: "timestamp" })
-      .notNull()
-      .$defaultFn(() => new Date()),
   },
   (t) => [index("idx_ticket_message_ticket").on(t.ticketId)]
 );
@@ -611,17 +762,17 @@ export const ticketMessage = table(
 export const inviteCode = table(
   "invite_code",
   {
-    id: text("id").primaryKey(),
     code: text("code").notNull().unique(),
-    maxUses: integer("max_uses").notNull().default(1),
-    usedCount: integer("used_count").notNull().default(0),
-    trialDays: integer("trial_days").notNull().default(15),
-    note: text("note").default(""),
-    createdBy: text("created_by").references(() => user.id),
-    expiresAt: integer("expires_at", { mode: "timestamp" }),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
+    createdBy: text("created_by").references(() => user.id),
+    expiresAt: integer("expires_at", { mode: "timestamp" }),
+    id: text("id").primaryKey(),
+    maxUses: integer("max_uses").notNull().default(1),
+    note: text("note").default(""),
+    trialDays: integer("trial_days").notNull().default(15),
+    usedCount: integer("used_count").notNull().default(0),
   },
   (t) => [index("idx_invite_code_code").on(t.code)]
 );
@@ -629,17 +780,18 @@ export const inviteCode = table(
 export const userInvite = table(
   "user_invite",
   {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id),
-    inviteCodeId: text("invite_code_id")
-      .notNull()
-      .references(() => inviteCode.id),
     activatedAt: integer("activated_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
+    id: text("id").primaryKey(),
+    inviteCodeId: text("invite_code_id")
+      .notNull()
+      .references(() => inviteCode.id),
     trialEndsAt: integer("trial_ends_at", { mode: "timestamp" }).notNull(),
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => user.id),
   },
   (t) => [
     index("idx_user_invite_user").on(t.userId),
