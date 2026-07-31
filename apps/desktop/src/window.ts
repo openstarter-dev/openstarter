@@ -14,13 +14,12 @@ import {
 } from "./security";
 import type { WindowStateStore } from "./window-state";
 
-const OFFLINE_PAGE_PATH = join(
-  import.meta.dirname,
-  "..",
-  "resources",
-  "offline.html"
-);
-const PRELOAD_PATH = join(import.meta.dirname, "preload.cjs");
+// esbuild 把本文件编译成 CommonJS 供 Electron 主进程加载：__dirname 在运行时解析到 dist/，
+// 正是 preload.cjs 所在位置，其相对推导出的 .. /resources 也正确。
+// biome-ignore lint/correctness/noGlobalDirnameFilename: 见上行注释；import.meta 不可用于 CJS 输出，__dirname 是正确选择。
+const DIST_DIR = __dirname;
+const OFFLINE_PAGE_PATH = join(DIST_DIR, "..", "resources", "offline.html");
+const PRELOAD_PATH = join(DIST_DIR, "preload.cjs");
 
 function loadOfflinePage(
   win: BrowserWindow,

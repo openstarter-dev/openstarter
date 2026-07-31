@@ -1,16 +1,25 @@
 {
   "name": "desktop",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "src/main.cjs",
+  "main": "dist/main.cjs",
   "scripts": {
     "dev": "node ../../scripts/run-desktop.mjs",
     "dev:electron": "cross-env NODE_ENV=development electron .",
-    "check-types": "tsc --noEmit"
+    "build": "node scripts/build.mjs",
+    "package": "pnpm run build && electron-builder --publish never",
+    "release": "pnpm run build && electron-builder --publish always",
+    "check-types": "tsc --noEmit",
+    "test": "vitest --run"
   },
-  "dependencies": {},
+  "dependencies": {
+    "electron-updater": "6.8.9"
+  },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "electron": "^33.2.0"
+    "electron": "43.2.0",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.1"
   }
 }
