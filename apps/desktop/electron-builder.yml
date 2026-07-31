@@ -4,6 +4,10 @@
 # 编译产物、静态资源和 package.json —— 不需要 node_modules（显式声明 files 会覆盖
 # electron-builder 默认的 node_modules 收集行为）。
 # 详见 docs/superpowers/specs/2026-08-01-desktop-app-design.md §6。
+#
+# 多架构：electron-builder 不支持在各平台块的 arch 数组里同时列多个架构时配合
+# target 字符串数组（schema 会判定失败）。这里只声明 target，架构由 --arch 参数或
+# 外部 CI 矩阵传入，本机默认构建宿主架构。
 
 appId: com.openstarter.desktop
 productName: OpenStarter
@@ -21,9 +25,6 @@ mac:
   target:
     - dmg
     - zip
-  arch:
-    - arm64
-    - x64
   # electron-updater 在 macOS 上读取 zip 而非 dmg 的元数据；只配 dmg 会导致自动更新
   # 失效，zip 是必需项，不是可选项。
   #
@@ -34,8 +35,6 @@ mac:
 win:
   target:
     - nsis
-  arch:
-    - x64
   # 代码签名（接入证书后取消注释）：
   # certificateFile: path/to/cert.pfx
   # certificatePassword: ${env.WIN_CSC_KEY_PASSWORD}
@@ -44,8 +43,6 @@ linux:
   target:
     - AppImage
     - deb
-  arch:
-    - x64
   category: Utility
 
 publish:
