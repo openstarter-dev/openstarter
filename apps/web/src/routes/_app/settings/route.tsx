@@ -2,7 +2,7 @@
 // 账户设置外壳：左侧二级导航 + <Outlet/>。
 // 子路由：profile / security / accounts / sessions / danger。
 
-import { cn } from "@openstarter/ui/lib/utils";
+import { cn } from "@openstarter/ui-web/lib/utils";
 import {
   createFileRoute,
   Link,

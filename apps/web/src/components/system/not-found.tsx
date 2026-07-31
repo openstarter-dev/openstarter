@@ -1,4 +1,4 @@
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import { Link } from "@tanstack/react-router";
 
 import { BRAND_NAME } from "@/lib/branding";

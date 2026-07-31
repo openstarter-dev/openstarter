@@ -9,19 +9,23 @@
 //
 // 仅展示拥有 admin.* 权限的用户可见（路由外壳已守卫）。
 
-import { Button } from "@openstarter/ui/components/button";
-import { Card, CardContent, CardHeader } from "@openstarter/ui/components/card";
-import { Input } from "@openstarter/ui/components/input";
-import { Label } from "@openstarter/ui/components/label";
+import { Button } from "@openstarter/ui-web/components/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+} from "@openstarter/ui-web/components/card";
+import { Input } from "@openstarter/ui-web/components/input";
+import { Label } from "@openstarter/ui-web/components/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@openstarter/ui/components/select";
-import { Textarea } from "@openstarter/ui/components/textarea";
-import { cn } from "@openstarter/ui/lib/utils";
+} from "@openstarter/ui-web/components/select";
+import { Textarea } from "@openstarter/ui-web/components/textarea";
+import { cn } from "@openstarter/ui-web/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

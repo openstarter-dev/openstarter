@@ -1,4 +1,4 @@
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 
 import { BRAND_NAME } from "@/lib/branding";
 
@@ -17,7 +17,7 @@ export function ErrorPage({ error }: { error: Error }) {
           {error.message}
         </pre>
       ) : null}
-      <Button type="button" onClick={() => window.location.reload()}>
+      <Button onClick={() => window.location.reload()} type="button">
         Reload
       </Button>
     </main>

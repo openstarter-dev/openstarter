@@ -1,15 +1,15 @@
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
-import { Button } from "@openstarter/ui/components/button";
-import { Input } from "@openstarter/ui/components/input";
-import { Label } from "@openstarter/ui/components/label";
+} from "@openstarter/ui-web/components/card";
+import { Input } from "@openstarter/ui-web/components/input";
+import { Label } from "@openstarter/ui-web/components/label";
 import { useForm } from "@tanstack/react-form";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import z from "zod";
 
@@ -63,26 +63,26 @@ function ForgotPasswordPage() {
               its way.
             </p>
             <Link
-              to="/login"
               className="block text-center text-sm underline underline-offset-4"
+              to="/login"
             >
               Back to sign in
             </Link>
           </div>
         ) : (
           <form
+            className="space-y-4"
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
               form.handleSubmit();
             }}
-            className="space-y-4"
           >
-            {error && (
+            {error ? (
               <div className="rounded-md bg-destructive/10 p-3 text-destructive text-sm">
                 {error}
               </div>
-            )}
+            ) : null}
             <form.Field name="email">
               {(field) => (
                 <div className="space-y-2">
@@ -90,13 +90,13 @@ function ForgotPasswordPage() {
                   <Input
                     id={field.name}
                     name={field.name}
-                    type="email"
-                    value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
+                    type="email"
+                    value={field.state.value}
                   />
                   {field.state.meta.errors.map((err) => (
-                    <p key={err?.message} className="text-red-500 text-sm">
+                    <p className="text-red-500 text-sm" key={err?.message}>
                       {err?.message}
                     </p>
                   ))}
@@ -105,14 +105,18 @@ function ForgotPasswordPage() {
             </form.Field>
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button
+                  className="w-full"
+                  disabled={isSubmitting}
+                  type="submit"
+                >
                   {isSubmitting ? "Sending..." : "Send reset link"}
                 </Button>
               )}
             </form.Subscribe>
             <Link
-              to="/login"
               className="block text-center text-sm underline underline-offset-4"
+              to="/login"
             >
               Back to sign in
             </Link>

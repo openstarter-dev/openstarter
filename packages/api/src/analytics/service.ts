@@ -12,7 +12,10 @@
 // 单一事实源保持一致。Config 读取走 `@openstarter/shared/config`（env + DB 双源合并、秘密解密、
 // 1h 缓存）。依赖分层 api → db / shared / billing，无反向、无环。
 
-import { CreditStatus, CreditTransactionType } from "@openstarter/billing/credits";
+import {
+  CreditStatus,
+  CreditTransactionType,
+} from "@openstarter/billing-web/credits";
 import { credit, order, subscription, user } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getAllConfigs } from "@openstarter/shared/config";
@@ -25,22 +28,22 @@ import { and, count, eq, sum } from "drizzle-orm";
  * - `creditsConsumed`：已消耗积分总量（正数）——对 `transaction_type='consume'` 且
  *   `status='active'` 的流水求和；已撤销的消费（`status='deleted'`）不计入，故为**净消耗**。
  */
-export type AdminMetrics = {
-  userCount: number;
+export interface AdminMetrics {
+  creditsConsumed: number;
   orderCount: number;
   subscriptionCount: number;
-  creditsConsumed: number;
-};
+  userCount: number;
+}
 
 /**
  * 公开分析配置（R25.1/R25.2 数据面）：仅含分析供应商标识与度量 ID（非敏感）。
  * 空字符串表示未配置该供应商——apps/web 据此决定是否注入对应脚本。
  */
-export type PublicAnalyticsConfig = {
+export interface PublicAnalyticsConfig {
   googleAnalyticsId: string;
   plausibleDomain: string;
   plausibleSrc: string;
-};
+}
 
 /** 将 `count()` 结果（可能缺失）归一为非负整数。 */
 function toCount(value: number | undefined): number {
@@ -78,10 +81,10 @@ export async function getAdminMetrics(): Promise<AdminMetrics> {
     ]);
 
   return {
-    userCount: toCount(userRows[0]?.value),
+    creditsConsumed: toConsumedTotal(consumedRows[0]?.total),
     orderCount: toCount(orderRows[0]?.value),
     subscriptionCount: toCount(subscriptionRows[0]?.value),
-    creditsConsumed: toConsumedTotal(consumedRows[0]?.total),
+    userCount: toCount(userRows[0]?.value),
   };
 }
 

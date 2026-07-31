@@ -1,4 +1,4 @@
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,8 +7,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@openstarter/ui/components/dropdown-menu";
-import { Skeleton } from "@openstarter/ui/components/skeleton";
+} from "@openstarter/ui-web/components/dropdown-menu";
+import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { LogOut, Settings, User } from "lucide-react";
 

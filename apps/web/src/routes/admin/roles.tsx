@@ -2,8 +2,8 @@
 // 角色管理（R26.2/R26.3）：列出/创建/编辑/删除角色，并覆盖式设置角色权限集合。
 // 数据经 /api/admin/roles* 与 /api/admin/permissions（requirePermission admin.*）。
 
-import { Button } from "@openstarter/ui/components/button";
-import { Checkbox } from "@openstarter/ui/components/checkbox";
+import { Button } from "@openstarter/ui-web/components/button";
+import { Checkbox } from "@openstarter/ui-web/components/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +11,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@openstarter/ui/components/dialog";
-import { Input } from "@openstarter/ui/components/input";
-import { Label } from "@openstarter/ui/components/label";
+} from "@openstarter/ui-web/components/dialog";
+import { Input } from "@openstarter/ui-web/components/input";
+import { Label } from "@openstarter/ui-web/components/label";
 import {
   Table,
   TableBody,
@@ -21,7 +21,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@openstarter/ui/components/table";
+} from "@openstarter/ui-web/components/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

@@ -2,15 +2,15 @@
 // 将 `codeUrl`（weixin://...）本地渲染为二维码供用户扫码支付（不外发第三方）。
 // 金额固定为人民币最小单位（分），以 ¥ 展示。
 
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import { QRCodeSVG } from "qrcode.react";
 
 /** 前端渲染微信二维码所需数据（对应结账返回的 qrData + 订单号）。 */
-export type WechatQr = {
-  codeUrl: string;
+export interface WechatQr {
   amount: number;
+  codeUrl: string;
   orderNo: string;
-};
+}
 
 const CENTS_PER_UNIT = 100;
 const QR_SIZE = 220;

@@ -1,16 +1,16 @@
 // apps/web/src/routes/_app/settings/danger.tsx
 // 危险操作：删除账户。两步确认（输入邮箱确认）+ 二次确认按钮。
 
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
-import { Input } from "@openstarter/ui/components/input";
-import { Label } from "@openstarter/ui/components/label";
+} from "@openstarter/ui-web/components/card";
+import { Input } from "@openstarter/ui-web/components/input";
+import { Label } from "@openstarter/ui-web/components/label";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";

@@ -2,15 +2,15 @@
 // 支付记录自助视图（R27.2）：当前用户的订单分页列表。
 // 数据面经类型化 RPC（`client.api.user.orders`）→ packages/api（requireAuth）→ user 读投影。
 
-import { Badge } from "@openstarter/ui/components/badge";
-import { Button } from "@openstarter/ui/components/button";
+import { Badge } from "@openstarter/ui-web/components/badge";
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
+} from "@openstarter/ui-web/components/card";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@openstarter/ui/components/table";
+} from "@openstarter/ui-web/components/table";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";

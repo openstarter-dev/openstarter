@@ -1,5 +1,5 @@
-import { Button } from "@openstarter/ui/components/button";
-import { Skeleton } from "@openstarter/ui/components/skeleton";
+import { Button } from "@openstarter/ui-web/components/button";
+import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -10,9 +10,9 @@ import { authClient } from "@/lib/auth-client";
 import { BRAND_NAME } from "@/lib/branding";
 
 const NAV_LINKS = [
-  { label: "Features", to: "/", hash: "features" },
-  { label: "Pricing", to: "/pricing", hash: undefined },
-  { label: "FAQ", to: "/", hash: "faq" },
+  { hash: "features", label: "Features", to: "/" },
+  { hash: undefined, label: "Pricing", to: "/pricing" },
+  { hash: "faq", label: "FAQ", to: "/" },
 ] as const;
 
 function AuthCta() {
@@ -26,7 +26,7 @@ function AuthCta() {
   }
   return (
     <div className="flex items-center gap-2">
-      <Button variant="ghost" render={<Link to="/login" />}>
+      <Button render={<Link to="/login" />} variant="ghost">
         Sign in
       </Button>
       <Button render={<Link to="/login" />}>Sign up</Button>
@@ -41,17 +41,17 @@ export function MarketingHeader() {
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        <Link to="/" className="font-semibold">
+        <Link className="font-semibold" to="/">
           {BRAND_NAME}
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex">
           {NAV_LINKS.map((link) => (
             <Link
+              className="text-muted-foreground text-sm hover:text-foreground"
+              hash={link.hash}
               key={link.label}
               to={link.to}
-              hash={link.hash}
-              className="text-muted-foreground text-sm hover:text-foreground"
             >
               {link.label}
             </Link>
@@ -66,12 +66,12 @@ export function MarketingHeader() {
         <div className="flex items-center gap-2 md:hidden">
           <ThemeToggleIcon />
           <Button
+            aria-expanded={open}
+            aria-label="Open menu"
+            onClick={() => setOpen(true)}
+            size="icon"
             type="button"
             variant="ghost"
-            size="icon"
-            aria-label="Open menu"
-            aria-expanded={open}
-            onClick={() => setOpen(true)}
           >
             <Menu aria-hidden="true" />
           </Button>
@@ -79,20 +79,20 @@ export function MarketingHeader() {
       </div>
 
       <Drawer
-        open={open}
-        onClose={close}
-        side="right"
-        label="Menu"
         className="gap-4 p-4"
+        label="Menu"
+        onClose={close}
+        open={open}
+        side="right"
       >
         <div className="flex items-center justify-between">
           <span className="font-semibold">{BRAND_NAME}</span>
           <Button
-            type="button"
-            variant="ghost"
-            size="icon"
             aria-label="Close menu"
             onClick={close}
+            size="icon"
+            type="button"
+            variant="ghost"
           >
             <X aria-hidden="true" />
           </Button>
@@ -100,11 +100,11 @@ export function MarketingHeader() {
         <nav className="flex flex-col gap-3">
           {NAV_LINKS.map((link) => (
             <Link
-              key={link.label}
-              to={link.to}
-              hash={link.hash}
-              onClick={close}
               className="text-sm"
+              hash={link.hash}
+              key={link.label}
+              onClick={close}
+              to={link.to}
             >
               {link.label}
             </Link>

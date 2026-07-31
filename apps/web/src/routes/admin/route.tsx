@@ -6,7 +6,7 @@
 // 菜单过滤（R26.4）：仅展示当前权限码（含通配符）可访问的入口，权限码经 matchPermission 判定。
 // 平台级授权仅依通配符 RBAC，与 organization 解耦。ssr:false 对齐 _app（认证态在客户端解析）。
 
-import { cn } from "@openstarter/ui/lib/utils";
+import { cn } from "@openstarter/ui-web/lib/utils";
 import {
   createFileRoute,
   Link,

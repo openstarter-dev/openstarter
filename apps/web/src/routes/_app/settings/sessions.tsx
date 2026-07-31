@@ -1,14 +1,14 @@
 // apps/web/src/routes/_app/settings/sessions.tsx
 // 会话列表：当前设备高亮 + 单个登出 + 登出其它全部。
 
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
+} from "@openstarter/ui-web/components/card";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";

@@ -1,7 +1,7 @@
 import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
-} from "@openstarter/ui/components/dropdown-menu";
+} from "@openstarter/ui-web/components/dropdown-menu";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 

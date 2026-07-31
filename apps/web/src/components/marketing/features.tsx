@@ -3,41 +3,41 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
-import { ShieldCheck, Sparkles, Zap } from "lucide-react";
+} from "@openstarter/ui-web/components/card";
 import type { LucideIcon } from "lucide-react";
+import { ShieldCheck, Sparkles, Zap } from "lucide-react";
 
-type Feature = {
+interface Feature {
+  description: string;
   icon: LucideIcon;
   title: string;
-  description: string;
-};
+}
 
 // TODO: replace with your product features.
 const FEATURES: Feature[] = [
   {
-    icon: Zap,
-    title: "Type-safe end to end",
     description:
       "From database to UI with Drizzle, Hono RPC, and TanStack - no codegen drift.",
+    icon: Zap,
+    title: "Type-safe end to end",
   },
   {
-    icon: ShieldCheck,
-    title: "Auth out of the box",
     description:
       "Email and password sessions wired with Better-Auth, ready for OAuth.",
+    icon: ShieldCheck,
+    title: "Auth out of the box",
   },
   {
-    icon: Sparkles,
-    title: "Stripe-ready",
     description:
       "A pricing page and billing seams designed to plug into Stripe fast.",
+    icon: Sparkles,
+    title: "Stripe-ready",
   },
 ];
 
 export function Features() {
   return (
-    <section id="features" className="mx-auto max-w-6xl px-4 py-20">
+    <section className="mx-auto max-w-6xl px-4 py-20" id="features">
       <div className="mb-12 text-center">
         <h2 className="font-bold text-3xl tracking-tight">
           Everything you need to ship

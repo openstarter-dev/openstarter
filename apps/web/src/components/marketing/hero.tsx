@@ -1,15 +1,15 @@
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import { Link } from "@tanstack/react-router";
 
 import { BRAND_TAGLINE } from "@/lib/branding";
 
 // TODO: replace with your product copy.
 const COPY = {
-  title: BRAND_TAGLINE,
-  subtitle:
-    "A full-stack TypeScript starter with auth, billing seams, and a polished UI - so you can focus on what makes your product unique.",
   primaryCta: "Start free trial",
   secondaryCta: "View pricing",
+  subtitle:
+    "A full-stack TypeScript starter with auth, billing seams, and a polished UI - so you can focus on what makes your product unique.",
+  title: BRAND_TAGLINE,
 } as const;
 
 export function Hero() {
@@ -22,10 +22,10 @@ export function Hero() {
         {COPY.subtitle}
       </p>
       <div className="flex flex-wrap items-center justify-center gap-3">
-        <Button size="lg" render={<Link to="/login" />}>
+        <Button render={<Link to="/login" />} size="lg">
           {COPY.primaryCta}
         </Button>
-        <Button size="lg" variant="outline" render={<Link to="/pricing" />}>
+        <Button render={<Link to="/pricing" />} size="lg" variant="outline">
           {COPY.secondaryCta}
         </Button>
       </div>

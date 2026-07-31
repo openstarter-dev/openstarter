@@ -2,15 +2,15 @@
 // 工单客服自助面板（R21 / R27.2）：我的工单列表、创建工单、查看消息线程并回复。
 // 数据面经类型化 RPC（`client.api.tickets`）→ packages/api（requireAuth，访问隔离仅本人工单）。
 
-import { Badge } from "@openstarter/ui/components/badge";
-import { Button } from "@openstarter/ui/components/button";
+import { Badge } from "@openstarter/ui-web/components/badge";
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
+} from "@openstarter/ui-web/components/card";
 import {
   Dialog,
   DialogContent,
@@ -18,10 +18,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@openstarter/ui/components/dialog";
-import { Input } from "@openstarter/ui/components/input";
-import { Label } from "@openstarter/ui/components/label";
-import { Textarea } from "@openstarter/ui/components/textarea";
+} from "@openstarter/ui-web/components/dialog";
+import { Input } from "@openstarter/ui-web/components/input";
+import { Label } from "@openstarter/ui-web/components/label";
+import { Textarea } from "@openstarter/ui-web/components/textarea";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";

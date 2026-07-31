@@ -2,14 +2,14 @@
 // 积分自助视图（R13 / R27.4）：当前可用余额 + 积分流水历史（grant / consume）。
 // 数据面经类型化 RPC（`client.api.user.credits`）→ packages/api（requireAuth）→ Credit_Service。
 
-import { Badge } from "@openstarter/ui/components/badge";
+import { Badge } from "@openstarter/ui-web/components/badge";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
+} from "@openstarter/ui-web/components/card";
 import {
   Table,
   TableBody,
@@ -17,7 +17,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@openstarter/ui/components/table";
+} from "@openstarter/ui-web/components/table";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 

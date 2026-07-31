@@ -1,18 +1,18 @@
-import { cn } from "@openstarter/ui/lib/utils";
-import { useEffect, useRef } from "react";
+import { cn } from "@openstarter/ui-web/lib/utils";
 import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
 
-type DrawerProps = {
-  open: boolean;
-  onClose: () => void;
-  /** Accessible name for the dialog. */
-  label: string;
-  /** Edge the panel slides in from. */
-  side?: "left" | "right";
+interface DrawerProps {
+  children: ReactNode;
   /** Extra classes for the sliding panel (e.g. background, padding). */
   className?: string;
-  children: ReactNode;
-};
+  /** Accessible name for the dialog. */
+  label: string;
+  onClose: () => void;
+  open: boolean;
+  /** Edge the panel slides in from. */
+  side?: "left" | "right";
+}
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -83,22 +83,22 @@ export function Drawer({
   return (
     <div className="fixed inset-0 z-50 md:hidden">
       <button
-        type="button"
         aria-label="Close menu"
         className="absolute inset-0 bg-black/50"
         onClick={onClose}
+        type="button"
       />
       <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
         aria-label={label}
-        tabIndex={-1}
+        aria-modal="true"
         className={cn(
           "absolute top-0 bottom-0 flex w-72 flex-col bg-background shadow-lg outline-none",
           side === "right" ? "right-0" : "left-0",
-          className,
+          className
         )}
+        ref={panelRef}
+        role="dialog"
+        tabIndex={-1}
       >
         {children}
       </div>

@@ -1,4 +1,4 @@
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -15,11 +15,11 @@ export function ThemeToggleIcon() {
 
   return (
     <Button
-      type="button"
-      variant="ghost"
-      size="icon"
       aria-label="Toggle theme"
       onClick={() => setTheme(isDark ? "light" : "dark")}
+      size="icon"
+      type="button"
+      variant="ghost"
     >
       {mounted && isDark ? (
         <Sun aria-hidden="true" />

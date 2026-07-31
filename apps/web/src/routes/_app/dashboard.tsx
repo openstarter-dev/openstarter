@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
-import { Link, createFileRoute } from "@tanstack/react-router";
+} from "@openstarter/ui-web/components/card";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app/dashboard")({
   component: DashboardPage,
@@ -32,7 +32,7 @@ function DashboardPage() {
         <CardContent>
           <ul className="flex flex-col gap-2 text-sm">
             <li>
-              <Link to="/settings" className="text-primary hover:underline">
+              <Link className="text-primary hover:underline" to="/settings">
                 Configure your account settings
               </Link>
             </li>

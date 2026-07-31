@@ -2,14 +2,14 @@
 // API 密钥自助管理（R8 / R27.2）：创建（明文一次性展示）、列表（仅前缀）、吊销。
 // 数据面经类型化 RPC（`client.api.apikeys`）→ packages/api（requireAuth）→ Auth APIKey_Service。
 
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
+} from "@openstarter/ui-web/components/card";
 import {
   Dialog,
   DialogContent,
@@ -17,9 +17,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@openstarter/ui/components/dialog";
-import { Input } from "@openstarter/ui/components/input";
-import { Label } from "@openstarter/ui/components/label";
+} from "@openstarter/ui-web/components/dialog";
+import { Input } from "@openstarter/ui-web/components/input";
+import { Label } from "@openstarter/ui-web/components/label";
 import {
   Table,
   TableBody,
@@ -27,7 +27,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@openstarter/ui/components/table";
+} from "@openstarter/ui-web/components/table";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";

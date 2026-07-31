@@ -1,3 +1,4 @@
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
@@ -5,23 +6,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
-import { Button } from "@openstarter/ui/components/button";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+} from "@openstarter/ui-web/components/card";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_auth-pages/verify-email")({
+  component: VerifyEmailPage,
   validateSearch: (
     search: Record<string, unknown>
   ): { email?: string; callbackUrl?: string } => ({
-    email: typeof search.email === "string" ? search.email : undefined,
     callbackUrl:
       typeof search.callbackUrl === "string" ? search.callbackUrl : undefined,
+    email: typeof search.email === "string" ? search.email : undefined,
   }),
-  component: VerifyEmailPage,
 });
 
 function VerifyEmailPage() {
@@ -40,11 +40,13 @@ function VerifyEmailPage() {
     setSending(true);
     try {
       const result = await authClient.sendVerificationEmail({
-        email,
         callbackURL: nextUrl,
+        email,
       });
       if (result.error) {
-        toast.error(result.error.message || "Failed to send verification email");
+        toast.error(
+          result.error.message || "Failed to send verification email"
+        );
         return;
       }
       toast.success("Verification email sent");
@@ -79,8 +81,6 @@ function VerifyEmailPage() {
       <CardContent>
         <div className="grid gap-3">
           <Button
-            type="button"
-            variant="outline"
             className="w-full"
             disabled={sending}
             onClick={() => {
@@ -88,11 +88,12 @@ function VerifyEmailPage() {
                 toast.error("Failed to send verification email");
               });
             }}
+            type="button"
+            variant="outline"
           >
             {sending ? "Sending..." : "Resend verification email"}
           </Button>
           <Button
-            type="button"
             className="w-full"
             disabled={checking}
             onClick={() => {
@@ -100,6 +101,7 @@ function VerifyEmailPage() {
                 toast.error("Failed to check verification status");
               });
             }}
+            type="button"
           >
             {checking ? "Checking..." : "I've verified, continue"}
           </Button>
@@ -107,8 +109,8 @@ function VerifyEmailPage() {
       </CardContent>
       <CardFooter>
         <Link
-          to="/login"
           className="w-full text-center text-muted-foreground text-xs underline underline-offset-4"
+          to="/login"
         >
           Back to sign in
         </Link>

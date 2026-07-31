@@ -1,11 +1,11 @@
-import { Toaster } from "@openstarter/ui/components/sonner";
+import { Toaster } from "@openstarter/ui-web/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
+  createRootRouteWithContext,
   HeadContent,
   Outlet,
   Scripts,
-  createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
@@ -25,21 +25,21 @@ export interface RouterAppContext {
 const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;var d=t==='dark'||((t==='system'||!t)&&m);var c=document.documentElement.classList;c.toggle('dark',d);c.toggle('light',!d);}catch(e){}})();`;
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
-  // 读取分析供应商配置（SSR），供 head() 依据其条件注入采集脚本（R25.1/R25.2）。
-  loader: () => getAnalyticsConfigFn(),
+  component: RootDocument,
   head: ({ loaderData }) => ({
+    links: [{ href: appCss, rel: "stylesheet" }],
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { content: "width=device-width, initial-scale=1", name: "viewport" },
       { title: BRAND_NAME },
-      { name: "description", content: BRAND_DESCRIPTION },
+      { content: BRAND_DESCRIPTION, name: "description" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
     // 依据 Config 供应商标识注入且仅注入对应供应商脚本；未配置则为空数组、不注入（R25.1/R25.2）。
     // 脚本来自受控白名单模板、度量 ID 已校验，经框架 head().scripts 机制注入（非危险 innerHTML）。
     scripts: buildAnalyticsHeadScripts(loaderData),
   }),
-  component: RootDocument,
+  // 读取分析供应商配置（SSR），供 head() 依据其条件注入采集脚本（R25.1/R25.2）。
+  loader: () => getAnalyticsConfigFn(),
 });
 
 function RootDocument() {
@@ -56,7 +56,7 @@ function RootDocument() {
           <Toaster richColors />
         </ThemeProvider>
         <TanStackRouterDevtools position="bottom-left" />
-        <ReactQueryDevtools position="bottom" buttonPosition="bottom-right" />
+        <ReactQueryDevtools buttonPosition="bottom-right" position="bottom" />
         <Scripts />
       </body>
     </html>

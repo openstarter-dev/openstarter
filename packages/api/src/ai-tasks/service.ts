@@ -17,7 +17,7 @@
 // 不依赖 MySQL 缺失的 `.returning()`——自行生成 `id` 并「插入后按 id 回读」返回完整记录；
 // 事务由 `db().transaction` 开启，`consume({ tx })` 在同一事务内执行以满足原子性。
 
-import { consume, revoke } from "@openstarter/billing";
+import { consume, revoke } from "@openstarter/billing-web";
 import { type AiTask, aiTask, type NewAiTask } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
@@ -60,40 +60,40 @@ export class AITaskNotFoundError extends Error {
 // ─── 入参 / 返回类型（Params / Results） ──────────────────────────────────────
 
 /** 创建任务入参。`provider`/`model` 由路由层解析确定；`costCredits` 缺省 0（不扣费）。 */
-export type CreateTaskParams = {
-  userId: string;
-  mediaType: string;
-  provider: string;
-  model: string;
-  prompt: string;
-  options?: Record<string, unknown>;
+export interface CreateTaskParams {
   costCredits?: number;
+  mediaType: string;
+  model: string;
+  options?: Record<string, unknown>;
+  prompt: string;
+  provider: string;
   scene?: string;
-};
+  userId: string;
+}
 
 /** 更新任务入参。`id` 为 `ai_task` 主键；`providerTaskId` 为供应商侧任务句柄（存入 `taskId` 列）。 */
-export type UpdateTaskParams = {
+export interface UpdateTaskParams {
   id: string;
-  status: AITaskStatus;
   providerTaskId?: string;
+  status: AITaskStatus;
   taskInfo?: AITaskInfo;
   taskResult?: unknown;
-};
+}
 
 /** 分页查询入参（R20.4）：省略的筛选条件不参与过滤。 */
-export type GetTasksParams = {
-  userId: string;
+export interface GetTasksParams {
   mediaType?: string;
-  status?: string;
   page?: number;
   pageSize?: number;
-};
+  status?: string;
+  userId: string;
+}
 
 /** 分页查询返回：完整记录与总数（与 `respPage` 结构一致）。 */
-export type GetTasksResult = {
+export interface GetTasksResult {
   items: AiTask[];
   total: number;
-};
+}
 
 // ─── 读取（Read） ─────────────────────────────────────────────────────────────
 
@@ -126,17 +126,17 @@ export function createTask(params: CreateTaskParams): Promise<AiTask> {
   const costCredits = params.costCredits ?? 0;
 
   const record: NewAiTask = {
-    id,
-    userId: params.userId,
-    mediaType: params.mediaType,
-    provider: params.provider,
-    model: params.model,
-    prompt: params.prompt,
-    options: params.options ? JSON.stringify(params.options) : null,
-    status: AITaskStatus.PENDING,
     costCredits,
-    scene,
     creditId: null,
+    id,
+    mediaType: params.mediaType,
+    model: params.model,
+    options: params.options ? JSON.stringify(params.options) : null,
+    prompt: params.prompt,
+    provider: params.provider,
+    scene,
+    status: AITaskStatus.PENDING,
+    userId: params.userId,
   };
 
   return db().transaction(async (tx) => {
@@ -144,12 +144,12 @@ export function createTask(params: CreateTaskParams): Promise<AiTask> {
 
     if (costCredits > 0) {
       const result = await consume({
-        userId: params.userId,
         credits: costCredits,
-        scene,
         description: `AI ${params.mediaType} generation`,
         metadata: JSON.stringify({ taskId: id }),
+        scene,
         tx,
+        userId: params.userId,
       });
 
       // 余额不足 → 抛错触发整个事务回滚（任务不落库、积分不扣，R20.2）。
@@ -222,7 +222,9 @@ export async function updateTask(params: UpdateTaskParams): Promise<void> {
  * 分页查询用户的 AI 任务（R20.4）：按 `userId` 固定归属，`mediaType`/`status` 可选组合筛选，
  * 按 `createdAt` 倒序返回。默认排除已软删记录。返回条目列表与总数（与 `respPage` 结构一致）。
  */
-export async function getTasks(params: GetTasksParams): Promise<GetTasksResult> {
+export async function getTasks(
+  params: GetTasksParams
+): Promise<GetTasksResult> {
   const page = params.page ?? DEFAULT_PAGE;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
   const offset = (page - 1) * pageSize;

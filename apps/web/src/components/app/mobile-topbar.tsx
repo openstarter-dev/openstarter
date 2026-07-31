@@ -1,4 +1,4 @@
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -16,29 +16,35 @@ export function MobileTopbar() {
     <div className="md:hidden">
       <div className="flex h-12 items-center gap-2 border-b px-3">
         <Button
+          aria-expanded={open}
+          aria-label="Open menu"
+          onClick={() => setOpen(true)}
+          size="icon"
           type="button"
           variant="ghost"
-          size="icon"
-          aria-label="Open menu"
-          aria-expanded={open}
-          onClick={() => setOpen(true)}
         >
           <Menu aria-hidden="true" />
         </Button>
-        <Link to="/dashboard" className="font-semibold">
+        <Link className="font-semibold" to="/dashboard">
           {BRAND_NAME}
         </Link>
       </div>
 
-      <Drawer open={open} onClose={close} side="left" label="Navigation" className="bg-sidebar">
+      <Drawer
+        className="bg-sidebar"
+        label="Navigation"
+        onClose={close}
+        open={open}
+        side="left"
+      >
         <div className="flex h-12 items-center justify-between border-b px-3">
           <span className="font-semibold">{BRAND_NAME}</span>
           <Button
-            type="button"
-            variant="ghost"
-            size="icon"
             aria-label="Close menu"
             onClick={close}
+            size="icon"
+            type="button"
+            variant="ghost"
           >
             <X aria-hidden="true" />
           </Button>

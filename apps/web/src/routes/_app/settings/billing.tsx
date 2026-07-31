@@ -2,15 +2,15 @@
 // 账单/订阅自助视图（R11.4 / R27.2）：当前订阅状态、套餐名、下一计费日与方案状态。
 // 数据面经类型化 RPC（`client.api.user.subscription` / `client.api.user.plan`）。
 
-import { Badge } from "@openstarter/ui/components/badge";
-import { buttonVariants } from "@openstarter/ui/components/button";
+import { Badge } from "@openstarter/ui-web/components/badge";
+import { buttonVariants } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
+} from "@openstarter/ui-web/components/card";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 

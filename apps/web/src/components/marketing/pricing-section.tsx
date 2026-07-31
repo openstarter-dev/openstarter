@@ -1,4 +1,4 @@
-import { Button } from "@openstarter/ui/components/button";
+import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
@@ -6,8 +6,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@openstarter/ui/components/card";
-import { cn } from "@openstarter/ui/lib/utils";
+} from "@openstarter/ui-web/components/card";
+import { cn } from "@openstarter/ui-web/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Check } from "lucide-react";
@@ -22,7 +22,7 @@ import {
   type PricingTier,
 } from "@/lib/marketing/pricing";
 
-import { WechatQrOverlay, type WechatQr } from "./wechat-qr-overlay";
+import { type WechatQr, WechatQrOverlay } from "./wechat-qr-overlay";
 
 function formatPrice(price: number | "custom"): string {
   if (price === "custom") {
@@ -39,16 +39,16 @@ function formatPrice(price: number | "custom"): string {
 async function requestCheckout(checkout: PricingCheckout) {
   const res = await client.api.checkout.$post({
     json: {
-      productId: checkout.productId,
-      productName: checkout.planName ?? checkout.productId,
-      planName: checkout.planName,
       amount: checkout.amount,
-      currency: checkout.currency,
-      type: checkout.type,
       credits: checkout.credits,
       creditsValidDays: checkout.creditsValidDays,
+      currency: checkout.currency,
       interval: checkout.interval,
       intervalCount: checkout.intervalCount,
+      planName: checkout.planName,
+      productId: checkout.productId,
+      productName: checkout.planName ?? checkout.productId,
+      type: checkout.type,
     },
   });
   const json = await res.json();
@@ -93,7 +93,7 @@ function TierCard({
       <CardContent className="flex-1">
         <ul className="flex flex-col gap-2">
           {tier.features.map((feature) => (
-            <li key={feature} className="flex items-center gap-2">
+            <li className="flex items-center gap-2" key={feature}>
               <Check aria-hidden="true" className="size-4 text-primary" />
               <span>{feature}</span>
             </li>
@@ -132,12 +132,15 @@ export function PricingSection() {
 
   const checkoutMutation = useMutation({
     mutationFn: requestCheckout,
+    onError: (err) => {
+      toast.error(err.message);
+    },
     onSuccess: (data) => {
       // 微信 Native 渠道：渲染二维码扫码支付；其余渠道：跳转结账链接（R10.3）。
       if (data.qrData?.codeUrl) {
         setWechatQr({
-          codeUrl: data.qrData.codeUrl,
           amount: data.qrData.amount,
+          codeUrl: data.qrData.codeUrl,
           orderNo: data.orderNo,
         });
         return;
@@ -147,9 +150,6 @@ export function PricingSection() {
         return;
       }
       toast.error("Checkout failed");
-    },
-    onError: (err) => {
-      toast.error(err.message);
     },
   });
 

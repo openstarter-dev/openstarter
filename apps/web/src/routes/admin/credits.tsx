@@ -1,7 +1,7 @@
 // apps/web/src/routes/admin/credits.tsx
 // 积分管理（R26.2）：分页列表。数据经 GET /api/admin/credits（requirePermission admin.*）。
 
-import { Badge } from "@openstarter/ui/components/badge";
+import { Badge } from "@openstarter/ui-web/components/badge";
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@openstarter/ui/components/table";
+} from "@openstarter/ui-web/components/table";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
