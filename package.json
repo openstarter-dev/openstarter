@@ -27,7 +27,9 @@
     "db:generate": "turbo -F @openstarter/db db:generate",
     "db:migrate": "turbo -F @openstarter/db db:migrate",
     "db:local": "turbo -F @openstarter/db db:local",
-    "seed:admin": "pnpm --filter @openstarter/auth exec pnpm dlx tsx scripts/seed-admin.ts"
+    "seed:admin": "pnpm --filter @openstarter/auth exec pnpm dlx tsx scripts/seed-admin.ts",
+    "dev:cli": "turbo -F @openstarter/cli dev",
+    "build:cli": "turbo -F @openstarter/cli build"
   },
   "dependencies": {
     "dotenv": "catalog:",
