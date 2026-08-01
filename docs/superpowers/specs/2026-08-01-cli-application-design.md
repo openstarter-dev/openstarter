@@ -203,7 +203,12 @@ $ openstarter profile:update --name "John Smith"
 
 ### 3. 数据操作命令
 
-> 注：以下命令使用通用的"资源"概念，实际实现时需要根据业务需求调整为具体的资源类型（如 projects、tasks、items 等）。
+> **实现说明：** 以下命令使用通用的"资源"概念作为示例。在实际实现时，应该根据 openstarter 的具体业务模型来定义资源类型。由于 openstarter 是一个 SaaS 启动模板，可以选择以下任一方向：
+> 
+> 1. 如果用于演示，可以创建一个简单的 "notes" 或 "bookmarks" 资源
+> 2. 如果面向实际产品，应该基于产品的核心数据模型（例如：如果是项目管理工具，资源就是 projects；如果是任务工具，资源就是 tasks）
+> 
+> 下面的命令使用 `list/get/create` 作为通用模式，实现时命令名称应该更具体（如 `notes:list`, `projects:get` 等）。
 
 #### `openstarter list`
 列出用户的资源。
