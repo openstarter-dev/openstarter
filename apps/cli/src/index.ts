@@ -4,6 +4,7 @@
 import { Command } from 'commander';
 import { config } from './lib/config.js';
 import { registerAuthCommands } from './commands/auth.js';
+import { registerProfileCommands } from './commands/profile.js';
 
 const program = new Command();
 
@@ -24,5 +25,6 @@ program.hook('preAction', () => {
 });
 
 registerAuthCommands(program);
+registerProfileCommands(program);
 
 program.parse();
