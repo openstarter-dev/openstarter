@@ -283,6 +283,20 @@ const ERROR_MESSAGES = {
   EMAIL_VERIFICATION_REQUIRED_FOR_INVITATION:
     "organization:error.invitation.emailVerificationRequiredForInvitation",
   CHANGE_EMAIL_DISABLED: "auth:error.credentials.email.changeDisabled",
+  // 由 deviceAuthorization 插件（RFC 8628）贡献的错误码：CLI 设备授权流的
+  // 取码/轮询/批准/拒绝端点经此映射到可翻译消息键。注意 USER_NOT_FOUND 与
+  // FAILED_TO_CREATE_SESSION 已在上方由通用 better-auth 错误码覆盖，此处不重复。
+  INVALID_DEVICE_CODE: "auth:error.device.invalidDeviceCode",
+  EXPIRED_DEVICE_CODE: "auth:error.device.expiredDeviceCode",
+  EXPIRED_USER_CODE: "auth:error.device.expiredUserCode",
+  AUTHORIZATION_PENDING: "auth:error.device.authorizationPending",
+  ACCESS_DENIED: "auth:error.device.accessDenied",
+  INVALID_USER_CODE: "auth:error.device.invalidUserCode",
+  DEVICE_CODE_ALREADY_PROCESSED: "auth:error.device.alreadyProcessed",
+  DEVICE_CODE_NOT_CLAIMED: "auth:error.device.notClaimed",
+  POLLING_TOO_FREQUENTLY: "auth:error.device.pollingTooFrequently",
+  INVALID_DEVICE_CODE_STATUS: "auth:error.device.invalidStatus",
+  AUTHENTICATION_REQUIRED: "auth:error.device.authenticationRequired",
 } as const satisfies Record<AuthErrorCode, TranslationKey>;
 
 export type { AuthConfig, AuthErrorCode };

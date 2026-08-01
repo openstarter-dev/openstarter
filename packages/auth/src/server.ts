@@ -17,6 +17,7 @@ import {
   admin,
   anonymous,
   bearer,
+  deviceAuthorization,
   emailOTP,
   lastLoginMethod,
   magicLink,
@@ -206,6 +207,15 @@ export const auth = betterAuth({
     }),
     oneTap(),
     expo(),
+    // 设备授权（RFC 8628）：CLI 登录经 POST /api/auth/device/code 取码 → 浏览器 /device 页输入
+    // user_code 并 approve → CLI 轮询 /api/auth/device/token 拿会话 token（即 access_token，
+    // 带 `.` 签名，满足下方 bearer requireSignature:true）。deviceCode 模型经 authSchema 注入。
+    deviceAuthorization({
+      deviceCodeLength: 32,
+      expiresIn: "10m",
+      interval: "5s",
+      userCodeLength: 8,
+    }),
     // Bearer 转发（浏览器插件端会话桥接，见 docs/superpowers/specs/2026-08-01-browser-extension-app-design.md
     // §3.2/§4）：插件把 web 端的会话 cookie 值原样作为 Authorization: Bearer 头转发；
     // requireSignature: true 拒绝未签名的裸 token，正常路径（真实会话 cookie 值本就带签名）不受影响。

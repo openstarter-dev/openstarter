@@ -816,5 +816,16 @@
   "landing.footer.blog": "博客",
   "mobile.home.greeting": "当前登录账号",
   "mobile.settings.appearance": "外观",
-  "mobile.settings.version": "版本"
+  "mobile.settings.version": "版本",
+  "auth:error.device.invalidDeviceCode": "无效的设备码",
+  "auth:error.device.expiredDeviceCode": "设备码已过期",
+  "auth:error.device.expiredUserCode": "用户码已过期",
+  "auth:error.device.authorizationPending": "授权等待中",
+  "auth:error.device.accessDenied": "访问被拒绝",
+  "auth:error.device.invalidUserCode": "无效的用户码",
+  "auth:error.device.alreadyProcessed": "设备码已处理",
+  "auth:error.device.notClaimed": "设备码尚未被验证会话领取",
+  "auth:error.device.pollingTooFrequently": "轮询过于频繁",
+  "auth:error.device.invalidStatus": "无效的设备码状态",
+  "auth:error.device.authenticationRequired": "需要认证"
 }
