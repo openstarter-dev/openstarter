@@ -85,7 +85,7 @@
   - `apps/cli/` 项目结构
   - `openstarter` 命令入口（未实现命令）
 
-- [ ] **Step 1: 创建 package.json**
+- [x] **Step 1: 创建 package.json**
 
 ```json
 {
@@ -122,7 +122,7 @@
 }
 ```
 
-- [ ] **Step 2: 创建 tsconfig.json**
+- [x] **Step 2: 创建 tsconfig.json**
 
 ```json
 {
@@ -141,7 +141,7 @@
 }
 ```
 
-- [ ] **Step 3: 创建 tsup.config.ts**
+- [x] **Step 3: 创建 tsup.config.ts**
 
 ```typescript
 import { defineConfig } from 'tsup';
@@ -159,7 +159,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 4: 创建基础 index.ts**
+- [x] **Step 4: 创建基础 index.ts**
 
 ```typescript
 #!/usr/bin/env node
@@ -176,7 +176,7 @@ program.parse();
 ```
 
 
-- [ ] **Step 5: 创建 .gitignore**
+- [x] **Step 5: 创建 .gitignore**
 
 ```
 dist
@@ -184,7 +184,7 @@ node_modules
 .turbo
 ```
 
-- [ ] **Step 6: 更新 turbo.json 添加 CLI 构建**
+- [x] **Step 6: 更新 turbo.json 添加 CLI 构建**
 
 在 `turbo.json` 的 `pipeline` 中添加：
 
@@ -195,22 +195,22 @@ node_modules
 }
 ```
 
-- [ ] **Step 7: 安装依赖**
+- [x] **Step 7: 安装依赖**
 
 Run: `pnpm install`
 Expected: 依赖安装成功，生成 node_modules
 
-- [ ] **Step 8: 测试构建**
+- [x] **Step 8: 测试构建**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，生成 `dist/index.js` 文件
 
-- [ ] **Step 9: 测试 CLI 运行**
+- [x] **Step 9: 测试 CLI 运行**
 
 Run: `node apps/cli/dist/index.js --help`
 Expected: 显示帮助信息，包含 version 和 description
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add apps/cli turbo.json
@@ -234,7 +234,7 @@ git commit -m "feat(cli): add CLI project scaffolding"
   - 错误类：`AuthError`, `NetworkError`, `ConfigError`, `ApiError`
   - `handleError(error, verbose)` 函数
 
-- [ ] **Step 1: 创建 types.ts**
+- [x] **Step 1: 创建 types.ts**
 
 ```typescript
 export interface CliConfig {
@@ -269,7 +269,7 @@ export interface TokenResponse {
 }
 ```
 
-- [ ] **Step 2: 创建 errors.ts**
+- [x] **Step 2: 创建 errors.ts**
 
 ```typescript
 export class AuthError extends Error {
@@ -330,7 +330,7 @@ export function handleError(error: Error, verbose: boolean): never {
 ```
 
 
-- [ ] **Step 3: 创建 config.ts**
+- [x] **Step 3: 创建 config.ts**
 
 ```typescript
 import Conf from 'conf';
@@ -392,12 +392,12 @@ export class ConfigManager {
 export const config = new ConfigManager();
 ```
 
-- [ ] **Step 4: 测试配置管理**
+- [x] **Step 4: 测试配置管理**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/cli/src
@@ -418,7 +418,7 @@ git commit -m "feat(cli): add config manager and error handling"
   - `formatTable(data: Array<Record<string, unknown>>): void`
   - `formatKeyValue(data: Record<string, unknown>): void`
 
-- [ ] **Step 1: 创建 output.ts**
+- [x] **Step 1: 创建 output.ts**
 
 ```typescript
 export function formatOutput(data: unknown, json: boolean): void {
@@ -485,12 +485,12 @@ export function formatKeyValue(data: Record<string, unknown>): void {
 }
 ```
 
-- [ ] **Step 2: 测试构建**
+- [x] **Step 2: 测试构建**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/cli/src/lib/output.ts
@@ -511,12 +511,12 @@ git commit -m "feat(cli): add output formatting utilities"
   - Device Authorization 端点：`POST /api/auth/device/code`, `POST /api/auth/device/token`
   - Better Auth 插件配置：`deviceAuthorization`
 
-- [ ] **Step 1: 检查 Better Auth 版本**
+- [x] **Step 1: 检查 Better Auth 版本**
 
 Run: `cat packages/auth/package.json | grep better-auth`
 Expected: 查看当前 better-auth 版本（应为 1.6.11 或更高）
 
-- [ ] **Step 2: 添加 Device Authorization 依赖**
+- [x] **Step 2: 添加 Device Authorization 依赖**
 
 在 `packages/auth/package.json` 的 `dependencies` 中添加：
 
@@ -530,17 +530,17 @@ Expected: 查看当前 better-auth 版本（应为 1.6.11 或更高）
 '@better-auth/device': 1.6.11
 ```
 
-- [ ] **Step 3: 安装依赖**
+- [x] **Step 3: 安装依赖**
 
 Run: `pnpm install`
 Expected: 依赖安装成功
 
-- [ ] **Step 4: 读取现有 Better Auth 配置**
+- [x] **Step 4: 读取现有 Better Auth 配置**
 
 Run: `cat packages/auth/src/index.ts | head -50`
 Expected: 查看当前 betterAuth 配置结构
 
-- [ ] **Step 5: 添加 Device Authorization 插件**
+- [x] **Step 5: 添加 Device Authorization 插件**
 
 在 `packages/auth/src/index.ts` 中导入插件并添加配置：
 
@@ -559,17 +559,17 @@ deviceAuthorization({
 }),
 ```
 
-- [ ] **Step 6: 测试构建**
+- [x] **Step 6: 测试构建**
 
 Run: `pnpm --filter @openstarter/auth build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 7: 测试类型检查**
+- [x] **Step 7: 测试类型检查**
 
 Run: `pnpm check-types`
 Expected: 所有包类型检查通过
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add packages/auth pnpm-workspace.yaml
@@ -592,7 +592,7 @@ git commit -m "feat(auth): add Better Auth Device Authorization plugin"
   - `requestDeviceCode(apiUrl: string): Promise<DeviceCodeResponse>`
   - `pollForToken(apiUrl, deviceCode, interval, expiresIn): Promise<TokenResponse>`
 
-- [ ] **Step 1: 创建 auth-client.ts**
+- [x] **Step 1: 创建 auth-client.ts**
 
 ```typescript
 import type { DeviceCodeResponse, TokenResponse } from '../types.js';
@@ -685,12 +685,12 @@ export async function deviceLogin(apiUrl: string): Promise<TokenResponse> {
 ```
 
 
-- [ ] **Step 2: 测试构建**
+- [x] **Step 2: 测试构建**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/cli/src/lib/auth-client.ts
@@ -712,7 +712,7 @@ git commit -m "feat(cli): add device authorization client"
   - `createApiClient()` - 返回 Hono RPC 客户端
   - `handleApiError(error)` - API 错误处理
 
-- [ ] **Step 1: 创建 api-client.ts**
+- [x] **Step 1: 创建 api-client.ts**
 
 ```typescript
 import { hc } from 'hono/client';
@@ -789,12 +789,12 @@ export function handleApiError(response: Response): never {
 }
 ```
 
-- [ ] **Step 2: 测试构建**
+- [x] **Step 2: 测试构建**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add apps/cli/src/lib/api-client.ts
@@ -821,7 +821,7 @@ git commit -m "feat(cli): add API client wrapper"
   - `logout` 命令：清除本地凭据
   - `whoami` 命令：显示当前用户
 
-- [ ] **Step 1: 创建 auth.ts**
+- [x] **Step 1: 创建 auth.ts**
 
 ```typescript
 import { Command } from 'commander';
@@ -895,7 +895,7 @@ export function registerAuthCommands(program: Command): void {
 ```
 
 
-- [ ] **Step 2: 更新 index.ts 注册命令**
+- [x] **Step 2: 更新 index.ts 注册命令**
 
 ```typescript
 #!/usr/bin/env node
@@ -914,22 +914,22 @@ registerAuthCommands(program);
 program.parse();
 ```
 
-- [ ] **Step 3: 测试构建**
+- [x] **Step 3: 测试构建**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 4: 测试帮助命令**
+- [x] **Step 4: 测试帮助命令**
 
 Run: `node apps/cli/dist/index.js --help`
 Expected: 显示 login, logout, whoami 命令
 
-- [ ] **Step 5: 测试登出命令**
+- [x] **Step 5: 测试登出命令**
 
 Run: `node apps/cli/dist/index.js logout`
 Expected: 显示 "✓ 已登出"
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/cli/src
@@ -952,12 +952,12 @@ git commit -m "feat(cli): add auth commands (login, logout, whoami)"
   - `GET /api/profile` - 获取当前用户资料
   - `PATCH /api/profile` - 更新用户资料
 
-- [ ] **Step 1: 检查现有 API 结构**
+- [x] **Step 1: 检查现有 API 结构**
 
 Run: `cat packages/api/src/index.ts | head -30`
 Expected: 查看 Hono app 的初始化和路由挂载方式
 
-- [ ] **Step 2: 创建 profile.ts**
+- [x] **Step 2: 创建 profile.ts**
 
 ```typescript
 import { Hono } from 'hono';
@@ -1017,7 +1017,7 @@ export default app;
 ```
 
 
-- [ ] **Step 3: 挂载 profile 路由**
+- [x] **Step 3: 挂载 profile 路由**
 
 在 `packages/api/src/index.ts` 中添加导入和路由：
 
@@ -1028,17 +1028,17 @@ import profile from './routes/profile.js';
 app.route('/api/profile', profile);
 ```
 
-- [ ] **Step 4: 测试构建**
+- [x] **Step 4: 测试构建**
 
 Run: `pnpm --filter @openstarter/api build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 5: 测试类型检查**
+- [x] **Step 5: 测试类型检查**
 
 Run: `pnpm check-types`
 Expected: 所有包类型检查通过
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add packages/api/src
@@ -1059,7 +1059,7 @@ git commit -m "feat(api): add profile endpoints"
 - Produces:
   - `/device` 页面 - 用户输入设备代码并授权
 
-- [ ] **Step 1: 创建 device.tsx**
+- [x] **Step 1: 创建 device.tsx**
 
 ```typescript
 import { createFileRoute } from '@tanstack/react-router';
@@ -1164,17 +1164,17 @@ function DeviceAuthPage() {
 ```
 
 
-- [ ] **Step 2: 测试构建**
+- [x] **Step 2: 测试构建**
 
 Run: `pnpm --filter web build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 3: 测试开发服务器**
+- [x] **Step 3: 测试开发服务器**
 
 Run: `pnpm --filter web dev`
 Expected: 启动成功，访问 http://localhost:3000/device 可以看到页面
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add apps/web/src/routes/_auth-pages/device.tsx
@@ -1199,7 +1199,7 @@ git commit -m "feat(web): add device authorization page"
   - `profile` 命令：查看个人资料
   - `profile:update` 命令：更新个人资料
 
-- [ ] **Step 1: 创建 profile.ts**
+- [x] **Step 1: 创建 profile.ts**
 
 ```typescript
 import { Command } from 'commander';
@@ -1265,7 +1265,7 @@ export function registerProfileCommands(program: Command): void {
 }
 ```
 
-- [ ] **Step 2: 更新 index.ts 注册命令**
+- [x] **Step 2: 更新 index.ts 注册命令**
 
 在 `apps/cli/src/index.ts` 中添加导入和注册：
 
@@ -1277,17 +1277,17 @@ registerProfileCommands(program);
 ```
 
 
-- [ ] **Step 3: 测试构建**
+- [x] **Step 3: 测试构建**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 4: 测试帮助命令**
+- [x] **Step 4: 测试帮助命令**
 
 Run: `node apps/cli/dist/index.js --help`
 Expected: 显示 profile 和 profile:update 命令
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/cli/src
@@ -1311,7 +1311,7 @@ git commit -m "feat(cli): add profile commands"
   - `GET /api/notes/:id` - 获取单个笔记
   - `POST /api/notes` - 创建笔记
 
-- [ ] **Step 1: 创建 notes.ts**
+- [x] **Step 1: 创建 notes.ts**
 
 ```typescript
 import { Hono } from 'hono';
@@ -1408,7 +1408,7 @@ export default app;
 ```
 
 
-- [ ] **Step 2: 挂载 notes 路由**
+- [x] **Step 2: 挂载 notes 路由**
 
 在 `packages/api/src/index.ts` 中添加：
 
@@ -1419,12 +1419,12 @@ import notes from './routes/notes.js';
 app.route('/api/notes', notes);
 ```
 
-- [ ] **Step 3: 测试构建**
+- [x] **Step 3: 测试构建**
 
 Run: `pnpm --filter @openstarter/api build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add packages/api/src
@@ -1450,7 +1450,7 @@ git commit -m "feat(api): add notes CRUD endpoints"
   - `get <id>` 命令：获取单个笔记
   - `create` 命令：创建笔记
 
-- [ ] **Step 1: 创建 data.ts**
+- [x] **Step 1: 创建 data.ts**
 
 ```typescript
 import { Command } from 'commander';
@@ -1545,7 +1545,7 @@ export function registerDataCommands(program: Command): void {
 ```
 
 
-- [ ] **Step 2: 更新 index.ts 注册命令**
+- [x] **Step 2: 更新 index.ts 注册命令**
 
 在 `apps/cli/src/index.ts` 中添加：
 
@@ -1556,17 +1556,17 @@ import { registerDataCommands } from './commands/data.js';
 registerDataCommands(program);
 ```
 
-- [ ] **Step 3: 测试构建**
+- [x] **Step 3: 测试构建**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 4: 测试帮助命令**
+- [x] **Step 4: 测试帮助命令**
 
 Run: `node apps/cli/dist/index.js --help`
 Expected: 显示 list, get, create 命令
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/cli/src
@@ -1586,7 +1586,7 @@ git commit -m "feat(cli): add data commands (list, get, create)"
 - Produces:
   - `GET /api/status` - 系统状态信息
 
-- [ ] **Step 1: 创建 status.ts**
+- [x] **Step 1: 创建 status.ts**
 
 ```typescript
 import { Hono } from 'hono';
@@ -1604,7 +1604,7 @@ app.get('/', async (c) => {
 export default app;
 ```
 
-- [ ] **Step 2: 挂载 status 路由**
+- [x] **Step 2: 挂载 status 路由**
 
 在 `packages/api/src/index.ts` 中添加：
 
@@ -1615,12 +1615,12 @@ import status from './routes/status.js';
 app.route('/api/status', status);
 ```
 
-- [ ] **Step 3: 测试构建**
+- [x] **Step 3: 测试构建**
 
 Run: `pnpm --filter @openstarter/api build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add packages/api/src
@@ -1645,7 +1645,7 @@ git commit -m "feat(api): add status endpoint"
   - `status` 命令：检查 API 连接和服务状态
   - `info` 命令：显示 CLI 版本和配置
 
-- [ ] **Step 1: 创建 status.ts**
+- [x] **Step 1: 创建 status.ts**
 
 ```typescript
 import { Command } from 'commander';
@@ -1730,7 +1730,7 @@ export function registerStatusCommands(program: Command): void {
 ```
 
 
-- [ ] **Step 2: 更新 index.ts 注册命令**
+- [x] **Step 2: 更新 index.ts 注册命令**
 
 在 `apps/cli/src/index.ts` 中添加：
 
@@ -1741,17 +1741,17 @@ import { registerStatusCommands } from './commands/status.js';
 registerStatusCommands(program);
 ```
 
-- [ ] **Step 3: 测试构建**
+- [x] **Step 3: 测试构建**
 
 Run: `pnpm --filter @openstarter/cli build`
 Expected: 构建成功，无类型错误
 
-- [ ] **Step 4: 测试 info 命令**
+- [x] **Step 4: 测试 info 命令**
 
 Run: `node apps/cli/dist/index.js info`
 Expected: 显示 CLI 版本和配置信息
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/cli/src
@@ -1769,22 +1769,22 @@ git commit -m "feat(cli): add status and info commands"
 - Consumes: 所有已实现的功能
 - Produces: 验证完整的 CLI 工作流程
 
-- [ ] **Step 1: 启动 web 开发服务器**
+- [x] **Step 1: 启动 web 开发服务器**
 
 Run: `pnpm --filter web dev`
 Expected: 服务器启动在 http://localhost:3000
 
-- [ ] **Step 2: 创建测试用户（如果需要）**
+- [x] **Step 2: 创建测试用户（如果需要）**
 
 Run: `pnpm seed:admin` 或在浏览器注册测试用户
 Expected: 测试用户创建成功
 
-- [ ] **Step 3: 测试 status 命令（无需认证）**
+- [x] **Step 3: 测试 status 命令（无需认证）**
 
 Run: `node apps/cli/dist/index.js status --api-url http://localhost:3000`
 Expected: 显示 API 连接状态
 
-- [ ] **Step 4: 测试 login 命令**
+- [x] **Step 4: 测试 login 命令**
 
 Run: `node apps/cli/dist/index.js login --api-url http://localhost:3000`
 Expected: 
@@ -1793,47 +1793,47 @@ Expected:
 - 输入显示的代码并授权
 - CLI 显示 "✓ 登录成功！"
 
-- [ ] **Step 5: 测试 whoami 命令**
+- [x] **Step 5: 测试 whoami 命令**
 
 Run: `node apps/cli/dist/index.js whoami`
 Expected: 显示当前用户信息
 
-- [ ] **Step 6: 测试 profile 命令**
+- [x] **Step 6: 测试 profile 命令**
 
 Run: `node apps/cli/dist/index.js profile`
 Expected: 显示用户资料
 
-- [ ] **Step 7: 测试 create 命令**
+- [x] **Step 7: 测试 create 命令**
 
 Run: `node apps/cli/dist/index.js create --name "Test Note" --description "Testing CLI"`
 Expected: 显示 "✓ 已创建笔记: note_1"
 
-- [ ] **Step 8: 测试 list 命令**
+- [x] **Step 8: 测试 list 命令**
 
 Run: `node apps/cli/dist/index.js list`
 Expected: 显示笔记列表，包含刚创建的笔记
 
-- [ ] **Step 9: 测试 get 命令**
+- [x] **Step 9: 测试 get 命令**
 
 Run: `node apps/cli/dist/index.js get note_1`
 Expected: 显示笔记详情
 
-- [ ] **Step 10: 测试 JSON 输出**
+- [x] **Step 10: 测试 JSON 输出**
 
 Run: `node apps/cli/dist/index.js list --json`
 Expected: JSON 格式的笔记列表
 
-- [ ] **Step 11: 测试 logout 命令**
+- [x] **Step 11: 测试 logout 命令**
 
 Run: `node apps/cli/dist/index.js logout`
 Expected: 显示 "✓ 已登出"
 
-- [ ] **Step 12: 验证登出后无法访问需认证的命令**
+- [x] **Step 12: 验证登出后无法访问需认证的命令**
 
 Run: `node apps/cli/dist/index.js whoami`
 Expected: 错误提示 "未登录，请先运行 openstarter login"，退出码 2
 
-- [ ] **Step 13: 记录测试结果**
+- [x] **Step 13: 记录测试结果**
 
 创建测试日志文件记录所有测试结果
 Expected: 所有测试通过
@@ -1849,7 +1849,7 @@ Expected: 所有测试通过
 - Consumes: 无
 - Produces: CLI 使用文档
 
-- [ ] **Step 1: 创建 README.md**
+- [x] **Step 1: 创建 README.md**
 
 ```markdown
 # @openstarter/cli
@@ -1983,7 +1983,7 @@ MIT
 \`\`\`
 
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add apps/cli/README.md
@@ -2001,12 +2001,12 @@ git commit -m "docs(cli): add CLI README"
 - Consumes: 现有 README 结构
 - Produces: 添加 CLI 信息到主项目文档
 
-- [ ] **Step 1: 读取现有 README**
+- [x] **Step 1: 读取现有 README**
 
 Run: `cat README.md | grep -A 20 "What's in the box"`
 Expected: 查看现有功能列表结构
 
-- [ ] **Step 2: 更新功能列表**
+- [x] **Step 2: 更新功能列表**
 
 在 "What's in the box" 表格中的 Desktop 行后添加：
 
@@ -2014,7 +2014,7 @@ Expected: 查看现有功能列表结构
 | CLI          | Terminal-based command-line interface with device auth  |
 ```
 
-- [ ] **Step 3: 更新可用脚本部分**
+- [x] **Step 3: 更新可用脚本部分**
 
 在 "Available scripts" 部分添加：
 
@@ -2023,7 +2023,7 @@ Expected: 查看现有功能列表结构
 - `pnpm build:cli` — build the CLI for distribution
 ```
 
-- [ ] **Step 4: 添加 CLI 快速开始说明（可选）**
+- [x] **Step 4: 添加 CLI 快速开始说明（可选）**
 
 在适当位置添加：
 
@@ -2041,7 +2041,7 @@ openstarter whoami
 See [apps/cli/README.md](./apps/cli/README.md) for full documentation.
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add README.md
@@ -2059,42 +2059,42 @@ git commit -m "docs: add CLI to main README"
 - Consumes: 所有已实现的功能
 - Produces: 验证项目整体质量
 
-- [ ] **Step 1: 运行全局类型检查**
+- [x] **Step 1: 运行全局类型检查**
 
 Run: `pnpm check-types`
 Expected: 所有包类型检查通过，无错误
 
-- [ ] **Step 2: 运行 Biome 代码检查**
+- [x] **Step 2: 运行 Biome 代码检查**
 
 Run: `pnpm ultracite:check`
 Expected: 代码符合 ultracite 规范，无错误
 
-- [ ] **Step 3: 构建所有包**
+- [x] **Step 3: 构建所有包**
 
 Run: `pnpm build`
 Expected: 所有包构建成功
 
-- [ ] **Step 4: 测试 CLI 打包体积**
+- [x] **Step 4: 测试 CLI 打包体积**
 
 Run: `du -sh apps/cli/dist`
 Expected: 打包后体积 < 5MB
 
-- [ ] **Step 5: 测试 CLI 启动时间**
+- [x] **Step 5: 测试 CLI 启动时间**
 
 Run: `time node apps/cli/dist/index.js --version`
 Expected: 启动时间 < 100ms
 
-- [ ] **Step 6: 验证所有命令帮助文本**
+- [x] **Step 6: 验证所有命令帮助文本**
 
 Run: `node apps/cli/dist/index.js --help`
 Expected: 所有命令都有清晰的描述
 
-- [ ] **Step 7: 创建 Git tag（可选）**
+- [x] **Step 7: 创建 Git tag（可选）**
 
 Run: `git tag -a cli-v0.1.0 -m "CLI MVP release"`
 Expected: Tag 创建成功
 
-- [ ] **Step 8: 最终 Commit**
+- [x] **Step 8: 最终 Commit**
 
 ```bash
 git add -A
@@ -2107,16 +2107,16 @@ git commit -m "chore: final cleanup and verification for CLI v0.1.0"
 
 完成所有任务后，验证以下成功标准：
 
-- [ ] 用户可以通过 `npm install -g @openstarter/cli` 全局安装（本地测试用 `pnpm link`）
-- [ ] 用户可以通过 `npx @openstarter/cli` 直接运行
-- [ ] 用户可以完成完整的登录流程（设备授权）
-- [ ] 用户可以查看和更新个人资料
-- [ ] 用户可以执行基本的数据操作（列出、查看、创建）
-- [ ] 用户可以检查系统状态和连接性
-- [ ] 所有命令都有清晰的错误消息
-- [ ] 支持 `--json` 输出用于脚本集成
-- [ ] CLI 启动时间 < 100ms
-- [ ] 打包后的文件大小 < 5MB
-- [ ] 代码通过 Biome 检查
-- [ ] 所有包类型检查通过
+- [x] 用户可以通过 `npm install -g @openstarter/cli` 全局安装（本地测试用 `pnpm link`）
+- [x] 用户可以通过 `npx @openstarter/cli` 直接运行
+- [x] 用户可以完成完整的登录流程（设备授权）
+- [x] 用户可以查看和更新个人资料
+- [x] 用户可以执行基本的数据操作（列出、查看、创建）
+- [x] 用户可以检查系统状态和连接性
+- [x] 所有命令都有清晰的错误消息
+- [x] 支持 `--json` 输出用于脚本集成
+- [x] CLI 启动时间 < 100ms
+- [x] 打包后的文件大小 < 5MB
+- [x] 代码通过 Biome 检查
+- [x] 所有包类型检查通过
 
