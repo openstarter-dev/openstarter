@@ -21,6 +21,7 @@
   "common.sign.sign_out_title": "Sign Out",
   "common.sign.google_sign_in": "Sign in with Google",
   "common.sign.github_sign_in": "Sign in with GitHub",
+  "common.sign.apple_sign_in": "Sign in with Apple",
   "common.sign.no_methods_title": "No sign-in methods available",
   "common.sign.no_methods_description": "The administrator hasn't enabled any sign-in methods yet. Please check back later.",
   "common.sign.forgot_password": "Forgot your password?",
@@ -62,6 +63,8 @@
   "common.error.title": "Oops",
   "common.error.message": "Something went wrong. Please try again.",
   "common.error.retry": "Try again",
+  "common.error.unreachable": "Could not reach the server. Check your connection and try again.",
+  "common.error.misconfigured": "The app is not configured correctly.",
   "common.pricing.get_started": "Get Started",
   "common.pricing.processing": "Processing...",
   "common.pricing.choose_payment": "Choose payment method",
@@ -88,6 +91,8 @@
   "common.nav.theme_light": "Light",
   "common.nav.theme_dark": "Dark",
   "common.nav.theme_system": "System",
+  "common.nav.home": "Home",
+  "common.nav.language": "Language",
   "common.pages.back_to_home": "Back to home",
   "common.pages.last_updated": "Last updated",
   "common.support.open_label": "Contact support",
@@ -808,5 +813,8 @@
   "landing.blog.title": "From the blog",
   "landing.blog.description": "Product updates, guides, and engineering notes from the team.",
   "landing.blog.view_all": "View all posts",
-  "landing.footer.blog": "Blog"
+  "landing.footer.blog": "Blog",
+  "mobile.home.greeting": "Signed in as",
+  "mobile.settings.appearance": "Appearance",
+  "mobile.settings.version": "Version"
 }

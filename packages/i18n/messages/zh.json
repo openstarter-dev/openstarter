@@ -21,6 +21,7 @@
   "common.sign.sign_out_title": "退出登录",
   "common.sign.google_sign_in": "使用 Google 登录",
   "common.sign.github_sign_in": "使用 GitHub 登录",
+  "common.sign.apple_sign_in": "使用 Apple 登录",
   "common.sign.no_methods_title": "暂无可用的登录方式",
   "common.sign.no_methods_description": "管理员尚未启用任何登录方式，请稍后再试。",
   "common.sign.forgot_password": "忘记密码？",
@@ -62,6 +63,8 @@
   "common.error.title": "出错了",
   "common.error.message": "页面出现了一些问题，请重试。",
   "common.error.retry": "重试",
+  "common.error.unreachable": "无法连接到服务器，请检查网络后重试。",
+  "common.error.misconfigured": "应用配置有误。",
   "common.pricing.get_started": "立即开始",
   "common.pricing.processing": "处理中...",
   "common.pricing.choose_payment": "选择支付方式",
@@ -88,6 +91,8 @@
   "common.nav.theme_light": "浅色模式",
   "common.nav.theme_dark": "深色模式",
   "common.nav.theme_system": "跟随系统",
+  "common.nav.home": "首页",
+  "common.nav.language": "语言",
   "common.pages.back_to_home": "返回首页",
   "common.pages.last_updated": "最近更新",
   "common.support.open_label": "联系客服",
@@ -808,5 +813,8 @@
   "landing.blog.title": "最新博客",
   "landing.blog.description": "来自团队的产品动态、使用指南与工程笔记。",
   "landing.blog.view_all": "查看全部文章",
-  "landing.footer.blog": "博客"
+  "landing.footer.blog": "博客",
+  "mobile.home.greeting": "当前登录账号",
+  "mobile.settings.appearance": "外观",
+  "mobile.settings.version": "版本"
 }
