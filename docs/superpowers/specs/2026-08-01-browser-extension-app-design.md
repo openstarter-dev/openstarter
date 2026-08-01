@@ -72,7 +72,7 @@ apps/extension/
 
 `packages/api/src/middleware/auth.ts` 走的是 `createAuth().api.getSession({ headers })`，所以服务端只要注册 `bearer()`，**现有全部域路由的 `requireAuth` 自动支持 Bearer，中间件与路由零改动**。
 
-`advanced.cookiePrefix` 配置为 `"turbostarter"`，故 cookie 名为 `turbostarter.session_token`；HTTPS 下浏览器会使用 `__Secure-turbostarter.session_token` 变体。解析顺序：先试带 `__Secure-` 前缀者，未命中再试无前缀者，两者皆无则判定未登录。
+`advanced.cookiePrefix` 配置为 `"openstarter"`，故 cookie 名为 `openstarter.session_token`；HTTPS 下浏览器会使用 `__Secure-openstarter.session_token` 变体。解析顺序：先试带 `__Secure-` 前缀者，未命中再试无前缀者，两者皆无则判定未登录。
 
 不缓存 token：每次 popup 打开时从 cookie jar 现读，仅在 popup 生命周期内驻留内存。因此 manifest 不需要 `storage` 权限，也不存在"插件本地持久化了会话凭证"这一风险面。
 

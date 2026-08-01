@@ -92,7 +92,7 @@ const otpExpiresIn = runtimeConfigs.email_otp_expires_in
 
 export const auth = betterAuth({
   advanced: {
-    cookiePrefix: "turbostarter",
+    cookiePrefix: "openstarter",
     cookies: {
       state: {
         attributes: {
@@ -102,7 +102,7 @@ export const auth = betterAuth({
       },
     },
   },
-  appName: "TurboStarter",
+  appName: "OpenStarter",
   database: drizzleAdapter(db(), {
     provider: getAuthAdapterProvider(),
     schema: authSchema,
@@ -251,7 +251,9 @@ export const auth = betterAuth({
   },
   trustedOrigins: [
     "chrome-extension://",
-    "turbostarter://",
+    // 移动端深链回跳（Expo Router scheme，见 apps/mobile/app.config.ts）。
+    // 与 expoClient({ scheme: "openstarter" }) 及 cookiePrefix 保持同名。
+    "openstarter://",
     /* Needed only for Apple ID authentication */
     "https://appleid.apple.com",
     ...(env.NODE_ENV === NodeEnv.DEVELOPMENT
