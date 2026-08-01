@@ -9,3 +9,7 @@
 interface ImportMetaEnv {
   readonly VITE_APP_URL: string;
 }
+
+// 副作用 CSS 导入（main.tsx 引入 globals.css）。WXT 走 Vite，理论上 vite/client 已声明
+// `*.css` 模块，但 WXT 生成的 .wxt/tsconfig.json 不引入 vite/client，故在此显式补声明。
+declare module "*.css";
