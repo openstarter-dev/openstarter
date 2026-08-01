@@ -13,6 +13,7 @@ it, rebrand it, and start building your product instead of your boilerplate.
 
 ```bash
 pnpm install
+cp .env.example .env                 # 跨端共享的 API 地址（见下方"共享 API 地址"）
 cp apps/web/.env.example apps/web/.env
 # Edit apps/web/.env and set a strong BETTER_AUTH_SECRET (see below).
 pnpm db:push
@@ -27,6 +28,22 @@ Generate a secret for `BETTER_AUTH_SECRET`:
 ```bash
 openssl rand -hex 32
 ```
+
+## 跨端共享 API 地址
+
+`web`（API 宿主）/ `cli` / `desktop` / `mobile` / `extension` 五端共用同一个 API
+地址，唯一事实源是**根目录 `.env`** 里的 `OPENSTARTER_API_URL`：
+
+| 端 | 何时读 | 改完如何生效 |
+|---|---|---|
+| web | （就是宿主，不读此变量） | — |
+| cli | 运行期 | 重跑命令即生效 |
+| desktop | 运行期 | 重启 app 即生效 |
+| mobile | 构建期（`apps/mobile/scripts/env.mjs` 派生为 `EXPO_PUBLIC_API_URL`） | 需重新 `pnpm dev:mobile` |
+| extension | 构建期（`apps/extension/wxt.config.ts` 派生为 `VITE_APP_URL`） | 需重新 `pnpm build:extension` |
+
+每端的本地 `.env` 可覆盖根值（例如 mobile 真机调试填局域网 IP）；DATABASE_URL /
+BETTER_AUTH_SECRET 等密钥仍由 `apps/web/.env` 维护，未集中到根 .env。
 
 ## What's in the box
 
