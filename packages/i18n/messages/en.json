@@ -816,5 +816,16 @@
   "landing.footer.blog": "Blog",
   "mobile.home.greeting": "Signed in as",
   "mobile.settings.appearance": "Appearance",
-  "mobile.settings.version": "Version"
+  "mobile.settings.version": "Version",
+  "auth:error.device.invalidDeviceCode": "Invalid device code",
+  "auth:error.device.expiredDeviceCode": "Device code has expired",
+  "auth:error.device.expiredUserCode": "User code has expired",
+  "auth:error.device.authorizationPending": "Authorization pending",
+  "auth:error.device.accessDenied": "Access denied",
+  "auth:error.device.invalidUserCode": "Invalid user code",
+  "auth:error.device.alreadyProcessed": "Device code already processed",
+  "auth:error.device.notClaimed": "Device code has not been claimed by a verifying session",
+  "auth:error.device.pollingTooFrequently": "Polling too frequently",
+  "auth:error.device.invalidStatus": "Invalid device code status",
+  "auth:error.device.authenticationRequired": "Authentication required"
 }

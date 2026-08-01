@@ -41,6 +41,7 @@ openssl rand -hex 32
 | Styling      | Tailwind CSS v4                                  |
 | Monorepo     | Turborepo + pnpm workspaces                     |
 | Desktop      | Electron 外壳（远程加载 + electron-builder 打包 + 自动更新），见 `apps/desktop/README.md` |
+| CLI          | 命令行工具（设备授权登录 + 基础 CRUD），见 `apps/cli/README.md` |
 | Email        | _planned (Phase 2)_                             |
 | Billing      | _planned (Phase 3)_                             |
 
@@ -56,6 +57,7 @@ openstarter/
 │           ├── routes/_app/         # authenticated app (sidebar shell)
 │           ├── components/          # marketing / app / theme / system / auth
 │           └── lib/                 # branding.ts + marketing/{pricing,faq}.ts
+│   └── desktop/     # Electron 外壳（远程加载 web）
 ├── packages/
 │   ├── ui/          # Shared shadcn/Base UI components and styles
 │   ├── api/         # Hono app (auth + routes) + AppType for RPC
@@ -80,6 +82,20 @@ pricing/FAQ data, and replace the placeholder marketing copy.
 - `pnpm build:desktop` — 编译桌面端主进程/preload
 - `pnpm package:desktop` — 本机打包出三平台安装包（不发布）
 - `pnpm release:desktop` — 打包并发布到 GitHub Releases（需要 `GH_TOKEN`）
+- `pnpm dev:cli` — 运行 CLI 开发模式（tsx watch）
+- `pnpm build:cli` — 构建 CLI（tsup → `apps/cli/dist`）
+
+### CLI
+
+本仓库附带 `@openstarter/cli`，通过 Better Auth 设备授权登录并调用后端 API：
+
+```bash
+pnpm build:cli
+node apps/cli/dist/index.js --api-url http://localhost:3000 login
+node apps/cli/dist/index.js whoami
+```
+
+完整文档见 [apps/cli/README.md](./apps/cli/README.md)。
 
 ## Deployment
 

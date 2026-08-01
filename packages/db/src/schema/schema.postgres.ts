@@ -247,6 +247,30 @@ export const teamMember = table(
   ]
 );
 
+// ─── Device Authorization (RFC 8628) ─────────────────────────────────────────
+// Better Auth deviceAuthorization 插件要求 deviceCode 模型：CLI 登录经设备授权流写于此。
+// 插件字段契约见 better-auth@1.6.11 dist/plugins/device-authorization/index.d.mts。
+
+export const deviceCode = table(
+  "device_code",
+  {
+    clientId: text("client_id"),
+    deviceCode: text("device_code").notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    id: text("id").primaryKey(),
+    lastPolledAt: timestamp("last_polled_at"),
+    pollingInterval: integer("polling_interval"),
+    scope: text("scope"),
+    status: text("status").notNull(),
+    userCode: text("user_code").notNull(),
+    userId: text("user_id"),
+  },
+  (t) => [
+    index("idx_device_code_user_code").on(t.userCode),
+    index("idx_device_code_status").on(t.status),
+  ]
+);
+
 // ─── Content ─────────────────────────────────────────────────────────────────
 
 export const config = table("config", {
@@ -766,3 +790,5 @@ export type InviteCode = typeof inviteCode.$inferSelect;
 export type NewInviteCode = typeof inviteCode.$inferInsert;
 export type UserInvite = typeof userInvite.$inferSelect;
 export type NewUserInvite = typeof userInvite.$inferInsert;
+export type DeviceCode = typeof deviceCode.$inferSelect;
+export type NewDeviceCode = typeof deviceCode.$inferInsert;
