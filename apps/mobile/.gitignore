@@ -1,0 +1,17 @@
+/node_modules
+.expo
+dist
+# Paraglide 生成物，每次 dev/check-types 重新编译
+/src/paraglide
+# Managed 工作流不提交原生工程（expo prebuild 的产物）
+/ios
+/android
+# Environment & local files
+.env*
+!.env.example
+.DS_Store
+*.tsbuildinfo
+# Logs
+*.log
+# Turbo
+.turbo

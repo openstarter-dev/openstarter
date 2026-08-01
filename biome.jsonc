@@ -7,7 +7,13 @@
     "ultracite/biome/vitest"
   ],
   "files": {
-    "includes": ["!!apps/web/src/paraglide", "!!apps/web/.output", "!!coverage"]
+    "includes": [
+      "!!apps/web/src/paraglide",
+      "!!apps/web/.output",
+      "!!apps/mobile/src/paraglide",
+      "!!apps/mobile/.expo",
+      "!!coverage"
+    ]
   },
   "linter": {
     "rules": {
@@ -15,5 +21,19 @@
         "noJsxPropsBind": "off"
       }
     }
-  }
+  },
+  "overrides": [
+    {
+      // Tailwind 指令（@tailwind base 等）非标准 CSS at-rule，但由 NativeWind/Tailwind 处理，
+      // 在 apps/mobile/global.css 中是预期写法，对该文件关闭 noUnknownAtRules。
+      "includes": ["**/apps/mobile/global.css"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUnknownAtRules": "off"
+          }
+        }
+      }
+    }
+  ]
 }

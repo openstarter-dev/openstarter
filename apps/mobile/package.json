@@ -1,0 +1,46 @@
+{
+  "name": "mobile",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "paraglide:compile": "paraglide-js compile --project ../../packages/i18n/project.inlang --outdir ./src/paraglide --strategy globalVariable baseLocale",
+    "dev": "pnpm paraglide:compile && expo start",
+    "android": "pnpm paraglide:compile && expo run:android",
+    "ios": "pnpm paraglide:compile && expo run:ios",
+    "check-types": "pnpm paraglide:compile && tsc --noEmit",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage"
+  },
+  "dependencies": {
+    "@better-auth/expo": "catalog:",
+    "@openstarter/auth": "workspace:*",
+    "@openstarter/i18n": "workspace:*",
+    "@tanstack/react-form": "^1.28.0",
+    "@tanstack/react-query": "^5.99.0",
+    "better-auth": "catalog:",
+    "expo": "^57.0.9",
+    "expo-constants": "~57.0.8",
+    "expo-linking": "~57.0.4",
+    "expo-localization": "~57.0.1",
+    "expo-network": "~57.0.1",
+    "expo-router": "~57.0.9",
+    "expo-secure-store": "~57.0.1",
+    "expo-status-bar": "~57.0.1",
+    "expo-web-browser": "~57.0.2",
+    "hono": "catalog:",
+    "react": "catalog:",
+    "react-native": "0.86.2",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.2",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@inlang/paraglide-js": "catalog:",
+    "@openstarter/api": "workspace:*",
+    "@types/react": "catalog:",
+    "nativewind": "4.2.6",
+    "tailwindcss": "3.4.19",
+    "typescript": "catalog:",
+    "vitest": "4.1.10"
+  }
+}
