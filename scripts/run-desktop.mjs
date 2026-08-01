@@ -93,7 +93,7 @@ function spawnElectron() {
     env: {
       ...process.env,
       NODE_ENV: "development",
-      OPENSTARTER_DESKTOP_APP_URL: RENDERER_URL,
+      OPENSTARTER_API_URL: RENDERER_URL,
     },
     stdio: ["ignore", "inherit", "inherit"],
   });

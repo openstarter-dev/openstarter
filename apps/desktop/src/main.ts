@@ -18,7 +18,7 @@ import {
 import { createFileWindowStateStore } from "./window-state";
 
 // esbuild 在构建时通过 define 注入的全局常量，见 scripts/build.mjs。
-declare const __OPENSTARTER_DESKTOP_APP_URL__: string;
+declare const __OPENSTARTER_API_URL__: string;
 
 const UPDATE_CHECK_DELAY_MS = 10_000;
 
@@ -40,8 +40,7 @@ async function main(): Promise<void> {
   await app.whenReady();
 
   if (mode === "dev") {
-    const devUrl =
-      process.env.OPENSTARTER_DESKTOP_APP_URL ?? "http://localhost:3000";
+    const devUrl = process.env.OPENSTARTER_API_URL ?? "http://localhost:3000";
     logInfo("waiting for dev server at", devUrl);
     const ready = await waitForDevServer(devUrl);
     if (!ready) {
@@ -50,7 +49,7 @@ async function main(): Promise<void> {
   }
 
   const resolvedUrl = resolveAppUrl({
-    buildTimeUrl: __OPENSTARTER_DESKTOP_APP_URL__,
+    buildTimeUrl: __OPENSTARTER_API_URL__,
     env: process.env,
     isPackaged,
   });

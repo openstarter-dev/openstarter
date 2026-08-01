@@ -16,7 +16,7 @@ describe("resolveAppUrl", () => {
   it("prefers the runtime env override over the build-time URL", () => {
     const result = resolveAppUrl({
       buildTimeUrl: "https://build-time.example.com",
-      env: { OPENSTARTER_DESKTOP_APP_URL: "https://runtime.example.com" },
+      env: { OPENSTARTER_API_URL: "https://runtime.example.com" },
       isPackaged: true,
     });
 
@@ -92,7 +92,7 @@ describe("resolveAppUrl", () => {
   it("prefers a valid runtime override even if the build-time URL is invalid", () => {
     const result = resolveAppUrl({
       buildTimeUrl: "not a url",
-      env: { OPENSTARTER_DESKTOP_APP_URL: "https://runtime.example.com" },
+      env: { OPENSTARTER_API_URL: "https://runtime.example.com" },
       isPackaged: true,
     });
 
@@ -102,7 +102,7 @@ describe("resolveAppUrl", () => {
   it("falls back to the build-time URL when the runtime override is invalid", () => {
     const result = resolveAppUrl({
       buildTimeUrl: "https://build-time.example.com",
-      env: { OPENSTARTER_DESKTOP_APP_URL: "not a url" },
+      env: { OPENSTARTER_API_URL: "not a url" },
       isPackaged: true,
     });
 

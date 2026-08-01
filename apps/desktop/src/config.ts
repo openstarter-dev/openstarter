@@ -51,7 +51,7 @@ export function resolveAppUrl(params: ResolveAppUrlParams): ResolvedUrl {
   const { buildTimeUrl, env, isPackaged } = params;
   const mode = getDesktopMode(isPackaged);
 
-  const runtimeOverride = normalizeUrl(env.OPENSTARTER_DESKTOP_APP_URL ?? "");
+  const runtimeOverride = normalizeUrl(env.OPENSTARTER_API_URL ?? "");
   if (runtimeOverride) {
     return { ok: true, url: runtimeOverride };
   }
@@ -68,7 +68,7 @@ export function resolveAppUrl(params: ResolveAppUrlParams): ResolvedUrl {
   return {
     ok: false,
     reason:
-      "No valid app URL configured. Set OPENSTARTER_DESKTOP_APP_URL or rebuild with a valid default URL.",
+      "No valid app URL configured. Set OPENSTARTER_API_URL or rebuild with a valid default URL.",
   };
 }
 

@@ -11,14 +11,15 @@ const desktopDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packageJsonPath = resolve(desktopDir, "package.json");
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 
-const buildTimeUrl =
-  process.env.OPENSTARTER_DESKTOP_APP_URL ?? "https://example.com";
+// 与其它端统一的共享变量名（根 .env 的 OPENSTARTER_API_URL）。
+// 构建期把值通过 define 注入 main.ts 的 __OPENSTARTER_API_URL__ 全局常量。
+const buildTimeUrl = process.env.OPENSTARTER_API_URL ?? "https://example.com";
 
 async function runBuild() {
   await build({
     bundle: true,
     define: {
-      __OPENSTARTER_DESKTOP_APP_URL__: JSON.stringify(buildTimeUrl),
+      __OPENSTARTER_API_URL__: JSON.stringify(buildTimeUrl),
     },
     entryPoints: [
       resolve(desktopDir, "src/main.ts"),

@@ -11,7 +11,23 @@
 import Conf from "conf";
 import type { AuthTokens, CliConfig, StoredAuth } from "../types.js";
 
-const DEFAULT_API_URL = "https://app.openstarter.dev";
+// 默认凭据 fallback：硬编码的兜底 origin，仅当环境变量与配置文件都没有时使用。
+const HARDCODED_FALLBACK_URL = "https://app.openstarter.dev";
+
+/**
+ * 解析默认 API URL：优先读根 .env 通过进程环境注入的 OPENSTARTER_API_URL
+ * （与 mobile/extension/desktop 统一的唯一事实源），缺失再回落硬编码兜底。
+ * 取值在 ConfigManager 实例化时计算一次，避免每次读取都访问 process.env。
+ */
+function resolveDefaultApiUrl(): string {
+  const fromEnv = process.env.OPENSTARTER_API_URL;
+  if (fromEnv?.trim()) {
+    return fromEnv.trim();
+  }
+  return HARDCODED_FALLBACK_URL;
+}
+
+const DEFAULT_API_URL = resolveDefaultApiUrl();
 
 const SCHEMA = {
   apiUrl: { type: "string" },
