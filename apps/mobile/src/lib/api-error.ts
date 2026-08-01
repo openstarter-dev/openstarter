@@ -12,6 +12,16 @@
 
 const UNAUTHORIZED_STATUS = 401;
 
+// runRequest 只用到响应的 ok / status / json() 三者；把入参收窄成这个结构化接口，
+// 既兼容 DOM Response（测试里直接 new Response(...)），也兼容 Hono 客户端的
+// ClientResponse —— 后者的 .formData() 返回 Hono 自己的 FormData，与全局 Response
+// 不能互相赋值，若要求完整 Response 会反过来卡住调用方。
+export interface HttpResponse {
+  json: () => Promise<unknown>;
+  ok: boolean;
+  status: number;
+}
+
 export type ApiFailure =
   | { status: "unauthorized" }
   | { status: "unreachable" }
@@ -41,10 +51,10 @@ export function mapApiError(httpStatus: number, body: unknown): ApiFailure {
 }
 
 export async function runRequest<TData>(
-  send: () => Promise<Response>,
+  send: () => Promise<HttpResponse>,
   extract: (body: unknown) => TData
 ): Promise<ApiResult<TData>> {
-  let response: Response;
+  let response: HttpResponse;
   try {
     response = await send();
   } catch {

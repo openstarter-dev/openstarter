@@ -11,12 +11,12 @@
 // 大小上限从 Config 读取（`inline_image_max_kb`，缺省 2048KB），对所有上传统一生效（R18.4）。
 // 超限/类型不允许（UploadLimitError）转 400 交由 app.onError 统一返回结构化 respErr。
 
-import { getAllConfigs } from "@openstarter/shared/config";
+import { Buffer } from "node:buffer";
 import { respData, respErr } from "@openstarter/shared";
+import { getAllConfigs } from "@openstarter/shared/config";
 import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { Buffer } from "node:buffer";
 import { z } from "zod";
 
 import { requireAuth } from "../middleware/auth";
@@ -36,8 +36,8 @@ interface UploadInput {
 }
 
 const base64Item = z.object({
-  data: z.string().min(1),
   contentType: z.string().min(1),
+  data: z.string().min(1),
   filename: z.string().min(1).optional(),
 });
 
@@ -61,19 +61,35 @@ function decodeBase64(input: string): Uint8Array {
 /** 解析 multipart/form-data 的 `files` 字段为归一化条目。 */
 async function parseMultipart(request: Request): Promise<UploadInput[]> {
   const form = await request.formData();
-  const files: File[] = [];
+  // 此路由运行在服务端（Hono on Node），multipart 由 Hono 解析，entry 运行时是
+  // DOM File/Blob（具备 arrayBuffer()）。但被移动端 tsconfig 的全局类型污染时，
+  // request.formData() 会被推断成 RN 的 FormData（getAll 返回 string | { uri, name?, type? }），
+  // 此类 entry 没有 arrayBuffer()。因此不直接依赖 File/Blob 类型，只按实际用到的成员
+  // 做结构化收窄，保证 DOM 与 RN 两套全局类型下都能编译且行为不变。
+  const parts: MultipartFilePart[] = [];
   for (const entry of form.getAll("files")) {
-    if (typeof entry !== "string") {
-      files.push(entry);
+    if (typeof entry !== "string" && hasArrayBuffer(entry)) {
+      parts.push(entry);
     }
   }
   return await Promise.all(
-    files.map(async (file) => ({
+    parts.map(async (file) => ({
       body: new Uint8Array(await file.arrayBuffer()),
       contentType: file.type,
       filename: file.name,
     }))
   );
+}
+
+/** multipart 文件条目的结构化形态：只声明 parseMultipart 实际用到的成员。 */
+interface MultipartFilePart {
+  arrayBuffer: () => Promise<ArrayBuffer>;
+  name?: string;
+  type: string;
+}
+
+function hasArrayBuffer(value: object): value is MultipartFilePart {
+  return typeof (value as { arrayBuffer?: unknown }).arrayBuffer === "function";
 }
 
 /** 解析 JSON base64 入参为归一化条目。 */
@@ -131,18 +147,22 @@ export const storageRoute = new Hono().post(
 
       return c.json(
         respData({
-          urls: results.map((r) => r.url),
           results: results.map((r, i) => ({
-            url: r.url,
-            inline: r.inline,
             filename: inputs[i]?.filename,
+            inline: r.inline,
+            url: r.url,
           })),
+          urls: results.map((r) => r.url),
         })
       );
     } catch (err) {
       if (err instanceof UploadLimitError) {
         // 超限/类型不允许（R18.4）：转 400 交由 app.onError 统一返回结构化 respErr。
-        throw new HTTPException(BAD_REQUEST_STATUS, { message: err.message });
+        // 保留原始 cause 便于日志追踪超限的具体来源。
+        throw new HTTPException(BAD_REQUEST_STATUS, {
+          cause: err,
+          message: err.message,
+        });
       }
       throw err;
     }

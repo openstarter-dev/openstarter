@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { extractMessage, mapApiError, runRequest } from "./api-error";
 
-const jsonResponse = (status, body): Response =>
+const jsonResponse = (status: number, body: unknown): Response =>
   new Response(JSON.stringify(body), {
     headers: { "content-type": "application/json" },
     status,
