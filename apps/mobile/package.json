@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@better-auth/expo": "catalog:",
+    "@expo/vector-icons": "^15.1.1",
     "@openstarter/auth": "workspace:*",
     "@openstarter/i18n": "workspace:*",
     "@tanstack/react-form": "^1.28.0",
