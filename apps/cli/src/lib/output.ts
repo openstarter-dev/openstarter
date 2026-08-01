@@ -36,7 +36,13 @@ export function formatTable(data: Array<Record<string, unknown>>): void {
     return;
   }
 
-  const keys = Object.keys(data[0]);
+  const firstRow = data[0];
+  if (!firstRow) {
+    console.log('(empty)');
+    return;
+  }
+
+  const keys = Object.keys(firstRow);
   if (keys.length === 0) {
     console.log('(empty)');
     return;
@@ -51,18 +57,24 @@ export function formatTable(data: Array<Record<string, unknown>>): void {
   });
 
   const header = keys
-    .map((key, i) => key.padEnd(columnWidths[i]))
+    .map((key, i) => {
+      const width = columnWidths[i];
+      return width !== undefined ? key.padEnd(width) : key;
+    })
     .join('  ');
   console.log(header);
-  console.log(columnWidths.map((w) => '-'.repeat(w)).join('  '));
+  console.log(
+    columnWidths.map((w) => '-'.repeat(w ?? 0)).join('  '),
+  );
 
   for (const row of data) {
     const line = keys
       .map((key, i) => {
         const value = String(row[key] ?? '');
-        const width = columnWidths[i];
+        const width = columnWidths[i] ?? value.length;
         if (value.length > width) {
-          return `${value.slice(0, Math.max(width - TRUNCATE_SUFFIX.length, 0))}${TRUNCATE_SUFFIX}`;
+          const sliceEnd = Math.max(width - TRUNCATE_SUFFIX.length, 0);
+          return `${value.slice(0, sliceEnd)}${TRUNCATE_SUFFIX}`;
         }
         return value.padEnd(width);
       })
