@@ -215,6 +215,13 @@ export const auth = betterAuth({
       expiresIn: "10m",
       interval: "5s",
       userCodeLength: 8,
+      // better-auth 1.6.11 的 deviceAuthorizationOptionsSchema 将 `schema` 声明为
+      // `z.custom(() => true)` 而未加 `.optional()`/`.default()`，导致缺省调用时
+      // `parse(options)` 抛 ZodError(path:["schema"], expected "nonoptional")。
+      // 插件内部 `mergeSchema(schema, options?.schema)` 对 falsy 入参直接返回默认 schema，
+      // 故该字段本应是可选——传入 `{}` 满足校验且不重映射任何字段（drizzle 侧
+      // authSchema.deviceCode 仍是规范的数据库模型，经顶层 drizzleAdapter 注入）。
+      schema: {},
     }),
     // Bearer 转发（浏览器插件端会话桥接，见 docs/superpowers/specs/2026-08-01-browser-extension-app-design.md
     // §3.2/§4）：插件把 web 端的会话 cookie 值原样作为 Authorization: Bearer 头转发；
