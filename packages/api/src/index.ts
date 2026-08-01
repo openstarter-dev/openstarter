@@ -17,6 +17,7 @@ import { configRoute } from "./routes/config";
 import { healthRoute } from "./routes/health";
 import { postsRoute } from "./routes/posts";
 import { privateDataRoute } from "./routes/private-data";
+import { profileRoute } from "./routes/profile";
 import { seoRoute } from "./routes/seo";
 import { storageRoute } from "./routes/storage";
 import { taxonomyRoute } from "./routes/taxonomy";
@@ -78,6 +79,7 @@ const routes = app
   .route("/", aiTasksRoute)
   .route("/", ticketsRoute)
   .route("/", userRoute)
+  .route("/", profileRoute)
   .route("/", seoRoute)
   .route("/", analyticsRoute)
   .route("/", adminRoute)
