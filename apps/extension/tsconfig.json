@@ -7,5 +7,5 @@
       "@openstarter/ui-web/*": ["../../packages/ui/ui-web/src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", ".wxt/types/**/*.d.ts"]
 }
