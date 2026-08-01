@@ -3,9 +3,13 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+// 校验 note id 形如 `note_<数字>`。顶层声明，避免 useTopLevelRegex。
+const NOTE_ID_PATTERN = /^note_\d+$/;
+
 // mock 中间件：requireAuth 只把 userId 写入 context，不做真实鉴权。
-vi.mock("../middleware/auth", () => {
-  const { createMiddleware } = require("hono/factory");
+// 工厂内以 ESM 动态 import 获取 createMiddleware，避免 require() 引发的隐式 any。
+vi.mock("../middleware/auth", async () => {
+  const { createMiddleware } = await import("hono/factory");
   const requireAuth = createMiddleware<{
     Variables: { userId: string; session: null };
   }>(async (c, next) => {
@@ -19,10 +23,7 @@ vi.mock("../middleware/auth", () => {
 
 import { notesRoute } from "./notes";
 
-function request(
-  path: string,
-  init: RequestInit & { userId?: string } = {},
-) {
+function request(path: string, init: RequestInit & { userId?: string } = {}) {
   const userId = init.userId ?? "test-user";
   const { userId: _omit, ...rest } = init;
   return notesRoute.request(path, {
@@ -55,7 +56,7 @@ describe("notes routes", () => {
       data: {
         createdAt: expect.any(String),
         description: "integration sanity check",
-        id: expect.stringMatching(/^note_\d+$/),
+        id: expect.stringMatching(NOTE_ID_PATTERN),
         name: "Integration Note",
         updatedAt: expect.any(String),
         userId: "test-user",
@@ -80,7 +81,9 @@ describe("notes routes", () => {
     });
     const alienId = (await alien.json()).data.id;
 
-    const response = await request("/api/notes?limit=10", { userId: "iso-user" });
+    const response = await request("/api/notes?limit=10", {
+      userId: "iso-user",
+    });
     expect(response.status).toBe(200);
     const body = await response.json();
 

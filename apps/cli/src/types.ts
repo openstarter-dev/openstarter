@@ -29,11 +29,11 @@ export interface AuthTokens {
 /** RFC 8628 设备码响应。 */
 export interface DeviceCodeResponse {
   device_code: string;
+  expires_in: number;
+  interval: number;
   user_code: string;
   verification_uri: string;
   verification_uri_complete?: string;
-  expires_in: number;
-  interval: number;
 }
 
 /** RFC 8628 token 端点成功响应。 */

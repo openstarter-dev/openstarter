@@ -12,7 +12,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-type Phase = "claiming" | "ready" | "approving" | "approved" | "denied" | "error";
+type Phase =
+  | "claiming"
+  | "ready"
+  | "approving"
+  | "approved"
+  | "denied"
+  | "error";
 
 interface DeviceState {
   message: string;
@@ -21,21 +27,23 @@ interface DeviceState {
 }
 
 const STATUS_BY_PHASE: Record<Phase, string> = {
-  claiming: "正在验证设备代码…",
-  ready: "请确认是否授权该设备登录",
-  approving: "正在授权…",
   approved: "授权成功！",
+  approving: "正在授权…",
+  claiming: "正在验证设备代码…",
   denied: "已拒绝授权。",
   error: "授权失败。",
+  ready: "请确认是否授权该设备登录",
 };
 
 export const Route = createFileRoute("/_app/device")({
+  component: DeviceAuthPage,
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { user_code?: string } => ({
+  validateSearch: (
+    search: Record<string, unknown>
+  ): { user_code?: string } => ({
     user_code:
       typeof search.user_code === "string" ? search.user_code : undefined,
   }),
-  component: DeviceAuthPage,
 });
 
 function DeviceAuthPage() {
@@ -58,21 +66,29 @@ function DeviceAuthPage() {
       return;
     }
 
-    void (async () => {
+    const loadClaim = async () => {
       try {
         const claim = await fetch(
           `/api/auth/device?user_code=${encodeURIComponent(userCode)}`,
-          { method: "GET" },
+          { method: "GET" }
         );
         if (!claim.ok) {
           const err = await safeError(claim);
           if (!cancelled) {
-            setState({ message: err || "无法识别该授权代码。", phase: "error", userCode });
+            setState({
+              message: err || "无法识别该授权代码。",
+              phase: "error",
+              userCode,
+            });
           }
           return;
         }
         if (!cancelled) {
-          setState({ message: STATUS_BY_PHASE.ready, phase: "ready", userCode });
+          setState({
+            message: STATUS_BY_PHASE.ready,
+            phase: "ready",
+            userCode,
+          });
         }
       } catch (err) {
         if (!cancelled) {
@@ -83,7 +99,9 @@ function DeviceAuthPage() {
           });
         }
       }
-    })();
+    };
+
+    loadClaim();
 
     return () => {
       cancelled = true;
@@ -107,7 +125,11 @@ function DeviceAuthPage() {
       });
       if (!res.ok) {
         const err = await safeError(res);
-        setState({ message: err || "授权失败。", phase: "error", userCode: state.userCode });
+        setState({
+          message: err || "授权失败。",
+          phase: "error",
+          userCode: state.userCode,
+        });
         return;
       }
       setState({ message: STATUS_BY_PHASE.approved, phase: "approved" });
@@ -132,7 +154,11 @@ function DeviceAuthPage() {
       });
       if (!res.ok) {
         const err = await safeError(res);
-        setState({ message: err || "拒绝失败。", phase: "error", userCode: state.userCode });
+        setState({
+          message: err || "拒绝失败。",
+          phase: "error",
+          userCode: state.userCode,
+        });
         return;
       }
       setState({ message: STATUS_BY_PHASE.denied, phase: "denied" });
@@ -150,7 +176,9 @@ function DeviceAuthPage() {
       <div className="flex flex-col items-center gap-6 text-center">
         <div className="text-6xl">✓</div>
         <h1 className="font-bold text-2xl">授权成功！</h1>
-        <p className="text-muted-foreground">您可以关闭此页面并返回终端继续操作。</p>
+        <p className="text-muted-foreground">
+          您可以关闭此页面并返回终端继续操作。
+        </p>
       </div>
     );
   }
@@ -190,23 +218,23 @@ function DeviceAuthPage() {
 
       {state.phase === "ready" && (
         <>
-          {state.userCode && (
+          {state.userCode !== undefined && (
             <div className="rounded-md border p-4 text-center font-mono tracking-widest">
               {state.userCode}
             </div>
           )}
           <div className="flex gap-3">
             <button
-              type="button"
-              onClick={approve}
               className="flex-1 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
+              onClick={approve}
+              type="button"
             >
               授权
             </button>
             <button
-              type="button"
-              onClick={deny}
               className="rounded-md border px-4 py-2 hover:bg-muted"
+              onClick={deny}
+              type="button"
             >
               拒绝
             </button>
@@ -232,7 +260,8 @@ async function safeError(res: Response): Promise<string | undefined> {
     };
     return body.error_description ?? body.message;
   } catch {
-    return undefined;
+    // 非 JSON 响应（如纯文本错误页）无法解析，回退到 undefined 由调用方给默认文案。
+    return undefined as string | undefined;
   }
 }
 

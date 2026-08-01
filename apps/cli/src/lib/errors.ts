@@ -7,36 +7,40 @@
 
 /** 认证错误（未登录、令牌过期）——退出码 2。 */
 export class AuthError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'AuthError';
+  constructor(message: string, options: ErrorOptions = {}) {
+    super(message, options);
+    this.name = "AuthError";
   }
 }
 
 /** 网络错误（无法连接 API、请求失败）——退出码 3。 */
 export class NetworkError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'NetworkError';
+  constructor(message: string, options: ErrorOptions = {}) {
+    super(message, options);
+    this.name = "NetworkError";
   }
 }
 
 /** 配置错误（配置文件损坏、地址非法）——退出码 4。 */
 export class ConfigError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'ConfigError';
+  constructor(message: string, options: ErrorOptions = {}) {
+    super(message, options);
+    this.name = "ConfigError";
   }
 }
 
 /** API 错误（服务端返回非 2xx，附带状态码）——退出码 1（认证相关子类优先匹配）。 */
 export class ApiError extends Error {
+  readonly statusCode?: number;
+
   constructor(
     message: string,
-    public readonly statusCode?: number,
+    statusCode?: number,
+    options: ErrorOptions = {}
   ) {
-    super(message);
-    this.name = 'ApiError';
+    super(message, options);
+    this.name = "ApiError";
+    this.statusCode = statusCode;
   }
 }
 
@@ -46,23 +50,23 @@ export class ApiError extends Error {
  */
 export function handleError(error: Error, verbose: boolean): never {
   if (error instanceof AuthError) {
-    console.error('❌ 认证错误:', error.message);
-    console.error('请运行 `openstarter login` 重新登录');
+    console.error("❌ 认证错误:", error.message);
+    console.error("请运行 `openstarter login` 重新登录");
     process.exit(2);
   }
 
   if (error instanceof NetworkError) {
-    console.error('❌ 网络错误:', error.message);
-    console.error('请检查网络连接和 API 地址');
+    console.error("❌ 网络错误:", error.message);
+    console.error("请检查网络连接和 API 地址");
     process.exit(3);
   }
 
   if (error instanceof ConfigError) {
-    console.error('❌ 配置错误:', error.message);
+    console.error("❌ 配置错误:", error.message);
     process.exit(4);
   }
 
-  console.error('❌ 错误:', error.message);
+  console.error("❌ 错误:", error.message);
   if (verbose) {
     console.error(error.stack);
   }

@@ -4,25 +4,25 @@
  * status 端点公开（不要求登录），但展示是否已登录以辅助诊断。
  */
 
-import { Command } from 'commander';
-import { config } from '../lib/config.js';
-import { createApiClient } from '../lib/api-client.js';
-import { formatOutput } from '../lib/output.js';
-import { handleError } from '../lib/errors.js';
+import type { Command } from "commander";
+import { createApiClient } from "../lib/api-client.js";
+import { config } from "../lib/config.js";
+import { handleError } from "../lib/errors.js";
+import { formatOutput } from "../lib/output.js";
 
 interface StatusView {
-  readonly status: 'ok';
+  readonly status: "ok";
   readonly timestamp: string;
   readonly version: string;
 }
 
-const CLI_VERSION = '0.1.0';
+const CLI_VERSION = "0.1.0";
 
 export function registerStatusCommands(program: Command): void {
   program
-    .command('status')
-    .description('检查 API 连接和服务状态')
-    .option('--json', '以 JSON 格式输出')
+    .command("status")
+    .description("检查 API 连接和服务状态")
+    .option("--json", "以 JSON 格式输出")
     .action(async (options) => {
       try {
         const apiUrl = config.getApiUrl();
@@ -30,15 +30,15 @@ export function registerStatusCommands(program: Command): void {
         const client = createApiClient();
 
         const startTime = Date.now();
-        const statusData = await client.request<StatusView>('/api/status');
+        const statusData = await client.request<StatusView>("/api/status");
         const latency = Date.now() - startTime;
 
         const result = {
           api: apiUrl,
-          status: statusData.status === 'ok' ? '✓ Connected' : '✗ Error',
+          authenticated: isAuthenticated ? "✓" : "✗",
           latency: `${latency}ms`,
+          status: statusData.status === "ok" ? "✓ Connected" : "✗ Error",
           version: statusData.version,
-          authenticated: isAuthenticated ? '✓' : '✗',
         };
 
         formatOutput(result, options.json);
@@ -48,18 +48,18 @@ export function registerStatusCommands(program: Command): void {
     });
 
   program
-    .command('info')
-    .description('显示 CLI 版本和配置信息')
+    .command("info")
+    .description("显示 CLI 版本和配置信息")
     .action(() => {
       try {
         const apiUrl = config.getApiUrl();
         const isAuthenticated = config.isAuthenticated();
 
         const info = {
-          'CLI Version': CLI_VERSION,
-          'API URL': apiUrl,
-          Config: '~/.openstarter/config.json',
-          'Logged in': isAuthenticated ? 'Yes' : 'No',
+          "API URL": apiUrl,
+          "CLI Version": CLI_VERSION,
+          Config: "~/.openstarter/config.json",
+          "Logged in": isAuthenticated ? "Yes" : "No",
         };
 
         formatOutput(info, false);

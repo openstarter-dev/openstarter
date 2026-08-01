@@ -9,8 +9,8 @@
 // 存储说明：使用进程内内存数组（对齐计划「简单实现，生产应使用数据库」）。在多实例 / 无状态
 // 部署下数据不跨进程持久，仅供 CLI 数据命令的端到端演示；后续可平迁到 @openstarter/db。
 
-import { respData, respErr } from "@openstarter/shared";
 import { zValidator } from "@hono/zod-validator";
+import { respData, respErr } from "@openstarter/shared";
 import { Hono } from "hono";
 import { z } from "zod";
 
@@ -29,12 +29,12 @@ const listQuery = z.object({
 });
 
 interface Note {
-  id: string;
-  userId: string;
-  name: string;
-  description: string;
   createdAt: string;
+  description: string;
+  id: string;
+  name: string;
   updatedAt: string;
+  userId: string;
 }
 
 // 进程内存储（见上文存储说明）。单实例内随 userId 隔离、跨请求存活。
@@ -42,7 +42,7 @@ const notes: Note[] = [];
 let noteIdCounter = 1;
 
 export const notesRoute = new Hono()
-  .get("/api/notes", requireAuth, zValidator("query", listQuery), async (c) => {
+  .get("/api/notes", requireAuth, zValidator("query", listQuery), (c) => {
     const { limit } = c.req.valid("query");
     const userId = c.get("userId");
     const userNotes = notes
@@ -51,24 +51,26 @@ export const notesRoute = new Hono()
       .reverse();
     return c.json(respData(userNotes));
   })
-  .get("/api/notes/:id", requireAuth, async (c) => {
+  .get("/api/notes/:id", requireAuth, (c) => {
     const userId = c.get("userId");
     const note = notes.find(
-      (n) => n.id === c.req.param("id") && n.userId === userId,
+      (n) => n.id === c.req.param("id") && n.userId === userId
     );
     if (!note) {
       return c.json(respErr("note not found"), 404);
     }
     return c.json(respData(note));
   })
-  .post("/api/notes", requireAuth, zValidator("json", createSchema), async (c) => {
+  .post("/api/notes", requireAuth, zValidator("json", createSchema), (c) => {
     const userId = c.get("userId");
     const { name, description } = c.req.valid("json");
     const now = new Date().toISOString();
+    const noteId = noteIdCounter;
+    noteIdCounter += 1;
     const note: Note = {
       createdAt: now,
       description: description ?? "",
-      id: `note_${noteIdCounter++}`,
+      id: `note_${noteId}`,
       name,
       updatedAt: now,
       userId,

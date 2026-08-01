@@ -8,20 +8,20 @@
  * --version/--help 与未鉴权命令不再为其付出 ~数十毫秒的启动成本。
  */
 
-import Conf from 'conf';
-import type { AuthTokens, CliConfig, StoredAuth } from '../types.js';
+import Conf from "conf";
+import type { AuthTokens, CliConfig, StoredAuth } from "../types.js";
 
-const DEFAULT_API_URL = 'https://app.openstarter.dev';
+const DEFAULT_API_URL = "https://app.openstarter.dev";
 
 const SCHEMA = {
-  apiUrl: { type: 'string' },
+  apiUrl: { type: "string" },
   auth: {
     properties: {
-      accessToken: { type: 'string' },
-      expiresAt: { type: 'number' },
-      refreshToken: { type: 'string' },
+      accessToken: { type: "string" },
+      expiresAt: { type: "number" },
+      refreshToken: { type: "string" },
     },
-    type: 'object',
+    type: "object",
   },
 } as const;
 
@@ -31,8 +31,8 @@ export class ConfigManager {
 
   constructor() {
     this.store = new Conf<CliConfig>({
-      projectName: 'openstarter',
       defaults: { apiUrl: DEFAULT_API_URL },
+      projectName: "openstarter",
       schema: SCHEMA,
     });
   }
@@ -43,30 +43,30 @@ export class ConfigManager {
   }
 
   getApiUrl(): string {
-    return this.store.get('apiUrl') ?? DEFAULT_API_URL;
+    return this.store.get("apiUrl") ?? DEFAULT_API_URL;
   }
 
   setApiUrl(url: string): void {
-    this.store.set('apiUrl', url);
+    this.store.set("apiUrl", url);
   }
 
   /** 写入凭据：将相对 expiresIn 转为绝对过期时间戳。 */
   setAuth(tokens: AuthTokens): void {
     const auth: StoredAuth = {
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken,
       expiresAt: Date.now() + tokens.expiresIn * 1000,
+      refreshToken: tokens.refreshToken,
     };
-    this.store.set('auth', auth);
+    this.store.set("auth", auth);
   }
 
   clearAuth(): void {
-    this.store.delete('auth');
+    this.store.delete("auth");
   }
 
   /** 当前令牌是否仍有效（未过期）。 */
   isAuthenticated(): boolean {
-    const auth = this.store.get('auth');
+    const auth = this.store.get("auth");
     if (!auth) {
       return false;
     }
@@ -75,16 +75,16 @@ export class ConfigManager {
 
   /** 取有效访问令牌；未登录或已过期返回 undefined。 */
   getAccessToken(): string | undefined {
-    const auth = this.store.get('auth');
+    const auth = this.store.get("auth");
     if (!auth || Date.now() >= auth.expiresAt) {
-      return undefined;
+      return;
     }
     return auth.accessToken;
   }
 }
 
 // 懒加载单例：首次访问才构造，避免启动期无谓的读盘/实例化开销。
-let _config: ConfigManager | undefined = undefined;
+let _config: ConfigManager | undefined;
 
 /** 进程级单例：命令实现共享同一配置存储。 */
 export const config: ConfigManager = new Proxy(
@@ -95,9 +95,7 @@ export const config: ConfigManager = new Proxy(
         _config = new ConfigManager();
       }
       const value = _config[prop as keyof ConfigManager];
-      return typeof value === 'function'
-        ? value.bind(_config)
-        : value;
+      return typeof value === "function" ? value.bind(_config) : value;
     },
-  },
+  }
 ) as ConfigManager;

@@ -6,13 +6,13 @@
 //   - PATCH /api/profile  更新当前用户显示名（仅 name 可改，余字段只读）。
 // 响应统一走 `{ code, message, data? }` 信封（@openstarter/shared）。
 
-import { db } from "@openstarter/db/server";
-import { user as userTable } from "@openstarter/db/schema";
-import { respData, respErr } from "@openstarter/shared";
-import { Hono } from "hono";
-import { eq } from "drizzle-orm";
-import { z } from "zod";
 import { zValidator } from "@hono/zod-validator";
+import { user as userTable } from "@openstarter/db/schema";
+import { db } from "@openstarter/db/server";
+import { respData, respErr } from "@openstarter/shared";
+import { eq } from "drizzle-orm";
+import { Hono } from "hono";
+import { z } from "zod";
 
 import { requireAuth } from "../middleware/auth";
 
@@ -41,7 +41,12 @@ function toView(row: {
   id: string;
   name: string | null;
 }): ProfileView {
-  return { createdAt: row.createdAt, email: row.email, id: row.id, name: row.name ?? "" };
+  return {
+    createdAt: row.createdAt,
+    email: row.email,
+    id: row.id,
+    name: row.name ?? "",
+  };
 }
 
 export const profileRoute = new Hono()
@@ -81,5 +86,5 @@ export const profileRoute = new Hono()
         return c.json(respErr("user not found"), 404);
       }
       return c.json(respData(toView(updated)));
-    },
+    }
   );
