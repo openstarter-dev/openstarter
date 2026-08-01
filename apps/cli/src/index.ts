@@ -6,6 +6,7 @@ import { config } from './lib/config.js';
 import { registerAuthCommands } from './commands/auth.js';
 import { registerDataCommands } from './commands/data.js';
 import { registerProfileCommands } from './commands/profile.js';
+import { registerStatusCommands } from './commands/status.js';
 
 const program = new Command();
 
@@ -26,5 +27,6 @@ program.hook('preAction', () => {
 registerAuthCommands(program);
 registerProfileCommands(program);
 registerDataCommands(program);
+registerStatusCommands(program);
 
 program.parse();
