@@ -1,0 +1,8 @@
+.output
+.wxt
+node_modules
+.env*
+!.env.example
+.turbo
+*.tsbuildinfo
+.DS_Store

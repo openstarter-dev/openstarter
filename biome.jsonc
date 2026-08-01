@@ -12,6 +12,8 @@
       "!!apps/web/.output",
       "!!apps/mobile/src/paraglide",
       "!!apps/mobile/.expo",
+      "!!apps/extension/.output",
+      "!!apps/extension/.wxt",
       "!!coverage"
     ]
   },

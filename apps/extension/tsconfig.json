@@ -1,0 +1,11 @@
+{
+  "extends": "./.wxt/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "verbatimModuleSyntax": true,
+    "paths": {
+      "@openstarter/ui-web/*": ["../../packages/ui/ui-web/src/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"]
+}

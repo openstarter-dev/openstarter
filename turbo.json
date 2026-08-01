@@ -5,7 +5,7 @@
     "build": {
       "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", "src/routeTree.gen.ts"]
+      "outputs": ["dist/**", "src/routeTree.gen.ts", ".output/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]
