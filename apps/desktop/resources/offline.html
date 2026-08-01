@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenStarter</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0a0a0a;
+        color: #f5f5f5;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      }
+      main {
+        text-align: center;
+        max-width: 28rem;
+        padding: 2rem;
+      }
+      h1 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+      }
+      p {
+        color: #a3a3a3;
+        line-height: 1.5;
+      }
+      button {
+        margin-top: 1.5rem;
+        padding: 0.5rem 1.5rem;
+        border-radius: 0.375rem;
+        border: 1px solid #404040;
+        background: #171717;
+        color: #f5f5f5;
+        font-size: 0.875rem;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #262626;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 id="title">Can't reach the app</h1>
+      <p id="message">
+        Check your internet connection, then try again.
+      </p>
+      <button type="button" id="retry-button">Retry</button>
+    </main>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const reason = params.get("reason");
+      if (reason === "config") {
+        document.getElementById("title").textContent =
+          "App URL not configured";
+        document.getElementById("message").textContent =
+          "The desktop app doesn't have a valid site URL configured. Set OPENSTARTER_DESKTOP_APP_URL or rebuild with a valid default URL.";
+      }
+      document
+        .getElementById("retry-button")
+        .addEventListener("click", () => {
+          window.desktop?.retry();
+        });
+    </script>
+  </body>
+</html>
