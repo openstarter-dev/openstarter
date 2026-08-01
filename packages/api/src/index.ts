@@ -20,6 +20,7 @@ import { privateDataRoute } from "./routes/private-data";
 import { notesRoute } from "./routes/notes";
 import { profileRoute } from "./routes/profile";
 import { seoRoute } from "./routes/seo";
+import { statusRoute } from "./routes/status";
 import { storageRoute } from "./routes/storage";
 import { taxonomyRoute } from "./routes/taxonomy";
 import { ticketsRoute } from "./routes/tickets";
@@ -82,6 +83,7 @@ const routes = app
   .route("/", userRoute)
   .route("/", profileRoute)
   .route("/", notesRoute)
+  .route("/", statusRoute)
   .route("/", seoRoute)
   .route("/", analyticsRoute)
   .route("/", adminRoute)
