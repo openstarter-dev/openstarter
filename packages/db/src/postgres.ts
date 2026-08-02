@@ -17,6 +17,7 @@ let postgresClient: ReturnType<typeof postgres> | null = null;
  * `singleton` is enabled.
  */
 export function createPostgresDb(config: DbConfig): Database {
+  // biome-ignore lint/style/useDestructuring: <explanation>
   let url = config.url;
 
   if (isCloudflareWorker) {
