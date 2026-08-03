@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (!isHydrated) {
     return (
-      <View className="layout__loading">
+      <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 400 }}>
         <Text>Loading...</Text>
       </View>
     );

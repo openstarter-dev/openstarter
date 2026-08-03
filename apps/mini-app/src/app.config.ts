@@ -1,3 +1,4 @@
+// defineAppConfig 是 Taro 提供的全局函数，无需 import
 export default defineAppConfig({
   pages: [
     'pages/index/index',

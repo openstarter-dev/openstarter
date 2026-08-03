@@ -1,6 +1,7 @@
 import { hc } from 'hono/client';
 import type { AppType } from '@openstarter/api';
 import { getToken, removeToken } from '@/utils/storage';
+import Taro from '@tarojs/taro';
 
 /** 构建期由 Taro defineConstants 注入的 API 基础地址。 */
 declare const API_BASE_URL: string;
@@ -32,15 +33,19 @@ export async function request<TData = unknown>(
   const token = getToken();
   const { method = 'GET', body, params } = options;
 
-  // 构建 URL
+  // 构建 URL（手动拼接 query string，避免依赖 URLSearchParams）
   let url = `${getApiBaseUrl()}${path}`;
   if (params) {
-    const searchParams = new URLSearchParams(params);
-    url += `?${searchParams.toString()}`;
+    const query = Object.entries(params)
+      .filter(([, v]) => v !== undefined && v !== null)
+      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+      .join('&');
+    if (query) {
+      url += `?${query}`;
+    }
   }
 
   try {
-    const { Taro } = await import('@tarojs/taro');
     const res = await Taro.request({
       url,
       method: method as keyof Taro.request.Method,
