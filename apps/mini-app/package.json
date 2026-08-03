@@ -1,0 +1,30 @@
+{
+  "name": "mini-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "taro build --type weapp --watch",
+    "build": "taro build --type weapp",
+    "test": "vitest --run",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7",
+    "@openstarter/api": "workspace:*",
+    "@openstarter/auth": "workspace:*",
+    "@openstarter/shared": "workspace:*",
+    "@tanstack/react-form": "^1.28.0",
+    "zustand": "^5",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@tarojs/cli": "^4",
+    "@tarojs/taro": "^4",
+    "@tarojs/plugin-platform-weapp": "^4",
+    "@tarojs/react": "^4",
+    "@types/react": "catalog:",
+    "babel-preset-taro": "^4",
+    "typescript": "catalog:"
+  }
+}
