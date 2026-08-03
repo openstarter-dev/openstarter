@@ -48,7 +48,7 @@ async function main(): Promise<void> {
       ? { ok: true, url: "http://localhost:5173" }
       : {
           ok: true,
-          url: `file://${join(__dirname, "..", "dist", "renderer", "index.html")}`,
+          url: `file://${join(__dirname, "..", "renderer", "index.html")}`,
         };
 
   // dev 模式等待 Vite dev server 就绪

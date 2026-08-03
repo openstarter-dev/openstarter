@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "main": "dist/main.cjs",
+  "main": "dist/main/main.cjs",
   "scripts": {
     "dev": "node ../../scripts/run-desktop.mjs",
     "dev:electron": "cross-env NODE_ENV=development electron .",
