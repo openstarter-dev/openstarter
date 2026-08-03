@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { app, BrowserWindow, ipcMain, Menu } from "electron";
 
 import { getDesktopMode } from "./config";
+import { registerIpcHandlers } from "./ipc";
 import { logError, logInfo, logWarn } from "./log";
 import { buildMenuTemplate } from "./menu";
 import { maybeCheckForUpdates } from "./updater";
@@ -35,6 +36,9 @@ async function main(): Promise<void> {
   );
 
   await app.whenReady();
+
+  // 注册 IPC 处理器
+  registerIpcHandlers(app.getPath("userData"));
 
   // 构建加载 URL：dev 模式指向 Vite dev server，prod 模式指向本地文件
   const resolvedUrl: { ok: true; url: string } =
