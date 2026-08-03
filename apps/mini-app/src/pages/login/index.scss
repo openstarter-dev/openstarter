@@ -1,0 +1,36 @@
+.login-page {
+  display: flex;
+  flex-direction: column;
+  padding: 80px 40px;
+
+  &__header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+
+  &__title {
+    display: block;
+    font-size: 48px;
+    font-weight: 700;
+    color: #1677ff;
+    margin-bottom: 16px;
+  }
+
+  &__subtitle {
+    display: block;
+    font-size: 28px;
+    color: #666;
+  }
+
+  &__form {
+    width: 100%;
+  }
+
+  &__error {
+    display: block;
+    color: #ff4d4f;
+    font-size: 24px;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+}
