@@ -3,8 +3,7 @@
 // SSR 经 RPC 调 GET /api/blog/:slug 渲染正文与元信息；文章不存在或未发布时抛 TanStack Router
 // 的 notFound()，由路由 notFoundComponent 渲染既有 NotFound 组件并返回 404。文案依当前 locale。
 //
-// 正文渲染：当前以保留换行的纯文本安全呈现（不注入原始 HTML，避免 XSS）；富文本/MDX 渲染属
-// 静态页任务（任务 24）范畴，暂不在此引入渲染依赖。
+// 正文渲染：使用 Markdown 组件将 API 返回的 markdown 字符串渲染为 HTML。
 
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
@@ -13,6 +12,7 @@ import { BlogShell } from "@/components/blog/blog-shell";
 import { NotFound } from "@/components/system/not-found";
 import { getBlogPostFn } from "@/functions/blog";
 import { formatBlogDate } from "@/lib/blog-i18n";
+import { Markdown } from "@/lib/markdown";
 import { buildPageHead } from "@/lib/page-head";
 import { m } from "@/paraglide/messages.js";
 
@@ -89,9 +89,7 @@ function BlogPostPage() {
         ) : null}
 
         {post.content ? (
-          <div className="mt-8 whitespace-pre-wrap text-[15px] text-foreground/90 leading-7">
-            {post.content}
-          </div>
+          <Markdown content={post.content} />
         ) : null}
       </article>
     </BlogShell>
