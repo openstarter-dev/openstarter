@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { BRAND_NAME } from "@/lib/branding";
+import { buildPageHead } from "@/lib/page-head";
 
 import TermsContent from "./terms.mdx";
 
 export const Route = createFileRoute("/(pages)/terms")({
-  head: () => ({
-    meta: [{ title: `Terms of Service - ${BRAND_NAME}` }],
-  }),
+  head: () =>
+    buildPageHead({
+      title: "Terms of Service",
+      description: "Terms of Service",
+      path: "/terms",
+    }),
   component: TermsContent,
 });

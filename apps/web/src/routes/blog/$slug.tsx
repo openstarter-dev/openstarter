@@ -13,7 +13,7 @@ import { BlogShell } from "@/components/blog/blog-shell";
 import { NotFound } from "@/components/system/not-found";
 import { getBlogPostFn } from "@/functions/blog";
 import { formatBlogDate } from "@/lib/blog-i18n";
-import { BRAND_NAME } from "@/lib/branding";
+import { buildPageHead } from "@/lib/page-head";
 import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -29,12 +29,13 @@ export const Route = createFileRoute("/blog/$slug")({
       return {};
     }
     const { post } = loaderData;
-    return {
-      meta: [
-        { title: `${post.title ?? post.slug} | ${BRAND_NAME}` },
-        { name: "description", content: post.description ?? "" },
-      ],
-    };
+    return buildPageHead({
+      title: post.title ?? post.slug,
+      description: post.description ?? undefined,
+      image: post.image ?? undefined,
+      path: `/blog/${post.slug}`,
+      type: "article",
+    });
   },
   notFoundComponent: () => <NotFound />,
   component: BlogPostPage,

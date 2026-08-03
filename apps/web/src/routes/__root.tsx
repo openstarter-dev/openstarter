@@ -13,6 +13,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
+import { buildPageHead } from "@/lib/page-head";
 import { getLocale } from "@/paraglide/runtime.js";
 
 import appCss from "../index.css?url";
@@ -26,18 +27,27 @@ const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var m=
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootDocument,
-  head: ({ loaderData }) => ({
-    links: [{ href: appCss, rel: "stylesheet" }],
-    meta: [
-      { charSet: "utf-8" },
-      { content: "width=device-width, initial-scale=1", name: "viewport" },
-      { title: BRAND_NAME },
-      { content: BRAND_DESCRIPTION, name: "description" },
-    ],
-    // 依据 Config 供应商标识注入且仅注入对应供应商脚本；未配置则为空数组、不注入（R25.1/R25.2）。
-    // 脚本来自受控白名单模板、度量 ID 已校验，经框架 head().scripts 机制注入（非危险 innerHTML）。
-    scripts: buildAnalyticsHeadScripts(loaderData),
-  }),
+  head: ({ loaderData }) => {
+    const pageHead = buildPageHead({
+      title: BRAND_NAME,
+      description: BRAND_DESCRIPTION,
+      path: "/",
+    });
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { content: "width=device-width, initial-scale=1", name: "viewport" },
+        ...pageHead.meta,
+      ],
+      links: [
+        { href: appCss, rel: "stylesheet" },
+        ...pageHead.links,
+      ],
+      // 依据 Config 供应商标识注入且仅注入对应供应商脚本；未配置则为空数组、不注入（R25.1/R25.2）。
+      // 脚本来自受控白名单模板、度量 ID 已校验，经框架 head().scripts 机制注入（非危险 innerHTML）。
+      scripts: buildAnalyticsHeadScripts(loaderData),
+    };
+  },
   // 读取分析供应商配置（SSR），供 head() 依据其条件注入采集脚本（R25.1/R25.2）。
   loader: () => getAnalyticsConfigFn(),
 });

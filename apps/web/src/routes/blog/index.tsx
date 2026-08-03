@@ -10,7 +10,7 @@ import { BlogShell } from "@/components/blog/blog-shell";
 import { getBlogPostsFn } from "@/functions/blog";
 import { collectCategories } from "@/lib/blog";
 import { formatBlogDate } from "@/lib/blog-i18n";
-import { BRAND_NAME } from "@/lib/branding";
+import { buildPageHead } from "@/lib/page-head";
 import { m } from "@/paraglide/messages.js";
 
 type BlogSearch = {
@@ -26,12 +26,12 @@ export const Route = createFileRoute("/blog/")({
   }),
   loaderDeps: ({ search }) => ({ category: search.category }),
   loader: ({ deps }) => getBlogPostsFn({ data: { category: deps.category } }),
-  head: () => ({
-    meta: [
-      { title: `${m["blog.title"]()} | ${BRAND_NAME}` },
-      { name: "description", content: m["blog.description"]() },
-    ],
-  }),
+  head: () =>
+    buildPageHead({
+      title: m["blog.title"](),
+      description: m["blog.description"](),
+      path: "/blog",
+    }),
   component: BlogListPage,
 });
 

@@ -1,8 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 import { PricingSection } from "@/components/marketing/pricing-section";
+import { buildPageHead } from "@/lib/page-head";
 
 export const Route = createFileRoute("/_marketing/pricing")({
+  head: () =>
+    buildPageHead({
+      title: "Pricing",
+      description: "Choose the plan that fits where you are today.",
+      path: "/pricing",
+    }),
   component: PricingPage,
 });
 
