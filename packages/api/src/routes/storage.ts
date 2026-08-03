@@ -20,6 +20,7 @@ import { HTTPException } from "hono/http-exception";
 import { z } from "zod";
 
 import { requireAuth } from "../middleware/auth";
+import { requirePlan } from "../middleware/plan-gate";
 import { UploadLimitError } from "../storage/errors";
 import { uploadImage } from "../storage/service";
 
@@ -109,6 +110,7 @@ async function parseBase64(request: Request): Promise<UploadInput[]> {
 export const storageRoute = new Hono().post(
   "/api/storage/upload-image",
   requireAuth,
+  requirePlan("member"),
   async (c) => {
     const contentType = c.req.header("content-type") ?? "";
 

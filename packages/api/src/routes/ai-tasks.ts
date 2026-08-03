@@ -41,6 +41,7 @@ import {
   updateTask,
 } from "../ai-tasks";
 import { requireAuth } from "../middleware/auth";
+import { requirePlan } from "../middleware/plan-gate";
 
 const MAX_PAGE_SIZE = 100;
 const DEFAULT_PAGE_SIZE = 20;
@@ -221,7 +222,7 @@ async function refreshTaskStatus(task: AiTask): Promise<AiTask> {
 }
 
 export const aiTasksRoute = new Hono()
-  .post("/api/ai-tasks", requireAuth, zValidator("json", createBody), async (c) => {
+  .post("/api/ai-tasks", requireAuth, requirePlan("member"), zValidator("json", createBody), async (c) => {
     const body = c.req.valid("json");
     const userId = c.get("userId");
 
@@ -270,7 +271,7 @@ export const aiTasksRoute = new Hono()
     const updated = await findTask(task.id);
     return c.json(respData(updated ?? task));
   })
-  .get("/api/ai-tasks", requireAuth, zValidator("query", listQuery), async (c) => {
+  .get("/api/ai-tasks", requireAuth, requirePlan("member"), zValidator("query", listQuery), async (c) => {
     const { page, pageSize, mediaType, status } = c.req.valid("query");
     const { items, total } = await getTasks({
       userId: c.get("userId"),
@@ -281,7 +282,7 @@ export const aiTasksRoute = new Hono()
     });
     return c.json(respPage(items, total));
   })
-  .get("/api/ai-tasks/:id", requireAuth, async (c) => {
+  .get("/api/ai-tasks/:id", requireAuth, requirePlan("member"), async (c) => {
     const userId = c.get("userId");
     const id = c.req.param("id");
 
