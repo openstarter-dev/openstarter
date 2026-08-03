@@ -1,7 +1,7 @@
 // scripts/run-desktop.mjs —— 编排 apps/desktop 的 dev 流程：
 //   1. 先用 esbuild 编译一次 main/preload（否则 dist/main.cjs 不存在，Electron 无法启动）
-//   2. 并行启动 apps/web 的 Vite dev server（端口 3000）
-//   3. 等 web 就绪后，spawn Electron 主进程加载 http://localhost:3000
+//   2. 启动 renderer 的 Vite dev server（端口 5173）
+//   3. 等 Vite 就绪后，spawn Electron 主进程加载 http://localhost:5173
 //   4. Ctrl-C 时优雅地把子进程都杀掉
 //
 // 设计取舍：不引入 concurrently / wait-on 等依赖，直接用 Node 内置 API 做进程编排，
@@ -15,10 +15,9 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const webDir = resolve(repoRoot, "apps/web");
 const desktopDir = resolve(repoRoot, "apps/desktop");
 
-const RENDERER_PORT = process.env.OPENSTARTER_RENDERER_PORT || "3000";
+const RENDERER_PORT = process.env.OPENSTARTER_RENDERER_PORT || "5173";
 const RENDERER_URL = `http://localhost:${RENDERER_PORT}`;
 
 // 递归杀掉子进程树（避免 vite/electron 留下孤儿进程）。
@@ -73,15 +72,15 @@ function runBuild() {
   });
 }
 
-function spawnWeb() {
-  console.log("[desktop] starting web dev server (apps/web)...");
-  const proc = spawn("pnpm", ["run", "dev"], {
-    cwd: webDir,
-    env: { ...process.env, PORT: RENDERER_PORT },
+function spawnVite() {
+  console.log("[desktop] starting renderer dev server (vite)...");
+  const proc = spawn("pnpm", ["exec", "vite"], {
+    cwd: desktopDir,
     stdio: ["ignore", "inherit", "inherit"],
+    shell: true,
   });
   proc.on("exit", (code) => {
-    console.log(`[desktop] web dev server exited (code=${code})`);
+    console.log(`[desktop] renderer dev server exited (code=${code})`);
   });
   return proc;
 }
@@ -93,7 +92,6 @@ function spawnElectron() {
     env: {
       ...process.env,
       NODE_ENV: "development",
-      OPENSTARTER_API_URL: RENDERER_URL,
     },
     stdio: ["ignore", "inherit", "inherit"],
   });
@@ -107,12 +105,12 @@ async function main() {
   console.log("[desktop] building main/preload...");
   await runBuild();
 
-  const webProc = spawnWeb();
+  const viteProc = spawnVite();
 
   const ready = await waitForDevServer();
   if (!ready) {
     console.warn(
-      `[desktop] web dev server not ready at ${RENDERER_URL}; launching electron anyway.`
+      `[desktop] renderer dev server not ready at ${RENDERER_URL}; launching electron anyway.`
     );
   }
 
@@ -120,11 +118,11 @@ async function main() {
 
   // 任一进程退出 → 全部退出（dev 会话结束）。
   const exitAll = (code) => {
-    killTree(webProc);
+    killTree(viteProc);
     killTree(electronProc);
     process.exit(code ?? 0);
   };
-  webProc.on("exit", exitAll);
+  viteProc.on("exit", exitAll);
   electronProc.on("exit", exitAll);
 
   // Ctrl-C
