@@ -22,7 +22,7 @@ async function runBuild() {
       __OPENSTARTER_API_URL__: JSON.stringify(buildTimeUrl),
     },
     entryPoints: [
-      resolve(desktopDir, "src/main.ts"),
+      resolve(desktopDir, "src/main/main.ts"),
       resolve(desktopDir, "src/preload.ts"),
     ],
     external: ["electron"],
