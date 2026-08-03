@@ -16,6 +16,7 @@
     "@tarojs/components": "^4.2.1",
     "@tarojs/runtime": "^4.2.1",
     "@tarojs/shared": "^4.2.1",
+    "hono": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zod": "catalog:",
