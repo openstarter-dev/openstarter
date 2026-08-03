@@ -59,27 +59,44 @@ BETTER_AUTH_SECRET 等密钥仍由 `apps/web/.env` 维护，未集中到根 .env
 | Monorepo     | Turborepo + pnpm workspaces                     |
 | Desktop      | Electron 外壳（远程加载 + electron-builder 打包 + 自动更新），见 `apps/desktop/README.md` |
 | CLI          | 命令行工具（设备授权登录 + 基础 CRUD），见 `apps/cli/README.md` |
-| Email        | _planned (Phase 2)_                             |
-| Billing      | _planned (Phase 3)_                             |
+| Email        | Resend + Cloudflare transactional email (React Email templates, bilingual) |
+| Billing      | Stripe/PayPal/Alipay/WeChat Pay, subscriptions, credits, customer portal, plan gating |
+| Analytics    | Configurable analytics provider injection (server-side) |
+| i18n         | inlang/Paraglide (multilingual, request-scoped locale) |
+| RBAC         | Role-based access control with wildcard permission matching |
+| API Keys     | Service-to-service authentication without sessions |
+| SEO          | sitemap.xml, robots.txt, llms.txt, Open Graph, Twitter Card, canonical URLs |
 
 ## Project structure
 
 ```
 openstarter/
 ├── apps/
-│   └── web/         # Full-stack app (TanStack Start + Hono via server routes)
-│       └── src/
-│           ├── routes/_marketing/   # public marketing pages
-│           ├── routes/_auth-pages/  # login (centered, no chrome)
-│           ├── routes/_app/         # authenticated app (sidebar shell)
-│           ├── components/          # marketing / app / theme / system / auth
-│           └── lib/                 # branding.ts + marketing/{pricing,faq}.ts
-│   └── desktop/     # Electron 外壳（远程加载 web）
+│   ├── web/         # Full-stack app (TanStack Start + Hono via server routes)
+│   │   └── src/
+│   │       ├── routes/_marketing/   # public marketing pages
+│   │       ├── routes/_auth-pages/  # login (centered, no chrome)
+│   │       ├── routes/_app/         # authenticated app (sidebar shell)
+│   │       ├── routes/admin/        # admin console
+│   │       ├── routes/blog/         # blog (SSR via RPC)
+│   │       ├── components/          # marketing / app / admin / blog / theme / system / auth
+│   │       └── lib/                 # branding, SEO, permissions, i18n
+│   ├── cli/         # CLI tool (device auth login + CRUD)
+│   ├── desktop/     # Electron 外壳（远程加载 web）
+│   ├── mobile/      # Expo React Native app
+│   └── extension/   # Chrome browser extension (WXT + React)
 ├── packages/
-│   ├── ui/          # Shared shadcn/Base UI components and styles
-│   ├── api/         # Hono app (auth + routes) + AppType for RPC
-│   ├── auth/        # Better-Auth configuration
-│   └── db/          # Database schema & client
+│   ├── api/         # Hono app (20+ routes) + AppType for RPC
+│   ├── auth/        # Better-Auth configuration + RBAC + API Keys + invite codes
+│   ├── db/          # Drizzle schema (SQLite/Postgres/MySQL) + dialect adapter
+│   ├── shared/      # Common utilities: response envelope, logging, ID, hash, config
+│   ├── ui/          # Shared UI components (web + mobile per-platform)
+│   ├── i18n/        # Internationalization (inlang/Paraglide)
+│   ├── email/       # React Email templates (7 templates, bilingual)
+│   ├── billing/     # Subscriptions, credits, payment providers (Stripe/PayPal/Alipay/WeChat)
+│   ├── analytics/   # Analytics provider abstraction (web + mobile)
+│   ├── monitoring/  # Monitoring (scaffold)
+│   └── notifications/# Notifications (scaffold)
 ```
 
 ## Customizing the template
@@ -132,11 +149,22 @@ Deploy anywhere Node runs (Docker, VPS, Vercel, Netlify).
 ## Roadmap
 
 This starter ships in phases. Phase 0 (this shell) is done; the rest are
-planned:
+complete or in progress:
 
+- **Phase 0 — Foundation:** Monorepo, multi-app shell, marketing site, auth
+  basics, database, UI framework, CLI. ✅ *Complete*
 - **Phase 1 — Auth experience:** password reset, email verification, OAuth
-  (Google/GitHub), full account settings. _coming soon_
-- **Phase 2 — Email:** transactional email via Resend + React Email. _coming soon_
-- **Phase 3 — Billing:** Stripe subscriptions, customer portal, plan gating.
-  _coming soon_
-- **Phase 4 — DX polish:** SEO (sitemap/robots/OG), CONTRIBUTING, docs. _coming soon_
+  (Google/GitHub/Apple), full account settings, passkey, two-factor, organization
+  teams, magic link, email OTP, anonymous sign-in. ✅ *Complete*
+- **Phase 2 — Email:** transactional email via Resend + Cloudflare, React Email
+  templates (7 templates, bilingual), channel manager with graceful degradation.
+  ✅ *Complete*
+- **Phase 3 — Billing:** Stripe/PayPal/Alipay/WeChat Pay integration, subscription
+  lifecycle management, credit system (FIFO consumption, revocation, history),
+  order management, webhook orchestration, customer portal, plan gating middleware.
+  ✅ *Complete*
+- **Phase 4 — DX polish:** SEO data layer (sitemap/robots/llms), Open Graph &
+  Twitter Card meta tags, canonical URLs, markdown blog rendering, CONTRIBUTING.md.
+  ✅ *Complete*
+- **Phase 5 — Planned:** Real-time notifications, AI features, advanced analytics,
+  mini-app platform, mobile app polish. *Coming soon*
