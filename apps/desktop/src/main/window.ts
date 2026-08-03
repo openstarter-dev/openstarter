@@ -1,11 +1,10 @@
-// apps/desktop/src/window.ts —— 创建主窗口、加载站点或兜底页、安全策略挂载。
+// apps/desktop/src/main/window.ts —— 创建主窗口、加载本地页面或兜底页、安全策略挂载。
 //
 // 这是唯一持有 BrowserWindow 生命周期的模块。所有决策（白名单判定、URL 解析、窗口状态
 // 校验）都来自纯逻辑模块，这里只做 Electron API 的搭接（见 spec §5）。
 import { join } from "node:path";
 import { app, BrowserWindow, shell } from "electron";
 
-import type { ResolvedUrl } from "./config";
 import { logInfo, logWarn } from "./log";
 import {
   createPermissionRequestHandler,
@@ -14,12 +13,12 @@ import {
 } from "./security";
 import type { WindowStateStore } from "./window-state";
 
-// esbuild 把本文件编译成 CommonJS 供 Electron 主进程加载：__dirname 在运行时解析到 dist/，
-// 正是 preload.cjs 所在位置，其相对推导出的 .. /resources 也正确。
+// esbuild 把本文件编译成 CommonJS 供 Electron 主进程加载：__dirname 在运行时解析到
+// dist/main/，preload.cjs 在 dist/ 下，resources/ 在项目根目录下。
 // biome-ignore lint/correctness/noGlobalDirnameFilename: 见上行注释；import.meta 不可用于 CJS 输出，__dirname 是正确选择。
 const DIST_DIR = __dirname;
-const OFFLINE_PAGE_PATH = join(DIST_DIR, "..", "resources", "offline.html");
-const PRELOAD_PATH = join(DIST_DIR, "preload.cjs");
+const OFFLINE_PAGE_PATH = join(DIST_DIR, "..", "..", "resources", "offline.html");
+const PRELOAD_PATH = join(DIST_DIR, "..", "preload.cjs");
 
 function loadOfflinePage(
   win: BrowserWindow,
@@ -30,7 +29,7 @@ function loadOfflinePage(
 }
 
 export interface CreateWindowParams {
-  resolvedUrl: ResolvedUrl;
+  resolvedUrl: { ok: true; url: string };
   windowStateStore: WindowStateStore;
 }
 
@@ -63,19 +62,21 @@ export function createMainWindow(params: CreateWindowParams): BrowserWindow {
       y: bounds.y,
     });
   };
-  win.on("close", persistState);
+  win.on("close", (event) => {
+    persistState();
+    // 默认行为：关闭时隐藏到托盘而非退出应用
+    // macOS 上 Command+Q 会直接退出，不受此影响
+    if (process.platform !== "darwin") {
+      event.preventDefault();
+      win.hide();
+    }
+  });
 
   const openExternal: (url: string) => void = (url) => {
     shell.openExternal(url).catch((error) => {
       logWarn("failed to open external URL", url, error);
     });
   };
-
-  if (!resolvedUrl.ok) {
-    logWarn("no valid app URL configured:", resolvedUrl.reason);
-    loadOfflinePage(win, "config");
-    return win;
-  }
 
   const allowedOrigin = new URL(resolvedUrl.url).origin;
   win.webContents.setWindowOpenHandler(createWindowOpenHandler(openExternal));
