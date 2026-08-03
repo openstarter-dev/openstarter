@@ -10,6 +10,7 @@ import { getDesktopMode } from "./config";
 import { registerIpcHandlers } from "./ipc";
 import { logError, logInfo, logWarn } from "./log";
 import { buildMenuTemplate } from "./menu";
+import { createTray, destroyTray } from "./tray";
 import { maybeCheckForUpdates } from "./updater";
 import {
   applyGlobalWebContentsPolicy,
@@ -65,6 +66,14 @@ async function main(): Promise<void> {
   );
 
   let currentWindow = createMainWindow({ resolvedUrl, windowStateStore });
+
+  // 创建系统托盘
+  createTray(currentWindow);
+
+  // 退出时清理托盘
+  app.on("before-quit", () => {
+    destroyTray();
+  });
 
   ipcMain.handle("desktop:retry", () => {
     currentWindow.close();

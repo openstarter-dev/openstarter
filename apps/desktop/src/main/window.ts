@@ -62,7 +62,15 @@ export function createMainWindow(params: CreateWindowParams): BrowserWindow {
       y: bounds.y,
     });
   };
-  win.on("close", persistState);
+  win.on("close", (event) => {
+    persistState();
+    // 默认行为：关闭时隐藏到托盘而非退出应用
+    // macOS 上 Command+Q 会直接退出，不受此影响
+    if (process.platform !== "darwin") {
+      event.preventDefault();
+      win.hide();
+    }
+  });
 
   const openExternal: (url: string) => void = (url) => {
     shell.openExternal(url).catch((error) => {
