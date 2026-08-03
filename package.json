@@ -55,7 +55,11 @@
       "msw",
       "sharp",
       "workerd",
-      "electron"
+      "electron",
+      "@tarojs/binding",
+      "@tarojs/cli",
+      "core-js",
+      "core-js-pure"
     ]
   }
 }

@@ -1,6 +1,8 @@
+import path from 'path';
 import type { UserConfig } from '@tarojs/taro';
 
 const config: UserConfig = {
+  framework: 'react',
   projectName: 'openstarter',
   date: '2026-8-4',
   designWidth: 750,
@@ -12,11 +14,14 @@ const config: UserConfig = {
   },
   sourceRoot: 'src',
   outputRoot: 'dist',
-  plugins: ['@tarojs/plugin-platform-weapp'],
+  plugins: ['@tarojs/plugin-platform-weapp', '@tarojs/plugin-framework-react'],
   defineConstants: {
     API_BASE_URL: JSON.stringify(process.env.OPENSTARTER_API_URL || 'http://localhost:3000'),
   },
   mini: {
+    webpackChain: (chain) => {
+      chain.resolve.alias.set('@', path.resolve(__dirname, '..', 'src'));
+    },
     postcss: {
       autoprefixer: { enable: true },
       pxtransform: { enable: true, config: {} },
