@@ -449,9 +449,9 @@ describe('API client', () => {
     expect(typeof mod.createClient).toBe('function');
   });
 
-  it('should export API_BASE_URL constant', async () => {
+  it('should export getApiBaseUrl function', async () => {
     const mod = await import('../../src/services/client');
-    expect(typeof mod.API_BASE_URL).toBe('string');
+    expect(typeof mod.getApiBaseUrl).toBe('function');
   });
 });
 ```
@@ -471,14 +471,16 @@ import { getToken, removeToken } from '@/utils/storage';
 /** 构建期由 Taro defineConstants 注入的 API 基础地址。 */
 declare const API_BASE_URL: string;
 
-// 导出常量以便页面使用
-export { API_BASE_URL };
+/** 获取 API 基础地址（构建期注入，测试环境 fallback）。 */
+export function getApiBaseUrl(): string {
+  return typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:3000';
+}
 
 /** 创建一个已注入 auth token 的 Hono RPC 客户端。 */
 export function createClient() {
   const token = getToken();
 
-  return hc<AppType>(API_BASE_URL, {
+  return hc<AppType>(getApiBaseUrl(), {
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
@@ -497,7 +499,7 @@ export async function request<TData = unknown>(
   const { method = 'GET', body, params } = options;
 
   // 构建 URL
-  let url = `${API_BASE_URL}${path}`;
+  let url = `${getApiBaseUrl()}${path}`;
   if (params) {
     const searchParams = new URLSearchParams(params);
     url += `?${searchParams.toString()}`;
