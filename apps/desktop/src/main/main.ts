@@ -1,12 +1,12 @@
-// apps/desktop/src/main.ts —— 主进程生命周期编排。
+// apps/desktop/src/main/main.ts —— 主进程生命周期编排。
 //
-// dev 模式：等待本地 web dev server 就绪后加载 http://localhost:3000。
-// prod 模式：加载构建时注入的站点 URL（可被运行时环境变量覆盖），失败时降级到兜底页。
+// dev 模式：加载 Vite dev server（http://localhost:5173，由 run-desktop.mjs 启动）。
+// prod 模式：加载本地构建产物（dist/renderer/index.html）。
 // 具体决策全部来自纯逻辑模块（config/security/window-state/menu），这里只做编排。
 import { join } from "node:path";
 import { app, BrowserWindow, ipcMain, Menu } from "electron";
 
-import { getDesktopMode, resolveAppUrl } from "./config";
+import { getDesktopMode } from "./config";
 import { logError, logInfo, logWarn } from "./log";
 import { buildMenuTemplate } from "./menu";
 import { maybeCheckForUpdates } from "./updater";
@@ -16,9 +16,6 @@ import {
   waitForDevServer,
 } from "./window";
 import { createFileWindowStateStore } from "./window-state";
-
-// esbuild 在构建时通过 define 注入的全局常量，见 scripts/build.mjs。
-declare const __OPENSTARTER_API_URL__: string;
 
 const UPDATE_CHECK_DELAY_MS = 10_000;
 
@@ -39,20 +36,25 @@ async function main(): Promise<void> {
 
   await app.whenReady();
 
+  // 构建加载 URL：dev 模式指向 Vite dev server，prod 模式指向本地文件
+  const resolvedUrl: { ok: true; url: string } =
+    mode === "dev"
+      ? { ok: true, url: "http://localhost:5173" }
+      : {
+          ok: true,
+          url: `file://${join(__dirname, "..", "dist", "renderer", "index.html")}`,
+        };
+
+  // dev 模式等待 Vite dev server 就绪
   if (mode === "dev") {
-    const devUrl = process.env.OPENSTARTER_API_URL ?? "http://localhost:3000";
-    logInfo("waiting for dev server at", devUrl);
-    const ready = await waitForDevServer(devUrl);
+    logInfo("waiting for renderer dev server at", resolvedUrl.url);
+    const ready = await waitForDevServer(resolvedUrl.url);
     if (!ready) {
-      logWarn(`dev server ${devUrl} did not respond in time; loading anyway.`);
+      logWarn(
+        `renderer dev server ${resolvedUrl.url} did not respond in time; loading anyway.`
+      );
     }
   }
-
-  const resolvedUrl = resolveAppUrl({
-    buildTimeUrl: __OPENSTARTER_API_URL__,
-    env: process.env,
-    isPackaged,
-  });
 
   const windowStateStore = createFileWindowStateStore(
     join(app.getPath("userData"), "window-state.json")

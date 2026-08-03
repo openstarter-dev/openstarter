@@ -1,11 +1,10 @@
-// apps/desktop/src/window.ts —— 创建主窗口、加载站点或兜底页、安全策略挂载。
+// apps/desktop/src/main/window.ts —— 创建主窗口、加载本地页面或兜底页、安全策略挂载。
 //
 // 这是唯一持有 BrowserWindow 生命周期的模块。所有决策（白名单判定、URL 解析、窗口状态
 // 校验）都来自纯逻辑模块，这里只做 Electron API 的搭接（见 spec §5）。
 import { join } from "node:path";
 import { app, BrowserWindow, shell } from "electron";
 
-import type { ResolvedUrl } from "./config";
 import { logInfo, logWarn } from "./log";
 import {
   createPermissionRequestHandler,
@@ -30,7 +29,7 @@ function loadOfflinePage(
 }
 
 export interface CreateWindowParams {
-  resolvedUrl: ResolvedUrl;
+  resolvedUrl: { ok: true; url: string };
   windowStateStore: WindowStateStore;
 }
 
@@ -70,12 +69,6 @@ export function createMainWindow(params: CreateWindowParams): BrowserWindow {
       logWarn("failed to open external URL", url, error);
     });
   };
-
-  if (!resolvedUrl.ok) {
-    logWarn("no valid app URL configured:", resolvedUrl.reason);
-    loadOfflinePage(win, "config");
-    return win;
-  }
 
   const allowedOrigin = new URL(resolvedUrl.url).origin;
   win.webContents.setWindowOpenHandler(createWindowOpenHandler(openExternal));

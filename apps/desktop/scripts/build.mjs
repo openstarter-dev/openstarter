@@ -1,4 +1,4 @@
-// apps/desktop/scripts/build.mjs —— 用 esbuild 把 src/{main,preload}.ts 编译成
+// apps/desktop/scripts/build.mjs —— 用 esbuild 把 src/main/main.ts 和 src/preload.ts 编译成
 // dist/{main,preload}.cjs。只把 electron 标记为 external，其余依赖（含 electron-updater）
 // 全部打进产物：pnpm 的 symlink 式 node_modules 与 electron-builder 的依赖收集历来不兼容，
 // 全部 bundle 后就不需要处理这个问题（见 docs/superpowers/specs/2026-08-01-desktop-app-design.md §6）。
@@ -11,16 +11,9 @@ const desktopDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packageJsonPath = resolve(desktopDir, "package.json");
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 
-// 与其它端统一的共享变量名（根 .env 的 OPENSTARTER_API_URL）。
-// 构建期把值通过 define 注入 main.ts 的 __OPENSTARTER_API_URL__ 全局常量。
-const buildTimeUrl = process.env.OPENSTARTER_API_URL ?? "https://example.com";
-
 async function runBuild() {
   await build({
     bundle: true,
-    define: {
-      __OPENSTARTER_API_URL__: JSON.stringify(buildTimeUrl),
-    },
     entryPoints: [
       resolve(desktopDir, "src/main/main.ts"),
       resolve(desktopDir, "src/preload.ts"),
