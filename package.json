@@ -19,6 +19,8 @@
     "dev:desktop": "turbo -F desktop dev",
     "dev:extension": "turbo -F extension dev",
     "dev:mobile": "turbo -F mobile dev",
+    "dev:mini-app": "turbo -F mini-app dev",
+    "build:mini-app": "turbo -F mini-app build",
     "build:desktop": "pnpm --filter desktop build",
     "package:desktop": "pnpm --filter desktop package",
     "release:desktop": "pnpm --filter desktop release",

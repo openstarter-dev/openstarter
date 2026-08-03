@@ -44,6 +44,15 @@
     },
     "db:local": {
       "cache": false
+    },
+    "dev:mini-app": {
+      "cache": false,
+      "persistent": true
+    },
+    "build:mini-app": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".temp/**", "dist/**"]
     }
   }
 }
