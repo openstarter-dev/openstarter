@@ -12,10 +12,12 @@ import { zValidator } from "@hono/zod-validator";
 import { getUserPermissionCodes, getUserPlan } from "@openstarter/auth";
 import {
   getBalance,
+  getCurrentSubscription,
   getHistory,
   getSubscriptionStatusView,
 } from "@openstarter/billing-web";
-import { respData, respPage } from "@openstarter/shared";
+import { getPaymentManager } from "@openstarter/billing-web/payment";
+import { respData, respErr, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 import { z } from "zod";
 
@@ -88,4 +90,31 @@ export const userRoute = new Hono()
       });
       return c.json(respPage(items, total));
     }
-  );
+  )
+  .post("/api/user/billing-portal", requireAuth, async (c) => {
+    const userId = c.get("userId");
+    const origin = new URL(c.req.url).origin;
+
+    // 获取当前订阅记录，从中提取 paymentUserId（即 Stripe customer ID）。
+    const currentSub = await getCurrentSubscription(userId);
+    if (!currentSub?.paymentUserId) {
+      return c.json(
+        respErr("No active subscription with a payment provider customer ID"),
+        400
+      );
+    }
+
+    // 获取支付渠道管理器，找到 Stripe provider。
+    const manager = await getPaymentManager();
+    const provider = manager.getProvider("stripe");
+    if (!provider?.getPaymentBilling) {
+      return c.json(respErr("Stripe payment provider is not available"), 400);
+    }
+
+    const result = await provider.getPaymentBilling({
+      customerId: currentSub.paymentUserId,
+      returnUrl: `${origin}/settings/billing`,
+    });
+
+    return c.json(respData({ billingUrl: result.billingUrl }));
+  });

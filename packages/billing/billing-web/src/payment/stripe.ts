@@ -8,6 +8,7 @@
 import Stripe from "stripe";
 import {
   type CheckoutSession,
+  type PaymentBilling,
   type PaymentEvent,
   PaymentEventType,
   type PaymentInterval,
@@ -234,6 +235,20 @@ export class StripeProvider implements PaymentProvider {
     const paymentSession = await this.buildSessionForEvent(eventType, event);
 
     return { eventType, eventResult: event, paymentSession };
+  }
+
+  async getPaymentBilling({
+    customerId,
+    returnUrl,
+  }: {
+    customerId: string;
+    returnUrl?: string;
+  }): Promise<PaymentBilling> {
+    const session = await this.client.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: returnUrl ?? "",
+    });
+    return { billingUrl: session.url };
   }
 
   // ─── 私有辅助（Private helpers） ──────────────────────────────────────────

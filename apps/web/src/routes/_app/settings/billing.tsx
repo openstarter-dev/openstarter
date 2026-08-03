@@ -3,7 +3,7 @@
 // 数据面经类型化 RPC（`client.api.user.subscription` / `client.api.user.plan`）。
 
 import { Badge } from "@openstarter/ui-web/components/badge";
-import { buttonVariants } from "@openstarter/ui-web/components/button";
+import { Button, buttonVariants } from "@openstarter/ui-web/components/button";
 import {
   Card,
   CardContent,
@@ -11,8 +11,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@openstarter/ui-web/components/card";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 import { client } from "@/lib/api";
 
@@ -62,6 +63,26 @@ function BillingPage() {
   const subscription = subscriptionQuery.data;
   const plan = planQuery.data;
   const isLoading = subscriptionQuery.isPending || planQuery.isPending;
+
+  const billingPortalMutation = useMutation({
+    mutationFn: async () => {
+      const res = await client.api.user["billing-portal"].$post();
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.message ?? "Failed to create billing portal session");
+      }
+      const json = await res.json();
+      return json.data;
+    },
+    onSuccess: (data) => {
+      if (data?.billingUrl) {
+        window.location.href = data.billingUrl;
+      }
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : "Failed to open billing portal");
+    },
+  });
 
   return (
     <div className="space-y-6">
@@ -114,6 +135,18 @@ function BillingPage() {
           <Link className={buttonVariants()} to="/pricing">
             View plans
           </Link>
+
+          {subscription?.hasSubscription ? (
+            <Button
+              onClick={() => billingPortalMutation.mutate()}
+              disabled={billingPortalMutation.isPending}
+              variant="outline"
+            >
+              {billingPortalMutation.isPending
+                ? "Opening..."
+                : "Manage on Stripe"}
+            </Button>
+          ) : null}
         </CardContent>
       </Card>
     </div>
