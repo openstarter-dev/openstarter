@@ -111,7 +111,6 @@ apps/mini-app/
     "@openstarter/api": "workspace:*",
     "@openstarter/auth": "workspace:*",
     "@openstarter/shared": "workspace:*",
-    "@tanstack/react-form": "catalog:",
     "zustand": "^5",
     "zod": "catalog:"
   },
