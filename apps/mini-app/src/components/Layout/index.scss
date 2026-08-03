@@ -1,0 +1,28 @@
+.layout {
+  min-height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f8f8f8;
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+  }
+
+  &__loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 6px solid #e8e8e8;
+    border-top-color: #1677ff;
+    border-radius: 50%;
+    animation: layout-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes layout-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
