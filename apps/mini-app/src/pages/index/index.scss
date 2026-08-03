@@ -1,0 +1,67 @@
+.home {
+  padding: 40px 20px;
+
+  &__hero {
+    text-align: center;
+    padding: 100px 0 60px;
+  }
+
+  &__hero-title {
+    display: block;
+    font-size: 56px;
+    font-weight: 700;
+    color: #1677ff;
+    margin-bottom: 24px;
+  }
+
+  &__hero-desc {
+    display: block;
+    font-size: 28px;
+    color: #666;
+    line-height: 1.6;
+    padding: 0 20px;
+  }
+
+  &__cta {
+    padding: 0 20px;
+  }
+
+  &__welcome-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 48px 32px;
+    margin-bottom: 32px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &__greeting {
+    display: block;
+    font-size: 24px;
+    color: #999;
+    margin-bottom: 8px;
+  }
+
+  &__username {
+    display: block;
+    font-size: 36px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  &__actions {
+    padding: 0 0 32px;
+  }
+
+  &__placeholder {
+    background: #fff;
+    border-radius: 20px;
+    padding: 60px 32px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &__placeholder-text {
+    font-size: 26px;
+    color: #bbb;
+  }
+}

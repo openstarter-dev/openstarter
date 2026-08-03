@@ -111,7 +111,6 @@ apps/mini-app/
     "@openstarter/api": "workspace:*",
     "@openstarter/auth": "workspace:*",
     "@openstarter/shared": "workspace:*",
-    "@tanstack/react-form": "catalog:",
     "zustand": "^5",
     "zod": "catalog:"
   },
@@ -411,7 +410,7 @@ export function setToken(token: string): void {
 
 /** 从本地存储中移除 token。 */
 export function removeToken(): void {
-  Taro.removeStorageSync(TOKEN_KEY, token);
+  Taro.removeStorageSync(TOKEN_KEY);
 }
 ```
 
@@ -423,7 +422,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/utils/storage.test.ts apps/mini-app/src/utils/storage.ts
+git add apps/mini-app/test/utils/storage.test.ts apps/mini-app/src/utils/storage.ts
 git commit -m "feat(mini-app): add storage utility for token persistence"
 ```
 
@@ -441,18 +440,18 @@ git commit -m "feat(mini-app): add storage utility for token persistence"
 - [ ] **Step 1: Write the test**
 
 ```typescript
-// test/services/client.test.ts
+// test/services/client.test.ts — 注意：测试文件在 apps/mini-app/test/ 下
 import { describe, it, expect } from 'vitest';
 
 describe('API client', () => {
   it('should export createClient function', async () => {
-    const mod = await import('../src/services/client');
+    const mod = await import('../../src/services/client');
     expect(typeof mod.createClient).toBe('function');
   });
 
-  it('should export API_BASE_URL constant', async () => {
-    const mod = await import('../src/services/client');
-    expect(typeof mod.API_BASE_URL).toBe('string');
+  it('should export getApiBaseUrl function', async () => {
+    const mod = await import('../../src/services/client');
+    expect(typeof mod.getApiBaseUrl).toBe('function');
   });
 });
 ```
@@ -472,14 +471,16 @@ import { getToken, removeToken } from '@/utils/storage';
 /** 构建期由 Taro defineConstants 注入的 API 基础地址。 */
 declare const API_BASE_URL: string;
 
-// 导出常量以便页面使用
-export { API_BASE_URL };
+/** 获取 API 基础地址（构建期注入，测试环境 fallback）。 */
+export function getApiBaseUrl(): string {
+  return typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:3000';
+}
 
 /** 创建一个已注入 auth token 的 Hono RPC 客户端。 */
 export function createClient() {
   const token = getToken();
 
-  return hc<AppType>(API_BASE_URL, {
+  return hc<AppType>(getApiBaseUrl(), {
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
@@ -498,7 +499,7 @@ export async function request<TData = unknown>(
   const { method = 'GET', body, params } = options;
 
   // 构建 URL
-  let url = `${API_BASE_URL}${path}`;
+  let url = `${getApiBaseUrl()}${path}`;
   if (params) {
     const searchParams = new URLSearchParams(params);
     url += `?${searchParams.toString()}`;
@@ -544,7 +545,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/services/client.test.ts apps/mini-app/src/services/client.ts
+git add apps/mini-app/test/services/client.test.ts apps/mini-app/src/services/client.ts
 git commit -m "feat(mini-app): add API client with Taro.request and auth token injection"
 ```
 
@@ -564,7 +565,7 @@ git commit -m "feat(mini-app): add API client with Taro.request and auth token i
 ```typescript
 // test/stores/auth-store.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useAuthStore } from '../src/stores/auth-store';
+import { useAuthStore } from '../../src/stores/auth-store';
 
 describe('auth-store', () => {
   beforeEach(() => {
@@ -665,7 +666,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/stores/auth-store.test.ts apps/mini-app/src/stores/auth-store.ts
+git add apps/mini-app/test/stores/auth-store.test.ts apps/mini-app/src/stores/auth-store.ts
 git commit -m "feat(mini-app): add auth store with zustand"
 ```
 
@@ -685,7 +686,7 @@ git commit -m "feat(mini-app): add auth store with zustand"
 ```typescript
 // test/stores/app-store.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useAppStore } from '../src/stores/app-store';
+import { useAppStore } from '../../src/stores/app-store';
 
 describe('app-store', () => {
   beforeEach(() => {
@@ -733,7 +734,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/stores/app-store.test.ts apps/mini-app/src/stores/app-store.ts
+git add apps/mini-app/test/stores/app-store.test.ts apps/mini-app/src/stores/app-store.ts
 git commit -m "feat(mini-app): add app store with zustand"
 ```
 
@@ -1769,7 +1770,7 @@ git commit -m "feat(mini-app): add webview page for external H5 content"
 ```typescript
 // test/hooks/use-auth.test.ts
 import { describe, it, expect } from 'vitest';
-import { useAuthStore } from '../src/stores/auth-store';
+import { useAuthStore } from '../../src/stores/auth-store';
 
 describe('useAuth hook', () => {
   it('should reflect auth store state', async () => {
@@ -1846,7 +1847,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/hooks/use-auth.test.ts apps/mini-app/src/hooks/use-auth.ts
+git add apps/mini-app/test/hooks/use-auth.test.ts apps/mini-app/src/hooks/use-auth.ts
 git commit -m "feat(mini-app): add use-auth hook"
 ```
 
