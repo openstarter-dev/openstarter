@@ -410,7 +410,7 @@ export function setToken(token: string): void {
 
 /** 从本地存储中移除 token。 */
 export function removeToken(): void {
-  Taro.removeStorageSync(TOKEN_KEY, token);
+  Taro.removeStorageSync(TOKEN_KEY);
 }
 ```
 
@@ -422,7 +422,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/utils/storage.test.ts apps/mini-app/src/utils/storage.ts
+git add apps/mini-app/test/utils/storage.test.ts apps/mini-app/src/utils/storage.ts
 git commit -m "feat(mini-app): add storage utility for token persistence"
 ```
 
@@ -440,17 +440,17 @@ git commit -m "feat(mini-app): add storage utility for token persistence"
 - [ ] **Step 1: Write the test**
 
 ```typescript
-// test/services/client.test.ts
+// test/services/client.test.ts — 注意：测试文件在 apps/mini-app/test/ 下
 import { describe, it, expect } from 'vitest';
 
 describe('API client', () => {
   it('should export createClient function', async () => {
-    const mod = await import('../src/services/client');
+    const mod = await import('../../src/services/client');
     expect(typeof mod.createClient).toBe('function');
   });
 
   it('should export API_BASE_URL constant', async () => {
-    const mod = await import('../src/services/client');
+    const mod = await import('../../src/services/client');
     expect(typeof mod.API_BASE_URL).toBe('string');
   });
 });
@@ -543,7 +543,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/services/client.test.ts apps/mini-app/src/services/client.ts
+git add apps/mini-app/test/services/client.test.ts apps/mini-app/src/services/client.ts
 git commit -m "feat(mini-app): add API client with Taro.request and auth token injection"
 ```
 
@@ -563,7 +563,7 @@ git commit -m "feat(mini-app): add API client with Taro.request and auth token i
 ```typescript
 // test/stores/auth-store.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useAuthStore } from '../src/stores/auth-store';
+import { useAuthStore } from '../../src/stores/auth-store';
 
 describe('auth-store', () => {
   beforeEach(() => {
@@ -664,7 +664,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/stores/auth-store.test.ts apps/mini-app/src/stores/auth-store.ts
+git add apps/mini-app/test/stores/auth-store.test.ts apps/mini-app/src/stores/auth-store.ts
 git commit -m "feat(mini-app): add auth store with zustand"
 ```
 
@@ -684,7 +684,7 @@ git commit -m "feat(mini-app): add auth store with zustand"
 ```typescript
 // test/stores/app-store.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useAppStore } from '../src/stores/app-store';
+import { useAppStore } from '../../src/stores/app-store';
 
 describe('app-store', () => {
   beforeEach(() => {
@@ -732,7 +732,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/stores/app-store.test.ts apps/mini-app/src/stores/app-store.ts
+git add apps/mini-app/test/stores/app-store.test.ts apps/mini-app/src/stores/app-store.ts
 git commit -m "feat(mini-app): add app store with zustand"
 ```
 
@@ -1768,7 +1768,7 @@ git commit -m "feat(mini-app): add webview page for external H5 content"
 ```typescript
 // test/hooks/use-auth.test.ts
 import { describe, it, expect } from 'vitest';
-import { useAuthStore } from '../src/stores/auth-store';
+import { useAuthStore } from '../../src/stores/auth-store';
 
 describe('useAuth hook', () => {
   it('should reflect auth store state', async () => {
@@ -1845,7 +1845,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add test/hooks/use-auth.test.ts apps/mini-app/src/hooks/use-auth.ts
+git add apps/mini-app/test/hooks/use-auth.test.ts apps/mini-app/src/hooks/use-auth.ts
 git commit -m "feat(mini-app): add use-auth hook"
 ```
 
