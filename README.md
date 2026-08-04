@@ -1,170 +1,136 @@
+<div align="center">
+
 # openstarter
 
-An opinionated, production-ready starter for shipping an Indie SaaS fast. Clone
-it, rebrand it, and start building your product instead of your boilerplate.
+**Ship your SaaS in days, not months.**
 
-**What you get**
+An opinionated, production-ready full-stack SaaS starter. Clone it, rebrand it,
+and start building your product instead of your boilerplate — auth, billing,
+i18n, SEO, and six client platforms are already wired up and working together.
 
-- A polished marketing site (hero, features, pricing, FAQ) ready to rebrand.
-- Email/password authentication with protected app routes.
-- A typed full-stack setup (TanStack Start + Hono RPC) on a single Node server.
+</div>
 
-## Quick start
+## Features
 
-```bash
-pnpm install
-cp .env.example .env                 # 跨端共享的 API 地址（见下方"共享 API 地址"）
-cp apps/web/.env.example apps/web/.env
-# Edit apps/web/.env and set a strong BETTER_AUTH_SECRET (see below).
-pnpm db:push
-pnpm dev
-```
+- **Marketing site** — Polished hero, features, pricing, FAQ, blog (SSR), and
+  docs-ready layout, all rebrandable from a single `branding.ts` file.
+- **Full auth experience** — Email/password, OAuth (Google/GitHub/Apple), magic
+  link, email OTP, passkey, two-factor, anonymous sign-in, password reset,
+  organizations & teams, invite codes, powered by Better-Auth.
+- **Billing out of the box** — Stripe / PayPal / Alipay / WeChat Pay,
+  subscription lifecycle, credit system (FIFO consumption, revocation, history),
+  order management, webhook orchestration, customer portal, plan gating.
+- **Typed full-stack API** — Hono RPC mounted at `/api/*` with end-to-end type
+  safety from server to every client.
+- **Six platforms, one codebase** — Web, Desktop (Electron), Mobile (Expo),
+  Browser Extension (WXT), CLI, and WeChat Mini-App (Taro) sharing one API,
+  auth session, and design system.
+- **Transactional email** — Resend + Cloudflare with 7 bilingual React Email
+  templates and graceful channel degradation.
+- **Internationalization** — inlang/Paraglide, request-scoped locale, works on
+  web and mobile.
+- **RBAC & API Keys** — Role-based access control with wildcard permission
+  matching, plus service-to-service API key authentication.
+- **SEO ready** — sitemap.xml, robots.txt, llms.txt, Open Graph, Twitter Card,
+  canonical URLs.
+- **Admin console** — Built-in admin routes for managing users and the product.
 
-Open [http://localhost:3000](http://localhost:3000). The API is served from the
-same origin under `/api/*`.
+## Why openstarter
 
-Generate a secret for `BETTER_AUTH_SECRET`:
+Most starters give you a login page and a TODO list. openstarter gives you the
+boring 80% that every SaaS needs but nobody wants to build:
 
-```bash
-openssl rand -hex 32
-```
+- **Production-ready, not demo-ready** — Billing webhooks, credit revocation,
+  permission matching, email fallbacks, no-FOUC theming. The edge cases are
+  already handled.
+- **Truly full-stack, truly typed** — One Node server serves both the app and
+  the API; Hono RPC gives you autocomplete from database schema to UI.
+- **Multi-platform by default** — Your indie SaaS probably needs a CLI, a
+  browser extension, or a mini-app eventually. They're already in the monorepo,
+  sharing auth and API.
+- **Batteries included, swappable** — SQLite/Turso/Postgres/MySQL via a dialect
+  adapter, pluggable analytics and email providers. Start cheap, scale later.
+- **Indie-hacker friendly** — One `.env` for the shared API URL, one command to
+  run everything, deploy anywhere Node runs.
 
-## 跨端共享 API 地址
+## Tech Stack
 
-`web`（API 宿主）/ `cli` / `desktop` / `mobile` / `extension` 五端共用同一个 API
-地址，唯一事实源是**根目录 `.env`** 里的 `OPENSTARTER_API_URL`：
+| Layer | Technology |
+| --- | --- |
+| Framework | TanStack Start + TanStack Router (file-based, SSR) |
+| Backend | Hono (mounted at `/api/*`, RPC client) |
+| Auth | Better-Auth (sessions, OAuth, 2FA, passkey, orgs) |
+| Database | Drizzle ORM — SQLite / Turso (libSQL) / Postgres / MySQL |
+| UI | shadcn + Base UI primitives, Tailwind CSS v4, next-themes |
+| Monorepo | Turborepo + pnpm workspaces |
+| Desktop | Electron (electron-builder + auto-update) |
+| Mobile | Expo (React Native) |
+| Extension | WXT + React |
+| Mini-App | Taro (WeChat) |
+| Email | Resend + Cloudflare, React Email |
+| Payments | Stripe, PayPal, Alipay, WeChat Pay |
+| i18n | inlang / Paraglide |
+| Testing | Vitest + fast-check |
+| Linting | Biome (ultracite) |
 
-| 端 | 何时读 | 改完如何生效 |
-|---|---|---|
-| web | （就是宿主，不读此变量） | — |
-| cli | 运行期 | 重跑命令即生效 |
-| desktop | 运行期 | 重启 app 即生效 |
-| mobile | 构建期（`apps/mobile/scripts/env.mjs` 派生为 `EXPO_PUBLIC_API_URL`） | 需重新 `pnpm dev:mobile` |
-| extension | 构建期（`apps/extension/wxt.config.ts` 派生为 `VITE_APP_URL`） | 需重新 `pnpm build:extension` |
-
-每端的本地 `.env` 可覆盖根值（例如 mobile 真机调试填局域网 IP）；DATABASE_URL /
-BETTER_AUTH_SECRET 等密钥仍由 `apps/web/.env` 维护，未集中到根 .env。
-
-## What's in the box
-
-| Capability   | Implementation                                  |
-| ------------ | ----------------------------------------------- |
-| Routing      | TanStack Start + TanStack Router (file-based)   |
-| Backend      | Hono app mounted at `/api/*` (Hono RPC client)  |
-| Auth         | Better-Auth (email/password sessions)           |
-| Database     | Drizzle ORM on SQLite/Turso (libSQL)            |
-| UI           | shadcn/Base UI primitives in `packages/ui`      |
-| Theming      | next-themes (system/light/dark, no-FOUC)        |
-| Styling      | Tailwind CSS v4                                  |
-| Monorepo     | Turborepo + pnpm workspaces                     |
-| Desktop      | Electron 外壳（远程加载 + electron-builder 打包 + 自动更新），见 `apps/desktop/README.md` |
-| CLI          | 命令行工具（设备授权登录 + 基础 CRUD），见 `apps/cli/README.md` |
-| Email        | Resend + Cloudflare transactional email (React Email templates, bilingual) |
-| Billing      | Stripe/PayPal/Alipay/WeChat Pay, subscriptions, credits, customer portal, plan gating |
-| Analytics    | Configurable analytics provider injection (server-side) |
-| i18n         | inlang/Paraglide (multilingual, request-scoped locale) |
-| RBAC         | Role-based access control with wildcard permission matching |
-| API Keys     | Service-to-service authentication without sessions |
-| SEO          | sitemap.xml, robots.txt, llms.txt, Open Graph, Twitter Card, canonical URLs |
-
-## Project structure
+## Project Structure
 
 ```
 openstarter/
 ├── apps/
-│   ├── web/         # Full-stack app (TanStack Start + Hono via server routes)
+│   ├── web/         # Full-stack app (TanStack Start + Hono server routes)
 │   │   └── src/
 │   │       ├── routes/_marketing/   # public marketing pages
 │   │       ├── routes/_auth-pages/  # login (centered, no chrome)
 │   │       ├── routes/_app/         # authenticated app (sidebar shell)
 │   │       ├── routes/admin/        # admin console
 │   │       ├── routes/blog/         # blog (SSR via RPC)
-│   │       ├── components/          # marketing / app / admin / blog / theme / system / auth
+│   │       ├── components/          # marketing / app / admin / blog / theme / auth
 │   │       └── lib/                 # branding, SEO, permissions, i18n
 │   ├── cli/         # CLI tool (device auth login + CRUD)
-│   ├── desktop/     # Electron 外壳（远程加载 web）
+│   ├── desktop/     # Electron shell (loads web remotely)
 │   ├── mobile/      # Expo React Native app
-│   └── extension/   # Chrome browser extension (WXT + React)
+│   ├── extension/   # Chrome browser extension (WXT + React)
+│   └── mini-app/    # WeChat mini-app (Taro)
 ├── packages/
 │   ├── api/         # Hono app (20+ routes) + AppType for RPC
-│   ├── auth/        # Better-Auth configuration + RBAC + API Keys + invite codes
-│   ├── db/          # Drizzle schema (SQLite/Postgres/MySQL) + dialect adapter
-│   ├── shared/      # Common utilities: response envelope, logging, ID, hash, config
+│   ├── auth/        # Better-Auth config + RBAC + API Keys + invite codes
+│   ├── db/          # Drizzle schema + dialect adapter
+│   ├── shared/      # Response envelope, logging, ID, hash, config
 │   ├── ui/          # Shared UI components (web + mobile per-platform)
 │   ├── i18n/        # Internationalization (inlang/Paraglide)
 │   ├── email/       # React Email templates (7 templates, bilingual)
-│   ├── billing/     # Subscriptions, credits, payment providers (Stripe/PayPal/Alipay/WeChat)
+│   ├── billing/     # Subscriptions, credits, payment providers
 │   ├── analytics/   # Analytics provider abstraction (web + mobile)
-│   ├── monitoring/  # Monitoring (scaffold)
-│   └── notifications/# Notifications (scaffold)
+│   ├── monitoring/  # Monitoring (web + mobile)
+│   ├── notifications/# Notifications (web + mobile + shared)
+│   └── ai/          # AI features (scaffold)
+└── docs/            # Architecture & operations docs
 ```
 
-## Customizing the template
-
-Make it yours by following the checklist in [CUSTOMIZE.md](./CUSTOMIZE.md):
-rename the project, set your brand in `apps/web/src/lib/branding.ts`, edit
-pricing/FAQ data, and replace the placeholder marketing copy.
-
-## Available scripts
-
-- `pnpm dev` — start the app in development mode (http://localhost:3000)
-- `pnpm build` — build for production
-- `pnpm --filter web start` — run the production Node server
-- `pnpm check-types` — type-check across the workspace
-- `pnpm db:push` / `db:generate` / `db:migrate` / `db:studio` / `db:local` — Drizzle commands
-- `pnpm dev:desktop` — 启动桌面端（同时起 web dev server 与 Electron 窗口）
-- `pnpm build:desktop` — 编译桌面端主进程/preload
-- `pnpm package:desktop` — 本机打包出三平台安装包（不发布）
-- `pnpm release:desktop` — 打包并发布到 GitHub Releases（需要 `GH_TOKEN`）
-- `pnpm dev:cli` — 运行 CLI 开发模式（tsx watch）
-- `pnpm build:cli` — 构建 CLI（tsup → `apps/cli/dist`）
-
-### CLI
-
-本仓库附带 `@openstarter/cli`，通过 Better Auth 设备授权登录并调用后端 API：
+## Quick Start
 
 ```bash
-pnpm build:cli
-node apps/cli/dist/index.js --api-url http://localhost:3000 login
-node apps/cli/dist/index.js whoami
+pnpm install
+cp .env.example .env
+cp apps/web/.env.example apps/web/.env
+# Set a strong BETTER_AUTH_SECRET in apps/web/.env:
+#   openssl rand -hex 32
+pnpm db:push
+pnpm dev
 ```
 
-完整文档见 [apps/cli/README.md](./apps/cli/README.md)。
+Open [http://localhost:3000](http://localhost:3000). The API is served from the
+same origin under `/api/*`. For deployment, customization, per-platform
+commands, and the full roadmap, see [docs/](./docs) and
+[CUSTOMIZE.md](./CUSTOMIZE.md).
 
-## Deployment
+## Contact
 
-The app builds to a standard Node server (`apps/web/dist/server/server.js`).
+- **GitHub**: [openstarter-dev/openstarter](https://github.com/openstarter-dev/openstarter) — issues and PRs welcome
+- **X (Twitter)**: [@kirin092600](https://x.com/kirin092600)
+- **微信**: shilipai0926
+- **微信群**: shilipai0926
+- **Contributing**: see [CONTRIBUTING.md](./CONTRIBUTING.md)
 
-1. Build: `pnpm build`
-2. Start: `pnpm --filter web start`
-
-Provide these environment variables on your host:
-
-- `DATABASE_URL`
-- `BETTER_AUTH_SECRET`
-- `BETTER_AUTH_URL`
-
-Deploy anywhere Node runs (Docker, VPS, Vercel, Netlify).
-
-## Roadmap
-
-This starter ships in phases. Phase 0 (this shell) is done; the rest are
-complete or in progress:
-
-- **Phase 0 — Foundation:** Monorepo, multi-app shell, marketing site, auth
-  basics, database, UI framework, CLI. ✅ *Complete*
-- **Phase 1 — Auth experience:** password reset, email verification, OAuth
-  (Google/GitHub/Apple), full account settings, passkey, two-factor, organization
-  teams, magic link, email OTP, anonymous sign-in. ✅ *Complete*
-- **Phase 2 — Email:** transactional email via Resend + Cloudflare, React Email
-  templates (7 templates, bilingual), channel manager with graceful degradation.
-  ✅ *Complete*
-- **Phase 3 — Billing:** Stripe/PayPal/Alipay/WeChat Pay integration, subscription
-  lifecycle management, credit system (FIFO consumption, revocation, history),
-  order management, webhook orchestration, customer portal, plan gating middleware.
-  ✅ *Complete*
-- **Phase 4 — DX polish:** SEO data layer (sitemap/robots/llms), Open Graph &
-  Twitter Card meta tags, canonical URLs, markdown blog rendering, CONTRIBUTING.md.
-  ✅ *Complete*
-- **Phase 5 — Planned:** Real-time notifications, AI features, advanced analytics,
-  mini-app platform, mobile app polish. *Coming soon*
+If openstarter helps you ship faster, consider giving it a ⭐️
