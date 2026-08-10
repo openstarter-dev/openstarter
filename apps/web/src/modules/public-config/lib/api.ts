@@ -10,12 +10,15 @@ export type PublicConfig = Record<string, string>;
 const queries = {
   get: () =>
     queryOptions({
-      queryKey: ["public-config"] as const,
       queryFn: async (): Promise<PublicConfig> => {
         const res = await client.api.config.public.$get();
+        if (!res.ok) {
+          throw new Error("Failed to load public config");
+        }
         const json = await res.json();
         return json.data ?? {};
       },
+      queryKey: ["public-config"] as const,
       staleTime: 5 * 60 * 1000,
     }),
 };

@@ -6,20 +6,8 @@ import { queryOptions } from "@tanstack/react-query";
 import { authClient } from "@/lib/auth-client";
 
 const queries = {
-  sessions: () =>
-    queryOptions({
-      queryKey: ["auth", "sessions"] as const,
-      queryFn: async () => {
-        const result = await authClient.listSessions();
-        if (result.error) {
-          throw new Error(result.error.message || "Failed to load sessions");
-        }
-        return result.data ?? [];
-      },
-    }),
   accounts: () =>
     queryOptions({
-      queryKey: ["auth", "accounts"] as const,
       queryFn: async () => {
         const result = await authClient.listAccounts();
         if (result.error) {
@@ -27,8 +15,19 @@ const queries = {
         }
         return result.data ?? [];
       },
+      queryKey: ["auth", "accounts"] as const,
+    }),
+  sessions: () =>
+    queryOptions({
+      queryFn: async () => {
+        const result = await authClient.listSessions();
+        if (result.error) {
+          throw new Error(result.error.message || "Failed to load sessions");
+        }
+        return result.data ?? [];
+      },
+      queryKey: ["auth", "sessions"] as const,
     }),
 };
 
 export const auth = { queries } as const;
-

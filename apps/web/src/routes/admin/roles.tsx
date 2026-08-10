@@ -86,6 +86,9 @@ function AdminRolesPage() {
     ...admin.mutations.saveRolePermissions(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: admin.queries.rolePermissions(permRoleId).queryKey,
+      });
       setPermRoleId(null);
       toast.success("Permissions updated");
     },

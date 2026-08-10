@@ -10,19 +10,19 @@ import type { PricingCheckout } from "@/lib/marketing/pricing";
 const mutations = {
   create: () =>
     mutationOptions({
-      mutationFn: async (checkout: PricingCheckout) => {
+      mutationFn: async (input: PricingCheckout) => {
         const res = await client.api.checkout.$post({
           json: {
-            amount: checkout.amount,
-            credits: checkout.credits,
-            creditsValidDays: checkout.creditsValidDays,
-            currency: checkout.currency,
-            interval: checkout.interval,
-            intervalCount: checkout.intervalCount,
-            planName: checkout.planName,
-            productId: checkout.productId,
-            productName: checkout.planName ?? checkout.productId,
-            type: checkout.type,
+            amount: input.amount,
+            credits: input.credits,
+            creditsValidDays: input.creditsValidDays,
+            currency: input.currency,
+            interval: input.interval,
+            intervalCount: input.intervalCount,
+            planName: input.planName,
+            productId: input.productId,
+            productName: input.planName ?? input.productId,
+            type: input.type,
           },
         });
         const json = await res.json();
@@ -43,4 +43,3 @@ const mutations = {
 };
 
 export const checkout = { mutations } as const;
-

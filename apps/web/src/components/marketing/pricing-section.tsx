@@ -13,14 +13,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-
-import { checkout } from "@/modules/checkout/lib/api";
 import { authClient } from "@/lib/auth-client";
 import {
   PRICING_TIERS,
   type PricingCheckout,
   type PricingTier,
 } from "@/lib/marketing/pricing";
+import { checkout } from "@/modules/checkout/lib/api";
 
 import { type WechatQr, WechatQrOverlay } from "./wechat-qr-overlay";
 
@@ -114,10 +113,14 @@ export function PricingSection() {
     }) => {
       // 微信 Native 渠道：渲染二维码扫码支付；其余渠道：跳转结账链接（R10.3）。
       if (data.qrData?.codeUrl) {
+        if (!data.orderNo) {
+          toast.error("Checkout failed: missing order number");
+          return;
+        }
         setWechatQr({
           amount: data.qrData.amount,
           codeUrl: data.qrData.codeUrl,
-          orderNo: data.orderNo!,
+          orderNo: data.orderNo,
         });
         return;
       }
@@ -129,13 +132,13 @@ export function PricingSection() {
     },
   });
 
-  function handleCheckout(checkout: PricingCheckout) {
+  function handleCheckout(input: PricingCheckout) {
     // 未登录用户发起结账 → 重定向到登录页（R10.2）。
     if (!session?.user) {
       navigate({ to: "/login" });
       return;
     }
-    checkoutMutation.mutate(checkout);
+    checkoutMutation.mutate(input);
   }
 
   return (
