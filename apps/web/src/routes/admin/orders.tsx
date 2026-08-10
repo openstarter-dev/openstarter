@@ -15,7 +15,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
-import { client } from "@/lib/api";
+import { admin } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/orders")({
   component: AdminOrdersPage,
@@ -31,18 +31,8 @@ function AdminOrdersPage() {
   const [page, setPage] = useState(1);
 
   const ordersQuery = useQuery({
+    ...admin.queries.orders(page),
     placeholderData: keepPreviousData,
-    queryFn: async () => {
-      const res = await client.api.admin.orders.$get({
-        query: { page: String(page), pageSize: String(PAGE_SIZE) },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to load orders");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["admin", "orders", page],
   });
 
   const items = ordersQuery.data?.items ?? [];

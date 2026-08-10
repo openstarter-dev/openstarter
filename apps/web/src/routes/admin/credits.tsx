@@ -15,7 +15,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
-import { client } from "@/lib/api";
+import { admin } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/credits")({
   component: AdminCreditsPage,
@@ -31,18 +31,8 @@ function AdminCreditsPage() {
   const [page, setPage] = useState(1);
 
   const query = useQuery({
+    ...admin.queries.credits(page),
     placeholderData: keepPreviousData,
-    queryFn: async () => {
-      const res = await client.api.admin.credits.$get({
-        query: { page: String(page), pageSize: String(PAGE_SIZE) },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to load credits");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["admin", "credits", page],
   });
 
   const items = query.data?.items ?? [];

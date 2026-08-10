@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { AdminHeader } from "@/components/admin/list";
-import { client } from "@/lib/api";
+import { admin } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
@@ -26,17 +26,7 @@ const METRIC_CARDS = [
 ] as const;
 
 function AdminDashboard() {
-  const metricsQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.admin.analytics.metrics.$get();
-      if (!res.ok) {
-        throw new Error("Failed to load metrics");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["admin", "metrics"],
-  });
+  const metricsQuery = useQuery({ ...admin.queries.metrics() });
 
   const metrics = metricsQuery.data;
 

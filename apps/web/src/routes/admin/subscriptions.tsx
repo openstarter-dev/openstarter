@@ -15,7 +15,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
-import { client } from "@/lib/api";
+import { admin } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/subscriptions")({
   component: AdminSubscriptionsPage,
@@ -31,18 +31,8 @@ function AdminSubscriptionsPage() {
   const [page, setPage] = useState(1);
 
   const query = useQuery({
+    ...admin.queries.subscriptions(page),
     placeholderData: keepPreviousData,
-    queryFn: async () => {
-      const res = await client.api.admin.subscriptions.$get({
-        query: { page: String(page), pageSize: String(PAGE_SIZE) },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to load subscriptions");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["admin", "subscriptions", page],
   });
 
   const items = query.data?.items ?? [];

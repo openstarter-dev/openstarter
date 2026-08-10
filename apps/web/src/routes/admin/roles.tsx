@@ -28,14 +28,11 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AdminHeader, StatusText } from "@/components/admin/list";
-import { client } from "@/lib/api";
+import { admin } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/roles")({
   component: AdminRolesPage,
 });
-
-const ROLES_KEY = ["admin", "roles"] as const;
-const PERMISSIONS_KEY = ["admin", "permissions"] as const;
 
 interface RoleForm {
   id: string | null;
@@ -51,40 +48,13 @@ function AdminRolesPage() {
   const [permRoleId, setPermRoleId] = useState<string | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<Set<string>>(new Set());
 
-  const rolesQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.admin.roles.$get();
-      if (!res.ok) {
-        throw new Error("Failed to load roles");
-      }
-      return (await res.json()).data ?? [];
-    },
-    queryKey: ROLES_KEY,
-  });
+  const rolesQuery = useQuery({ ...admin.queries.roles() });
 
-  const permissionsQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.admin.permissions.$get();
-      if (!res.ok) {
-        throw new Error("Failed to load permissions");
-      }
-      return (await res.json()).data ?? [];
-    },
-    queryKey: PERMISSIONS_KEY,
-  });
+  const permissionsQuery = useQuery({ ...admin.queries.permissions() });
 
   const rolePermsQuery = useQuery({
+    ...admin.queries.rolePermissions(permRoleId),
     enabled: permRoleId !== null,
-    queryFn: async () => {
-      const res = await client.api.admin.roles[":id"].permissions.$get({
-        param: { id: permRoleId ?? "" },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to load role permissions");
-      }
-      return (await res.json()).data ?? [];
-    },
-    queryKey: ["admin", "roles", permRoleId, "permissions"],
   });
 
   useEffect(() => {
@@ -94,58 +64,26 @@ function AdminRolesPage() {
   }, [rolePermsQuery.data]);
 
   const saveMutation = useMutation({
-    mutationFn: async (input: RoleForm) => {
-      if (input.id) {
-        const res = await client.api.admin.roles[":id"].$put({
-          json: { name: input.name, title: input.title },
-          param: { id: input.id },
-        });
-        if (!res.ok) {
-          throw new Error("Failed to update role");
-        }
-        return;
-      }
-      const res = await client.api.admin.roles.$post({
-        json: { name: input.name, title: input.title },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to create role");
-      }
-    },
+    ...admin.mutations.saveRole(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setForm(null);
-      queryClient.invalidateQueries({ queryKey: ROLES_KEY });
+      queryClient.invalidateQueries({ queryKey: admin.queries.roles().queryKey });
       toast.success("Role saved");
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await client.api.admin.roles[":id"].$delete({
-        param: { id },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to delete role");
-      }
-    },
+    ...admin.mutations.deleteRole(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ROLES_KEY });
+      queryClient.invalidateQueries({ queryKey: admin.queries.roles().queryKey });
       toast.success("Role deleted");
     },
   });
 
   const savePermsMutation = useMutation({
-    mutationFn: async (input: { id: string; permissionIds: string[] }) => {
-      const res = await client.api.admin.roles[":id"].permissions.$put({
-        json: { permissionIds: input.permissionIds },
-        param: { id: input.id },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to save permissions");
-      }
-    },
+    ...admin.mutations.saveRolePermissions(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setPermRoleId(null);

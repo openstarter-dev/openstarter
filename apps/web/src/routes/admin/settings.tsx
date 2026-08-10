@@ -32,7 +32,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AdminHeader, StatusText } from "@/components/admin/list";
-import { client } from "@/lib/api";
+import { admin } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/settings")({
   component: AdminSettingsPage,
@@ -52,27 +52,7 @@ interface SettingField {
   type: "text" | "password" | "textarea" | "number" | "switch" | "select";
 }
 
-interface SettingGroupMeta {
-  description?: string;
-  name: string;
-  tab: string;
-  title: string;
-}
-
-interface SettingTabMeta {
-  name: string;
-  title: string;
-}
-
-interface AdminConfigResponse {
-  configs: Record<string, string>;
-  groups: SettingGroupMeta[];
-  settings: SettingField[];
-  tabs: SettingTabMeta[];
-}
-
 const MASK_PREFIX = "••••••••";
-const CONFIG_QUERY_KEY = ["admin", "config"] as const;
 
 /** 掩码值表示秘密项未修改,不进入提交 payload(后端同样会跳过)。 */
 const isMasked = (value: string): boolean => value.startsWith(MASK_PREFIX);
@@ -82,17 +62,7 @@ function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [pending, setPending] = useState<Record<string, string>>({});
 
-  const configQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.admin.config.$get();
-      if (!res.ok) {
-        throw new Error("Failed to load settings");
-      }
-      const json = await res.json();
-      return json.data as AdminConfigResponse;
-    },
-    queryKey: CONFIG_QUERY_KEY,
-  });
+  const configQuery = useQuery({ ...admin.queries.config() });
 
   const { data } = configQuery;
   const configs = data?.configs ?? {};
@@ -101,18 +71,10 @@ function AdminSettingsPage() {
   const tabs = data?.tabs ?? [];
 
   const saveMutation = useMutation({
-    mutationFn: async (payload: Record<string, string>) => {
-      const res = await client.api.admin.config.$post({ json: payload });
-      if (!res.ok) {
-        const text = await res.json().catch(() => null);
-        const message =
-          (text as { error?: string } | null)?.error ?? "Failed to save";
-        throw new Error(message);
-      }
-    },
+    ...admin.mutations.saveConfig(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: CONFIG_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: admin.queries.config().queryKey });
       toast.success("Settings saved");
     },
   });

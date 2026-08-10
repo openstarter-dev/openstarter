@@ -16,7 +16,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
-import { client } from "@/lib/api";
+import { admin } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsersPage,
@@ -29,22 +29,8 @@ function AdminUsersPage() {
   const [search, setSearch] = useState("");
 
   const usersQuery = useQuery({
+    ...admin.queries.users(page, search),
     placeholderData: keepPreviousData,
-    queryFn: async () => {
-      const res = await client.api.admin.users.$get({
-        query: {
-          page: String(page),
-          pageSize: String(PAGE_SIZE),
-          ...(search ? { search } : {}),
-        },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to load users");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["admin", "users", page, search],
   });
 
   const items = usersQuery.data?.items ?? [];
