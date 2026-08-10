@@ -15,11 +15,15 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "catalog:",
+    "@ai-sdk/google": "catalog:",
+    "@ai-sdk/openai": "catalog:",
     "@hono/zod-validator": "^0.8.0",
     "@openstarter/auth": "workspace:*",
     "@openstarter/billing-web": "workspace:*",
     "@openstarter/db": "workspace:*",
     "@openstarter/shared": "workspace:*",
+    "ai": "catalog:",
     "aws4fetch": "catalog:",
     "drizzle-orm": "^0.45.1",
     "hono": "catalog:",
