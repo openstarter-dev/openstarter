@@ -7,9 +7,9 @@
  * appended to the re-export block below.
  */
 
-import { createDb } from "./create-db";
-import { env } from "./env";
-import { isCloudflareWorker } from "./runtime";
+import { createDb } from "./factory/create-db";
+import { env } from "./config/env";
+import { isCloudflareWorker } from "./utils/runtime";
 import type { Database, DbConfig } from "./types";
 
 // workerd forbids reusing TCP sockets across requests, so TCP-backed drivers
@@ -49,7 +49,7 @@ export function db(): Database {
   return instance;
 }
 
-export { getAuthAdapterProvider } from "./adapter";
-export type { AuthAdapterProvider } from "./adapter";
-export { closeDb, createDb } from "./create-db";
+export { getAuthAdapterProvider } from "./config/adapter";
+export type { AuthAdapterProvider } from "./config/adapter";
+export { closeDb, createDb } from "./factory/create-db";
 export type { Database, DbConfig, DbProvider } from "./types";

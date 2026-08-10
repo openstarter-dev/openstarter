@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2";
 
-import { isCloudflareWorker, readCloudflareEnv } from "./runtime";
-import type { Database, DbConfig } from "./types";
+import { isCloudflareWorker, readCloudflareEnv } from "../utils/runtime";
+import type { Database, DbConfig } from "../types";
 
 // mysql2 pool singleton (Node only).
 let mysqlDbInstance: Database | null = null;

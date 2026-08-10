@@ -2,7 +2,7 @@ import fc from "fast-check";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createDb } from "./create-db";
-import type { DbConfig } from "./types";
+import type { DbConfig } from "../types";
 
 // Supported providers whose createDb elaborates a real network driver that then
 // attempts a TCP connect to a deliberately non-functional URL. mysql2 / pg emit

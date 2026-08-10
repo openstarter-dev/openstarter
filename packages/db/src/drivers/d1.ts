@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/d1";
 
-import { readCloudflareEnv } from "./runtime";
-import * as schema from "./schema";
-import type { Database } from "./types";
+import { readCloudflareEnv } from "../utils/runtime";
+import * as schema from "../schema";
+import type { Database } from "../types";
 
 // D1 singleton (safe to cache: the binding is request-scoped by the runtime).
 let d1DbInstance: Database | null = null;

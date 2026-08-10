@@ -8,8 +8,14 @@
     "./schema": {
       "default": "./src/schema/index.ts"
     },
-    "./*": {
-      "default": "./src/*.ts"
+    "./server": {
+      "default": "./src/server.ts"
+    },
+    "./types": {
+      "default": "./src/types.ts"
+    },
+    "./env": {
+      "default": "./src/config/env.ts"
     }
   },
   "scripts": {

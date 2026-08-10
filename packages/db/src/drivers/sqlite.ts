@@ -3,9 +3,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 
-import { isCloudflareWorker } from "./runtime";
-import * as schema from "./schema";
-import type { Database, DbConfig } from "./types";
+import { isCloudflareWorker } from "../utils/runtime";
+import * as schema from "../schema";
+import type { Database, DbConfig } from "../types";
 
 // libsql/SQLite singleton (Node only).
 let sqliteDbInstance: Database | null = null;

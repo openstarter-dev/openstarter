@@ -1,8 +1,8 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
-import { isCloudflareWorker, readCloudflareEnv } from "./runtime";
-import type { Database, DbConfig } from "./types";
+import { isCloudflareWorker, readCloudflareEnv } from "../utils/runtime";
+import type { Database, DbConfig } from "../types";
 
 // postgres.js singleton (Node only).
 let postgresDbInstance: Database | null = null;
