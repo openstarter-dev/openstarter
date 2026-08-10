@@ -14,7 +14,7 @@ import { Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { client } from "@/lib/api";
+import { checkout } from "@/modules/checkout/lib/api";
 import { authClient } from "@/lib/auth-client";
 import {
   PRICING_TIERS,
@@ -32,34 +32,6 @@ function formatPrice(price: number | "custom"): string {
     return "Free";
   }
   return `$${price}/mo`;
-}
-
-// 经类型化 Hono RPC 客户端发起结账；解包 `{ code, message, data }` 信封，
-// 失败（含校验失败、渠道不可用）抛出可读错误交由调用方 toast 呈现。
-async function requestCheckout(checkout: PricingCheckout) {
-  const res = await client.api.checkout.$post({
-    json: {
-      amount: checkout.amount,
-      credits: checkout.credits,
-      creditsValidDays: checkout.creditsValidDays,
-      currency: checkout.currency,
-      interval: checkout.interval,
-      intervalCount: checkout.intervalCount,
-      planName: checkout.planName,
-      productId: checkout.productId,
-      productName: checkout.planName ?? checkout.productId,
-      type: checkout.type,
-    },
-  });
-  const json = await res.json();
-  if ("code" in json && json.code === 0 && json.data) {
-    return json.data;
-  }
-  const message =
-    "message" in json && typeof json.message === "string"
-      ? json.message
-      : "Checkout failed";
-  throw new Error(message);
 }
 
 function TierCard({
@@ -131,17 +103,21 @@ export function PricingSection() {
   const [wechatQr, setWechatQr] = useState<WechatQr | null>(null);
 
   const checkoutMutation = useMutation({
-    mutationFn: requestCheckout,
+    ...checkout.mutations.create(),
     onError: (err) => {
       toast.error(err.message);
     },
-    onSuccess: (data) => {
+    onSuccess: (data: {
+      checkoutUrl?: string;
+      orderNo?: string;
+      qrData?: { amount: number; codeUrl: string };
+    }) => {
       // 微信 Native 渠道：渲染二维码扫码支付；其余渠道：跳转结账链接（R10.3）。
       if (data.qrData?.codeUrl) {
         setWechatQr({
           amount: data.qrData.amount,
           codeUrl: data.qrData.codeUrl,
-          orderNo: data.orderNo,
+          orderNo: data.orderNo!,
         });
         return;
       }

@@ -14,8 +14,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { authClient } from "@/lib/auth-client";
 import { auth } from "@/modules/auth/lib/api";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_app/settings/sessions")({
   component: SessionsPage,

@@ -27,13 +27,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { client } from "@/lib/api";
+import { tickets } from "@/modules/tickets/lib/api";
 
 export const Route = createFileRoute("/_app/settings/tickets")({
   component: TicketsPage,
 });
-
-const LIST_KEY = ["user", "tickets"] as const;
 
 function statusVariant(status: string): "default" | "secondary" | "outline" {
   if (status === "open") {
@@ -60,71 +58,32 @@ function TicketsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reply, setReply] = useState("");
 
-  const listQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.tickets.$get({ query: {} });
-      if (!res.ok) {
-        throw new Error("Failed to load tickets");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: LIST_KEY,
-  });
+  const listQuery = useQuery({ ...tickets.queries.list() });
 
   const detailQuery = useQuery({
+    ...tickets.queries.detail(selectedId),
     enabled: selectedId !== null,
-    queryFn: async () => {
-      const res = await client.api.tickets[":id"].$get({
-        param: { id: selectedId ?? "" },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to load ticket");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["user", "tickets", selectedId],
   });
 
   const createMutation = useMutation({
-    mutationFn: async (input: { title: string; content: string }) => {
-      const res = await client.api.tickets.$post({ json: input });
-      if (!res.ok) {
-        throw new Error("Failed to create ticket");
-      }
-      const json = await res.json();
-      return json.data;
-    },
+    ...tickets.mutations.create(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setTitle("");
       setContent("");
       setCreateOpen(false);
-      queryClient.invalidateQueries({ queryKey: LIST_KEY });
+      queryClient.invalidateQueries({ queryKey: tickets.queries.list().queryKey });
       toast.success("Ticket created");
     },
   });
 
   const replyMutation = useMutation({
-    mutationFn: async (input: { id: string; content: string }) => {
-      const res = await client.api.tickets[":id"].messages.$post({
-        json: { content: input.content },
-        param: { id: input.id },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to send reply");
-      }
-      const json = await res.json();
-      return json.data;
-    },
+    ...tickets.mutations.reply(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: (_data, variables) => {
       setReply("");
-      queryClient.invalidateQueries({
-        queryKey: ["user", "tickets", variables.id],
-      });
-      queryClient.invalidateQueries({ queryKey: LIST_KEY });
+      queryClient.invalidateQueries({ queryKey: tickets.queries.detail(variables.id).queryKey });
+      queryClient.invalidateQueries({ queryKey: tickets.queries.list().queryKey });
       toast.success("Reply sent");
     },
   });
