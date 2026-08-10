@@ -15,6 +15,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
+import { auth } from "@/modules/auth/lib/api";
 
 export const Route = createFileRoute("/_app/settings/sessions")({
   component: SessionsPage,
@@ -23,16 +24,7 @@ export const Route = createFileRoute("/_app/settings/sessions")({
 function SessionsPage() {
   const { data: currentSessionData, isPending: isCurrentSessionPending } =
     authClient.useSession();
-  const sessionsQuery = useQuery({
-    queryFn: async () => {
-      const result = await authClient.listSessions();
-      if (result.error) {
-        throw new Error(result.error.message || "Failed to load sessions");
-      }
-      return result.data ?? [];
-    },
-    queryKey: ["auth", "sessions"],
-  });
+  const sessionsQuery = useQuery({ ...auth.queries.sessions() });
   const sessions = sessionsQuery.data ?? [];
   const currentSessionToken = currentSessionData?.session.token;
   const canRevokeSession =

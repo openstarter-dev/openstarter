@@ -16,6 +16,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
+import { auth } from "@/modules/auth/lib/api";
 
 export const Route = createFileRoute("/_app/settings/accounts")({
   component: AccountsPage,
@@ -45,16 +46,7 @@ const getLinkLabel = (
 
 function AccountsPage() {
   const { data: session } = authClient.useSession();
-  const accountsQuery = useQuery({
-    queryFn: async () => {
-      const result = await authClient.listAccounts();
-      if (result.error) {
-        throw new Error(result.error.message || "Failed to load accounts");
-      }
-      return result.data ?? [];
-    },
-    queryKey: ["auth", "accounts"],
-  });
+  const accountsQuery = useQuery({ ...auth.queries.accounts() });
   const accounts = accountsQuery.data ?? [];
 
   const [linking, setLinking] = useState<string | null>(null);
