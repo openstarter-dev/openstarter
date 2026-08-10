@@ -21,7 +21,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { client } from "@/lib/api";
+import { user } from "@/modules/user/lib/api";
 
 export const Route = createFileRoute("/_app/settings/credits")({
   component: CreditsPage,
@@ -35,17 +35,7 @@ function formatDate(value: string | null | undefined): string {
 }
 
 function CreditsPage() {
-  const creditsQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.user.credits.$get({ query: {} });
-      if (!res.ok) {
-        throw new Error("Failed to load credits");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["user", "credits"],
-  });
+  const creditsQuery = useQuery({ ...user.queries.credits() });
 
   const balance = creditsQuery.data?.balance ?? 0;
   const history = creditsQuery.data?.history ?? [];

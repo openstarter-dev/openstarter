@@ -33,13 +33,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { client } from "@/lib/api";
+import { user } from "@/modules/user/lib/api";
 
 export const Route = createFileRoute("/_app/settings/apikeys")({
   component: ApiKeysPage,
 });
-
-const QUERY_KEY = ["user", "apikeys"] as const;
 
 function ApiKeysPage() {
   const queryClient = useQueryClient();
@@ -47,51 +45,25 @@ function ApiKeysPage() {
   const [title, setTitle] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
-  const keysQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.apikeys.$get({ query: {} });
-      if (!res.ok) {
-        throw new Error("Failed to load API keys");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: QUERY_KEY,
-  });
+  const keysQuery = useQuery({ ...user.queries.apiKeys() });
 
   const createMutation = useMutation({
-    mutationFn: async (name: string) => {
-      const res = await client.api.apikeys.$post({ json: { title: name } });
-      if (!res.ok) {
-        throw new Error("Failed to create API key");
-      }
-      const json = await res.json();
-      if (!json.data) {
-        throw new Error("Failed to create API key");
-      }
-      return json.data;
-    },
+    ...user.mutations.createApiKey(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: (data) => {
       setRevealedKey(data.key);
       setTitle("");
       setCreateOpen(false);
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: user.queries.apiKeys().queryKey });
       toast.success("API key created");
     },
   });
 
   const revokeMutation = useMutation({
-    mutationFn: async (id: string) => {
-      const res = await client.api.apikeys.$delete({ query: { id } });
-      if (!res.ok) {
-        throw new Error("Failed to revoke API key");
-      }
-      return id;
-    },
+    ...user.mutations.revokeApiKey(),
     onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: user.queries.apiKeys().queryKey });
       toast.success("API key revoked");
     },
   });

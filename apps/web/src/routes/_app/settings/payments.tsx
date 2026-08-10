@@ -23,7 +23,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { client } from "@/lib/api";
+import { user } from "@/modules/user/lib/api";
 
 export const Route = createFileRoute("/_app/settings/payments")({
   component: PaymentsPage,
@@ -51,18 +51,8 @@ function PaymentsPage() {
   const [page, setPage] = useState(1);
 
   const ordersQuery = useQuery({
+    ...user.queries.orders(page),
     placeholderData: keepPreviousData,
-    queryFn: async () => {
-      const res = await client.api.user.orders.$get({
-        query: { page: String(page), pageSize: String(PAGE_SIZE) },
-      });
-      if (!res.ok) {
-        throw new Error("Failed to load payments");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["user", "orders", page],
   });
 
   const items = ordersQuery.data?.items ?? [];

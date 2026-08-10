@@ -15,7 +15,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-import { client } from "@/lib/api";
+import { user } from "@/modules/user/lib/api";
 
 export const Route = createFileRoute("/_app/settings/billing")({
   component: BillingPage,
@@ -36,45 +36,17 @@ function formatDate(value: string | null | undefined): string {
 }
 
 function BillingPage() {
-  const subscriptionQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.user.subscription.$get();
-      if (!res.ok) {
-        throw new Error("Failed to load subscription");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["user", "subscription"],
-  });
+  const subscriptionQuery = useQuery({ ...user.queries.subscription() });
 
-  const planQuery = useQuery({
-    queryFn: async () => {
-      const res = await client.api.user.plan.$get();
-      if (!res.ok) {
-        throw new Error("Failed to load plan");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    queryKey: ["user", "plan"],
-  });
+  const planQuery = useQuery({ ...user.queries.plan() });
 
   const subscription = subscriptionQuery.data;
   const plan = planQuery.data;
   const isLoading = subscriptionQuery.isPending || planQuery.isPending;
 
   const billingPortalMutation = useMutation({
-    mutationFn: async () => {
-      const res = await client.api.user["billing-portal"].$post();
-      if (!res.ok) {
-        const json = await res.json();
-        throw new Error(json.message ?? "Failed to create billing portal session");
-      }
-      const json = await res.json();
-      return json.data;
-    },
-    onSuccess: (data) => {
+    ...user.mutations.billingPortal(),
+    onSuccess: (data: { billingUrl?: string } | undefined) => {
       if (data?.billingUrl) {
         window.location.href = data.billingUrl;
       }
