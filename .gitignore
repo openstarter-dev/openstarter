@@ -58,6 +58,8 @@ temp
 .claude/
 .superpowers/
 semantic-review/
+.workbuddy/
+docs/
 
 # 本地 SQLite 数据库
 local.db
