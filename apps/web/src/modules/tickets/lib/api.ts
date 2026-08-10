@@ -37,6 +37,7 @@ const mutations = {
         const res = await client.api.tickets.$post({ json: input });
         if (!res.ok) throw new Error("Failed to create ticket");
         const json = await res.json();
+        if (!json.data) throw new Error("Failed to create ticket");
         return json.data;
       },
     }),
@@ -49,6 +50,7 @@ const mutations = {
         });
         if (!res.ok) throw new Error("Failed to send reply");
         const json = await res.json();
+        if (!json.data) throw new Error("Failed to send reply");
         return json.data;
       },
     }),
