@@ -27,6 +27,7 @@
     "@libsql/client": "0.15.15",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
+    "envin": "catalog:",
     "libsql": "0.5.22",
     "mysql2": "catalog:",
     "postgres": "catalog:",

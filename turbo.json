@@ -54,5 +54,14 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".temp/**", "dist/**"]
     }
-  }
+  },
+  "globalEnv": [
+    "DATABASE_URL",
+    "DATABASE_PROVIDER",
+    "DATABASE_AUTH_TOKEN",
+    "PRODUCT_NAME",
+    "URL",
+    "DEFAULT_LOCALE",
+    "OPENSTARTER_API_URL"
+  ]
 }
