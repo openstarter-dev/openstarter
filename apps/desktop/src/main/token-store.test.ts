@@ -1,17 +1,30 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { existsSync, unlinkSync, writeFileSync } from "node:fs";
 
 // Mock safeStorage at top level
 vi.mock("electron", () => ({
   safeStorage: {
     encryptString: vi.fn((s) => Buffer.from(`enc:${s}`)),
-    decryptString: vi.fn((b) => b.toString().replace("enc:", "")),
+    decryptString: vi.fn((b) => {
+      const str = b.toString();
+      if (!str.startsWith("enc:")) {
+        throw new Error("Decryption failed");
+      }
+      return str.replace("enc:", "");
+    }),
   },
 }));
 
 import { createTokenStore } from "./token-store";
 
+const testFilePath = "/tmp/test-token-store";
+
 describe("TokenStore", () => {
-  const testFilePath = "/tmp/test-token-store";
+  afterEach(() => {
+    if (existsSync(testFilePath)) {
+      unlinkSync(testFilePath);
+    }
+  });
 
   it("should return null when file does not exist", () => {
     const store = createTokenStore(`${testFilePath}-nonexistent`);
@@ -38,10 +51,11 @@ describe("TokenStore", () => {
 
   it("should handle corrupted files gracefully", () => {
     const store = createTokenStore(testFilePath);
-    // Write invalid data
     store.set("valid-token");
-    // Manually corrupt by writing invalid encrypted data
-    // (this is a property-based test; in real impl, we test this via mocking)
+    // Corrupt the file by writing garbage data directly
+    writeFileSync(testFilePath, "garbage data");
+    // Should not throw — returns null gracefully
     expect(() => store.get()).not.toThrow();
+    expect(store.get()).toBeNull();
   });
 });
