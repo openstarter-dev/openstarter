@@ -4,6 +4,9 @@
 import Taro from '@tarojs/taro';
 import { getToken } from '@/utils/storage';
 
+// 小程序环境无 DOM 类型，Reducer 入参使用含 any 的宽松签名（运行时校验）。
+// 见 normalizeHeaders() 和 parseBody() 内 typeof 检查。
+
 /** 极简 Response shim（小程序环境无原生 Response API）。 */
 export class MiniResponse {
   status: number;
@@ -56,13 +59,13 @@ export function createTaroFetch(onUnauthorized?: () => void) {
   };
 }
 
-function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
+function normalizeHeaders(headers?: Record<string, string> | Array<[string, string]> | { entries(): Iterable<[string, string]> }): Record<string, string> {
   if (!headers) return {};
 
-  // Handle Headers instance
-  if (typeof Headers !== 'undefined' && headers instanceof Headers) {
+  // Handle Headers instance (Web API, 小程序可能无此类型)
+  if (typeof (headers as any).entries === 'function') {
     try {
-      return Object.fromEntries(headers.entries());
+      return Object.fromEntries((headers as any).entries());
     } catch { /* ignore */ }
   }
 
@@ -75,7 +78,7 @@ function normalizeHeaders(headers?: HeadersInit): Record<string, string> {
   return headers as Record<string, string>;
 }
 
-function parseBody(body?: BodyInit): unknown {
+function parseBody(body: unknown): unknown {
   if (!body) return undefined;
 
   if (typeof body === 'string') {
