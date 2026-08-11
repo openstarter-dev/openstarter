@@ -1,23 +1,42 @@
-// API_BASE_URL is a declare const injected by Taro's defineConstants at build time.
-import { describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
-// Mock @tarojs/taro for storage utility dependency
+const { mockReLaunch } = vi.hoisted(() => ({
+  mockReLaunch: vi.fn(),
+}));
+
 vi.mock('@tarojs/taro', () => ({
   default: {
-    getStorageSync: vi.fn(),
+    request: vi.fn(),
+    getStorageSync: vi.fn(() => null),
     setStorageSync: vi.fn(),
     removeStorageSync: vi.fn(),
+    reLaunch: mockReLaunch,
+  },
+}));
+vi.mock('@/utils/storage', () => ({
+  getToken: vi.fn(() => null),
+  removeToken: vi.fn(),
+}));
+vi.mock('@/stores/auth-store', () => ({
+  useAuthStore: {
+    getState: vi.fn(() => ({
+      logout: vi.fn(),
+    })),
   },
 }));
 
 describe('API client', () => {
-  it('should export createClient function', async () => {
+  it('should create client with Hono RPC', async () => {
     const mod = await import('../../src/services/client');
-    expect(typeof mod.createClient).toBe('function');
+    const client = mod.createClient();
+    expect(client).toBeDefined();
   });
 
-  it('should export getApiBaseUrl function', async () => {
+  it('should have type-safe RPC methods', async () => {
     const mod = await import('../../src/services/client');
-    expect(typeof mod.getApiBaseUrl).toBe('function');
+    const client = mod.createClient();
+    // hc returns a callable proxy with route methods
+    // In this test environment, the proxy is a function
+    expect(typeof client).toBe('function');
   });
 });

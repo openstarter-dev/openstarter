@@ -1,76 +1,22 @@
-import { hc } from 'hono/client';
-import type { AppType } from '@openstarter/api';
-import { getToken, removeToken } from '@/utils/storage';
-import Taro from '@tarojs/taro';
+// apps/mini-app/src/services/client.ts
+// Hono RPC 类型安全客户端（主力 API 方式）
 
-/** 构建期由 Taro defineConstants 注入的 API 基础地址。 */
-declare const API_BASE_URL: string;
+import type { AppType } from "@openstarter/api";
+import { hc } from "hono/client";
+import { createTaroFetch } from "./taro-fetch";
+import { useAuthStore } from "@/stores/auth-store";
+import { removeToken } from "@/utils/storage";
+import Taro from "@tarojs/taro";
+import { getApiBaseUrl } from "@/lib/env";
 
-/** 获取 API 基础地址（构建期注入，测试环境 fallback）。 */
-export function getApiBaseUrl(): string {
-  return typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:3000';
+function handleUnauthorized() {
+  removeToken();
+  useAuthStore.getState().logout();
+  Taro.reLaunch({ url: '/pages/login/index' });
 }
 
-/** 创建一个已注入 auth token 的 Hono RPC 客户端。 */
 export function createClient() {
-  const token = getToken();
-
   return hc<AppType>(getApiBaseUrl(), {
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    fetch: createTaroFetch(handleUnauthorized),
   });
-}
-
-/**
- * 发送原始 API 请求（当 Hono RPC 类型不匹配时用）。
- * 自动携带 token，401 时清除 token 并跳转登录页。
- */
-export async function request<TData = unknown>(
-  path: string,
-  options: { method?: string; body?: unknown; params?: Record<string, string> } = {},
-): Promise<{ data?: TData; error?: string }> {
-  const token = getToken();
-  const { method = 'GET', body, params } = options;
-
-  // 构建 URL（手动拼接 query string，避免依赖 URLSearchParams）
-  let url = `${getApiBaseUrl()}${path}`;
-  if (params) {
-    const query = Object.entries(params)
-      .filter(([, v]) => v !== undefined && v !== null)
-      .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
-      .join('&');
-    if (query) {
-      url += `?${query}`;
-    }
-  }
-
-  try {
-    const res = await Taro.request({
-      url,
-      method: method as keyof Taro.request.Method,
-      header: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      data: body,
-    });
-
-    const result = res.data as { code: number; message: string; data?: TData };
-
-    // 401 时清除 token 并跳转登录页
-    if (res.statusCode === 401) {
-      removeToken();
-      Taro.reLaunch({ url: '/pages/login/index' });
-      return { error: 'Authentication expired' };
-    }
-
-    if (result.code !== 0) {
-      return { error: result.message || 'Unknown error' };
-    }
-
-    return { data: result.data };
-  } catch (err) {
-    return { error: err instanceof Error ? err.message : 'Network error' };
-  }
 }
