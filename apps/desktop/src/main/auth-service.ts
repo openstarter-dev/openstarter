@@ -65,8 +65,8 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
       }
 
       const token = sessionCookie.split(";")[0]!.split("=").slice(1).join("=");
-      tokenStore.set(token);
 
+      // Parse body before storing token — if body parse fails, no orphaned token
       const rawBody: unknown = await response.json();
       const body = rawBody as {
         user?: AuthUser;
@@ -76,6 +76,8 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
       if (!user) {
         throw new Error("No user in response");
       }
+
+      tokenStore.set(token);
       return { user };
     },
 
@@ -93,8 +95,12 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
     },
 
     async signOut(): Promise<void> {
-      await apiRequest({ method: "POST", path: "/api/auth/sign-out" });
-      tokenStore.clear();
+      try {
+        await apiRequest({ method: "POST", path: "/api/auth/sign-out" });
+      } finally {
+        // Always clear the local token, even if the API call fails
+        tokenStore.clear();
+      }
     },
   };
 }
