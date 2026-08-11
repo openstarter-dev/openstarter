@@ -19,6 +19,10 @@ import {
   waitForDevServer,
 } from "./window";
 import { createFileWindowStateStore } from "./window-state";
+import { createTokenStore } from "./token-store";
+import { createApiProxy } from "./api-proxy";
+import { createAuthService } from "./auth-service";
+import { openOAuthWindow } from "./oauth-window";
 
 const UPDATE_CHECK_DELAY_MS = 10_000;
 
@@ -41,6 +45,64 @@ async function main(): Promise<void> {
 
   // 注册 IPC 处理器
   registerIpcHandlers(app.getPath("userData"));
+
+  // 初始化认证服务
+  const API_BASE_URL = process.env.OPENSTARTER_API_URL || "http://localhost:3000";
+  const tokenStore = createTokenStore(join(app.getPath("userData"), "auth-token.enc"));
+  const apiProxy = createApiProxy({
+    baseUrl: API_BASE_URL,
+    getToken: () => tokenStore.get(),
+  });
+  const authService = createAuthService({
+    baseUrl: API_BASE_URL,
+    tokenStore,
+    apiRequest: apiProxy,
+  });
+
+  // 注册认证 IPC 处理器
+  ipcMain.handle("auth:sign-in-email", async (_event, { email, password }) => {
+    try {
+      const result = await authService.signInWithEmail(email, password);
+      return { code: 200, message: "ok", data: result };
+    } catch (error) {
+      return { code: 401, message: (error as Error).message };
+    }
+  });
+
+  ipcMain.handle("auth:sign-in-oauth", async (_event, { provider }) => {
+    try {
+      const result = await openOAuthWindow(provider as "google" | "github", {
+        baseUrl: API_BASE_URL,
+        getSession: () => authService.getSession(),
+        tokenStore,
+      });
+      return { code: 200, message: "ok", data: result };
+    } catch (error) {
+      return { code: 401, message: (error as Error).message };
+    }
+  });
+
+  ipcMain.handle("auth:sign-out", async () => {
+    try {
+      await authService.signOut();
+      return { code: 200, message: "ok" };
+    } catch (error) {
+      return { code: -1, message: (error as Error).message };
+    }
+  });
+
+  ipcMain.handle("auth:get-session", async () => {
+    try {
+      const result = await authService.getSession();
+      return { code: 200, message: "ok", data: result };
+    } catch {
+      return { code: 401, message: "no_session" };
+    }
+  });
+
+  ipcMain.handle("api:request", async (_event, request) => {
+    return apiProxy(request);
+  });
 
   // 构建加载 URL：dev 模式指向 Vite dev server，prod 模式指向本地文件
   const resolvedUrl: { ok: true; url: string } =

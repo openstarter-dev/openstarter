@@ -15,6 +15,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   getVersion: () => ipcRenderer.invoke("desktop:get-version"),
 
+  // 认证
+  authSignInEmail: (params: { email: string; password: string }) =>
+    ipcRenderer.invoke("auth:sign-in-email", params),
+  authSignInOAuth: (params: { provider: "google" | "github" }) =>
+    ipcRenderer.invoke("auth:sign-in-oauth", params),
+  authSignOut: () => ipcRenderer.invoke("auth:sign-out"),
+  authGetSession: () => ipcRenderer.invoke("auth:get-session"),
+  apiRequest: (request: { method: string; path: string; body?: unknown }) =>
+    ipcRenderer.invoke("api:request", request),
+
   // 文件系统
   openFile: (
     options?: { filters?: { name: string; extensions: string[] }[] }

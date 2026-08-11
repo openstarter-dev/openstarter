@@ -39,7 +39,8 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
       if (!response.ok) {
         let message = `Sign-in failed (${response.status})`;
         try {
-          const body = await response.json();
+          const rawBody: unknown = await response.json();
+          const body = rawBody as { message?: string; error?: { message?: string } };
           message = body.message || body.error?.message || message;
         } catch {
           /* use default message */
@@ -63,11 +64,19 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
         throw new Error("No session token in response");
       }
 
-      const token = sessionCookie.split(";")[0].split("=").slice(1).join("=");
+      const token = sessionCookie.split(";")[0]!.split("=").slice(1).join("=");
       tokenStore.set(token);
 
-      const body = await response.json();
-      return { user: body.user || body.data?.user || body };
+      const rawBody: unknown = await response.json();
+      const body = rawBody as {
+        user?: AuthUser;
+        data?: { user?: AuthUser };
+      };
+      const user = body.user || body.data?.user;
+      if (!user) {
+        throw new Error("No user in response");
+      }
+      return { user };
     },
 
     async getSession(): Promise<AuthResult | null> {

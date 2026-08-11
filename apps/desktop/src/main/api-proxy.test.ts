@@ -50,7 +50,7 @@ describe("ApiProxy", () => {
 
     await proxy({ method: "POST", path: "/api/auth/sign-up", body: { email: "user@example.com" } });
 
-    const call = mockFetch.mock.calls[0];
+    const call = mockFetch.mock.calls[0]!;
     expect(call[1]?.headers?.Authorization).toBeUndefined();
   });
 

@@ -50,12 +50,19 @@ export function createApiProxy(options: ApiProxyOptions) {
         };
       }
 
-      const data = await response.json();
+      const rawData: unknown = await response.json();
+      // API 响应统一为 envelope：{ code, message, data, error? }
+      const data = rawData as {
+        code?: number;
+        message?: string;
+        data?: unknown;
+        error?: unknown;
+      };
 
       // API returned an error
       if (!response.ok) {
         return {
-          code: data.code || response.status,
+          code: (data.code as number) || response.status,
           message: data.message || `HTTP ${response.status}`,
           error: data.error,
         };
