@@ -1,4 +1,8 @@
-import { NavLink } from "react-router-dom";
+// apps/desktop/src/renderer/components/Sidebar.tsx —— 侧边栏导航
+
+import { NavLink, useNavigate } from "react-router-dom";
+import { Button } from "@openstarter/ui-web/components/button";
+import { useAuth } from "../contexts/AuthContext";
 
 const NAV_ITEMS = [
   { to: "/", label: "Dashboard" },
@@ -7,63 +11,51 @@ const NAV_ITEMS = [
 ];
 
 export function Sidebar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   return (
-    <nav
-      style={{
-        width: "240px",
-        height: "100%",
-        background: "#111",
-        borderRight: "1px solid #222",
-        padding: "16px 0",
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div
-        style={{
-          padding: "12px 20px",
-          fontSize: "18px",
-          fontWeight: 600,
-          marginBottom: "16px",
-        }}
-      >
+    <nav className="flex h-full w-60 shrink-0 flex-col border-r border-border bg-card">
+      <div className="mb-4 px-5 py-4 text-lg font-semibold text-foreground">
         OpenStarter
       </div>
-      {NAV_ITEMS.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.to === "/"}
-          style={({ isActive }) => ({
-            padding: "10px 20px",
-            color: isActive ? "#fff" : "#888",
-            background: isActive ? "#222" : "transparent",
-            textDecoration: "none",
-            fontSize: "14px",
-          })}
-        >
-          {item.label}
-        </NavLink>
-      ))}
-      <div style={{ marginTop: "auto", padding: "12px 20px" }}>
-        <button
-          onClick={() => {
-            localStorage.removeItem("auth-token");
-            window.location.href = "/login";
-          }}
+      <div className="flex flex-col gap-1 px-3">
+        {NAV_ITEMS.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.to === "/"}
+            className={({ isActive }) =>
+              `rounded-md px-3 py-2 text-sm transition-colors ${
+                isActive
+                  ? "bg-accent text-accent-foreground"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              }`
+            }
+          >
+            {item.label}
+          </NavLink>
+        ))}
+      </div>
+      <div className="mt-auto space-y-2 p-4">
+        {user && (
+          <div className="mb-2 truncate text-xs text-muted-foreground">
+            {user.email}
+          </div>
+        )}
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={handleLogout}
           type="button"
-          style={{
-            background: "none",
-            border: "1px solid #333",
-            color: "#888",
-            padding: "8px 16px",
-            borderRadius: "4px",
-            cursor: "pointer",
-            width: "100%",
-          }}
         >
           Logout
-        </button>
+        </Button>
       </div>
     </nav>
   );

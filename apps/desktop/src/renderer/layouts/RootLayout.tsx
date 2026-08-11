@@ -3,9 +3,9 @@ import { Sidebar } from "../components/Sidebar";
 
 export function RootLayout() {
   return (
-    <div style={{ display: "flex", height: "100%" }}>
+    <div className="flex h-screen bg-background text-foreground">
       <Sidebar />
-      <main style={{ flex: 1, padding: "24px", overflow: "auto" }}>
+      <main className="min-w-0 flex-1 overflow-auto p-6">
         <Outlet />
       </main>
     </div>

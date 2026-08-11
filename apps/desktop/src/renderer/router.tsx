@@ -5,6 +5,7 @@ import { LoginPage } from "./pages/login";
 import { DashboardPage } from "./pages/dashboard";
 import { SettingsPage } from "./pages/settings";
 import { AboutPage } from "./pages/about";
+import { RequireAuth } from "./components/RequireAuth";
 
 export const router = createBrowserRouter([
   {
@@ -14,11 +15,16 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
-    element: <RootLayout />,
+    element: <RequireAuth />,
     children: [
-      { index: true, element: <DashboardPage /> },
-      { path: "settings", element: <SettingsPage /> },
-      { path: "about", element: <AboutPage /> },
+      {
+        element: <RootLayout />,
+        children: [
+          { index: true, element: <DashboardPage /> },
+          { path: "settings", element: <SettingsPage /> },
+          { path: "about", element: <AboutPage /> },
+        ],
+      },
     ],
   },
 ]);

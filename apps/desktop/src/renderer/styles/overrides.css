@@ -1,0 +1,18 @@
+/* apps/desktop/src/renderer/styles/overrides.css —— 桌面端特定覆盖
+ * 在 @openstarter/ui-web/globals.css 之后引入，用于调整桌面应用特有的样式
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+input,
+select,
+button {
+  font-family: inherit;
+  font-size: inherit;
+}

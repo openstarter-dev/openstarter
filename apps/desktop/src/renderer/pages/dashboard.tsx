@@ -1,8 +1,20 @@
+// apps/desktop/src/renderer/pages/dashboard.tsx —— 仪表盘
+
+import { Card, CardContent, CardHeader, CardTitle } from "@openstarter/ui-web/components/card";
+
 export function DashboardPage() {
   return (
-    <div>
-      <h1 style={{ marginBottom: "16px" }}>Dashboard</h1>
-      <p style={{ color: "#a3a3a3" }}>Welcome to OpenStarter Desktop.</p>
+    <div className="mx-auto max-w-4xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Dashboard</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground text-sm">
+            Welcome to OpenStarter Desktop.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

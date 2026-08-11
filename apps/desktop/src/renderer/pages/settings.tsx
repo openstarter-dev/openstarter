@@ -1,4 +1,21 @@
+// apps/desktop/src/renderer/pages/settings.tsx —— 设置页
+
 import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@openstarter/ui-web/components/card";
+import { Button } from "@openstarter/ui-web/components/button";
+import { Checkbox } from "@openstarter/ui-web/components/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@openstarter/ui-web/components/select";
 import type { AppSettings } from "../types";
 
 export function SettingsPage() {
@@ -8,7 +25,7 @@ export function SettingsPage() {
     window.electronAPI?.getSettings().then(setSettings);
   }, []);
 
-  if (!settings) return <div>Loading...</div>;
+  if (!settings) return <div className="text-muted-foreground">Loading...</div>;
 
   const updateSetting = (partial: Partial<AppSettings>) => {
     const updated = { ...settings, ...partial };
@@ -17,71 +34,65 @@ export function SettingsPage() {
   };
 
   return (
-    <div>
-      <h1 style={{ marginBottom: "24px" }}>Settings</h1>
-      <div style={{ maxWidth: "480px" }}>
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            marginBottom: "16px",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={settings.minimizeToTray}
-            onChange={(e) => updateSetting({ minimizeToTray: e.target.checked })}
-          />
-          Minimize to tray on close
-        </label>
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            marginBottom: "16px",
-            cursor: "pointer",
-          }}
-        >
-          <input
-            type="checkbox"
-            checked={settings.autoStart}
-            onChange={(e) => updateSetting({ autoStart: e.target.checked })}
-          />
-          Launch at startup
-        </label>
-        <label
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            marginBottom: "16px",
-          }}
-        >
-          <span style={{ minWidth: "80px" }}>Theme:</span>
-          <select
-            value={settings.theme}
-            onChange={(e) =>
-              updateSetting({
-                theme: e.target.value as AppSettings["theme"],
-              })
-            }
-            style={{
-              padding: "6px 12px",
-              background: "#1a1a1a",
-              color: "#f5f5f5",
-              border: "1px solid #333",
-              borderRadius: "4px",
-            }}
+    <div className="mx-auto max-w-4xl">
+      <Card>
+        <CardHeader>
+          <CardTitle>Settings</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="minimize-to-tray"
+              checked={settings.minimizeToTray}
+              onCheckedChange={(checked) =>
+                updateSetting({ minimizeToTray: !!checked })
+              }
+            />
+            <label htmlFor="minimize-to-tray" className="text-sm">
+              Minimize to tray on close
+            </label>
+          </div>
+          <div className="flex items-center gap-3">
+            <Checkbox
+              id="auto-start"
+              checked={settings.autoStart}
+              onCheckedChange={(checked) =>
+                updateSetting({ autoStart: !!checked })
+              }
+            />
+            <label htmlFor="auto-start" className="text-sm">
+              Launch at startup
+            </label>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm">Theme:</span>
+            <Select
+              value={settings.theme}
+              onValueChange={(value) =>
+                updateSetting({
+                  theme: value as AppSettings["theme"],
+                })
+              }
+            >
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="system">System</SelectItem>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => updateSetting({ ...settings })}
+            type="button"
           >
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
-      </div>
+            Save
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
