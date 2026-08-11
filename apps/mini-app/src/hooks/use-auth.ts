@@ -1,15 +1,14 @@
+// apps/mini-app/src/hooks/use-auth.ts
+// 认证 hook（整合 better-auth client）
+
 import { useCallback } from 'react';
 import { useAuthStore, type UserInfo } from '@/stores/auth-store';
-import { request } from '@/services/client';
+import { authClient } from '@/lib/auth-client';
 
-/**
- * 认证相关 hook，封装登录/登出逻辑和认证状态。
- * 页面组件通过此 hook 而非直接操作 store。
- */
 export function useAuth() {
   const {
-    token,
     user,
+    token,
     isAuthenticated,
     isHydrated,
     setSession,
@@ -20,24 +19,37 @@ export function useAuth() {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const result = await request<{ token: string; user: UserInfo }>(
-        '/api/auth/email-password/login',
-        {
-          method: 'POST',
-          body: { email, password },
-        },
-      );
+      try {
+        let bearerToken: string | null = null;
 
-      if (result.data) {
-        setSession(result.data.token, result.data.user);
+        const result = await authClient.signIn.email(
+          { email, password },
+          {
+            onSuccess: (ctx: any) => {
+              bearerToken = ctx.response.headers.get("set-auth-token");
+            },
+          }
+        );
+
+        if (result.error) {
+          return { error: result.error.message || 'Login failed' };
+        }
+
+        if (result.data?.user && bearerToken) {
+          setSession(bearerToken, result.data.user as UserInfo);
+          return { data: result.data };
+        }
+
+        return { error: 'Login failed: missing token or user' };
+      } catch (err) {
+        return { error: err instanceof Error ? err.message : 'Login failed' };
       }
-
-      return result;
     },
     [setSession],
   );
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await authClient.signOut();
     storeLogout();
   }, [storeLogout]);
 

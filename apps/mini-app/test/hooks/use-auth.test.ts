@@ -1,12 +1,9 @@
-// test/hooks/use-auth.test.ts
-import { describe, expect, it, vi } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
-// Mock react to allow useCallback outside of React component context
 vi.mock('react', () => ({
   useCallback: (fn: () => unknown) => fn,
 }));
 
-// Mock @tarojs/taro for storage utility dependency
 vi.mock('@tarojs/taro', () => ({
   default: {
     getStorageSync: vi.fn(),
@@ -15,7 +12,15 @@ vi.mock('@tarojs/taro', () => ({
   },
 }));
 
-// Mock the auth store to avoid React hook dependency
+vi.mock('@/lib/auth-client', () => ({
+  authClient: {
+    signIn: {
+      email: vi.fn(),
+    },
+    signOut: vi.fn(),
+  },
+}));
+
 vi.mock('@/stores/auth-store', () => ({
   useAuthStore: vi.fn(() => ({
     token: null,
@@ -25,11 +30,6 @@ vi.mock('@/stores/auth-store', () => ({
     setSession: vi.fn(),
     logout: vi.fn(),
   })),
-}));
-
-// Mock the client to avoid API_BASE_URL and Taro import chain
-vi.mock('@/services/client', () => ({
-  request: vi.fn(),
 }));
 
 describe('useAuth hook', () => {
@@ -66,5 +66,42 @@ describe('useAuth hook', () => {
 
     expect(typeof result.login).toBe('function');
     expect(typeof result.logout).toBe('function');
+  });
+
+  it('should call signIn.email on login', async () => {
+    const { authClient } = await import('../../src/lib/auth-client');
+    const mockSignIn = authClient.signIn.email as ReturnType<typeof vi.fn>;
+    mockSignIn.mockResolvedValue({
+      data: { user: { id: '1', email: 'test@test.com' } },
+      error: null,
+    });
+
+    const mod = await import('../../src/hooks/use-auth');
+    const { useAuth } = mod;
+
+    const result = useAuth();
+    await result.login('test@test.com', 'password');
+
+    expect(mockSignIn).toHaveBeenCalledWith(
+      { email: 'test@test.com', password: 'password' },
+      expect.objectContaining({ onSuccess: expect.any(Function) }),
+    );
+  });
+
+  it('should handle login error', async () => {
+    const { authClient } = await import('../../src/lib/auth-client');
+    const mockSignIn = authClient.signIn.email as ReturnType<typeof vi.fn>;
+    mockSignIn.mockResolvedValue({
+      data: null,
+      error: { message: 'Invalid credentials' },
+    });
+
+    const mod = await import('../../src/hooks/use-auth');
+    const { useAuth } = mod;
+
+    const result = useAuth();
+    const loginResult = await result.login('test@test.com', 'wrong');
+
+    expect(loginResult.error).toBe('Invalid credentials');
   });
 });

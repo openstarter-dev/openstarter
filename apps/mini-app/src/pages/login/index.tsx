@@ -1,8 +1,10 @@
+// apps/mini-app/src/pages/login/index.tsx
+// 登录页（用 useAuth hook）
+
 import { useState } from 'react';
 import { View, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
-import { useAuthStore } from '@/stores/auth-store';
-import { request } from '@/services/client';
+import { useAuth } from '@/hooks/use-auth';
 import Input from '@/components/Input';
 import Button from '@/components/Button';
 import Layout from '@/components/Layout';
@@ -13,45 +15,26 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const setSession = useAuthStore((s) => s.setSession);
+  const { login } = useAuth();
 
   const handleLogin = async () => {
-    // 基础校验
-    if (!email.trim()) {
-      setError('Please enter your email');
-      return;
-    }
-    if (!password) {
-      setError('Please enter your password');
+    if (!email.trim() || !password) {
+      setError('Please enter email and password');
       return;
     }
 
     setLoading(true);
     setError('');
 
-    try {
-      const result = await request<{ token: string; user: { id: string; email: string; name?: string } }>(
-        '/api/auth/email-password/login',
-        {
-          method: 'POST',
-          body: { email: email.trim(), password },
-        },
-      );
+    const result = await login(email.trim(), password);
 
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-
-      if (result.data) {
-        setSession(result.data.token, result.data.user);
-        Taro.reLaunch({ url: '/pages/index/index' });
-      }
-    } catch {
-      setError('Login failed. Please try again.');
-    } finally {
+    if (result.error) {
+      setError(result.error);
       setLoading(false);
+      return;
     }
+
+    Taro.reLaunch({ url: '/pages/index/index' });
   };
 
   return (
@@ -68,7 +51,6 @@ export default function LoginPage() {
           onChange={setEmail}
           placeholder="your@email.com"
           type="text"
-          name="email"
         />
         <Input
           label="Password"
@@ -76,7 +58,6 @@ export default function LoginPage() {
           onChange={setPassword}
           placeholder="Enter your password"
           type="password"
-          name="password"
         />
 
         {error && <Text className="login-page__error">{error}</Text>}

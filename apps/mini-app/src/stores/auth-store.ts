@@ -1,4 +1,8 @@
+// apps/mini-app/src/stores/auth-store.ts
+// 认证状态管理（整合 better-auth client）
+
 import { create } from 'zustand';
+import { authClient } from '@/lib/auth-client';
 import { getToken, setToken, removeToken } from '@/utils/storage';
 
 export type UserInfo = {
@@ -13,29 +17,47 @@ type AuthState = {
   user: UserInfo | null;
   isAuthenticated: boolean;
   isHydrated: boolean;
-  /** 从持久化存储中恢复 token 并尝试获取用户信息。 */
+
   hydrate: () => Promise<void>;
-  /** 保存会话（登录成功后调用）。 */
   setSession: (token: string, user: UserInfo) => void;
-  /** 清除会话并移除 token。 */
   logout: () => void;
 };
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   token: null,
   user: null,
   isAuthenticated: false,
   isHydrated: false,
 
   hydrate: async () => {
-    const token = getToken();
-    if (!token) {
+    const storedToken = getToken();
+
+    if (!storedToken) {
       set({ isHydrated: true });
       return;
     }
-    set({ token, isHydrated: true });
-    // 可选：验证 token 有效性并获取用户信息
-    // (后续通过 API 调用获取 profile)
+
+    set({ token: storedToken });
+
+    try {
+      // 验证 token 有效性并获取用户信息
+      const { data: session } = await authClient.getSession();
+
+      if (session?.user) {
+        set({
+          user: session.user as UserInfo,
+          isAuthenticated: true,
+        });
+      } else {
+        removeToken();
+        set({ token: null });
+      }
+    } catch {
+      // 网络失败时静默降级，不跳登录页
+      // 保留 token，后续请求自动 401 处理
+    } finally {
+      set({ isHydrated: true });
+    }
   },
 
   setSession: (token: string, user: UserInfo) => {
