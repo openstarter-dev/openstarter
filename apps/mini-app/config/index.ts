@@ -19,6 +19,9 @@ const config: UserConfig = {
     API_BASE_URL: JSON.stringify(process.env.OPENSTARTER_API_URL || 'http://localhost:3000'),
   },
   mini: {
+    miniCssExtractPluginOption: {
+      ignoreOrder: true,
+    },
     webpackChain: (chain) => {
       chain.resolve.alias.set('@', path.resolve(__dirname, '..', 'src'));
     },
