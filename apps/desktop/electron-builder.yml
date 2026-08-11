@@ -21,6 +21,12 @@ files:
   - resources/**
   - package.json
 
+extraResources:
+  - from: .env
+    to: resources/.env
+    filter:
+      - OPENSTARTER_API_URL
+
 mac:
   target:
     - dmg
