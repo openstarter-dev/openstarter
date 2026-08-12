@@ -6,7 +6,7 @@ interface AuthStateContextValue {
   clearSignedOut: () => void;
 }
 
-const AuthStateContext = createContext<AuthStateContextValue | null>(null);
+export const AuthStateContext = createContext<AuthStateContextValue | null>(null);
 
 export function AuthStateProvider({ children }: { children: ReactNode }) {
   const [isSignedOut, setSignedOutState] = useState(false);
