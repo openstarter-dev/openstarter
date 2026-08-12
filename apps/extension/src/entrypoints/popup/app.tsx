@@ -13,7 +13,7 @@ import { AccountPanel } from "../../components/account-panel";
 import { ErrorState } from "../../components/error-state";
 import { SignedOut } from "../../components/signed-out";
 import type { EnvResult } from "../../lib/env";
-import type { AccountSnapshot } from "../../lib/state";
+import type { AccountSnapshot } from "../../lib/types";
 
 export interface AppDeps {
   env: EnvResult;

@@ -5,7 +5,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { AccountSnapshot } from "../lib/state";
+import type { AccountSnapshot } from "../lib/types";
 import { AccountPanel } from "./account-panel";
 
 // 顶层正则（Ultracite useTopLevelRegex 要求正则字面量定义在模块顶层作用域）。

@@ -1,10 +1,10 @@
-import { AuthStateProvider } from "~lib/auth-state";
-import { QueryClientProvider } from "~lib/query";
-import { ApiClientProvider } from "~lib/api-context";
+import { AuthStateProvider } from "../lib/auth-state";
+import { QueryClientProvider } from "../lib/query";
+import { ApiClientProvider } from "../lib/api-context";
 import { I18nProvider } from "./i18n";
 import type { ReactNode } from "react";
-import type { createExtensionApiClient } from "~lib/api";
-import type { createExtensionAuthClient } from "~lib/auth-client";
+import type { createExtensionApiClient } from "../lib/api";
+import type { createExtensionAuthClient } from "../lib/auth-client";
 
 type Api = ReturnType<typeof createExtensionApiClient>;
 type Auth = ReturnType<typeof createExtensionAuthClient>;

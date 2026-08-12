@@ -1,4 +1,4 @@
-// apps/extension/src/components/error-state.tsx —— 网络/服务端错误态（不含 401，见 lib/state.ts）。
+// apps/extension/src/components/error-state.tsx —— 网络/服务端错误态（不含 401）。
 import { Button } from "@openstarter/ui-web/components/button";
 
 export function ErrorState(props: { message: string; onRetry: () => void }) {

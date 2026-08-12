@@ -14,12 +14,14 @@
   "dependencies": {
     "@openstarter/api": "workspace:*",
     "@openstarter/auth": "workspace:*",
+    "@openstarter/i18n": "workspace:*",
     "@openstarter/ui-web": "workspace:*",
     "@tanstack/react-query": "^5.99.0",
     "better-auth": "catalog:",
     "hono": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "sonner": "^2.0.7"
   },
   "devDependencies": {
     "@inlang/paraglide-js": "catalog:",

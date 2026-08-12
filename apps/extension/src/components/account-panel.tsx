@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@openstarter/ui-web/components/card";
 
-import type { AccountSnapshot } from "../lib/state";
+import type { AccountSnapshot } from "../lib/types";
 
 function formatDate(value: string | null): string {
   if (!value) {
