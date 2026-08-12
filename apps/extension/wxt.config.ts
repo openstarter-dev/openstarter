@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { paraglideVitePlugin } from "@inlang/paraglide-js";
 import { defineConfig } from "wxt";
 
 // 加载根 .env，把跨端共享的 OPENSTARTER_API_URL 派生为 VITE_APP_URL。
@@ -19,6 +20,14 @@ const { config: loadDotenv } = await import(dotenvPath);
 loadDotenv({ path: resolve(monorepoRoot, ".env"), quiet: true });
 
 const APP_URL_FALLBACK = "http://localhost:3000";
+
+// Paraglide compiles the shared en/zh message catalog (defined in
+// packages/i18n) into the locale runtime consumed here in the extension. The
+// inlang project + messages live in packages/i18n; the compiled runtime lands
+// in src/paraglide (git-ignored, regenerated on every dev/build).
+const inlangProject = fileURLToPath(
+  new URL("../../packages/i18n/project.inlang", import.meta.url)
+);
 
 function resolveAppUrl(): string {
   if (process.env.VITE_APP_URL) {
@@ -42,4 +51,20 @@ export default defineConfig({
   },
   modules: ["@wxt-dev/module-react"],
   srcDir: "src",
+  vite: () => ({
+    plugins: [
+      // Paraglide: locale-aware message compilation for the extension popup.
+      // Unlike apps/web there is no URL strategy — the popup has no routable
+      // path — so we read the preference from the cookie (set via setLocale()
+      // against the same origin the API lives on) and fall back to the base
+      // locale (en). No urlPatterns needed for the same reason.
+      paraglideVitePlugin({
+        project: inlangProject,
+        outdir: "./src/paraglide",
+        outputStructure: "message-modules",
+        cookieName: "PARAGLIDE_LOCALE",
+        strategy: ["cookie", "baseLocale"],
+      }),
+    ],
+  }),
 });
