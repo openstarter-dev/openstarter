@@ -1,6 +1,7 @@
 // apps/extension/src/entrypoints/popup/main.tsx —— 真实依赖装配（chrome.cookies、
-// 真实网络请求、authClient.getSession()），是唯一接触浏览器全局的地方。App 本身在
-// app.test.tsx 里已用注入的 fake 依赖测过，这里不重复测状态机逻辑，只是把真实实现接上。
+// 真实网络请求、authClient.getSession()），是唯一接触浏览器全局的地方。
+// App 本身在 app.test.tsx 里已用 TanStack Query 测试过，这里不重复测状态机逻辑，
+// 只是把真实实现接上。
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { browser } from "wxt/browser";
@@ -9,11 +10,7 @@ import { createExtensionApiClient } from "../../lib/api";
 import { createExtensionAuthClient } from "../../lib/auth-client";
 import { getAppUrl } from "../../lib/env";
 import { chromeCookieReader } from "../../lib/session";
-import type {
-  EndpointResult,
-  SubscriptionStatusView,
-  UserPlan,
-} from "../../lib/state";
+import { AppProviders } from "../../providers/providers";
 import type { AppDeps } from "./app";
 import { App } from "./app";
 import "../../styles/globals.css";
@@ -21,63 +18,16 @@ import "../../styles/globals.css";
 const env = getAppUrl();
 const cookieReader = chromeCookieReader();
 
-// 平铺 try/catch 读取 JSON，避免 Ultracite noNestedPromises 对 `.catch()` 嵌套的报错。
-async function readJsonOr(response: Response, fallback: null) {
-  try {
-    return await response.json();
-  } catch {
-    return fallback;
-  }
-}
-
-function endpointResult<T>(
-  promise: Promise<Response>,
-  extract: (json: unknown) => T
-): Promise<EndpointResult<T>> {
-  return promise
-    .then(async (response) => {
-      if (response.ok) {
-        const json = await response.json();
-        return { data: extract(json), status: "success" as const };
-      }
-      const json = await readJsonOr(response, null);
-      const message =
-        json && typeof json === "object" && "message" in json
-          ? String((json as { message: unknown }).message)
-          : null;
-      return {
-        httpStatus: response.status,
-        message,
-        status: "http-error" as const,
-      };
-    })
-    .catch(() => ({ status: "network-error" as const }));
-}
-
 function buildDeps(): AppDeps {
   if (!env.ok) {
     return {
       env,
-      fetchCredits: () =>
-        Promise.resolve({ status: "network-error" }) as Promise<
-          EndpointResult<number>
-        >,
-      fetchPlan: () =>
-        Promise.resolve({ status: "network-error" }) as Promise<
-          EndpointResult<UserPlan>
-        >,
-      fetchSubscription: () =>
-        Promise.resolve({
-          status: "network-error",
-        }) as Promise<EndpointResult<SubscriptionStatusView>>,
-      fetchUser: () => Promise.resolve(null),
       onManage: () => undefined,
       onSignIn: () => undefined,
       onSignOut: () => undefined,
     };
   }
 
-  const client = createExtensionApiClient(env.origin, cookieReader);
   const authClient = createExtensionAuthClient(env.origin, cookieReader);
 
   const openWebPage = (path: string) => {
@@ -86,28 +36,6 @@ function buildDeps(): AppDeps {
 
   return {
     env,
-    fetchCredits: () =>
-      endpointResult(
-        client.api.user.credits.$get({ query: {} }),
-        (json) => (json as { data: { balance: number } }).data.balance
-      ),
-    fetchPlan: () =>
-      endpointResult(
-        client.api.user.plan.$get(),
-        (json) => (json as { data: { plan: UserPlan } }).data.plan
-      ),
-    fetchSubscription: () =>
-      endpointResult(
-        client.api.user.subscription.$get(),
-        (json) => (json as { data: SubscriptionStatusView }).data
-      ),
-    fetchUser: () =>
-      authClient
-        .getSession()
-        .then(({ data }) =>
-          data?.user ? { email: data.user.email, name: data.user.name } : null
-        )
-        .catch(() => null),
     onManage: () => openWebPage("/settings/profile"),
     onSignIn: () => openWebPage("/login"),
     onSignOut: () => {
@@ -123,8 +51,21 @@ if (!rootElement) {
   throw new Error("Popup root element (#root) is missing from index.html");
 }
 
+const deps = buildDeps();
+// Always create API and auth clients for the providers chain, even when env is
+// misconfigured — the App will short-circuit to the misconfigured view before
+// calling any hooks, so the stubs are never used for actual requests.
+const api = env.ok
+  ? createExtensionApiClient(env.origin, cookieReader)
+  : ({} as ReturnType<typeof createExtensionApiClient>);
+const auth = env.ok
+  ? createExtensionAuthClient(env.origin, cookieReader)
+  : ({} as ReturnType<typeof createExtensionAuthClient>);
+
 createRoot(rootElement).render(
   <StrictMode>
-    <App deps={buildDeps()} />
+    <AppProviders value={{ api, auth }}>
+      <App deps={deps} />
+    </AppProviders>
   </StrictMode>
 );

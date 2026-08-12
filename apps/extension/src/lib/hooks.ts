@@ -39,3 +39,20 @@ export function useSubscriptionQuery() {
     },
   });
 }
+
+export function useUserQuery() {
+  const { auth } = useApiClient();
+  return useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const { data } = await auth.getSession();
+      if (data?.user) {
+        return {
+          name: data.user.name,
+          email: data.user.email,
+        };
+      }
+      return null;
+    },
+  });
+}
