@@ -28,9 +28,9 @@ function resolveFileUrl(url: string): string {
   }
 
   // Relative path — resolve against monorepo root
-  // From packages/db/src/sqlite.ts, repo root is ../../..
+  // From packages/db/src/drivers/sqlite.ts, repo root is ../../..
   const moduleDir = dirname(fileURLToPath(import.meta.url));
-  const repoRoot = resolve(moduleDir, "../../..");
+  const repoRoot = resolve(moduleDir, "../../../..");
   const absolutePath = resolve(repoRoot, pathPart);
   return pathToFileURL(absolutePath).href;
 }
