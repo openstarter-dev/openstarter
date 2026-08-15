@@ -28,25 +28,23 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            className="h-auto w-full justify-start gap-2 px-2 py-2"
-            variant="ghost"
-          />
-        }
-      >
-        <span className="flex size-8 items-center justify-center rounded-full bg-muted">
-          <User aria-hidden="true" className="size-4" />
-        </span>
-        <span className="flex min-w-0 flex-col items-start">
-          <span className="truncate font-medium text-sm">
-            {session.user.name}
+      <DropdownMenuTrigger asChild>
+        <Button
+          className="h-auto w-full justify-start gap-2 px-2 py-2"
+          variant="ghost"
+        >
+          <span className="flex size-8 items-center justify-center rounded-full bg-muted">
+            <User aria-hidden="true" className="size-4" />
           </span>
-          <span className="truncate text-muted-foreground text-xs">
-            {session.user.email}
+          <span className="flex min-w-0 flex-col items-start">
+            <span className="truncate font-medium text-sm">
+              {session.user.name}
+            </span>
+            <span className="truncate text-muted-foreground text-xs">
+              {session.user.email}
+            </span>
           </span>
-        </span>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56 bg-card" side="top">
         <DropdownMenuGroup>
@@ -54,9 +52,11 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
           <ThemeMenuItems />
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onNavigate} render={<Link to="/settings" />}>
-          <Settings aria-hidden="true" className="size-4" />
-          Settings
+        <DropdownMenuItem asChild>
+          <Link to="/settings" onClick={onNavigate}>
+            <Settings aria-hidden="true" className="size-4" />
+            Settings
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

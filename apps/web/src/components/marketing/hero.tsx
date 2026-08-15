@@ -22,11 +22,11 @@ export function Hero() {
         {COPY.subtitle}
       </p>
       <div className="flex flex-wrap items-center justify-center gap-3">
-        <Button render={<Link to="/login" />} size="lg">
-          {COPY.primaryCta}
+        <Button asChild size="lg">
+          <Link to="/login">{COPY.primaryCta}</Link>
         </Button>
-        <Button render={<Link to="/pricing" />} size="lg" variant="outline">
-          {COPY.secondaryCta}
+        <Button asChild size="lg" variant="outline">
+          <Link to="/pricing">{COPY.secondaryCta}</Link>
         </Button>
       </div>
       <div className="mt-8 w-full rounded-xl border bg-gradient-to-b from-muted/50 to-muted/10 p-2 shadow-sm">

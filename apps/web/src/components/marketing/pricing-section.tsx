@@ -74,11 +74,11 @@ function TierCard({
       <CardFooter>
         {cta.kind === "link" ? (
           <Button
+            asChild
             className="w-full"
-            render={<Link to={cta.to} />}
             variant={tier.highlight ? "default" : "outline"}
           >
-            {cta.label}
+            <Link to={cta.to}>{cta.label}</Link>
           </Button>
         ) : (
           <Button

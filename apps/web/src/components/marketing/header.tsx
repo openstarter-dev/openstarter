@@ -22,14 +22,20 @@ function AuthCta() {
     return <Skeleton className="h-8 w-32" />;
   }
   if (session) {
-    return <Button render={<Link to="/dashboard" />}>Go to dashboard</Button>;
+    return (
+      <Button asChild>
+        <Link to="/dashboard">Go to dashboard</Link>
+      </Button>
+    );
   }
   return (
     <div className="flex items-center gap-2">
-      <Button render={<Link to="/login" />} variant="ghost">
-        Sign in
+      <Button asChild variant="ghost">
+        <Link to="/login">Sign in</Link>
       </Button>
-      <Button render={<Link to="/login" />}>Sign up</Button>
+      <Button asChild>
+        <Link to="/login">Sign up</Link>
+      </Button>
     </div>
   );
 }
