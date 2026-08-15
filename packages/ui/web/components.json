@@ -1,6 +1,6 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "style": "base-lyra",
+  "style": "new-york-v4",
   "rsc": false,
   "tsx": true,
   "tailwind": {
@@ -12,11 +12,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": @openstarter/ui-web/components",
-    "utils": @openstarter/ui-web/lib/utils",
-    "hooks": @openstarter/ui-web/hooks",
-    "lib": @openstarter/ui-web/lib",
-    "ui": @openstarter/ui-web/components"
+    "components": "@openstarter/ui-web/components",
+    "utils": "@openstarter/ui-web/lib/utils",
+    "hooks": "@openstarter/ui-web/hooks",
+    "lib": "@openstarter/ui-web/lib",
+    "ui": "@openstarter/ui-web/components"
   },
   "menuColor": "default",
   "menuAccent": "subtle",
