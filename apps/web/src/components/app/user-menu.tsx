@@ -10,13 +10,16 @@ import {
 } from "@openstarter/ui-web/components/dropdown-menu";
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { LogOut, Settings, User } from "lucide-react";
+import { LogOut, Settings, User, UserCog } from "lucide-react";
+import { useState } from "react";
 
+import { ManageAccountDialog } from "@/components/app/manage-account-dialog";
 import { ThemeMenuItems } from "@/components/theme/theme-menu-items";
 import { authClient } from "@/lib/auth-client";
 
 export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
+  const [manageOpen, setManageOpen] = useState(false);
   const { data: session, isPending } = authClient.useSession();
 
   if (isPending) {
@@ -47,13 +50,18 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-56 bg-card" side="top">
+        <DropdownMenuItem onClick={() => setManageOpen(true)}>
+          <UserCog aria-hidden="true" className="size-4" />
+          Manage Account
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuLabel>Theme</DropdownMenuLabel>
           <ThemeMenuItems />
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link to="/settings" onClick={onNavigate}>
+          <Link onClick={onNavigate} to="/settings">
             <Settings aria-hidden="true" className="size-4" />
             Settings
           </Link>
@@ -75,6 +83,7 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
           Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
+      <ManageAccountDialog onOpenChange={setManageOpen} open={manageOpen} />
     </DropdownMenu>
   );
 }
