@@ -14,7 +14,7 @@ openstarter is a production-ready full-stack SaaS starter built with:
 - **Billing**: Stripe/PayPal/Alipay/WeChat Pay with credit system
 - **i18n**: inlang/Paraglide
 - **Testing**: Vitest + fast-check
-- **Linting**: Biome
+- **Linting**: oxlint + oxfmt (Oxc toolchain)
 
 ## Monorepo Structure
 

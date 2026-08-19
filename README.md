@@ -71,7 +71,7 @@ boring 80% that every SaaS needs but nobody wants to build:
 | Payments | Stripe, PayPal, Alipay, WeChat Pay |
 | i18n | inlang / Paraglide |
 | Testing | Vitest + fast-check |
-| Linting | Biome (ultracite) |
+| Linting | oxlint + oxfmt |
 
 ## Project Structure
 
