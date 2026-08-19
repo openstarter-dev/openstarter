@@ -1,0 +1,13 @@
+# Oxlint ignore patterns (gitignore syntax)
+apps/web/src/paraglide
+apps/web/.output
+apps/mobile/src/paraglide
+apps/mobile/.expo
+apps/extension/.output
+apps/extension/.wxt
+coverage
+**/dist
+**/node_modules
+**/*.paraglide
+**/routeTree.gen.ts
+**/*.gen.ts

@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "import"],
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2022": true
+  },
+  "globals": {
+    "__dirname": "readonly"
+  },
+  "settings": {
+    "react": {
+      "version": "19.0.0"
+    }
+  },
+  "rules": {
+    "react-perf/jsx-no-new-function-as-prop": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off"
+      }
+    }
+  ]
+}

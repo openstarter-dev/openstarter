@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 100,
+  "semicolons": "always",
+  "singleQuote": false,
+  "tabWidth": 2,
+  "trailingCommas": "all",
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.output/**",
+    "**/.expo/**",
+    "**/.wxt/**",
+    "**/coverage/**",
+    "**/*.paraglide/**",
+    "**/routeTree.gen.ts",
+    "**/*.gen.ts",
+    "**/pnpm-lock.yaml",
+    "apps/web/.output/**",
+    "apps/mobile/src/paraglide/**",
+    "apps/mobile/.expo/**",
+    "apps/extension/.output/**",
+    "apps/extension/.wxt/**",
+    "coverage/**"
+  ]
+}
