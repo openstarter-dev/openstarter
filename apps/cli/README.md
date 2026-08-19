@@ -60,43 +60,43 @@ openstarter --api-url http://localhost:3000 status
 
 ### Authentication
 
-| Command | Description |
-| --- | --- |
-| `openstarter login` | Authenticate via device authorization; saves the session token. |
-| `openstarter logout` | Clear local credentials. |
-| `openstarter whoami` | Show the currently logged-in user's profile. |
+| Command              | Description                                                     |
+| -------------------- | --------------------------------------------------------------- |
+| `openstarter login`  | Authenticate via device authorization; saves the session token. |
+| `openstarter logout` | Clear local credentials.                                        |
+| `openstarter whoami` | Show the currently logged-in user's profile.                    |
 
 ### Profile
 
-| Command | Description |
-| --- | --- |
-| `openstarter profile` | Show your profile (id / email / name / createdAt). |
-| `openstarter profile:update --name <name>` | Update your display name. |
+| Command                                    | Description                                        |
+| ------------------------------------------ | -------------------------------------------------- |
+| `openstarter profile`                      | Show your profile (id / email / name / createdAt). |
+| `openstarter profile:update --name <name>` | Update your display name.                          |
 
 ### Data (notes)
 
-| Command | Description |
-| --- | --- |
-| `openstarter list [--limit <n>]` | List your notes (newest first, `--limit` 1–100, default 10). |
-| `openstarter get <id>` | Show a single note by id. |
-| `openstarter create --name <name> [--description <desc>]` | Create a note; prints its id. |
+| Command                                                   | Description                                                  |
+| --------------------------------------------------------- | ------------------------------------------------------------ |
+| `openstarter list [--limit <n>]`                          | List your notes (newest first, `--limit` 1–100, default 10). |
+| `openstarter get <id>`                                    | Show a single note by id.                                    |
+| `openstarter create --name <name> [--description <desc>]` | Create a note; prints its id.                                |
 
 ### System
 
-| Command | Description |
-| --- | --- |
+| Command              | Description                                                                         |
+| -------------------- | ----------------------------------------------------------------------------------- |
 | `openstarter status` | Probe the API and report connection state, latency, server version, and auth state. |
-| `openstarter info` | Print local CLI version, configured API URL, config path, and login state. |
+| `openstarter info`   | Print local CLI version, configured API URL, config path, and login state.          |
 
 ## Global Options
 
-| Option | Description |
-| --- | --- |
-| `--api-url <url>` | Override the API URL for this invocation (persists to config). |
-| `--verbose` | Print the error stack on failure. |
-| `--json` (per command) | Emit JSON-friendly output for scripting. |
-| `-h, --help` | Show help. |
-| `-V, --version` | Show CLI version. |
+| Option                 | Description                                                    |
+| ---------------------- | -------------------------------------------------------------- |
+| `--api-url <url>`      | Override the API URL for this invocation (persists to config). |
+| `--verbose`            | Print the error stack on failure.                              |
+| `--json` (per command) | Emit JSON-friendly output for scripting.                       |
+| `-h, --help`           | Show help.                                                     |
+| `-V, --version`        | Show CLI version.                                              |
 
 ## Authentication Flow (RFC 8628 Device Authorization Grant)
 
@@ -139,13 +139,13 @@ The API returns a uniform `{ code, message, data? }` envelope; the CLI unwraps
 
 ## Exit Codes
 
-| Code | Meaning |
-| --- | --- |
-| `0` | Success |
-| `1` | General / API error |
-| `2` | Authentication error (run `openstarter login`) |
-| `3` | Network error |
-| `4` | Configuration error |
+| Code | Meaning                                        |
+| ---- | ---------------------------------------------- |
+| `0`  | Success                                        |
+| `1`  | General / API error                            |
+| `2`  | Authentication error (run `openstarter login`) |
+| `3`  | Network error                                  |
+| `4`  | Configuration error                            |
 
 ## Development
 
@@ -163,9 +163,9 @@ commands don't pay for a disk read on startup.
 
 ## Performance Targets
 
-| Metric | Target | Measured |
-| --- | --- | --- |
-| Bundle size | < 5 MB | ~9.6 KB ✅ |
+| Metric       | Target   | Measured                                                           |
+| ------------ | -------- | ------------------------------------------------------------------ |
+| Bundle size  | < 5 MB   | ~9.6 KB ✅                                                         |
 | Cold startup | < 100 ms | median ~150 ms warm ❌ (Node runtime baseline ~80 ms; see e2e log) |
 
 ## License

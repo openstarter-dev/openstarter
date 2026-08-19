@@ -963,7 +963,7 @@ const allSettings = getSettings();
 
 /** name → Setting 映射，供写入校验按键查规则。 */
 const settingsByName = new Map<string, Setting>(
-  allSettings.map((setting) => [setting.name, setting])
+  allSettings.map((setting) => [setting.name, setting]),
 );
 
 /**
@@ -1038,8 +1038,7 @@ export const envConfigs: ConfigMap = {
 
   // 邮件 - Resend
   resend_api_key: readEnv("RESEND_API_KEY") ?? "",
-  resend_sender_email:
-    readEnv("RESEND_SENDER_EMAIL") ?? readEnv("RESEND_EMAIL_FROM") ?? "",
+  resend_sender_email: readEnv("RESEND_SENDER_EMAIL") ?? readEnv("RESEND_EMAIL_FROM") ?? "",
   storage_access_key: readEnv("STORAGE_ACCESS_KEY") ?? "",
   storage_bucket: readEnv("STORAGE_BUCKET") ?? "",
 
@@ -1108,10 +1107,7 @@ export async function getDbConfigs(): Promise<ConfigMap> {
           // 使 env 值（若有）生效，并告警，不阻断其余配置读取。
           result[row.name] = decryptSecret(row.value);
         } catch (error) {
-          logger.warn(
-            `[config] failed to decrypt "${row.name}", skipping`,
-            error
-          );
+          logger.warn(`[config] failed to decrypt "${row.name}", skipping`, error);
         }
       } else {
         result[row.name] = row.value;
@@ -1164,11 +1160,8 @@ export const PROTECTED_CONFIG_KEYS: ReadonlySet<string> = new Set([
  */
 const SECRET_SETTING_NAMES: ReadonlySet<string> = new Set(
   allSettings
-    .filter(
-      (setting) =>
-        setting.type === "password" || setting.name.endsWith("_private_key")
-    )
-    .map((setting) => setting.name)
+    .filter((setting) => setting.type === "password" || setting.name.endsWith("_private_key"))
+    .map((setting) => setting.name),
 );
 
 const SECRET_KEY_PATTERN =
@@ -1278,8 +1271,8 @@ export async function saveConfigs(configs: ConfigMap): Promise<void> {
         .onConflictDoUpdate({
           set: { value: entry.value },
           target: config.name,
-        })
-    )
+        }),
+    ),
   );
 
   // 失效缓存，使后续读取返回新值（R2.2）。
@@ -1300,8 +1293,7 @@ export async function getAdminConfigs(): Promise<ConfigMap> {
     if (PROTECTED_CONFIG_KEYS.has(name)) {
       continue;
     }
-    result[name] =
-      isSecretConfigKey(name) && value ? maskConfigValue(value) : value;
+    result[name] = isSecretConfigKey(name) && value ? maskConfigValue(value) : value;
   }
   return result;
 }

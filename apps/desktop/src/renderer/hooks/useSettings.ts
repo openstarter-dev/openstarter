@@ -23,12 +23,9 @@ export function useSettings() {
     });
   }, []);
 
-  const updateSettings = useCallback(
-    (partial: Partial<AppSettings>) => {
-      window.electronAPI?.setSettings(partial).then(setSettings);
-    },
-    []
-  );
+  const updateSettings = useCallback((partial: Partial<AppSettings>) => {
+    window.electronAPI?.setSettings(partial).then(setSettings);
+  }, []);
 
   return { settings, updateSettings, loading };
 }

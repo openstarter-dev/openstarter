@@ -22,11 +22,7 @@ export const DEFAULT_WINDOW_STATE: WindowState = {
 const MIN_DIMENSION = 200;
 
 function isValidDimension(value: unknown): value is number {
-  return (
-    typeof value === "number" &&
-    Number.isInteger(value) &&
-    value >= MIN_DIMENSION
-  );
+  return typeof value === "number" && Number.isInteger(value) && value >= MIN_DIMENSION;
 }
 
 /** 解析一个候选窗口状态字符串；任何格式或取值问题都回退到默认值，不抛异常。 */
@@ -43,9 +39,7 @@ export function parseWindowState(raw: string): WindowState {
   }
 
   const candidate = parsed as Record<string, unknown>;
-  const width = isValidDimension(candidate.width)
-    ? candidate.width
-    : DEFAULT_WINDOW_STATE.width;
+  const width = isValidDimension(candidate.width) ? candidate.width : DEFAULT_WINDOW_STATE.width;
   const height = isValidDimension(candidate.height)
     ? candidate.height
     : DEFAULT_WINDOW_STATE.height;

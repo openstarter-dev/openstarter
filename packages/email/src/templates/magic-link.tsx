@@ -21,15 +21,13 @@ const copy = {
       `Click the button below to securely sign in to ${app}. No password required.`,
     button: "Sign in",
     expiry: "This link will expire in 15 minutes and can be used once.",
-    fallbackIntro:
-      "If the button doesn't work, copy and paste this link into your browser:",
+    fallbackIntro: "If the button doesn't work, copy and paste this link into your browser:",
     footer: "If you didn't try to sign in, you can safely ignore this email.",
   },
   zh: {
     preview: "你的登录链接",
     title: "使用魔法链接登录",
-    intro: (app: string) =>
-      `点击下方按钮即可安全登录 ${app}，无需输入密码。`,
+    intro: (app: string) => `点击下方按钮即可安全登录 ${app}，无需输入密码。`,
     button: "登录",
     expiry: "此链接将在 15 分钟后失效，且仅可使用一次。",
     fallbackIntro: "如果按钮无法点击，请复制以下链接到浏览器打开：",
@@ -43,11 +41,7 @@ type MagicLinkEmailProps = {
   readonly appName?: string;
 };
 
-export const MagicLinkEmail = ({
-  url,
-  locale,
-  appName = "OpenStarter",
-}: MagicLinkEmailProps) => {
+export const MagicLinkEmail = ({ url, locale, appName = "OpenStarter" }: MagicLinkEmailProps) => {
   const resolved = resolveEmailLocale(locale);
   const c = copy[resolved];
 

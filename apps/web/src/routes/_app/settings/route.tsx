@@ -3,12 +3,7 @@
 // 子路由：profile / security / accounts / sessions / danger。
 
 import { cn } from "@openstarter/ui-web/lib/utils";
-import {
-  createFileRoute,
-  Link,
-  Outlet,
-  useRouterState,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_app/settings")({
   component: SettingsLayout,
@@ -45,15 +40,14 @@ function SettingsLayout() {
           className="flex shrink-0 flex-row gap-1 overflow-x-auto md:w-48 md:flex-col md:overflow-visible"
         >
           {NAV_ITEMS.map((item) => {
-            const active =
-              pathname === item.to || pathname.startsWith(`${item.to}/`);
+            const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
             return (
               <Link
                 className={cn(
                   "whitespace-nowrap rounded-md px-3 py-2 text-sm transition-colors",
                   active
                     ? "bg-muted font-medium text-foreground"
-                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
                 key={item.to}
                 to={item.to}

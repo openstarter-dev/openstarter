@@ -5,12 +5,14 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const here = dirname(fileURLToPath(import.meta.url));
-const enJson = JSON.parse(
-  readFileSync(join(here, "..", "messages", "en.json"), "utf8")
-) as Record<string, unknown>;
-const zhJson = JSON.parse(
-  readFileSync(join(here, "..", "messages", "zh.json"), "utf8")
-) as Record<string, unknown>;
+const enJson = JSON.parse(readFileSync(join(here, "..", "messages", "en.json"), "utf8")) as Record<
+  string,
+  unknown
+>;
+const zhJson = JSON.parse(readFileSync(join(here, "..", "messages", "zh.json"), "utf8")) as Record<
+  string,
+  unknown
+>;
 
 const enKeys = new Set(Object.keys(enJson));
 const zhKeys = new Set(Object.keys(zhJson));
@@ -22,7 +24,7 @@ describe("bilingual message key parity (Property 48)", () => {
   it("P48 en and zh message key sets are equal", () => {
     if (missingFromEn.length > 0 || missingFromZh.length > 0) {
       throw new Error(
-        `Message key mismatch:\n  Missing from en (${missingFromEn.length}): ${missingFromEn.slice(0, 10).join(", ")}\n  Missing from zh (${missingFromZh.length}): ${missingFromZh.slice(0, 10).join(", ")}`
+        `Message key mismatch:\n  Missing from en (${missingFromEn.length}): ${missingFromEn.slice(0, 10).join(", ")}\n  Missing from zh (${missingFromZh.length}): ${missingFromZh.slice(0, 10).join(", ")}`,
       );
     }
     expect(enKeys).toEqual(zhKeys);

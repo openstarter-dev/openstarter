@@ -1,12 +1,7 @@
 // apps/extension/src/entrypoints/popup/app.tsx —— popup 根组件：使用 TanStack Query
 // hooks 和 AuthState 实现 5 状态机。依赖通过 hooks 注入，main.tsx 负责装配。
 // 见 spec §6（状态机）/§7（错误处理）。
-import {
-  useCreditsQuery,
-  usePlanQuery,
-  useSubscriptionQuery,
-  useUserQuery,
-} from "../../lib/hooks";
+import { useCreditsQuery, usePlanQuery, useSubscriptionQuery, useUserQuery } from "../../lib/hooks";
 import { useIsSignedOut } from "../../lib/auth-state";
 
 import { AccountPanel } from "../../components/account-panel";
@@ -31,9 +26,7 @@ export function App(props: { deps: AppDeps }) {
 
   // Extract user from query - it's optional and doesn't block the panel
   const user =
-    userQuery.data != null
-      ? { name: userQuery.data.name, email: userQuery.data.email }
-      : null;
+    userQuery.data != null ? { name: userQuery.data.name, email: userQuery.data.email } : null;
 
   // 1. env.ok === false → misconfigured
   if (!props.deps.env.ok) {

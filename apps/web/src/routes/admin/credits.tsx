@@ -70,13 +70,7 @@ function AdminCreditsPage() {
                     {item.userEmail ?? item.userId}
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        item.transactionType === "grant"
-                          ? "secondary"
-                          : "outline"
-                      }
-                    >
+                    <Badge variant={item.transactionType === "grant" ? "secondary" : "outline"}>
                       {item.transactionType}
                     </Badge>
                   </TableCell>

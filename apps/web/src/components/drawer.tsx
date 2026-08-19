@@ -22,14 +22,7 @@ const FOCUSABLE_SELECTOR =
  * close, scrim click to close, body scroll lock, initial focus, focus return to
  * the trigger, and a basic Tab focus trap. Hidden at `md` and up.
  */
-export function Drawer({
-  open,
-  onClose,
-  label,
-  side = "right",
-  className,
-  children,
-}: DrawerProps) {
+export function Drawer({ open, onClose, label, side = "right", className, children }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -94,7 +87,7 @@ export function Drawer({
         className={cn(
           "absolute top-0 bottom-0 flex w-72 flex-col bg-background shadow-lg outline-none",
           side === "right" ? "right-0" : "left-0",
-          className
+          className,
         )}
         ref={panelRef}
         role="dialog"

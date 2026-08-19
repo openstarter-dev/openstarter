@@ -21,8 +21,7 @@ const copy = {
       `You requested to change your ${app} email address to ${newEmail}. Confirm below to apply the change.`,
     button: "Confirm new email",
     expiry: "This link will expire in 24 hours.",
-    fallbackIntro:
-      "If the button doesn't work, copy and paste this link into your browser:",
+    fallbackIntro: "If the button doesn't work, copy and paste this link into your browser:",
     footer:
       "If you didn't request this change, you can safely ignore this email and your email will stay the same.",
   },

@@ -1,8 +1,4 @@
-import {
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { toast } from "sonner";
@@ -52,9 +48,7 @@ export const getRouter = () => {
     defaultNotFoundComponent: () => <NotFound />,
     defaultErrorComponent: ({ error }) => <ErrorPage error={error} />,
     Wrap: ({ children }) => (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     ),
   });
 

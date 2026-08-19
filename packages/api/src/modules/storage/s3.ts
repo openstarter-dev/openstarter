@@ -43,9 +43,7 @@ export class S3Provider implements StorageProvider {
   getPublicUrl(options: { key: string; bucket?: string }): string {
     const bucket = options.bucket || this.configs.bucket;
     const endpointUrl = `${this.configs.endpoint}/${bucket}/${options.key}`;
-    return this.configs.publicDomain
-      ? `${this.configs.publicDomain}/${options.key}`
-      : endpointUrl;
+    return this.configs.publicDomain ? `${this.configs.publicDomain}/${options.key}` : endpointUrl;
   }
 
   async exists(options: { key: string; bucket?: string }): Promise<boolean> {
@@ -62,9 +60,7 @@ export class S3Provider implements StorageProvider {
     }
   }
 
-  async uploadFile(
-    options: StorageUploadOptions
-  ): Promise<StorageUploadResult> {
+  async uploadFile(options: StorageUploadOptions): Promise<StorageUploadResult> {
     const bucket = options.bucket || this.configs.bucket;
     if (!bucket) {
       return { success: false, error: "Bucket is required", provider: this.name };
@@ -111,9 +107,7 @@ export class S3Provider implements StorageProvider {
     }
   }
 
-  async downloadAndUpload(
-    options: StorageDownloadUploadOptions
-  ): Promise<StorageUploadResult> {
+  async downloadAndUpload(options: StorageDownloadUploadOptions): Promise<StorageUploadResult> {
     try {
       const response = await fetch(options.url);
       if (!response.ok) {

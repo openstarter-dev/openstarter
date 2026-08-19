@@ -25,8 +25,7 @@ export async function persistMediaFiles<T>(args: {
   type: string;
   ext: string;
 }): Promise<void> {
-  const { items, getUrl, setUrl, saveFiles, uuid, keyPrefix, contentType, type, ext } =
-    args;
+  const { items, getUrl, setUrl, saveFiles, uuid, keyPrefix, contentType, type, ext } = args;
 
   if (!saveFiles) {
     return;

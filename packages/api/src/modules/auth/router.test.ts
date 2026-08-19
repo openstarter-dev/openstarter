@@ -67,17 +67,14 @@ describe("safe account unlink route", () => {
   it("rejects requests without a session", async () => {
     authMocks.getSession.mockResolvedValue(null);
 
-    const response = await authRouter.request(
-      "/auth/unlink-account",
-      {
-        body: JSON.stringify({
-          accountId: "google-account",
-          providerId: "google",
-        }),
-        headers: { "content-type": "application/json" },
-        method: "POST",
-      }
-    );
+    const response = await authRouter.request("/auth/unlink-account", {
+      body: JSON.stringify({
+        accountId: "google-account",
+        providerId: "google",
+      }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    });
 
     expect(response.status).toBe(401);
     expect(authMocks.unlinkAccountSafely).not.toHaveBeenCalled();
@@ -87,17 +84,14 @@ describe("safe account unlink route", () => {
     authMocks.getSession.mockResolvedValue({ user: { id: "user-1" } });
     authMocks.unlinkAccountSafely.mockResolvedValue(undefined);
 
-    const response = await authRouter.request(
-      "/auth/unlink-account",
-      {
-        body: JSON.stringify({
-          accountId: "google-account",
-          providerId: "google",
-        }),
-        headers: { "content-type": "application/json" },
-        method: "POST",
-      }
-    );
+    const response = await authRouter.request("/auth/unlink-account", {
+      body: JSON.stringify({
+        accountId: "google-account",
+        providerId: "google",
+      }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    });
 
     expect(response.status).toBe(200);
     expect(authMocks.unlinkAccountSafely).toHaveBeenCalledWith({
@@ -110,9 +104,7 @@ describe("safe account unlink route", () => {
   it("intercepts the native Better Auth path before the wildcard", async () => {
     authMocks.getSession.mockResolvedValue({ user: { id: "user-1" } });
     authMocks.unlinkAccountSafely.mockResolvedValue(undefined);
-    authMocks.authHandler.mockResolvedValue(
-      Response.json({ wildcard: true }, { status: 418 })
-    );
+    authMocks.authHandler.mockResolvedValue(Response.json({ wildcard: true }, { status: 418 }));
 
     const response = await app.request("/api/auth/unlink-account", {
       body: JSON.stringify({
@@ -131,9 +123,7 @@ describe("safe account unlink route", () => {
   it("intercepts path variants before the Better Auth wildcard", async () => {
     authMocks.getSession.mockResolvedValue({ user: { id: "user-1" } });
     authMocks.unlinkAccountSafely.mockResolvedValue(undefined);
-    authMocks.authHandler.mockResolvedValue(
-      Response.json({ wildcard: true }, { status: 418 })
-    );
+    authMocks.authHandler.mockResolvedValue(Response.json({ wildcard: true }, { status: 418 }));
     const paths = ["/api/auth/unlink-account/", "/api/auth//unlink-account"];
 
     const responses = await Promise.all(
@@ -142,8 +132,8 @@ describe("safe account unlink route", () => {
           body: JSON.stringify({ providerId: "google" }),
           headers: { "content-type": "application/json" },
           method: "POST",
-        })
-      )
+        }),
+      ),
     );
 
     for (const response of responses) {
@@ -155,18 +145,15 @@ describe("safe account unlink route", () => {
   it("rejects injected fields", async () => {
     authMocks.getSession.mockResolvedValue({ user: { id: "user-1" } });
 
-    const response = await authRouter.request(
-      "/auth/unlink-account",
-      {
-        body: JSON.stringify({
-          accountId: "google-account",
-          providerId: "google",
-          userId: "another-user",
-        }),
-        headers: { "content-type": "application/json" },
-        method: "POST",
-      }
-    );
+    const response = await authRouter.request("/auth/unlink-account", {
+      body: JSON.stringify({
+        accountId: "google-account",
+        providerId: "google",
+        userId: "another-user",
+      }),
+      headers: { "content-type": "application/json" },
+      method: "POST",
+    });
 
     expect(response.status).toBe(400);
     expect(authMocks.unlinkAccountSafely).not.toHaveBeenCalled();

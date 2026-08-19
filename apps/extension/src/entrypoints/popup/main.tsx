@@ -67,5 +67,5 @@ createRoot(rootElement).render(
     <AppProviders value={{ api, auth }}>
       <App deps={deps} />
     </AppProviders>
-  </StrictMode>
+  </StrictMode>,
 );

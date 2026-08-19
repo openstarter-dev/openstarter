@@ -1,15 +1,15 @@
 {
   "name": "@openstarter/cli",
   "version": "0.1.0",
-  "description": "Command-line interface for openstarter",
   "private": true,
-  "type": "module",
+  "description": "Command-line interface for openstarter",
   "bin": {
     "openstarter": "./dist/index.js"
   },
   "files": [
     "dist"
   ],
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsup",

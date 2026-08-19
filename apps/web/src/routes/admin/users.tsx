@@ -73,9 +73,7 @@ function AdminUsersPage() {
               {items.map((item) => (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {item.email}
-                  </TableCell>
+                  <TableCell className="text-muted-foreground">{item.email}</TableCell>
                   <TableCell>
                     {item.emailVerified ? (
                       <Badge variant="secondary">Verified</Badge>

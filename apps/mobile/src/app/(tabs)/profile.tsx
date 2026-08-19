@@ -53,9 +53,7 @@ export default function ProfileScreen() {
             {(field) => (
               <Input
                 autoComplete="name"
-                errors={field.state.meta.errors.map(
-                  (item) => item?.message ?? ""
-                )}
+                errors={field.state.meta.errors.map((item) => item?.message ?? "")}
                 label={m["settings.profile.name"]()}
                 onBlur={field.handleBlur}
                 onChangeText={field.handleChange}
@@ -73,11 +71,7 @@ export default function ProfileScreen() {
             {({ canSubmit, isSubmitting }) => (
               <Button
                 disabled={!canSubmit}
-                label={
-                  isSubmitting
-                    ? m["settings.profile.saving"]()
-                    : m["settings.profile.save"]()
-                }
+                label={isSubmitting ? m["settings.profile.saving"]() : m["settings.profile.save"]()}
                 loading={isSubmitting}
                 onPress={() => {
                   form.handleSubmit();
@@ -93,9 +87,7 @@ export default function ProfileScreen() {
           ) : null}
 
           {error.length > 0 ? (
-            <Text className="text-destructive text-sm dark:text-dark-destructive">
-              {error}
-            </Text>
+            <Text className="text-destructive text-sm dark:text-dark-destructive">{error}</Text>
           ) : null}
         </Card>
       </View>

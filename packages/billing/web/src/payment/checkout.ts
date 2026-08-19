@@ -74,9 +74,7 @@ export interface CreateCheckoutResult {
  *
  * @throws {PaymentProviderUnavailableError} 所选渠道未启用或凭证缺失时（R10.4）。
  */
-export async function createCheckout(
-  params: CreateCheckoutParams
-): Promise<CreateCheckoutResult> {
+export async function createCheckout(params: CreateCheckoutParams): Promise<CreateCheckoutResult> {
   const { userId, userEmail, paymentOrder } = params;
 
   const manager = await getPaymentManager();

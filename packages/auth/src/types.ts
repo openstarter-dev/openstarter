@@ -62,8 +62,7 @@ const InvitationStatus = {
   REJECTED: "rejected",
 } as const;
 
-type InvitationStatus =
-  (typeof InvitationStatus)[keyof typeof InvitationStatus];
+type InvitationStatus = (typeof InvitationStatus)[keyof typeof InvitationStatus];
 
 const VerificationType = {
   CONFIRM_EMAIL: "confirm-email",
@@ -71,16 +70,14 @@ const VerificationType = {
   MAGIC_LINK: "magic-link",
 } as const;
 
-type VerificationType =
-  (typeof VerificationType)[keyof typeof VerificationType];
+type VerificationType = (typeof VerificationType)[keyof typeof VerificationType];
 
 type AuthConfig = z.infer<typeof authConfigSchema>;
 
 const ERROR_MESSAGES = {
   ACCESS_DENIED: "auth:error.device.accessDenied",
   ACCOUNT_NOT_FOUND: "auth:error.user.accountNotFound",
-  ANONYMOUS_USERS_CANNOT_SIGN_IN_AGAIN_ANONYMOUSLY:
-    "auth:error.anonymous.cannotSignInAgain",
+  ANONYMOUS_USERS_CANNOT_SIGN_IN_AGAIN_ANONYMOUSLY: "auth:error.anonymous.cannotSignInAgain",
   ASYNC_VALIDATION_NOT_SUPPORTED: "auth:error.asyncValidationNotSupported",
   AUTH_CANCELLED: "auth:error.authCancelled",
   AUTHENTICATION_FAILED: "auth:error.authenticationFailed",
@@ -90,14 +87,12 @@ const ERROR_MESSAGES = {
   BANNED_USER: "auth:error.user.banned",
   BODY_MUST_BE_AN_OBJECT: "auth:error.bodyMustBeAnObject",
   CALLBACK_URL_REQUIRED: "auth:error.url.callbackUrlRequired",
-  CANNOT_DELETE_A_PRE_DEFINED_ROLE:
-    "organization:error.ac.cannotDeletePreDefinedRole",
+  CANNOT_DELETE_A_PRE_DEFINED_ROLE: "organization:error.ac.cannotDeletePreDefinedRole",
   CHALLENGE_NOT_FOUND: "auth:error.passkey.challengeNotFound",
   CHANGE_EMAIL_DISABLED: "auth:error.credentials.email.changeDisabled",
   COULD_NOT_CREATE_SESSION: "auth:error.session.creation",
   CREDENTIAL_ACCOUNT_NOT_FOUND: "auth:error.credentials.notFound",
-  CROSS_SITE_NAVIGATION_LOGIN_BLOCKED:
-    "auth:error.crossSiteNavigationLoginBlocked",
+  CROSS_SITE_NAVIGATION_LOGIN_BLOCKED: "auth:error.crossSiteNavigationLoginBlocked",
   DELETE_ANONYMOUS_USER_DISABLED: "auth:error.user.deleteAnonymousUserDisabled",
   DEVICE_CODE_ALREADY_PROCESSED: "auth:error.device.alreadyProcessed",
   DEVICE_CODE_NOT_CLAIMED: "auth:error.device.notClaimed",
@@ -114,16 +109,13 @@ const ERROR_MESSAGES = {
   FAILED_TO_CREATE_SESSION: "auth:error.session.creation",
   FAILED_TO_CREATE_USER: "auth:error.account.creation",
   FAILED_TO_CREATE_VERIFICATION: "auth:error.failedToCreateVerification",
-  FAILED_TO_DELETE_ANONYMOUS_USER:
-    "auth:error.user.failedToDeleteAnonymousUser",
+  FAILED_TO_DELETE_ANONYMOUS_USER: "auth:error.user.failedToDeleteAnonymousUser",
   // 由 anonymous / organization / changeEmail 插件贡献的错误码（随第三方依赖落位后
   // auth.$ERROR_CODES 完整解析而补全其翻译键映射）。
-  FAILED_TO_DELETE_ANONYMOUS_USER_SESSIONS:
-    "auth:error.user.failedToDeleteAnonymousUserSessions",
+  FAILED_TO_DELETE_ANONYMOUS_USER_SESSIONS: "auth:error.user.failedToDeleteAnonymousUserSessions",
   FAILED_TO_GET_SESSION: "auth:error.session.retrieval",
   FAILED_TO_GET_USER_INFO: "auth:error.user.infoNotFound",
-  FAILED_TO_RETRIEVE_INVITATION:
-    "organization:error.invitation.failedToRetrieve",
+  FAILED_TO_RETRIEVE_INVITATION: "organization:error.invitation.failedToRetrieve",
   FAILED_TO_UNLINK_LAST_ACCOUNT: "auth:error.social.unlinkLastAccount",
   FAILED_TO_UPDATE_PASSKEY: "auth:error.passkey.updateFailed",
   FAILED_TO_UPDATE_USER: "auth:error.account.update",
@@ -157,19 +149,16 @@ const ERROR_MESSAGES = {
   INVITATION_NOT_FOUND: "organization:error.invitation.notFound",
   INVITER_IS_NO_LONGER_A_MEMBER_OF_THE_ORGANIZATION:
     "organization:error.invitation.inviterNoLongerMember",
-  LINKED_ACCOUNT_ALREADY_EXISTS:
-    "auth:error.account.linkedAccountAlreadyExists",
+  LINKED_ACCOUNT_ALREADY_EXISTS: "auth:error.account.linkedAccountAlreadyExists",
   MEMBER_NOT_FOUND: "organization:error.memberNotFound",
-  METHOD_NOT_ALLOWED_DEFER_SESSION_REQUIRED:
-    "auth:error.methodNotAllowedDeferSessionRequired",
+  METHOD_NOT_ALLOWED_DEFER_SESSION_REQUIRED: "auth:error.methodNotAllowedDeferSessionRequired",
   MISSING_AC_INSTANCE: "organization:error.ac.missingAcInstance",
   MISSING_FIELD: "auth:error.missingField",
   MISSING_OR_NULL_ORIGIN: "auth:error.missingOrNullOrigin",
   NO_ACTIVE_ORGANIZATION: "organization:error.noActive",
   NO_DATA_TO_UPDATE: "auth:error.noDataToUpdate",
   ORGANIZATION_ALREADY_EXISTS: "organization:error.alreadyExists",
-  ORGANIZATION_MEMBERSHIP_LIMIT_REACHED:
-    "organization:error.membershipLimitReached",
+  ORGANIZATION_MEMBERSHIP_LIMIT_REACHED: "organization:error.membershipLimitReached",
   ORGANIZATION_NOT_FOUND: "organization:error.notFound",
   ORGANIZATION_SLUG_ALREADY_TAKEN: "organization:error.slugAlreadyTaken",
   OTP_EXPIRED: "auth:error.otp.expired",
@@ -205,14 +194,11 @@ const ERROR_MESSAGES = {
   UNABLE_TO_REMOVE_LAST_TEAM: "organization:error.team.unableToRemoveLastTeam",
   UNKNOWN_ERROR: "auth:error.unknown",
   USER_ALREADY_EXISTS: "auth:error.user.alreadyExists",
-  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL:
-    "auth:error.user.alreadyExistsUseAnotherEmail",
+  USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL: "auth:error.user.alreadyExistsUseAnotherEmail",
   USER_ALREADY_HAS_PASSWORD: "auth:error.user.alreadyHasPassword",
   USER_EMAIL_NOT_FOUND: "auth:error.user.emailNotFound",
-  USER_IS_ALREADY_A_MEMBER_OF_THIS_ORGANIZATION:
-    "organization:error.userAlreadyMember",
-  USER_IS_ALREADY_INVITED_TO_THIS_ORGANIZATION:
-    "organization:error.invitation.userAlreadyInvited",
+  USER_IS_ALREADY_A_MEMBER_OF_THIS_ORGANIZATION: "organization:error.userAlreadyMember",
+  USER_IS_ALREADY_INVITED_TO_THIS_ORGANIZATION: "organization:error.invitation.userAlreadyInvited",
   USER_IS_NOT_A_MEMBER_OF_THE_ORGANIZATION: "organization:error.userNotMember",
   USER_IS_NOT_A_MEMBER_OF_THE_TEAM: "organization:error.team.userNotMember",
   USER_IS_NOT_ANONYMOUS: "auth:error.user.notAnonymous",
@@ -220,81 +206,55 @@ const ERROR_MESSAGES = {
   VALIDATION_ERROR: "auth:error.validationError",
   VERIFICATION_EMAIL_NOT_ENABLED: "auth:error.user.verificationEmailNotEnabled",
   YOU_ARE_NOT_A_MEMBER_OF_THIS_ORGANIZATION: "organization:error.userNotMember",
-  YOU_ARE_NOT_ALLOWED_TO_ACCESS_THIS_ORGANIZATION:
-    "organization:error.cannotAccess",
+  YOU_ARE_NOT_ALLOWED_TO_ACCESS_THIS_ORGANIZATION: "organization:error.cannotAccess",
   YOU_ARE_NOT_ALLOWED_TO_BAN_USERS: "admin:error.cannotBanUsers",
-  YOU_ARE_NOT_ALLOWED_TO_CANCEL_THIS_INVITATION:
-    "organization:error.invitation.cannotCancel",
+  YOU_ARE_NOT_ALLOWED_TO_CANCEL_THIS_INVITATION: "organization:error.invitation.cannotCancel",
   YOU_ARE_NOT_ALLOWED_TO_CHANGE_USERS_ROLE: "auth:error.user.cannotChangeRole",
-  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_ORGANIZATION:
-    "organization:error.cannotCreateNew",
-  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_TEAM:
-    "organization:error.team.cannotCreateNew",
-  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_TEAM_MEMBER:
-    "organization:error.team.cannotCreateNewMember",
-  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_ROLE:
-    "organization:error.ac.cannotCreateRole",
+  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_ORGANIZATION: "organization:error.cannotCreateNew",
+  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_TEAM: "organization:error.team.cannotCreateNew",
+  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_NEW_TEAM_MEMBER: "organization:error.team.cannotCreateNewMember",
+  YOU_ARE_NOT_ALLOWED_TO_CREATE_A_ROLE: "organization:error.ac.cannotCreateRole",
   YOU_ARE_NOT_ALLOWED_TO_CREATE_TEAMS_IN_THIS_ORGANIZATION:
     "organization:error.team.cannotCreateNew",
   YOU_ARE_NOT_ALLOWED_TO_CREATE_USERS: "admin:error.cannotCreateUsers",
-  YOU_ARE_NOT_ALLOWED_TO_DELETE_A_ROLE:
-    "organization:error.ac.cannotDeleteRole",
-  YOU_ARE_NOT_ALLOWED_TO_DELETE_TEAMS_IN_THIS_ORGANIZATION:
-    "organization:error.team.cannotDelete",
-  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_MEMBER:
-    "organization:error.cannotDeleteMember",
-  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_ORGANIZATION:
-    "organization:error.cannotDelete",
-  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_TEAM:
-    "organization:error.team.cannotDelete",
+  YOU_ARE_NOT_ALLOWED_TO_DELETE_A_ROLE: "organization:error.ac.cannotDeleteRole",
+  YOU_ARE_NOT_ALLOWED_TO_DELETE_TEAMS_IN_THIS_ORGANIZATION: "organization:error.team.cannotDelete",
+  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_MEMBER: "organization:error.cannotDeleteMember",
+  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_ORGANIZATION: "organization:error.cannotDelete",
+  YOU_ARE_NOT_ALLOWED_TO_DELETE_THIS_TEAM: "organization:error.team.cannotDelete",
   YOU_ARE_NOT_ALLOWED_TO_DELETE_USERS: "admin:error.cannotDeleteUsers",
   YOU_ARE_NOT_ALLOWED_TO_GET_A_ROLE: "organization:error.ac.cannotGetRole",
   YOU_ARE_NOT_ALLOWED_TO_GET_USER: "auth:error.user.cannotGetUser",
-  YOU_ARE_NOT_ALLOWED_TO_IMPERSONATE_USERS:
-    "admin:error.cannotImpersonateUsers",
+  YOU_ARE_NOT_ALLOWED_TO_IMPERSONATE_USERS: "admin:error.cannotImpersonateUsers",
   YOU_ARE_NOT_ALLOWED_TO_INVITE_USER_WITH_THIS_ROLE:
     "organization:error.invitation.cannotInviteUserWithRole",
   YOU_ARE_NOT_ALLOWED_TO_INVITE_USERS_TO_THIS_ORGANIZATION:
     "organization:error.invitation.cannotInviteUsers",
   YOU_ARE_NOT_ALLOWED_TO_LIST_A_ROLE: "organization:error.ac.cannotListRole",
   YOU_ARE_NOT_ALLOWED_TO_LIST_USERS: "admin:error.cannotListUsers",
-  YOU_ARE_NOT_ALLOWED_TO_LIST_USERS_SESSIONS:
-    "admin:error.cannotListUsersSessions",
+  YOU_ARE_NOT_ALLOWED_TO_LIST_USERS_SESSIONS: "admin:error.cannotListUsersSessions",
   YOU_ARE_NOT_ALLOWED_TO_READ_A_ROLE: "organization:error.ac.cannotReadRole",
   YOU_ARE_NOT_ALLOWED_TO_REGISTER_THIS_PASSKEY: "auth:error.passkey.notAllowed",
-  YOU_ARE_NOT_ALLOWED_TO_REMOVE_A_TEAM_MEMBER:
-    "organization:error.team.cannotRemoveMember",
-  YOU_ARE_NOT_ALLOWED_TO_REVOKE_USERS_SESSIONS:
-    "admin:error.cannotRevokeUsersSessions",
-  YOU_ARE_NOT_ALLOWED_TO_SET_NON_EXISTENT_VALUE:
-    "auth:error.cannotSetNonExistentValue",
-  YOU_ARE_NOT_ALLOWED_TO_SET_USERS_PASSWORD:
-    "admin:error.cannotSetUsersPassword",
-  YOU_ARE_NOT_ALLOWED_TO_UPDATE_A_ROLE:
-    "organization:error.ac.cannotUpdateRole",
-  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_MEMBER:
-    "organization:error.cannotUpdateMember",
-  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_ORGANIZATION:
-    "organization:error.cannotUpdate",
-  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_TEAM:
-    "organization:error.team.cannotUpdate",
+  YOU_ARE_NOT_ALLOWED_TO_REMOVE_A_TEAM_MEMBER: "organization:error.team.cannotRemoveMember",
+  YOU_ARE_NOT_ALLOWED_TO_REVOKE_USERS_SESSIONS: "admin:error.cannotRevokeUsersSessions",
+  YOU_ARE_NOT_ALLOWED_TO_SET_NON_EXISTENT_VALUE: "auth:error.cannotSetNonExistentValue",
+  YOU_ARE_NOT_ALLOWED_TO_SET_USERS_PASSWORD: "admin:error.cannotSetUsersPassword",
+  YOU_ARE_NOT_ALLOWED_TO_UPDATE_A_ROLE: "organization:error.ac.cannotUpdateRole",
+  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_MEMBER: "organization:error.cannotUpdateMember",
+  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_ORGANIZATION: "organization:error.cannotUpdate",
+  YOU_ARE_NOT_ALLOWED_TO_UPDATE_THIS_TEAM: "organization:error.team.cannotUpdate",
   YOU_ARE_NOT_ALLOWED_TO_UPDATE_USERS: "admin:error.cannotUpdateUsers",
-  YOU_ARE_NOT_THE_RECIPIENT_OF_THE_INVITATION:
-    "organization:error.invitation.notRecipient",
-  YOU_CAN_NOT_ACCESS_THE_MEMBERS_OF_THIS_TEAM:
-    "organization:error.team.cannotAccessMembers",
+  YOU_ARE_NOT_THE_RECIPIENT_OF_THE_INVITATION: "organization:error.invitation.notRecipient",
+  YOU_CAN_NOT_ACCESS_THE_MEMBERS_OF_THIS_TEAM: "organization:error.team.cannotAccessMembers",
   YOU_CANNOT_BAN_YOURSELF: "auth:error.user.cannotBanYourself",
   YOU_CANNOT_IMPERSONATE_ADMINS: "auth:error.user.cannotImpersonateAdmins",
-  YOU_CANNOT_LEAVE_THE_ORGANIZATION_AS_THE_ONLY_OWNER:
-    "organization:error.cannotLeaveAsOnlyOwner",
-  YOU_CANNOT_LEAVE_THE_ORGANIZATION_WITHOUT_AN_OWNER:
-    "organization:error.cannotLeaveWithoutOwner",
+  YOU_CANNOT_LEAVE_THE_ORGANIZATION_AS_THE_ONLY_OWNER: "organization:error.cannotLeaveAsOnlyOwner",
+  YOU_CANNOT_LEAVE_THE_ORGANIZATION_WITHOUT_AN_OWNER: "organization:error.cannotLeaveWithoutOwner",
   YOU_CANNOT_REMOVE_YOURSELF: "auth:error.user.cannotRemoveYourself",
   YOU_DO_NOT_HAVE_AN_ACTIVE_TEAM: "organization:error.team.noActive",
   YOU_HAVE_REACHED_THE_MAXIMUM_NUMBER_OF_ORGANIZATIONS:
     "organization:error.maximumNumberOfOrganizations",
-  YOU_HAVE_REACHED_THE_MAXIMUM_NUMBER_OF_TEAMS:
-    "organization:error.team.maximumNumberOfTeams",
+  YOU_HAVE_REACHED_THE_MAXIMUM_NUMBER_OF_TEAMS: "organization:error.team.maximumNumberOfTeams",
   YOU_MUST_BE_IN_AN_ORGANIZATION_TO_CREATE_A_ROLE:
     "organization:error.ac.mustBeInOrganizationToCreateRole",
 } as const satisfies Record<AuthErrorCode, TranslationKey>;

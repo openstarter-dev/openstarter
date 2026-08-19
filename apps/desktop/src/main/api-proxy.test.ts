@@ -20,7 +20,7 @@ describe("ApiProxy", () => {
       new Response(JSON.stringify({ code: 200, message: "ok", data: { id: 1 } }), {
         status: 200,
         headers: { "content-type": "application/json" },
-      })
+      }),
     );
 
     await proxy({ method: "GET", path: "/api/user/profile" });
@@ -31,7 +31,7 @@ describe("ApiProxy", () => {
         headers: expect.objectContaining({
           Authorization: "Bearer test-token-123",
         }),
-      })
+      }),
     );
   });
 
@@ -45,7 +45,7 @@ describe("ApiProxy", () => {
     mockFetch.mockResolvedValue(
       new Response(JSON.stringify({ code: 200, message: "ok", data: {} }), {
         status: 200,
-      })
+      }),
     );
 
     await proxy({ method: "POST", path: "/api/auth/sign-up", body: { email: "user@example.com" } });
@@ -64,7 +64,7 @@ describe("ApiProxy", () => {
     mockFetch.mockResolvedValue(
       new Response(JSON.stringify({ code: 401, message: "unauthorized" }), {
         status: 401,
-      })
+      }),
     );
 
     const result = await proxy({ method: "GET", path: "/api/user/profile" });

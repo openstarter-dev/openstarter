@@ -16,7 +16,7 @@ import { loadLocalePreference, saveLocalePreference } from "./preferences";
 
 const initialLocale = resolveInitialLocale(
   getLocales().map((entry) => entry.languageTag),
-  loadLocalePreference()
+  loadLocalePreference(),
 );
 
 setLocale(initialLocale, { reload: false });

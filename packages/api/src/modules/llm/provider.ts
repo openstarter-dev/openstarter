@@ -14,10 +14,7 @@ import type { LanguageModel } from "ai";
  * Resolve an LLM model instance from config (provider + model name).
  * Throws if the provider is unconfigured or unknown.
  */
-export async function getModel(
-  provider?: string,
-  modelId?: string,
-): Promise<LanguageModel> {
+export async function getModel(provider?: string, modelId?: string): Promise<LanguageModel> {
   const configs = await getAllConfigs();
 
   const providerName = provider || configs.llm_provider || "openai";
@@ -33,18 +30,14 @@ export async function getModel(
 
     case "anthropic":
       if (!configs.llm_anthropic_api_key) {
-        throw new Error(
-          "Anthropic API key not configured (llm_anthropic_api_key)",
-        );
+        throw new Error("Anthropic API key not configured (llm_anthropic_api_key)");
       }
       logger.debug(`[llm] Loading Anthropic model: ${model}`);
       return anthropic(model);
 
     case "google":
       if (!configs.llm_google_api_key) {
-        throw new Error(
-          "Google API key not configured (llm_google_api_key)",
-        );
+        throw new Error("Google API key not configured (llm_google_api_key)");
       }
       logger.debug(`[llm] Loading Google model: ${model}`);
       return google(model);

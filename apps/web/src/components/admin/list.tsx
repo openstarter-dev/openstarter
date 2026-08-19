@@ -17,9 +17,7 @@ export function AdminHeader({
     <div className="mb-6 flex flex-row items-start justify-between gap-4">
       <div>
         <h1 className="font-bold text-2xl">{title}</h1>
-        {description ? (
-          <p className="text-muted-foreground text-sm">{description}</p>
-        ) : null}
+        {description ? <p className="text-muted-foreground text-sm">{description}</p> : null}
       </div>
       {action ? <div className="shrink-0">{action}</div> : null}
     </div>

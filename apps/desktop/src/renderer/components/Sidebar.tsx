@@ -21,9 +21,7 @@ export function Sidebar() {
 
   return (
     <nav className="flex h-full w-60 shrink-0 flex-col border-r border-border bg-card">
-      <div className="mb-4 px-5 py-4 text-lg font-semibold text-foreground">
-        OpenStarter
-      </div>
+      <div className="mb-4 px-5 py-4 text-lg font-semibold text-foreground">OpenStarter</div>
       <div className="flex flex-col gap-1 px-3">
         {NAV_ITEMS.map((item) => (
           <NavLink
@@ -43,17 +41,8 @@ export function Sidebar() {
         ))}
       </div>
       <div className="mt-auto space-y-2 p-4">
-        {user && (
-          <div className="mb-2 truncate text-xs text-muted-foreground">
-            {user.email}
-          </div>
-        )}
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleLogout}
-          type="button"
-        >
+        {user && <div className="mb-2 truncate text-xs text-muted-foreground">{user.email}</div>}
+        <Button variant="outline" className="w-full" onClick={handleLogout} type="button">
           Logout
         </Button>
       </div>

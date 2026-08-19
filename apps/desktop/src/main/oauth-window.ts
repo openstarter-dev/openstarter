@@ -28,7 +28,7 @@ export interface OAuthWindowOptions {
 export function buildOAuthUrl(
   baseUrl: string,
   provider: "google" | "github",
-  callbackUrl: string
+  callbackUrl: string,
 ): string {
   const url = new URL(`${baseUrl}/api/auth/sign-in/social`);
   url.searchParams.set("provider", provider);
@@ -48,12 +48,8 @@ export interface ElectronCookie {
   path?: string;
 }
 
-export function extractTokenFromCookies(
-  cookies: ElectronCookie[]
-): string | null {
-  const sessionCookie = cookies.find(
-    (c) => c.name === "openstarter.session_token"
-  );
+export function extractTokenFromCookies(cookies: ElectronCookie[]): string | null {
+  const sessionCookie = cookies.find((c) => c.name === "openstarter.session_token");
   return sessionCookie?.value ?? null;
 }
 
@@ -72,7 +68,7 @@ export function extractTokenFromCookies(
  */
 export async function openOAuthWindow(
   provider: "google" | "github",
-  options: OAuthWindowOptions
+  options: OAuthWindowOptions,
 ): Promise<OAuthResult> {
   const { baseUrl, getSession, tokenStore } = options;
   const callbackUrl = "openstarter://oauth-callback";
@@ -91,10 +87,7 @@ export async function openOAuthWindow(
     });
 
     // 拦截导航到 callback URL
-    const handleNavigation = async (
-      event: { preventDefault: () => void },
-      url: string
-    ) => {
+    const handleNavigation = async (event: { preventDefault: () => void }, url: string) => {
       if (url.startsWith(callbackUrl)) {
         event.preventDefault();
         win.close();

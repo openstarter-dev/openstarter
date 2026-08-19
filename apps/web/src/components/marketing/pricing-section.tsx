@@ -14,11 +14,7 @@ import { Check } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import {
-  PRICING_TIERS,
-  type PricingCheckout,
-  type PricingTier,
-} from "@/lib/marketing/pricing";
+import { PRICING_TIERS, type PricingCheckout, type PricingTier } from "@/lib/marketing/pricing";
 import { checkout } from "@/modules/checkout/lib/api";
 
 import { type WechatQr, WechatQrOverlay } from "./wechat-qr-overlay";
@@ -57,9 +53,7 @@ function TierCard({
         </div>
         <CardTitle className="mt-2 text-lg">{tier.name}</CardTitle>
         <CardDescription>{tier.description}</CardDescription>
-        <div className="mt-2 font-bold text-2xl">
-          {formatPrice(tier.priceMonthly)}
-        </div>
+        <div className="mt-2 font-bold text-2xl">{formatPrice(tier.priceMonthly)}</div>
       </CardHeader>
       <CardContent className="flex-1">
         <ul className="flex flex-col gap-2">
@@ -73,11 +67,7 @@ function TierCard({
       </CardContent>
       <CardFooter>
         {cta.kind === "link" ? (
-          <Button
-            asChild
-            className="w-full"
-            variant={tier.highlight ? "default" : "outline"}
-          >
+          <Button asChild className="w-full" variant={tier.highlight ? "default" : "outline"}>
             <Link to={cta.to}>{cta.label}</Link>
           </Button>
         ) : (
@@ -144,12 +134,8 @@ export function PricingSection() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-20" id="pricing">
       <div className="mb-12 text-center">
-        <h2 className="font-bold text-3xl tracking-tight">
-          Simple, transparent pricing
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          Start free. Upgrade when you grow.
-        </p>
+        <h2 className="font-bold text-3xl tracking-tight">Simple, transparent pricing</h2>
+        <p className="mt-2 text-muted-foreground">Start free. Upgrade when you grow.</p>
       </div>
       <div className="grid gap-6 lg:grid-cols-3">
         {PRICING_TIERS.map((tier) => (
@@ -161,9 +147,7 @@ export function PricingSection() {
           />
         ))}
       </div>
-      {wechatQr ? (
-        <WechatQrOverlay onClose={() => setWechatQr(null)} qr={wechatQr} />
-      ) : null}
+      {wechatQr ? <WechatQrOverlay onClose={() => setWechatQr(null)} qr={wechatQr} /> : null}
     </section>
   );
 }

@@ -80,8 +80,7 @@ const mutations = {
         if (!res.ok) {
           const json = await res.json();
           throw new Error(
-            (json as { message?: string }).message ??
-              "Failed to create billing portal session"
+            (json as { message?: string }).message ?? "Failed to create billing portal session",
           );
         }
         const json = await res.json();

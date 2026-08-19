@@ -54,7 +54,7 @@ describe("API key SQLite repository properties", () => {
                 title,
                 updatedAt: now,
                 userId,
-              }))
+              })),
             );
           }
 
@@ -70,9 +70,9 @@ describe("API key SQLite repository properties", () => {
             expect(Object.keys(item).sort()).toEqual(PUBLIC_LIST_FIELDS);
             expect(item.keyPrefix.startsWith("sk_")).toBe(true);
           }
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

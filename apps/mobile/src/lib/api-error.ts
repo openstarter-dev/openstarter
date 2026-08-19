@@ -52,7 +52,7 @@ export function mapApiError(httpStatus: number, body: unknown): ApiFailure {
 
 export async function runRequest<TData>(
   send: () => Promise<HttpResponse>,
-  extract: (body: unknown) => TData
+  extract: (body: unknown) => TData,
 ): Promise<ApiResult<TData>> {
   let response: HttpResponse;
   try {

@@ -30,9 +30,7 @@ export function OAuthButtons({
     authClient.signIn
       .social({ callbackURL, errorCallbackURL: OAUTH_ERROR_REDIRECT, provider })
       .catch((error: unknown) => {
-        toast.error(
-          error instanceof Error ? error.message : "OAuth sign-in failed"
-        );
+        toast.error(error instanceof Error ? error.message : "OAuth sign-in failed");
       });
   };
 

@@ -14,11 +14,7 @@ import { OAuthButtons } from "./oauth-buttons";
 import { getEnabledOAuthProviders } from "./oauth-provider-selection";
 import { PasswordlessForm } from "./passwordless-form";
 
-export default function SignUpForm({
-  onSwitchToSignIn,
-}: {
-  onSwitchToSignIn: () => void;
-}) {
+export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
   const navigate = useNavigate({ from: "/" });
   const { isPending } = authClient.useSession();
 
@@ -31,8 +27,7 @@ export default function SignUpForm({
   const appleEnabled = enabledOAuthProviders.includes("apple");
   const magicLinkEnabled = configs.magic_link_enabled === "true";
   const emailOtpEnabled = configs.email_otp_enabled === "true";
-  const emailVerificationEnabled =
-    configs.email_verification_enabled === "true";
+  const emailVerificationEnabled = configs.email_verification_enabled === "true";
   const hasSocial = enabledOAuthProviders.length > 0;
   const hasPasswordless = magicLinkEnabled || emailOtpEnabled;
 
@@ -62,7 +57,7 @@ export default function SignUpForm({
             navigate({ to: "/dashboard" });
             toast.success("Sign up successful");
           },
-        }
+        },
       );
     },
     validators: {
@@ -102,10 +97,7 @@ export default function SignUpForm({
 
       {hasPasswordless ? (
         <div className="mb-4">
-          <PasswordlessForm
-            emailOtpEnabled={emailOtpEnabled}
-            magicLinkEnabled={magicLinkEnabled}
-          />
+          <PasswordlessForm emailOtpEnabled={emailOtpEnabled} magicLinkEnabled={magicLinkEnabled} />
         </div>
       ) : null}
 
@@ -201,11 +193,7 @@ export default function SignUpForm({
             })}
           >
             {({ canSubmit, isSubmitting }) => (
-              <Button
-                className="w-full"
-                disabled={!canSubmit || isSubmitting}
-                type="submit"
-              >
+              <Button className="w-full" disabled={!canSubmit || isSubmitting} type="submit">
                 {isSubmitting ? "Submitting..." : "Sign Up"}
               </Button>
             )}

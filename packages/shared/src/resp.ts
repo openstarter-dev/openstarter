@@ -53,9 +53,6 @@ export function respErr(message: string): ApiResponse {
 /**
  * 成功响应并携带分页数据（条目列表与总数）。
  */
-export function respPage<TItem>(
-  items: TItem[],
-  total: number
-): ApiResponse<PageData<TItem>> {
+export function respPage<TItem>(items: TItem[], total: number): ApiResponse<PageData<TItem>> {
   return { code: RespCode.OK, message: "ok", data: { items, total } };
 }

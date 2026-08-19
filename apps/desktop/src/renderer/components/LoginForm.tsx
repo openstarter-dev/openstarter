@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "@openstarter/ui-web/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@openstarter/ui-web/components/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@openstarter/ui-web/components/card";
 import { Input } from "@openstarter/ui-web/components/input";
 import { Label } from "@openstarter/ui-web/components/label";
 import { useNavigate } from "react-router-dom";
@@ -64,9 +70,7 @@ export function LoginForm() {
             />
           </div>
 
-          {error && (
-            <p className="text-destructive text-xs">{error}</p>
-          )}
+          {error && <p className="text-destructive text-xs">{error}</p>}
 
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? "Signing in..." : "Sign In"}

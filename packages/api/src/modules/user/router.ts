@@ -23,12 +23,7 @@ const DEFAULT_HISTORY_LIMIT = 50;
 const listQuery = paginationSchema;
 
 const creditsQuery = z.object({
-  limit: z.coerce
-    .number()
-    .int()
-    .min(1)
-    .max(100)
-    .default(DEFAULT_HISTORY_LIMIT),
+  limit: z.coerce.number().int().min(1).max(100).default(DEFAULT_HISTORY_LIMIT),
   offset: z.coerce.number().int().min(0).default(0),
 });
 
@@ -143,10 +138,7 @@ export const userRouter = new Hono()
 
     const currentSub = await getCurrentSubscription(userId);
     if (!currentSub?.paymentUserId) {
-      return c.json(
-        respErr("No active subscription with a payment provider customer ID"),
-        400
-      );
+      return c.json(respErr("No active subscription with a payment provider customer ID"), 400);
     }
 
     const manager = await getPaymentManager();

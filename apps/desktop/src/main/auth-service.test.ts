@@ -40,7 +40,7 @@ describe("AuthService", () => {
         expect.objectContaining({
           method: "POST",
           body: JSON.stringify({ email: "test@test.com", password: "password123" }),
-        })
+        }),
       );
       expect(mockTokenStore.set).toHaveBeenCalledWith("test-session-token");
       expect(result.user.email).toBe("test@test.com");
@@ -62,7 +62,7 @@ describe("AuthService", () => {
       });
 
       await expect(auth.signInWithEmail("bad@test.com", "wrong")).rejects.toThrow(
-        "Invalid credentials"
+        "Invalid credentials",
       );
       expect(mockTokenStore.set).not.toHaveBeenCalled();
     });
@@ -83,7 +83,7 @@ describe("AuthService", () => {
       });
 
       await expect(auth.signInWithEmail("test@test.com", "pass")).rejects.toThrow(
-        "No session token"
+        "No session token",
       );
     });
   });

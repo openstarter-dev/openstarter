@@ -43,9 +43,7 @@ function parseJsonArray(value: string): string[] | null {
 }
 
 /** 汇总一组文章中出现的全部分类（去重、按名称升序），用于渲染筛选入口。 */
-export function collectCategories(
-  items: ReadonlyArray<{ categories?: string | null }>
-): string[] {
+export function collectCategories(items: ReadonlyArray<{ categories?: string | null }>): string[] {
   const seen = new Set<string>();
   for (const item of items) {
     for (const category of parseCategories(item.categories)) {

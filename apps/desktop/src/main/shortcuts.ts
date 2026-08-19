@@ -19,9 +19,7 @@ export function registerShortcuts(window: BrowserWindow): void {
         window.webContents.send("shortcut-triggered", shortcut.action);
       });
       if (registered) {
-        logInfo(
-          `shortcut registered: ${shortcut.accelerator} -> ${shortcut.action}`
-        );
+        logInfo(`shortcut registered: ${shortcut.accelerator} -> ${shortcut.action}`);
       } else {
         logWarn(`failed to register shortcut: ${shortcut.accelerator}`);
       }

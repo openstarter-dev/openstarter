@@ -32,20 +32,13 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          className="h-auto w-full justify-start gap-2 px-2 py-2"
-          variant="ghost"
-        >
+        <Button className="h-auto w-full justify-start gap-2 px-2 py-2" variant="ghost">
           <span className="flex size-8 items-center justify-center rounded-full bg-muted">
             <User aria-hidden="true" className="size-4" />
           </span>
           <span className="flex min-w-0 flex-col items-start">
-            <span className="truncate font-medium text-sm">
-              {session.user.name}
-            </span>
-            <span className="truncate text-muted-foreground text-xs">
-              {session.user.email}
-            </span>
+            <span className="truncate font-medium text-sm">{session.user.name}</span>
+            <span className="truncate text-muted-foreground text-xs">{session.user.email}</span>
           </span>
         </Button>
       </DropdownMenuTrigger>

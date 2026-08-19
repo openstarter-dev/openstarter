@@ -11,51 +11,35 @@ const ALLOWED_ORIGIN = "https://app.example.com";
 
 describe("isAllowedNavigation", () => {
   it("allows the same origin", () => {
-    expect(
-      isAllowedNavigation("https://app.example.com/login", ALLOWED_ORIGIN)
-    ).toBe(true);
+    expect(isAllowedNavigation("https://app.example.com/login", ALLOWED_ORIGIN)).toBe(true);
   });
 
   it("allows the same origin with different casing", () => {
-    expect(
-      isAllowedNavigation("https://APP.EXAMPLE.COM/login", ALLOWED_ORIGIN)
-    ).toBe(true);
+    expect(isAllowedNavigation("https://APP.EXAMPLE.COM/login", ALLOWED_ORIGIN)).toBe(true);
   });
 
   it("rejects a subdomain", () => {
-    expect(
-      isAllowedNavigation("https://evil.app.example.com", ALLOWED_ORIGIN)
-    ).toBe(false);
+    expect(isAllowedNavigation("https://evil.app.example.com", ALLOWED_ORIGIN)).toBe(false);
   });
 
   it("rejects a different protocol on the same host", () => {
-    expect(isAllowedNavigation("http://app.example.com", ALLOWED_ORIGIN)).toBe(
-      false
-    );
+    expect(isAllowedNavigation("http://app.example.com", ALLOWED_ORIGIN)).toBe(false);
   });
 
   it("rejects a different port", () => {
-    expect(
-      isAllowedNavigation("https://app.example.com:8443", ALLOWED_ORIGIN)
-    ).toBe(false);
+    expect(isAllowedNavigation("https://app.example.com:8443", ALLOWED_ORIGIN)).toBe(false);
   });
 
   it("rejects javascript: URLs", () => {
-    expect(isAllowedNavigation("javascript:alert(1)", ALLOWED_ORIGIN)).toBe(
-      false
-    );
+    expect(isAllowedNavigation("javascript:alert(1)", ALLOWED_ORIGIN)).toBe(false);
   });
 
   it("rejects file: URLs", () => {
-    expect(isAllowedNavigation("file:///etc/passwd", ALLOWED_ORIGIN)).toBe(
-      false
-    );
+    expect(isAllowedNavigation("file:///etc/passwd", ALLOWED_ORIGIN)).toBe(false);
   });
 
   it("rejects data: URLs", () => {
-    expect(isAllowedNavigation("data:text/html,hi", ALLOWED_ORIGIN)).toBe(
-      false
-    );
+    expect(isAllowedNavigation("data:text/html,hi", ALLOWED_ORIGIN)).toBe(false);
   });
 
   it("rejects an unparsable string without throwing", () => {
@@ -81,9 +65,7 @@ describe("createWindowOpenHandler", () => {
     const result = handler({ url: "https://accounts.google.com/oauth" });
 
     expect(result).toEqual({ action: "deny" });
-    expect(openExternal).toHaveBeenCalledWith(
-      "https://accounts.google.com/oauth"
-    );
+    expect(openExternal).toHaveBeenCalledWith("https://accounts.google.com/oauth");
   });
 });
 
@@ -107,9 +89,7 @@ describe("createWillNavigateHandler", () => {
     handler({ preventDefault }, "https://accounts.google.com/oauth");
 
     expect(preventDefault).toHaveBeenCalledTimes(1);
-    expect(openExternal).toHaveBeenCalledWith(
-      "https://accounts.google.com/oauth"
-    );
+    expect(openExternal).toHaveBeenCalledWith("https://accounts.google.com/oauth");
   });
 });
 

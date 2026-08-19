@@ -1,6 +1,6 @@
-import { View } from '@tarojs/components';
-import { ReactNode } from 'react';
-import './index.scss';
+import { View } from "@tarojs/components";
+import { ReactNode } from "react";
+import "./index.scss";
 
 interface LayoutProps {
   children: ReactNode;
@@ -8,7 +8,7 @@ interface LayoutProps {
   className?: string;
 }
 
-export default function Layout({ children, loading = false, className = '' }: LayoutProps) {
+export default function Layout({ children, loading = false, className = "" }: LayoutProps) {
   return (
     <View className={`layout ${className}`}>
       {loading ? (

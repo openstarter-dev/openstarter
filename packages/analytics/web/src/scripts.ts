@@ -48,19 +48,13 @@ const DEFAULT_PLAUSIBLE_SRC = "https://plausible.io/js/script.js";
 
 /** 校验度量 ID：非空、长度受限、且仅含允许字符集。 */
 export function isValidMeasurementId(id: string): boolean {
-  return (
-    id.length > 0 &&
-    id.length <= MAX_MEASUREMENT_ID_LENGTH &&
-    MEASUREMENT_ID_PATTERN.test(id)
-  );
+  return id.length > 0 && id.length <= MAX_MEASUREMENT_ID_LENGTH && MEASUREMENT_ID_PATTERN.test(id);
 }
 
 /** 校验 Plausible 域名：非空、长度受限、且仅含允许字符集。 */
 export function isValidPlausibleDomain(domain: string): boolean {
   return (
-    domain.length > 0 &&
-    domain.length <= MAX_DOMAIN_LENGTH &&
-    PLAUSIBLE_DOMAIN_PATTERN.test(domain)
+    domain.length > 0 && domain.length <= MAX_DOMAIN_LENGTH && PLAUSIBLE_DOMAIN_PATTERN.test(domain)
   );
 }
 
@@ -118,9 +112,7 @@ export function plausibleScripts(domain: string, src: string): HeadScript[] {
  *   - 配置了某供应商（且标识合规）→ 注入且仅注入该供应商对应的脚本；
  *   - 未配置任何供应商（或标识不合规）→ 返回空数组，即不注入任何分析脚本。
  */
-export function buildAnalyticsHeadScripts(
-  config: AnalyticsConfig | undefined
-): HeadScript[] {
+export function buildAnalyticsHeadScripts(config: AnalyticsConfig | undefined): HeadScript[] {
   if (!config) {
     return [];
   }
@@ -133,10 +125,7 @@ export function buildAnalyticsHeadScripts(
 
   if (isValidPlausibleDomain(config.plausibleDomain)) {
     scripts.push(
-      ...plausibleScripts(
-        config.plausibleDomain,
-        resolvePlausibleSrc(config.plausibleSrc)
-      )
+      ...plausibleScripts(config.plausibleDomain, resolvePlausibleSrc(config.plausibleSrc)),
     );
   }
 

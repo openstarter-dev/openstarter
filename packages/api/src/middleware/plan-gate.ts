@@ -34,27 +34,23 @@ const PLAN_HIERARCHY: Record<UserPlan, number> = {
  * ```
  */
 export function requirePlan(minimumPlan: UserPlan) {
-  return createMiddleware<{ Variables: { userId: string } }>(
-    async (c, next) => {
-      const userId = c.get("userId");
-      if (!userId) {
-        return c.json(respErr("Unauthorized"), 401);
-      }
-
-      const { plan } = await getUserPlan(userId);
-      const userLevel = PLAN_HIERARCHY[plan] ?? 0;
-      const requiredLevel = PLAN_HIERARCHY[minimumPlan] ?? 0;
-
-      if (userLevel < requiredLevel) {
-        return c.json(
-          respErr(
-            `This feature requires a ${minimumPlan} plan. Current plan: ${plan}.`
-          ),
-          403
-        );
-      }
-
-      await next();
+  return createMiddleware<{ Variables: { userId: string } }>(async (c, next) => {
+    const userId = c.get("userId");
+    if (!userId) {
+      return c.json(respErr("Unauthorized"), 401);
     }
-  );
+
+    const { plan } = await getUserPlan(userId);
+    const userLevel = PLAN_HIERARCHY[plan] ?? 0;
+    const requiredLevel = PLAN_HIERARCHY[minimumPlan] ?? 0;
+
+    if (userLevel < requiredLevel) {
+      return c.json(
+        respErr(`This feature requires a ${minimumPlan} plan. Current plan: ${plan}.`),
+        403,
+      );
+    }
+
+    await next();
+  });
 }

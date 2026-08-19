@@ -20,10 +20,7 @@ const DIST_DIR = __dirname;
 const OFFLINE_PAGE_PATH = join(DIST_DIR, "..", "..", "resources", "offline.html");
 const PRELOAD_PATH = join(DIST_DIR, "..", "preload.cjs");
 
-function loadOfflinePage(
-  win: BrowserWindow,
-  reason?: "config" | "network"
-): void {
+function loadOfflinePage(win: BrowserWindow, reason?: "config" | "network"): void {
   const query = reason ? `?reason=${reason}` : "";
   win.loadFile(OFFLINE_PAGE_PATH, { search: query });
 }
@@ -80,13 +77,8 @@ export function createMainWindow(params: CreateWindowParams): BrowserWindow {
 
   const allowedOrigin = new URL(resolvedUrl.url).origin;
   win.webContents.setWindowOpenHandler(createWindowOpenHandler(openExternal));
-  win.webContents.on(
-    "will-navigate",
-    createWillNavigateHandler(allowedOrigin, openExternal)
-  );
-  win.webContents.session.setPermissionRequestHandler(
-    createPermissionRequestHandler()
-  );
+  win.webContents.on("will-navigate", createWillNavigateHandler(allowedOrigin, openExternal));
+  win.webContents.session.setPermissionRequestHandler(createPermissionRequestHandler());
   win.webContents.on("will-attach-webview", (event) => {
     event.preventDefault();
   });
@@ -97,13 +89,9 @@ export function createMainWindow(params: CreateWindowParams): BrowserWindow {
       if (!isMainFrame) {
         return;
       }
-      logWarn(
-        `failed to load ${resolvedUrl.url}:`,
-        errorCode,
-        errorDescription
-      );
+      logWarn(`failed to load ${resolvedUrl.url}:`, errorCode, errorDescription);
       loadOfflinePage(win, "network");
-    }
+    },
   );
 
   logInfo("loading", resolvedUrl.url);
@@ -116,7 +104,7 @@ export function createMainWindow(params: CreateWindowParams): BrowserWindow {
 export async function waitForDevServer(
   url: string,
   attempts = 60,
-  intervalMs = 500
+  intervalMs = 500,
 ): Promise<boolean> {
   for (let i = 0; i < attempts; i += 1) {
     try {

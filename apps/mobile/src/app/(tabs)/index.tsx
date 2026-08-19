@@ -39,9 +39,7 @@ export default function HomeScreen() {
         </View>
 
         <Card title={m["settings.overview.plan"]()}>
-          {result.status === "success" ? (
-            <Badge label={result.data.plan} />
-          ) : null}
+          {result.status === "success" ? <Badge label={result.data.plan} /> : null}
 
           {result.status === "unreachable" ? (
             <View className="gap-3">

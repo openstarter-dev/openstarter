@@ -51,9 +51,7 @@ export const demoRouter = new Hono()
   })
   .get("/notes/:id", requireAuth, (c) => {
     const userId = c.get("userId");
-    const note = notes.find(
-      (n) => n.id === c.req.param("id") && n.userId === userId
-    );
+    const note = notes.find((n) => n.id === c.req.param("id") && n.userId === userId);
     if (!note) {
       return c.json(respErr("note not found"), 404);
     }

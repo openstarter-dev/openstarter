@@ -7,10 +7,7 @@
 // 详见 docs/superpowers/specs/2026-08-01-desktop-app-design.md §9。
 
 /** 判断 targetUrl 是否与 allowedOrigin 同源。解析失败（畸形字符串）返回 false，不抛异常。 */
-export function isAllowedNavigation(
-  targetUrl: string,
-  allowedOrigin: string
-): boolean {
+export function isAllowedNavigation(targetUrl: string, allowedOrigin: string): boolean {
   try {
     return new URL(targetUrl).origin === new URL(allowedOrigin).origin;
   } catch {
@@ -35,7 +32,7 @@ interface WindowOpenHandlerResult {
  * （站内 target=_blank 链接本就该在系统浏览器里打开，不必留在 app 窗口内）。
  */
 export function createWindowOpenHandler(
-  openExternal: ExternalOpener
+  openExternal: ExternalOpener,
 ): (details: WindowOpenHandlerDetails) => WindowOpenHandlerResult {
   return (details) => {
     openExternal(details.url);
@@ -54,7 +51,7 @@ interface WillNavigateEvent {
  */
 export function createWillNavigateHandler(
   allowedOrigin: string,
-  openExternal: ExternalOpener
+  openExternal: ExternalOpener,
 ): (event: WillNavigateEvent, url: string) => void {
   return (event, url) => {
     if (isAllowedNavigation(url, allowedOrigin)) {
@@ -71,7 +68,7 @@ export type PermissionCallback = (granted: boolean) => void;
 export function createPermissionRequestHandler(): (
   webContents: unknown,
   permission: string,
-  callback: PermissionCallback
+  callback: PermissionCallback,
 ) => void {
   return (_webContents, _permission, callback) => {
     callback(false);

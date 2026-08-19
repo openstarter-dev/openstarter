@@ -57,9 +57,7 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
         if (setCookie) cookies.push(setCookie);
       }
 
-      const sessionCookie = cookies.find((c) =>
-        c.startsWith("openstarter.session_token=")
-      );
+      const sessionCookie = cookies.find((c) => c.startsWith("openstarter.session_token="));
       if (!sessionCookie) {
         throw new Error("No session token in response");
       }

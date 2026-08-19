@@ -263,17 +263,11 @@ describe("Better Auth plugin SQLite production schema", () => {
       .innerJoin(team, eq(team.organizationId, organization.id))
       .innerJoin(
         teamMember,
-        and(
-          eq(teamMember.teamId, team.id),
-          eq(teamMember.userId, member.userId)
-        )
+        and(eq(teamMember.teamId, team.id), eq(teamMember.userId, member.userId)),
       )
       .innerJoin(
         invitation,
-        and(
-          eq(invitation.organizationId, organization.id),
-          eq(invitation.teamId, team.id)
-        )
+        and(eq(invitation.organizationId, organization.id), eq(invitation.teamId, team.id)),
       );
 
     expect(organizationRows).toEqual([

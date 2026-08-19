@@ -36,18 +36,11 @@ afterAll(() => {
   }
 });
 
-const VALID_NON_D1_PROVIDERS = [
-  "sqlite",
-  "turso",
-  "postgres",
-  "mysql",
-] as const;
+const VALID_NON_D1_PROVIDERS = ["sqlite", "turso", "postgres", "mysql"] as const;
 const validProviderArbitrary = fc.constantFrom(...VALID_NON_D1_PROVIDERS);
 const invalidProviderArbitrary = fc
   .string({ maxLength: 32, minLength: 1 })
-  .filter(
-    (value) => !(VALID_NON_D1_PROVIDERS as readonly string[]).includes(value)
-  )
+  .filter((value) => !(VALID_NON_D1_PROVIDERS as readonly string[]).includes(value))
   .filter((value) => value !== "d1");
 
 const buildConfig = (provider: string): DbConfig => ({
@@ -65,11 +58,9 @@ describe("createDb dialect guard (Property 1)", () => {
   it("P1 throws immediately for any unsupported DATABASE_PROVIDER", () => {
     fc.assert(
       fc.property(invalidProviderArbitrary, (provider) => {
-        expect(() => createDb(buildConfig(provider))).toThrow(
-          UNSUPPORTED_PROVIDER_REGEX
-        );
+        expect(() => createDb(buildConfig(provider))).toThrow(UNSUPPORTED_PROVIDER_REGEX);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -89,7 +80,7 @@ describe("createDb dialect guard (Property 1)", () => {
           expect(message.includes("Unsupported DATABASE_PROVIDER")).toBe(false);
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

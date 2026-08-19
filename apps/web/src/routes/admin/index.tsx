@@ -32,19 +32,14 @@ function AdminDashboard() {
 
   return (
     <div>
-      <AdminHeader
-        description="Key platform metrics at a glance."
-        title="Dashboard"
-      />
+      <AdminHeader description="Key platform metrics at a glance." title="Dashboard" />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {METRIC_CARDS.map((card) => (
           <Card key={card.key}>
             <CardHeader className="pb-2">
               <CardDescription>{card.label}</CardDescription>
               <CardTitle className="text-3xl tabular-nums">
-                {metricsQuery.isPending
-                  ? "—"
-                  : (metrics?.[card.key] ?? 0).toLocaleString()}
+                {metricsQuery.isPending ? "—" : (metrics?.[card.key] ?? 0).toLocaleString()}
               </CardTitle>
             </CardHeader>
             <CardContent />
@@ -52,9 +47,7 @@ function AdminDashboard() {
         ))}
       </div>
       {metricsQuery.error ? (
-        <p className="mt-4 text-destructive text-sm">
-          {(metricsQuery.error as Error).message}
-        </p>
+        <p className="mt-4 text-destructive text-sm">{(metricsQuery.error as Error).message}</p>
       ) : null}
     </div>
   );

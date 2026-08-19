@@ -45,9 +45,7 @@ export function ProfilePage() {
     <Card>
       <CardHeader>
         <CardTitle>Profile</CardTitle>
-        <CardDescription>
-          Your display name visible across the app.
-        </CardDescription>
+        <CardDescription>Your display name visible across the app.</CardDescription>
       </CardHeader>
       <CardContent>
         {/* TODO: avatar upload (Phase ?, requires file storage) */}

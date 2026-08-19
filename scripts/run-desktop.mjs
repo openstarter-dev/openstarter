@@ -110,7 +110,7 @@ async function main() {
   const ready = await waitForDevServer();
   if (!ready) {
     console.warn(
-      `[desktop] renderer dev server not ready at ${RENDERER_URL}; launching electron anyway.`
+      `[desktop] renderer dev server not ready at ${RENDERER_URL}; launching electron anyway.`,
     );
   }
 

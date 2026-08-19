@@ -21,12 +21,11 @@ const INTERNAL_RPC_BASE = "http://seo.internal";
 const SITEMAP_STATIC_PATHS = ["", "/pricing", "/blog", "/privacy", "/terms"];
 
 // llms 文本收录的公开页面（标题 / 描述用于人类与大模型可读的站点导览）。
-const LLMS_STATIC_PAGES: { path: string; title: string; description: string }[] =
-  [
-    { path: "", title: "Home", description: "Landing page" },
-    { path: "/pricing", title: "Pricing", description: "Pricing plans" },
-    { path: "/blog", title: "Blog", description: "Blog posts and articles" },
-  ];
+const LLMS_STATIC_PAGES: { path: string; title: string; description: string }[] = [
+  { path: "", title: "Home", description: "Landing page" },
+  { path: "/pricing", title: "Pricing", description: "Pricing plans" },
+  { path: "/blog", title: "Blog", description: "Blog posts and articles" },
+];
 
 // robots 屏蔽的路径：鉴权 / 私有区与 API（避免抓取工具索引），并屏蔽带查询串的 URL。
 const ROBOTS_DISALLOW = ["/admin", "/dashboard", "/settings", "/api/", "/*?*"];
@@ -119,9 +118,7 @@ export async function fetchSeoArticles(): Promise<SeoArticle[]> {
 }
 
 /** 取已发布文章全文（仅已发布，R24.4）；失败时回退空列表。 */
-export async function fetchSeoArticlesWithContent(): Promise<
-  SeoArticleWithContent[]
-> {
+export async function fetchSeoArticlesWithContent(): Promise<SeoArticleWithContent[]> {
   try {
     const rpc = await createRpc();
     const res = await rpc.api.seo.articles.full.$get();
@@ -147,8 +144,8 @@ function sitemapEntryXml(origin: string, entry: SitemapEntry): string {
     .map(
       (loc) =>
         `    <xhtml:link rel="alternate" hreflang="${loc}" href="${escapeXml(
-          urlForLocale(origin, entry.path, loc)
-        )}"/>`
+          urlForLocale(origin, entry.path, loc),
+        )}"/>`,
     )
     .join("\n");
   // 子元素顺序须符合 sitemap XSD 序列：loc → (xhtml:link 扩展) → lastmod → changefreq → priority。
@@ -172,10 +169,7 @@ function sitemapEntryXml(origin: string, entry: SitemapEntry): string {
  * locale 感知：`<loc>` 为 base locale 的**规范 URL**（无本地化前缀），各语言版本以
  * `xhtml:link rel="alternate" hreflang` 声明，避免重复本地化前缀导致重复内容。
  */
-export function buildSitemapXml(
-  origin: string,
-  articles: SeoArticle[]
-): string {
+export function buildSitemapXml(origin: string, articles: SeoArticle[]): string {
   const staticEntries: SitemapEntry[] = SITEMAP_STATIC_PATHS.map((path) => ({
     path,
     changeFrequency: path === "/blog" ? "daily" : "weekly",
@@ -226,9 +220,7 @@ export function buildLlmsTxt(origin: string, articles: SeoArticle[]): string {
     ...llmsHeaderLines(),
     ...LLMS_STATIC_PAGES.map(
       (page) =>
-        `- [${singleLine(page.title)}](${origin}${page.path}): ${singleLine(
-          page.description
-        )}`
+        `- [${singleLine(page.title)}](${origin}${page.path}): ${singleLine(page.description)}`,
     ),
   ];
   if (articles.length > 0) {
@@ -236,9 +228,7 @@ export function buildLlmsTxt(origin: string, articles: SeoArticle[]): string {
     for (const article of articles) {
       const title = singleLine(article.title ?? article.slug);
       const description = singleLine(article.description ?? "");
-      lines.push(
-        `- [${title}](${origin}/blog/${article.slug}): ${description}`
-      );
+      lines.push(`- [${title}](${origin}/blog/${article.slug}): ${description}`);
     }
   }
   lines.push("");
@@ -246,17 +236,12 @@ export function buildLlmsTxt(origin: string, articles: SeoArticle[]): string {
 }
 
 /** 渲染 llms-full.txt（R24.3）：站点概览 + 已发布文章全文（含正文），供大模型抓取。 */
-export function buildLlmsFullTxt(
-  origin: string,
-  articles: SeoArticleWithContent[]
-): string {
+export function buildLlmsFullTxt(origin: string, articles: SeoArticleWithContent[]): string {
   const lines: string[] = [
     ...llmsHeaderLines(),
     ...LLMS_STATIC_PAGES.map(
       (page) =>
-        `- [${singleLine(page.title)}](${origin}${page.path}): ${singleLine(
-          page.description
-        )}`
+        `- [${singleLine(page.title)}](${origin}${page.path}): ${singleLine(page.description)}`,
     ),
   ];
   if (articles.length > 0) {

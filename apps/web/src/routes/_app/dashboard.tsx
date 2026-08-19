@@ -25,9 +25,7 @@ function DashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Get started</CardTitle>
-          <CardDescription>
-            A few pointers to help you make this template your own.
-          </CardDescription>
+          <CardDescription>A few pointers to help you make this template your own.</CardDescription>
         </CardHeader>
         <CardContent>
           <ul className="flex flex-col gap-2 text-sm">

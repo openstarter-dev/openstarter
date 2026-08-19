@@ -21,10 +21,8 @@ const copy = {
       `${inviter} has invited you to join ${organization}. Accept the invitation below to get started.`,
     button: "Accept invitation",
     expiry: "This invitation will expire in 48 hours.",
-    fallbackIntro:
-      "If the button doesn't work, copy and paste this link into your browser:",
-    footer:
-      "If you weren't expecting this invitation, you can safely ignore this email.",
+    fallbackIntro: "If the button doesn't work, copy and paste this link into your browser:",
+    footer: "If you weren't expecting this invitation, you can safely ignore this email.",
   },
   zh: {
     preview: "你被邀请加入一个团队",

@@ -41,7 +41,7 @@ const resolveDialect = (provider: string | undefined): DrizzleDialect => {
       return "sqlite";
     default:
       throw new Error(
-        `Unsupported DATABASE_PROVIDER: ${provider}. Expected one of: sqlite, turso, postgres, mysql (or d1).`
+        `Unsupported DATABASE_PROVIDER: ${provider}. Expected one of: sqlite, turso, postgres, mysql (or d1).`,
       );
   }
 };

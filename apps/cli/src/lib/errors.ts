@@ -33,11 +33,7 @@ export class ConfigError extends Error {
 export class ApiError extends Error {
   readonly statusCode?: number;
 
-  constructor(
-    message: string,
-    statusCode?: number,
-    options: ErrorOptions = {}
-  ) {
+  constructor(message: string, statusCode?: number, options: ErrorOptions = {}) {
     super(message, options);
     this.name = "ApiError";
     this.statusCode = statusCode;

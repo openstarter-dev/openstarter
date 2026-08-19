@@ -52,11 +52,7 @@ export class AlipayProvider implements PaymentProvider {
     this.configs = configs;
   }
 
-  createPayment({
-    order,
-  }: {
-    order: PaymentOrder;
-  }): Promise<CheckoutSession> {
+  createPayment({ order }: { order: PaymentOrder }): Promise<CheckoutSession> {
     if (!order.price) {
       throw new Error("price is required for Alipay payment");
     }
@@ -74,10 +70,7 @@ export class AlipayProvider implements PaymentProvider {
         : undefined,
     };
 
-    const params = this.buildRequestParams(
-      "alipay.trade.page.pay",
-      bizContent
-    );
+    const params = this.buildRequestParams("alipay.trade.page.pay", bizContent);
 
     const baseReturnUrl = order.successUrl || this.configs.returnUrl || "";
     if (baseReturnUrl) {
@@ -100,20 +93,14 @@ export class AlipayProvider implements PaymentProvider {
     });
   }
 
-  async getPaymentSession({
-    sessionId,
-  }: {
-    sessionId: string;
-  }): Promise<PaymentSession> {
+  async getPaymentSession({ sessionId }: { sessionId: string }): Promise<PaymentSession> {
     const result = await this.execute("alipay.trade.query", {
       out_trade_no: sessionId,
     });
     const response = result.alipay_trade_query_response;
 
     if (!response || response.code !== "10000") {
-      throw new Error(
-        response?.sub_msg || response?.msg || "Query payment failed"
-      );
+      throw new Error(response?.sub_msg || response?.msg || "Query payment failed");
     }
 
     return {
@@ -123,15 +110,11 @@ export class AlipayProvider implements PaymentProvider {
         transactionId: response.trade_no,
         amount: toCents(response.total_amount),
         currency: "cny",
-        paymentAmount: toCents(
-          response.buyer_pay_amount || response.total_amount
-        ),
+        paymentAmount: toCents(response.buyer_pay_amount || response.total_amount),
         paymentCurrency: "cny",
         paymentUserId: response.buyer_user_id,
         paymentEmail: response.buyer_logon_id,
-        paidAt: response.send_pay_date
-          ? new Date(response.send_pay_date)
-          : undefined,
+        paidAt: response.send_pay_date ? new Date(response.send_pay_date) : undefined,
       },
       paymentResult: response,
       metadata: parsePassback(response.passback_params),
@@ -170,9 +153,7 @@ export class AlipayProvider implements PaymentProvider {
         transactionId: params.trade_no,
         amount: toCents(params.total_amount),
         currency: "cny",
-        paymentAmount: toCents(
-          params.buyer_pay_amount || params.total_amount
-        ),
+        paymentAmount: toCents(params.buyer_pay_amount || params.total_amount),
         paymentCurrency: "cny",
         paymentUserId: params.buyer_id,
         paymentEmail: params.buyer_logon_id,
@@ -189,7 +170,7 @@ export class AlipayProvider implements PaymentProvider {
 
   private async execute(
     method: string,
-    bizContent: Record<string, unknown>
+    bizContent: Record<string, unknown>,
   ): Promise<{ alipay_trade_query_response?: AlipayTradeQueryResponse }> {
     const params = this.buildRequestParams(method, bizContent);
     if (this.configs.notifyUrl) {
@@ -210,7 +191,7 @@ export class AlipayProvider implements PaymentProvider {
 
   private buildRequestParams(
     method: string,
-    bizContent: Record<string, unknown>
+    bizContent: Record<string, unknown>,
   ): Record<string, string> {
     return {
       app_id: this.configs.appId,
@@ -224,14 +205,9 @@ export class AlipayProvider implements PaymentProvider {
     };
   }
 
-  private signParams(
-    params: Record<string, string>
-  ): Record<string, string> {
+  private signParams(params: Record<string, string>): Record<string, string> {
     const signStr = buildSignString(params, []);
-    const algorithm =
-      (this.configs.signType || "RSA2") === "RSA2"
-        ? "RSA-SHA256"
-        : "RSA-SHA1";
+    const algorithm = (this.configs.signType || "RSA2") === "RSA2" ? "RSA-SHA256" : "RSA-SHA1";
 
     const sign = createSign(algorithm)
       .update(signStr, "utf-8")
@@ -251,21 +227,14 @@ export class AlipayProvider implements PaymentProvider {
 
     return createVerify(algorithm)
       .update(signStr, "utf-8")
-      .verify(
-        normalizePublicKey(this.configs.alipayPublicKey),
-        sign,
-        "base64"
-      );
+      .verify(normalizePublicKey(this.configs.alipayPublicKey), sign, "base64");
   }
 }
 
 // ─── 纯辅助（模块级） ────────────────────────────────────────────────────────
 
 /** 按键名字典序拼接 `k=v&...`，排除空值与 `exclude` 中的键。 */
-function buildSignString(
-  params: Record<string, string>,
-  exclude: string[]
-): string {
+function buildSignString(params: Record<string, string>, exclude: string[]): string {
   return Object.keys(params)
     .filter((k) => !exclude.includes(k))
     .sort()
@@ -282,9 +251,7 @@ function toCents(value: string | undefined): number {
   return Number.isFinite(parsed) ? Math.round(parsed * CENTS_PER_UNIT) : 0;
 }
 
-function parsePassback(
-  passback: string | undefined
-): Record<string, unknown> | undefined {
+function parsePassback(passback: string | undefined): Record<string, unknown> | undefined {
   if (!passback) {
     return undefined;
   }

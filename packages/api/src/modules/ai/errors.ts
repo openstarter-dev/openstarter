@@ -22,9 +22,7 @@ export class AIProviderUnavailableError extends Error {
   readonly provider: string;
 
   constructor(provider: string) {
-    super(
-      `AI provider '${provider}' is not enabled or its credentials are missing`
-    );
+    super(`AI provider '${provider}' is not enabled or its credentials are missing`);
     this.name = "AIProviderUnavailableError";
     this.provider = provider;
   }
@@ -56,8 +54,7 @@ export function normalizeProviderError(args: {
   statusCode?: number;
 }): AIProviderErrorInfo {
   const { provider, model, error, statusCode } = args;
-  const message =
-    error instanceof Error ? error.message : "unknown AI provider error";
+  const message = error instanceof Error ? error.message : "unknown AI provider error";
   return { provider, model, statusCode, message };
 }
 
@@ -73,7 +70,7 @@ export class AIProviderRequestError extends Error {
     super(
       detail
         ? `AI provider '${provider}' request failed with status ${statusCode}: ${detail}`
-        : `AI provider '${provider}' request failed with status ${statusCode}`
+        : `AI provider '${provider}' request failed with status ${statusCode}`,
     );
     this.name = "AIProviderRequestError";
     this.provider = provider;

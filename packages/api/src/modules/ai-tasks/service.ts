@@ -158,17 +158,10 @@ export function createTask(params: CreateTaskParams): Promise<AiTask> {
       }
 
       // 存入消费流水 id，供任务失败时按此 id 精确撤销（R20.3）。
-      await tx
-        .update(aiTask)
-        .set({ creditId: result.consumedCredit.id })
-        .where(eq(aiTask.id, id));
+      await tx.update(aiTask).set({ creditId: result.consumedCredit.id }).where(eq(aiTask.id, id));
     }
 
-    const [created] = await tx
-      .select()
-      .from(aiTask)
-      .where(eq(aiTask.id, id))
-      .limit(1);
+    const [created] = await tx.select().from(aiTask).where(eq(aiTask.id, id)).limit(1);
     if (!created) {
       throw new Error("Failed to load AI task after creation");
     }
@@ -222,17 +215,12 @@ export async function updateTask(params: UpdateTaskParams): Promise<void> {
  * 分页查询用户的 AI 任务（R20.4）：按 `userId` 固定归属，`mediaType`/`status` 可选组合筛选，
  * 按 `createdAt` 倒序返回。默认排除已软删记录。返回条目列表与总数（与 `respPage` 结构一致）。
  */
-export async function getTasks(
-  params: GetTasksParams
-): Promise<GetTasksResult> {
+export async function getTasks(params: GetTasksParams): Promise<GetTasksResult> {
   const page = params.page ?? DEFAULT_PAGE;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
   const offset = (page - 1) * pageSize;
 
-  const conditions: SQL[] = [
-    eq(aiTask.userId, params.userId),
-    isNull(aiTask.deletedAt),
-  ];
+  const conditions: SQL[] = [eq(aiTask.userId, params.userId), isNull(aiTask.deletedAt)];
   if (params.mediaType !== undefined) {
     conditions.push(eq(aiTask.mediaType, params.mediaType));
   }
@@ -241,10 +229,7 @@ export async function getTasks(
   }
   const where = and(...conditions);
 
-  const [totalRow] = await db()
-    .select({ value: count() })
-    .from(aiTask)
-    .where(where);
+  const [totalRow] = await db().select({ value: count() }).from(aiTask).where(where);
 
   const items = await db()
     .select()

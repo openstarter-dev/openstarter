@@ -31,9 +31,7 @@ export interface ListUserOrdersResult {
  * 分页返回当前用户的订单（支付记录），按创建时间倒序，排除软删（`deletedAt` 非空）。
  * 仅以 `userId` 为范围——不暴露他人订单（R27 自助数据隔离）。
  */
-export async function listUserOrders(
-  params: ListUserOrdersParams
-): Promise<ListUserOrdersResult> {
+export async function listUserOrders(params: ListUserOrdersParams): Promise<ListUserOrdersResult> {
   const { userId, page, pageSize } = params;
   const database = db();
   const where = and(eq(order.userId, userId), isNull(order.deletedAt));

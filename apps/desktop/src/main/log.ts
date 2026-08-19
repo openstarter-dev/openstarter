@@ -8,9 +8,7 @@ const PREFIX = "[desktop]";
 
 function writeLine(stream: NodeJS.WritableStream, args: unknown[]): void {
   const message = args
-    .map((arg) =>
-      arg instanceof Error ? (arg.stack ?? arg.message) : String(arg)
-    )
+    .map((arg) => (arg instanceof Error ? (arg.stack ?? arg.message) : String(arg)))
     .join(" ");
   stream.write(`${PREFIX} ${message}\n`);
 }

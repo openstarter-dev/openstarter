@@ -44,8 +44,7 @@ vi.mock("@/lib/auth-client", () => ({
 vi.mock("sonner", () => ({ toast: toastMocks }));
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const router =
-    await importOriginal<typeof import("@tanstack/react-router")>();
+  const router = await importOriginal<typeof import("@tanstack/react-router")>();
   return { ...router, useNavigate: () => navigateMock };
 });
 
@@ -60,9 +59,7 @@ const renderWithQuery = (node: ReactNode) => {
     },
   });
 
-  return render(
-    <QueryClientProvider client={queryClient}>{node}</QueryClientProvider>
-  );
+  return render(<QueryClientProvider client={queryClient}>{node}</QueryClientProvider>);
 };
 
 const AccountsPage = AccountsRoute.options.component as ComponentType;
@@ -71,9 +68,7 @@ const SessionsPage = SessionsRoute.options.component as ComponentType;
 
 const account = (overrides: { id: string; providerId: string }) => ({
   accountId:
-    overrides.providerId === "credential"
-      ? "user@example.com"
-      : `${overrides.providerId}-account`,
+    overrides.providerId === "credential" ? "user@example.com" : `${overrides.providerId}-account`,
   createdAt: new Date("2026-01-01T00:00:00.000Z"),
   updatedAt: new Date("2026-01-01T00:00:00.000Z"),
   userId: "user-1",
@@ -133,11 +128,7 @@ describe("Settings account data", () => {
     renderWithQuery(<AccountsPage />);
 
     expect(await screen.findByText("Google")).toBeTruthy();
-    fireEvent.click(
-      screen
-        .getAllByRole("button", { name: "Unlink" })
-        .at(0) as HTMLButtonElement
-    );
+    fireEvent.click(screen.getAllByRole("button", { name: "Unlink" }).at(0) as HTMLButtonElement);
 
     await waitFor(() => {
       expect(authMocks.unlinkAccount).toHaveBeenCalledWith({
@@ -230,7 +221,7 @@ describe("Settings session data", () => {
     fireEvent.click(
       await screen.findByRole("button", {
         name: "Revoke all other sessions",
-      })
+      }),
     );
 
     await waitFor(() => {
@@ -253,9 +244,7 @@ describe("Settings account deletion", () => {
     fireEvent.click(screen.getByRole("button", { name: "Delete my account" }));
 
     await waitFor(() => {
-      expect(toastMocks.success).toHaveBeenCalledWith(
-        "Verification email sent"
-      );
+      expect(toastMocks.success).toHaveBeenCalledWith("Verification email sent");
     });
     expect(navigateMock).not.toHaveBeenCalled();
   });

@@ -16,10 +16,12 @@
 ## 自动化验证（已执行并通过）
 
 ### 1. 全量构建（turbo build）—— PASS
+
 `pnpm build` → `4 successful, 4 total`。@openstarter/cli、@openstarter/api、
 apps/web（含新 device 页与 routeTree 生成）等全部构建成功。
 
 ### 2. 类型检查 —— PASS
+
 - `pnpm --filter @openstarter/db check-types`
 - `pnpm --filter @openstarter/auth check-types`（含新增的 11 个 device 错误码翻译键映射）
 - `pnpm --filter @openstarter/api check-types`
@@ -29,6 +31,7 @@ apps/web（含新 device 页与 routeTree 生成）等全部构建成功。
   device.tsx 本身无新增报错。
 
 ### 3. API 路由集成测试（vitest） —— PASS（25 passed / 9 files）
+
 - `status.test.ts`：`GET /api/status` 返回 `{ code:0, message:"ok", data:{status:"ok", timestamp, version:"0.1.0"} }` 信封。
 - `notes.test.ts`：mock requireAuth（注入 userId）后验证
   - POST /api_notes 创建并回包信封（note_NN、userId、createdAt/updatedAt）；
@@ -38,20 +41,24 @@ apps/web（含新 device 页与 routeTree 生成）等全部构建成功。
 - 其余既有测试无回归。
 
 ### 4. CLI 手工冒烟（node 调 dist）—— PASS
-| 命令 | 预期 | 结果 |
-| --- | --- | --- |
-| `node apps/cli/dist/index.js --help` | 列出 login/logout/whoami/profile/profile:update/list/get/create/status/info | ✅ 全部出现 |
-| `node apps/cli/dist/index.js logout` | `✓ 已登出` | ✅ |
-| `node apps/cli/dist/index.js whoami`（未登录） | `❌ 认证错误...`，退出码 2 | ✅ exit=2 |
-| `node apps/cli/dist/index.js info` | 键值对：CLI Version/API URL/Config/Logged in | ✅ |
+
+| 命令                                           | 预期                                                                        | 结果        |
+| ---------------------------------------------- | --------------------------------------------------------------------------- | ----------- |
+| `node apps/cli/dist/index.js --help`           | 列出 login/logout/whoami/profile/profile:update/list/get/create/status/info | ✅ 全部出现 |
+| `node apps/cli/dist/index.js logout`           | `✓ 已登出`                                                                  | ✅          |
+| `node apps/cli/dist/index.js whoami`（未登录） | `❌ 认证错误...`，退出码 2                                                  | ✅ exit=2   |
+| `node apps/cli/dist/index.js info`             | 键值对：CLI Version/API URL/Config/Logged in                                | ✅          |
 
 ### 5. 打包体积 —— PASS（达标）
+
 `du -sh apps/cli/dist` = **9.6 KB**（`dist/index.js` 9.75KB）。
 目标 < 5MB → **达标**（差距 ~500×）。
 
 ### 6. 启动时间 —— PARTIAL
+
 `node apps/cli/dist/index.js --version`，10 次暖启动（`--prepare` 预热）耗时（秒）：
 `0.15 0.15 0.15 0.16 0.16 0.16 0.17 0.17 0.18 0.27`
+
 - 中位 ~150ms，P90 ~180ms，偶发 270ms（首次冷启动约 320ms）。
 - 目标 < 100ms → **未达标**。原因分析：Node.js 进程自身冷启动即 ~80–90ms
   （`node --version` 约 40ms 仅 fork+print，真正加载 ESM 模块图基线更高）。

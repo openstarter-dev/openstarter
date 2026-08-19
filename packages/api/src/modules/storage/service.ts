@@ -80,22 +80,17 @@ function toBase64(body: Uint8Array): string {
  * 上传图片编排。类型/大小校验先于任何持久化完成（R18.4）；无存储渠道时返回 `data:` base64
  * 内联兜底（R18.3）；有渠道时持久化并返回可访问 URL（R18.2）。
  */
-export async function uploadImage(
-  params: UploadImageParams
-): Promise<UploadImageResult> {
+export async function uploadImage(params: UploadImageParams): Promise<UploadImageResult> {
   const { body, contentType, maxKb } = params;
 
   // R18.4：类型/大小校验必须在持久化前完成，违反即拒绝（不产生任何存储副作用）。
   if (!isAllowedImageType(contentType)) {
-    throw new UploadLimitError(
-      "type",
-      `Image type '${contentType}' is not allowed`
-    );
+    throw new UploadLimitError("type", `Image type '${contentType}' is not allowed`);
   }
   if (maxKb > 0 && body.length > maxKb * BYTES_PER_KB) {
     throw new UploadLimitError(
       "size",
-      `Image size ${Math.ceil(body.length / BYTES_PER_KB)}KB exceeds the ${maxKb}KB limit`
+      `Image size ${Math.ceil(body.length / BYTES_PER_KB)}KB exceeds the ${maxKb}KB limit`,
     );
   }
 

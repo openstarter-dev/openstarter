@@ -45,5 +45,5 @@ export const getAnalyticsConfigFn = createServerFn({ method: "GET" }).handler(
     }
     const json = await res.json();
     return json.data ?? EMPTY_ANALYTICS_CONFIG;
-  }
+  },
 );

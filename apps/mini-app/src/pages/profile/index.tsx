@@ -1,11 +1,11 @@
-import { View, Text } from '@tarojs/components';
-import Taro from '@tarojs/taro';
-import { useAuthStore } from '@/stores/auth-store';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import Layout from '@/components/Layout';
-import Button from '@/components/Button';
-import Icon from '@/components/Icon';
-import './index.scss';
+import { View, Text } from "@tarojs/components";
+import Taro from "@tarojs/taro";
+import { useAuthStore } from "@/stores/auth-store";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import Layout from "@/components/Layout";
+import Button from "@/components/Button";
+import Icon from "@/components/Icon";
+import "./index.scss";
 
 export default function ProfilePage() {
   const user = useAuthStore((s) => s.user);
@@ -13,7 +13,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     logout();
-    Taro.reLaunch({ url: '/pages/index/index' });
+    Taro.reLaunch({ url: "/pages/index/index" });
   };
 
   return (
@@ -25,21 +25,19 @@ export default function ProfilePage() {
           </View>
 
           <View className="profile__info">
-            <Text className="profile__name">{user?.name || user?.email || 'User'}</Text>
-            {user?.name && (
-              <Text className="profile__email">{user.email}</Text>
-            )}
+            <Text className="profile__name">{user?.name || user?.email || "User"}</Text>
+            {user?.name && <Text className="profile__email">{user.email}</Text>}
           </View>
 
           <View className="profile__section">
             <Text className="profile__section-title">Account</Text>
             <View className="profile__row">
               <Text className="profile__row-label">Email</Text>
-              <Text className="profile__row-value">{user?.email || '-'}</Text>
+              <Text className="profile__row-value">{user?.email || "-"}</Text>
             </View>
             <View className="profile__row">
               <Text className="profile__row-label">User ID</Text>
-              <Text className="profile__row-value">{user?.id || '-'}</Text>
+              <Text className="profile__row-value">{user?.id || "-"}</Text>
             </View>
           </View>
 

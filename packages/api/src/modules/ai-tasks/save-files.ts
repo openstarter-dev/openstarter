@@ -33,10 +33,7 @@ async function fetchAsBytes(url: string): Promise<Uint8Array> {
  * - 无存储渠道 → 拉取字节并回写 `data:` base64 内联 URL（R18.3 兜底）。
  * 任一异常仅记日志并原样返回该文件（保留供应商临时 URL），不影响其余文件。
  */
-async function persistOne(
-  file: AIFile,
-  storage: StorageManager | null
-): Promise<AIFile> {
+async function persistOne(file: AIFile, storage: StorageManager | null): Promise<AIFile> {
   try {
     if (storage) {
       const result = await storage.downloadAndUpload({

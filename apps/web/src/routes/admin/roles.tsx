@@ -141,9 +141,7 @@ function AdminRolesPage() {
             <TableBody>
               {roles.map((role) => (
                 <TableRow key={role.id}>
-                  <TableCell className="font-mono text-sm">
-                    {role.name}
-                  </TableCell>
+                  <TableCell className="font-mono text-sm">{role.name}</TableCell>
                   <TableCell>{role.title}</TableCell>
                   <TableCell className="space-x-1 text-right">
                     <Button
@@ -257,9 +255,7 @@ function AdminRolesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Role permissions</DialogTitle>
-            <DialogDescription>
-              Select the permissions granted by this role.
-            </DialogDescription>
+            <DialogDescription>Select the permissions granted by this role.</DialogDescription>
           </DialogHeader>
           <div className="max-h-80 space-y-2 overflow-y-auto">
             {permissions.map((permission) => (
@@ -271,14 +267,10 @@ function AdminRolesPage() {
                 <Checkbox
                   checked={selectedPerms.has(permission.id)}
                   id={`perm-${permission.id}`}
-                  onCheckedChange={(checked) =>
-                    togglePerm(permission.id, checked === true)
-                  }
+                  onCheckedChange={(checked) => togglePerm(permission.id, checked === true)}
                 />
                 <span className="font-mono">{permission.code}</span>
-                <span className="text-muted-foreground">
-                  {permission.title}
-                </span>
+                <span className="text-muted-foreground">{permission.title}</span>
               </label>
             ))}
           </div>

@@ -1,21 +1,21 @@
-import { View, Text } from '@tarojs/components';
-import './index.scss';
+import { View, Text } from "@tarojs/components";
+import "./index.scss";
 
 interface IconProps {
-  type: 'success' | 'error' | 'info' | 'arrow-right' | 'user' | 'lock' | 'logout';
+  type: "success" | "error" | "info" | "arrow-right" | "user" | "lock" | "logout";
   size?: number;
   color?: string;
 }
 
 export default function Icon({ type, size = 40, color }: IconProps) {
   const iconMap: Record<string, string> = {
-    success: '✓',
-    error: '✕',
-    info: 'ℹ',
-    'arrow-right': '›',
-    user: '👤',
-    lock: '🔒',
-    logout: '↩',
+    success: "✓",
+    error: "✕",
+    info: "ℹ",
+    "arrow-right": "›",
+    user: "👤",
+    lock: "🔒",
+    logout: "↩",
   };
 
   return (
@@ -26,7 +26,7 @@ export default function Icon({ type, size = 40, color }: IconProps) {
         ...(color ? { color } : {}),
       }}
     >
-      {iconMap[type] || '?'}
+      {iconMap[type] || "?"}
     </Text>
   );
 }

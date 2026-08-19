@@ -33,9 +33,7 @@ const SWITCH_KEYS: Record<MobileSocialProvider, string> = {
   google: "google_auth_enabled",
 };
 
-export function resolveEnabledProviders(
-  config: PublicConfig
-): EnabledAuthMethods {
+export function resolveEnabledProviders(config: PublicConfig): EnabledAuthMethods {
   const socialProviders: MobileSocialProvider[] = [];
   for (const provider of MOBILE_SOCIAL_PROVIDERS) {
     if (config[SWITCH_KEYS[provider]] === "true") {

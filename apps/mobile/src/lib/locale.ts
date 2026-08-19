@@ -5,15 +5,9 @@
 //
 // 优先级：用户显式选择（持久化） > 设备语言 > DEFAULT_LOCALE。
 // 设备语言按主语言子标签匹配：zh-Hans-CN / ZH-CN 都应命中 "zh"。
-import {
-  DEFAULT_LOCALE,
-  SUPPORTED_LOCALES,
-  type SupportedLocale,
-} from "@openstarter/i18n";
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type SupportedLocale } from "@openstarter/i18n";
 
-export function isSupportedLocale(
-  value: string | null | undefined
-): value is SupportedLocale {
+export function isSupportedLocale(value: string | null | undefined): value is SupportedLocale {
   if (!value) {
     return false;
   }
@@ -22,7 +16,7 @@ export function isSupportedLocale(
 
 export function resolveInitialLocale(
   deviceLocales: readonly string[],
-  persisted: string | null
+  persisted: string | null,
 ): SupportedLocale {
   if (isSupportedLocale(persisted)) {
     return persisted;

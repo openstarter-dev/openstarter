@@ -53,17 +53,9 @@ export interface ApiKeyListParams {
 
 export interface ApiKeyRepository {
   findActiveUserIdByHash: (keyHash: string) => Promise<string | null>;
-  insert: (
-    values: ApiKeyInsertValues
-  ) => Promise<{ id: string; title: string } | null>;
-  listActive: (
-    params: ApiKeyListParams
-  ) => Promise<{ items: ApiKeyListItem[]; total: number }>;
-  revoke: (params: {
-    keyId: string;
-    revokedAt: Date;
-    userId: string;
-  }) => Promise<void>;
+  insert: (values: ApiKeyInsertValues) => Promise<{ id: string; title: string } | null>;
+  listActive: (params: ApiKeyListParams) => Promise<{ items: ApiKeyListItem[]; total: number }>;
+  revoke: (params: { keyId: string; revokedAt: Date; userId: string }) => Promise<void>;
 }
 
 function generateKey(): GeneratedKey {
@@ -100,7 +92,7 @@ export function createApiKeyService(repository: ApiKeyRepository) {
     userId: string,
     page = 1,
     pageSize = DEFAULT_PAGE_SIZE,
-    search?: string
+    search?: string,
   ) => {
     const safePage = Math.max(1, page);
     const safePageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, pageSize));
@@ -127,18 +119,14 @@ export function createApiKeyService(repository: ApiKeyRepository) {
 }
 
 export const createDatabaseApiKeyRepository = (
-  getDatabase: () => Database = db
+  getDatabase: () => Database = db,
 ): ApiKeyRepository => ({
   findActiveUserIdByHash: async (keyHash) => {
     const [row] = await getDatabase()
       .select({ userId: apikey.userId })
       .from(apikey)
       .where(
-        and(
-          eq(apikey.keyHash, keyHash),
-          eq(apikey.status, "active"),
-          isNull(apikey.deletedAt)
-        )
+        and(eq(apikey.keyHash, keyHash), eq(apikey.status, "active"), isNull(apikey.deletedAt)),
       )
       .limit(1);
     return row?.userId ?? null;
@@ -161,10 +149,7 @@ export const createDatabaseApiKeyRepository = (
     }
     const where = and(...conditions);
     const database = getDatabase();
-    const [totalResult] = await database
-      .select({ count: count() })
-      .from(apikey)
-      .where(where);
+    const [totalResult] = await database.select({ count: count() }).from(apikey).where(where);
     const items = await database
       .select({
         createdAt: apikey.createdAt,

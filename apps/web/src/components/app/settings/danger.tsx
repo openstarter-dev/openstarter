@@ -20,8 +20,7 @@ export function DangerPage() {
   const [deleting, setDeleting] = useState(false);
 
   const canSubmit =
-    userEmail !== "" &&
-    confirmText.trim().toLowerCase() === userEmail.toLowerCase();
+    userEmail !== "" && confirmText.trim().toLowerCase() === userEmail.toLowerCase();
 
   const handleDelete = async () => {
     if (!canSubmit) {
@@ -47,8 +46,7 @@ export function DangerPage() {
       <CardHeader>
         <CardTitle className="text-destructive">Danger zone</CardTitle>
         <CardDescription>
-          Permanently delete your account and all associated data. This action
-          is irreversible.
+          Permanently delete your account and all associated data. This action is irreversible.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -63,8 +61,7 @@ export function DangerPage() {
 
         <div className="space-y-2">
           <Label htmlFor="confirm-email">
-            Type your email{" "}
-            <span className="text-destructive">{userEmail}</span> to confirm
+            Type your email <span className="text-destructive">{userEmail}</span> to confirm
           </Label>
           <Input
             disabled={deleting}

@@ -10,9 +10,7 @@
 // 值会拼出无效请求。这里显式要求 http/https 协议的绝对 URL，与 apps/desktop/config.ts
 // 的判定同语义（见 docs/superpowers/plans/2026-08-01-mobile-app.md Task 5）。
 
-export type EnvResult =
-  | { ok: true; apiUrl: string }
-  | { ok: false; reason: string };
+export type EnvResult = { ok: true; apiUrl: string } | { ok: false; reason: string };
 
 function isValidHttpUrl(value: string): boolean {
   try {

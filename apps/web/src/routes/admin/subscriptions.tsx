@@ -41,10 +41,7 @@ function AdminSubscriptionsPage() {
 
   return (
     <div>
-      <AdminHeader
-        description="All customer subscriptions."
-        title="Subscriptions"
-      />
+      <AdminHeader description="All customer subscriptions." title="Subscriptions" />
 
       <StatusText
         empty={items.length === 0}
@@ -74,15 +71,9 @@ function AdminSubscriptionsPage() {
                   <TableCell className="font-medium">
                     {item.planName ?? item.productName ?? "—"}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {item.paymentProvider}
-                  </TableCell>
+                  <TableCell className="text-muted-foreground">{item.paymentProvider}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant={
-                        item.status === "active" ? "secondary" : "outline"
-                      }
-                    >
+                    <Badge variant={item.status === "active" ? "secondary" : "outline"}>
                       {item.status}
                     </Badge>
                   </TableCell>

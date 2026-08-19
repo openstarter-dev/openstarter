@@ -17,13 +17,9 @@ export function SocialButtons(props: {
   const handlePress = (provider: MobileSocialProvider) => {
     // callbackURL 是应用内路径；Expo 插件据 scheme 组装成深链，
     // 授权完成后浏览器回跳到 openstarter:// 并由 expo-router 落到这里。
-    authClient.signIn
-      .social({ callbackURL: "/", provider })
-      .catch((error: unknown) => {
-        props.onError(
-          error instanceof Error ? error.message : "OAuth sign-in failed"
-        );
-      });
+    authClient.signIn.social({ callbackURL: "/", provider }).catch((error: unknown) => {
+      props.onError(error instanceof Error ? error.message : "OAuth sign-in failed");
+    });
   };
 
   return (

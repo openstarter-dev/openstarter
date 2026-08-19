@@ -30,22 +30,10 @@ export function MobileTopbar() {
         </Link>
       </div>
 
-      <Drawer
-        className="bg-sidebar"
-        label="Navigation"
-        onClose={close}
-        open={open}
-        side="left"
-      >
+      <Drawer className="bg-sidebar" label="Navigation" onClose={close} open={open} side="left">
         <div className="flex h-12 items-center justify-between border-b px-3">
           <span className="font-semibold">{BRAND_NAME}</span>
-          <Button
-            aria-label="Close menu"
-            onClick={close}
-            size="icon"
-            type="button"
-            variant="ghost"
-          >
+          <Button aria-label="Close menu" onClick={close} size="icon" type="button" variant="ghost">
             <X aria-hidden="true" />
           </Button>
         </div>

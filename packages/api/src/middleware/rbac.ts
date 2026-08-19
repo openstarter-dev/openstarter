@@ -19,23 +19,21 @@ export type PermissionCodeResolver = (userId: string) => Promise<string[]>;
  */
 export function createRequirePermission(
   code: string,
-  resolvePermissionCodes: PermissionCodeResolver
+  resolvePermissionCodes: PermissionCodeResolver,
 ) {
-  return createMiddleware<{ Variables: { userId: string } }>(
-    async (context, next) => {
-      const userId = context.get("userId");
-      if (!userId) {
-        return context.json(respErr("unauthorized"), 401);
-      }
-
-      const codes = await resolvePermissionCodes(userId);
-      if (!matchPermission(code, codes)) {
-        return context.json(respErr("forbidden"), 403);
-      }
-
-      await next();
+  return createMiddleware<{ Variables: { userId: string } }>(async (context, next) => {
+    const userId = context.get("userId");
+    if (!userId) {
+      return context.json(respErr("unauthorized"), 401);
     }
-  );
+
+    const codes = await resolvePermissionCodes(userId);
+    if (!matchPermission(code, codes)) {
+      return context.json(respErr("forbidden"), 403);
+    }
+
+    await next();
+  });
 }
 
 /**

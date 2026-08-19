@@ -30,8 +30,16 @@ function createMockApi() {
   return {
     api: {
       user: {
-        credits: { $get: vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { balance: 42 } }) }) },
-        plan: { $get: vi.fn().mockResolvedValue({ ok: true, json: async () => ({ data: { plan: "member" } }) }) },
+        credits: {
+          $get: vi
+            .fn()
+            .mockResolvedValue({ ok: true, json: async () => ({ data: { balance: 42 } }) }),
+        },
+        plan: {
+          $get: vi
+            .fn()
+            .mockResolvedValue({ ok: true, json: async () => ({ data: { plan: "member" } }) }),
+        },
         subscription: {
           $get: vi.fn().mockResolvedValue({
             ok: true,
@@ -104,7 +112,7 @@ describe("App", () => {
     render(
       <TestWrapper api={mockApi} queryClient={queryClient}>
         <App deps={makeDeps()} />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     await waitFor(() => {
@@ -122,7 +130,7 @@ describe("App", () => {
     render(
       <TestWrapper api={mockApi} queryClient={queryClient}>
         <App deps={makeDeps()} />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     await waitFor(() => {
@@ -144,7 +152,7 @@ describe("App", () => {
             env: { ok: false, reason: "VITE_APP_URL is not set" },
           })}
         />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     await waitFor(() => {
@@ -161,7 +169,7 @@ describe("App", () => {
     render(
       <TestWrapper api={mockApi} queryClient={queryClient} isSignedOut>
         <App deps={makeDeps()} />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     await waitFor(() => {
@@ -182,7 +190,7 @@ describe("App", () => {
     render(
       <TestWrapper api={mockApi} queryClient={queryClient}>
         <App deps={makeDeps()} />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     expect(screen.getByText("Loading...")).toBeTruthy();
@@ -203,7 +211,7 @@ describe("App", () => {
     render(
       <TestWrapper api={mockApi} queryClient={queryClient}>
         <App deps={makeDeps()} />
-      </TestWrapper>
+      </TestWrapper>,
     );
 
     await waitFor(() => {

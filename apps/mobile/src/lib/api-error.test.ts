@@ -35,9 +35,7 @@ describe("mapApiError", () => {
   });
 
   it("uses the server message for a 500", () => {
-    expect(
-      mapApiError(500, { code: -1, message: "Internal Server Error" })
-    ).toEqual({
+    expect(mapApiError(500, { code: -1, message: "Internal Server Error" })).toEqual({
       message: "Internal Server Error",
       status: "server-error",
     });
@@ -61,22 +59,17 @@ describe("mapApiError", () => {
 describe("runRequest", () => {
   it("extracts data from a successful envelope", async () => {
     const send = vi.fn(() =>
-      Promise.resolve(
-        jsonResponse(200, { code: 0, data: { plan: "member" }, message: "ok" })
-      )
+      Promise.resolve(jsonResponse(200, { code: 0, data: { plan: "member" }, message: "ok" })),
     );
 
-    const result = await runRequest(
-      send,
-      (body) => (body as { data: { plan: string } }).data.plan
-    );
+    const result = await runRequest(send, (body) => (body as { data: { plan: string } }).data.plan);
 
     expect(result).toEqual({ data: "member", status: "success" });
   });
 
   it("maps a 401 response to unauthorized", async () => {
     const send = vi.fn(() =>
-      Promise.resolve(jsonResponse(401, { code: -1, message: "Unauthorized" }))
+      Promise.resolve(jsonResponse(401, { code: -1, message: "Unauthorized" })),
     );
 
     const result = await runRequest(send, () => "unused");
@@ -85,9 +78,7 @@ describe("runRequest", () => {
   });
 
   it("maps a non-JSON error body to a status-code message", async () => {
-    const send = vi.fn(() =>
-      Promise.resolve(new Response("<html>502</html>", { status: 502 }))
-    );
+    const send = vi.fn(() => Promise.resolve(new Response("<html>502</html>", { status: 502 })));
 
     const result = await runRequest(send, () => "unused");
 
@@ -98,9 +89,7 @@ describe("runRequest", () => {
   });
 
   it("maps a rejected fetch to unreachable", async () => {
-    const send = vi.fn(() =>
-      Promise.reject(new Error("Network request failed"))
-    );
+    const send = vi.fn(() => Promise.reject(new Error("Network request failed")));
 
     const result = await runRequest(send, () => "unused");
 
@@ -108,9 +97,7 @@ describe("runRequest", () => {
   });
 
   it("maps a malformed success body to unreachable rather than throwing", async () => {
-    const send = vi.fn(() =>
-      Promise.resolve(new Response("not json", { status: 200 }))
-    );
+    const send = vi.fn(() => Promise.resolve(new Response("not json", { status: 200 })));
 
     const result = await runRequest(send, () => "unused");
 

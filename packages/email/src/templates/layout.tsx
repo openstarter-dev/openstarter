@@ -28,12 +28,7 @@ type EmailLayoutProps = {
  * 邮件外层骨架：Html(lang) → Head → Preview → 卡片容器。
  * `lang` 用于无障碍与邮件客户端语言标注，应传入已解析的 locale。
  */
-export const EmailLayout = ({
-  lang,
-  preview,
-  appName,
-  children,
-}: EmailLayoutProps) => (
+export const EmailLayout = ({ lang, preview, appName, children }: EmailLayoutProps) => (
   <Html lang={lang}>
     <Head />
     <Preview>{preview}</Preview>

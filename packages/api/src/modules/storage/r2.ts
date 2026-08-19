@@ -52,10 +52,7 @@ export class R2Provider implements StorageProvider {
   }
 
   private getEndpoint(): string {
-    return (
-      this.configs.endpoint ||
-      `https://${this.configs.accountId}.r2.cloudflarestorage.com`
-    );
+    return this.configs.endpoint || `https://${this.configs.accountId}.r2.cloudflarestorage.com`;
   }
 
   getPublicUrl(options: { key: string; bucket?: string }): string {
@@ -82,9 +79,7 @@ export class R2Provider implements StorageProvider {
     }
   }
 
-  async uploadFile(
-    options: StorageUploadOptions
-  ): Promise<StorageUploadResult> {
+  async uploadFile(options: StorageUploadOptions): Promise<StorageUploadResult> {
     const bucket = options.bucket || this.configs.bucket;
     if (!bucket) {
       return { success: false, error: "Bucket is required", provider: this.name };
@@ -133,9 +128,7 @@ export class R2Provider implements StorageProvider {
     }
   }
 
-  async downloadAndUpload(
-    options: StorageDownloadUploadOptions
-  ): Promise<StorageUploadResult> {
+  async downloadAndUpload(options: StorageDownloadUploadOptions): Promise<StorageUploadResult> {
     try {
       const response = await fetch(options.url);
       if (!response.ok) {

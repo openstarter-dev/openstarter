@@ -17,7 +17,7 @@ describe("hash determinism (Property 4 hash side)", () => {
         expect(first).toBe(second);
         expect(first).toMatch(SHA256_HEX_REGEX);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -30,22 +30,18 @@ describe("hash determinism (Property 4 hash side)", () => {
         expect(first).toBe(second);
         expect(first).toMatch(MD5_HEX_REGEX);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
   it("P4 different inputs do not hash to the same sha256 digest", () => {
     fc.assert(
-      fc.property(
-        printableStringArbitrary,
-        printableStringArbitrary,
-        (left, right) => {
-          fc.pre(left !== right);
+      fc.property(printableStringArbitrary, printableStringArbitrary, (left, right) => {
+        fc.pre(left !== right);
 
-          expect(sha256(left)).not.toBe(sha256(right));
-        }
-      ),
-      { numRuns: 100 }
+        expect(sha256(left)).not.toBe(sha256(right));
+      }),
+      { numRuns: 100 },
     );
   });
 });

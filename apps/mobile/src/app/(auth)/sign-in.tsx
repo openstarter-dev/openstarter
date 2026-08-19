@@ -36,9 +36,7 @@ export default function SignInScreen() {
     validators: {
       onSubmit: z.object({
         email: z.email("Invalid email address"),
-        password: z
-          .string()
-          .min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
+        password: z.string().min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
       }),
     },
   });
@@ -51,10 +49,7 @@ export default function SignInScreen() {
         </Text>
 
         {methods.socialProviders.length > 0 ? (
-          <SocialButtons
-            onError={setError}
-            providers={methods.socialProviders}
-          />
+          <SocialButtons onError={setError} providers={methods.socialProviders} />
         ) : null}
 
         {methods.socialProviders.length > 0 && methods.emailPassword ? (
@@ -69,9 +64,7 @@ export default function SignInScreen() {
               {(field) => (
                 <Input
                   autoComplete="email"
-                  errors={field.state.meta.errors.map(
-                    (item) => item?.message ?? ""
-                  )}
+                  errors={field.state.meta.errors.map((item) => item?.message ?? "")}
                   label={m["common.sign.email_title"]()}
                   onBlur={field.handleBlur}
                   onChangeText={field.handleChange}
@@ -85,9 +78,7 @@ export default function SignInScreen() {
               {(field) => (
                 <Input
                   autoComplete="password"
-                  errors={field.state.meta.errors.map(
-                    (item) => item?.message ?? ""
-                  )}
+                  errors={field.state.meta.errors.map((item) => item?.message ?? "")}
                   label={m["common.sign.password_title"]()}
                   onBlur={field.handleBlur}
                   onChangeText={field.handleChange}

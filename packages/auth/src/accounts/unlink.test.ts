@@ -16,14 +16,12 @@ interface LinkedAccount {
 const createRepository = (accounts: LinkedAccount[]) => {
   const repository: AccountUnlinkRepository = {
     deleteIfMultiple: ({ accountId, userId }) => {
-      const userAccounts = accounts.filter(
-        (account) => account.userId === userId
-      );
+      const userAccounts = accounts.filter((account) => account.userId === userId);
       if (userAccounts.length <= 1) {
         return Promise.resolve(false);
       }
       const index = accounts.findIndex(
-        (account) => account.id === accountId && account.userId === userId
+        (account) => account.id === accountId && account.userId === userId,
       );
       if (index === -1) {
         return Promise.resolve(true);
@@ -37,8 +35,8 @@ const createRepository = (accounts: LinkedAccount[]) => {
           (account) =>
             account.userId === userId &&
             account.providerId === providerId &&
-            (accountId === undefined || account.accountId === accountId)
-        ) ?? null
+            (accountId === undefined || account.accountId === accountId),
+        ) ?? null,
       ),
   };
   return repository;
@@ -69,7 +67,7 @@ describe("atomic account unlink", () => {
           providerId: "google",
           userId: "user-1",
         },
-        repository
+        repository,
       ),
       unlinkAccountWithRepository(
         {
@@ -77,21 +75,17 @@ describe("atomic account unlink", () => {
           providerId: "credential",
           userId: "user-1",
         },
-        repository
+        repository,
       ),
     ]);
 
     expect(accounts).toHaveLength(1);
-    expect(
-      results.filter((result) => result.status === "fulfilled")
-    ).toHaveLength(1);
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
     const rejection = results.find((result) => result.status === "rejected");
     expect(rejection?.status).toBe("rejected");
     if (rejection?.status === "rejected") {
       expect(rejection.reason).toBeInstanceOf(AccountUnlinkError);
-      expect((rejection.reason as AccountUnlinkError).code).toBe(
-        "LAST_ACCOUNT"
-      );
+      expect((rejection.reason as AccountUnlinkError).code).toBe("LAST_ACCOUNT");
     }
   });
 
@@ -112,8 +106,8 @@ describe("atomic account unlink", () => {
           providerId: "google",
           userId: "user-1",
         },
-        createRepository(accounts)
-      )
+        createRepository(accounts),
+      ),
     ).rejects.toMatchObject({ code: "LAST_ACCOUNT" });
     expect(accounts).toHaveLength(1);
   });

@@ -113,5 +113,5 @@ export const config: ConfigManager = new Proxy(
       const value = _config[prop as keyof ConfigManager];
       return typeof value === "function" ? value.bind(_config) : value;
     },
-  }
+  },
 ) as ConfigManager;

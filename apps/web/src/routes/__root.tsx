@@ -3,12 +3,7 @@ import { getAnalyticsConfigFn } from "@openstarter/analytics-web/server";
 import { Toaster } from "@openstarter/ui-web/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import {
-  createRootRouteWithContext,
-  HeadContent,
-  Outlet,
-  Scripts,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
@@ -39,10 +34,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
         { content: "width=device-width, initial-scale=1", name: "viewport" },
         ...pageHead.meta,
       ],
-      links: [
-        { href: appCss, rel: "stylesheet" },
-        ...pageHead.links,
-      ],
+      links: [{ href: appCss, rel: "stylesheet" }, ...pageHead.links],
       // 依据 Config 供应商标识注入且仅注入对应供应商脚本；未配置则为空数组、不注入（R25.1/R25.2）。
       // 脚本来自受控白名单模板、度量 ID 已校验，经框架 head().scripts 机制注入（非危险 innerHTML）。
       scripts: buildAnalyticsHeadScripts(loaderData),

@@ -69,24 +69,20 @@ describe("analytics-web scripts — resolvePlausibleSrc (R25.2)", () => {
   });
 
   it("accepts a valid https absolute URL", () => {
-    expect(
-      resolvePlausibleSrc("https://analytics.example.com/js/script.js")
-    ).toBe("https://analytics.example.com/js/script.js");
+    expect(resolvePlausibleSrc("https://analytics.example.com/js/script.js")).toBe(
+      "https://analytics.example.com/js/script.js",
+    );
   });
 
   it("falls back to official source for non-https (http) URLs", () => {
-    expect(
-      resolvePlausibleSrc("http://analytics.example.com/js/script.js")
-    ).toBe("https://plausible.io/js/script.js");
+    expect(resolvePlausibleSrc("http://analytics.example.com/js/script.js")).toBe(
+      "https://plausible.io/js/script.js",
+    );
   });
 
   it("falls back to official source for malformed URLs", () => {
-    expect(resolvePlausibleSrc("not-a-url")).toBe(
-      "https://plausible.io/js/script.js"
-    );
-    expect(resolvePlausibleSrc("javascript:alert(1)")).toBe(
-      "https://plausible.io/js/script.js"
-    );
+    expect(resolvePlausibleSrc("not-a-url")).toBe("https://plausible.io/js/script.js");
+    expect(resolvePlausibleSrc("javascript:alert(1)")).toBe("https://plausible.io/js/script.js");
   });
 });
 
@@ -94,9 +90,7 @@ describe("analytics-web scripts — googleAnalyticsScripts", () => {
   it("produces a loader and an init script for a valid id", () => {
     const [loader, init] = googleAnalyticsScripts(VALID_GA_ID);
     expect(loader?.id).toBe("ga-loader");
-    expect(loader?.src).toBe(
-      `https://www.googletagmanager.com/gtag/js?id=${VALID_GA_ID}`
-    );
+    expect(loader?.src).toBe(`https://www.googletagmanager.com/gtag/js?id=${VALID_GA_ID}`);
     expect(loader?.async).toBe(true);
 
     expect(init?.id).toBe("ga-init");
@@ -107,10 +101,7 @@ describe("analytics-web scripts — googleAnalyticsScripts", () => {
 
 describe("analytics-web scripts — plausibleScripts", () => {
   it("produces a static init stub and a domain-scoped loader", () => {
-    const [init, loader] = plausibleScripts(
-      VALID_DOMAIN,
-      "https://x.io/js/script.js"
-    );
+    const [init, loader] = plausibleScripts(VALID_DOMAIN, "https://x.io/js/script.js");
     expect(init?.id).toBe("plausible-init");
     expect(init?.children).toContain("window.plausible");
 
@@ -124,10 +115,7 @@ describe("analytics-web scripts — plausibleScripts", () => {
   it("loader src transparently passes through the given plausible src", () => {
     // `plausibleScripts` 本身为纯模板构造，不做 https 归一；归一由 `buildAnalyticsHeadScripts`
     // 调用 `resolvePlausibleSrc` 完成。透传是设计：调用方负责传入已归一的 src。
-    const [, loader] = plausibleScripts(
-      VALID_DOMAIN,
-      "https://analytics.example.com/js/script.js"
-    );
+    const [, loader] = plausibleScripts(VALID_DOMAIN, "https://analytics.example.com/js/script.js");
     expect(loader?.src).toBe("https://analytics.example.com/js/script.js");
   });
 });
@@ -143,7 +131,7 @@ describe("analytics-web scripts — buildAnalyticsHeadScripts (R25.1 / R25.2)", 
         googleAnalyticsId: "",
         plausibleDomain: "",
         plausibleSrc: "",
-      })
+      }),
     ).toEqual([]);
   });
 

@@ -21,15 +21,13 @@ const copy = {
       `Click the button below to verify your email address and finish signing in to ${app}.`,
     button: "Verify email",
     expiry: "This link will expire in 24 hours.",
-    fallbackIntro:
-      "If the button doesn't work, copy and paste this link into your browser:",
+    fallbackIntro: "If the button doesn't work, copy and paste this link into your browser:",
     footer: "If you didn't create an account, you can safely ignore this email.",
   },
   zh: {
     preview: "验证你的邮箱地址",
     title: "验证你的邮箱",
-    intro: (app: string) =>
-      `点击下方按钮验证你的邮箱地址，即可完成登录 ${app}。`,
+    intro: (app: string) => `点击下方按钮验证你的邮箱地址，即可完成登录 ${app}。`,
     button: "验证邮箱",
     expiry: "此链接将在 24 小时后失效。",
     fallbackIntro: "如果按钮无法点击，请复制以下链接到浏览器打开：",
@@ -43,11 +41,7 @@ type ConfirmEmailProps = {
   readonly appName?: string;
 };
 
-export const ConfirmEmail = ({
-  url,
-  locale,
-  appName = "OpenStarter",
-}: ConfirmEmailProps) => {
+export const ConfirmEmail = ({ url, locale, appName = "OpenStarter" }: ConfirmEmailProps) => {
   const resolved = resolveEmailLocale(locale);
   const c = copy[resolved];
 

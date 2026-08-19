@@ -21,11 +21,7 @@ export function ThemeToggleIcon() {
       type="button"
       variant="ghost"
     >
-      {mounted && isDark ? (
-        <Sun aria-hidden="true" />
-      ) : (
-        <Moon aria-hidden="true" />
-      )}
+      {mounted && isDark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
     </Button>
   );
 }

@@ -18,11 +18,7 @@
 import { getAllConfigs } from "@openstarter/shared/config";
 import { FalProvider } from "./fal";
 import { ReplicateProvider } from "./replicate";
-import {
-  AIMediaType,
-  type AIProvider,
-  type SaveFilesFunction,
-} from "./types";
+import { AIMediaType, type AIProvider, type SaveFilesFunction } from "./types";
 
 /**
  * AI 供应商管理器：持有一组已装配的 provider 与可注入的存储回调。
@@ -103,7 +99,7 @@ let cachedHash = "";
 function isAvailable(
   configs: Record<string, string>,
   provider: string,
-  credentialKeys: readonly string[]
+  credentialKeys: readonly string[],
 ): boolean {
   if (configs[`${provider}_enabled`] === "false") {
     return false;
@@ -115,7 +111,7 @@ function assembleReplicate(
   manager: AIManager,
   configs: Record<string, string>,
   saveFiles: SaveFilesFunction | undefined,
-  defaultProvider: string
+  defaultProvider: string,
 ): void {
   if (!isAvailable(configs, "replicate", ["replicate_api_token"])) {
     return;
@@ -128,7 +124,7 @@ function assembleReplicate(
       customStorage: Boolean(saveFiles),
     }),
     // Replicate 为主：显式指定为 replicate 或未指定默认时，作为默认渠道。
-    defaultProvider === "replicate" || defaultProvider === ""
+    defaultProvider === "replicate" || defaultProvider === "",
   );
 }
 
@@ -136,7 +132,7 @@ function assembleFal(
   manager: AIManager,
   configs: Record<string, string>,
   saveFiles: SaveFilesFunction | undefined,
-  defaultProvider: string
+  defaultProvider: string,
 ): void {
   if (!isAvailable(configs, "fal", ["fal_api_key"])) {
     return;
@@ -147,7 +143,7 @@ function assembleFal(
       saveFiles,
       customStorage: Boolean(saveFiles),
     }),
-    defaultProvider === "fal"
+    defaultProvider === "fal",
   );
 }
 

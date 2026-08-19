@@ -18,10 +18,7 @@ const OTP_LENGTH = 6;
 export const emailSchema = z.email();
 
 /** 账户口令。 */
-export const passwordSchema = z
-  .string()
-  .min(PASSWORD_MIN_LENGTH)
-  .max(PASSWORD_MAX_LENGTH);
+export const passwordSchema = z.string().min(PASSWORD_MIN_LENGTH).max(PASSWORD_MAX_LENGTH);
 
 /** 邮箱 + 口令登录凭据。 */
 export const credentialsSchema = z.object({

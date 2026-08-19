@@ -24,7 +24,7 @@ export function usePublicConfig() {
     queryFn: async (): Promise<PublicConfig> => {
       const result = await runRequest(
         () => apiClient.api.config.public.$get(),
-        (body) => (body as { data?: PublicConfig }).data ?? {}
+        (body) => (body as { data?: PublicConfig }).data ?? {},
       );
       // 公开配置拿不到时退回空对象：resolveEnabledProviders({}) 的结果是
       // "只有邮箱密码"，这是最保守也最不会 404 的降级（见 spec §6）。
@@ -46,7 +46,7 @@ export function useUserPlan() {
             data: { plan: string; trialEndsAt?: string };
           };
           return { plan: data.plan, trialEndsAt: data.trialEndsAt ?? null };
-        }
+        },
       ),
     queryKey: ["user-plan"],
     retry: false,

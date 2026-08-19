@@ -6,9 +6,7 @@ export function Faq() {
   return (
     <section id="faq" className="mx-auto max-w-3xl px-4 py-20">
       <div className="mb-12 text-center">
-        <h2 className="font-bold text-3xl tracking-tight">
-          Frequently asked questions
-        </h2>
+        <h2 className="font-bold text-3xl tracking-tight">Frequently asked questions</h2>
       </div>
       <div className="flex flex-col gap-3">
         {FAQ_ENTRIES.map((entry) => (

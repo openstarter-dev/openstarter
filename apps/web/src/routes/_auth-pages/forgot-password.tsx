@@ -50,22 +50,16 @@ function ForgotPasswordPage() {
       <CardHeader>
         <CardTitle>{sent ? "Check your email" : "Forgot password"}</CardTitle>
         {!sent && (
-          <CardDescription>
-            Enter your email and we'll send you a reset link.
-          </CardDescription>
+          <CardDescription>Enter your email and we'll send you a reset link.</CardDescription>
         )}
       </CardHeader>
       <CardContent>
         {sent ? (
           <div className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              If an account exists for that email, a password reset link is on
-              its way.
+              If an account exists for that email, a password reset link is on its way.
             </p>
-            <Link
-              className="block text-center text-sm underline underline-offset-4"
-              to="/login"
-            >
+            <Link className="block text-center text-sm underline underline-offset-4" to="/login">
               Back to sign in
             </Link>
           </div>
@@ -105,19 +99,12 @@ function ForgotPasswordPage() {
             </form.Field>
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
-                <Button
-                  className="w-full"
-                  disabled={isSubmitting}
-                  type="submit"
-                >
+                <Button className="w-full" disabled={isSubmitting} type="submit">
                   {isSubmitting ? "Sending..." : "Send reset link"}
                 </Button>
               )}
             </form.Subscribe>
-            <Link
-              className="block text-center text-sm underline underline-offset-4"
-              to="/login"
-            >
+            <Link className="block text-center text-sm underline underline-offset-4" to="/login">
               Back to sign in
             </Link>
           </form>

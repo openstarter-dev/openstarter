@@ -12,17 +12,13 @@ import {
 
 describe("parseWindowState", () => {
   it("parses a valid state", () => {
-    const state = parseWindowState(
-      JSON.stringify({ height: 900, width: 1400, x: 10, y: 20 })
-    );
+    const state = parseWindowState(JSON.stringify({ height: 900, width: 1400, x: 10, y: 20 }));
 
     expect(state).toEqual({ height: 900, width: 1400, x: 10, y: 20 });
   });
 
   it("parses a valid state without position", () => {
-    const state = parseWindowState(
-      JSON.stringify({ height: 900, width: 1400 })
-    );
+    const state = parseWindowState(JSON.stringify({ height: 900, width: 1400 }));
 
     expect(state).toEqual({ height: 900, width: 1400 });
   });
@@ -43,9 +39,7 @@ describe("parseWindowState", () => {
   });
 
   it("falls back to the default when height is not a number", () => {
-    const state = parseWindowState(
-      JSON.stringify({ height: "tall", width: 1400 })
-    );
+    const state = parseWindowState(JSON.stringify({ height: "tall", width: 1400 }));
 
     expect(state.height).toBe(DEFAULT_WINDOW_STATE.height);
     expect(state.width).toBe(1400);
@@ -53,7 +47,7 @@ describe("parseWindowState", () => {
 
   it("drops a non-finite x/y instead of failing the whole state", () => {
     const state = parseWindowState(
-      JSON.stringify({ height: 900, width: 1400, x: Number.POSITIVE_INFINITY })
+      JSON.stringify({ height: 900, width: 1400, x: Number.POSITIVE_INFINITY }),
     );
 
     expect(state).toEqual({ height: 900, width: 1400 });

@@ -75,10 +75,7 @@ export async function createInviteCode(params: {
   createdBy?: string;
   expiresAt?: Date | null;
 }): Promise<InviteCode | undefined> {
-  const [row] = await db()
-    .insert(inviteCode)
-    .values(buildInviteCodeValues(params))
-    .returning();
+  const [row] = await db().insert(inviteCode).values(buildInviteCodeValues(params)).returning();
   return row;
 }
 
@@ -102,7 +99,7 @@ export function createInviteCodesBatch(params: {
       maxUses: params.maxUses,
       note: params.note,
       trialDays: params.trialDays,
-    })
+    }),
   );
   return db().insert(inviteCode).values(values).returning();
 }
@@ -128,14 +125,8 @@ export interface InviteCodeValidation {
 /**
  * 校验邀请码是否可兑换（存在、未过期、未用尽）。R9.4
  */
-export async function validateInviteCode(
-  code: string
-): Promise<InviteCodeValidation> {
-  const [row] = await db()
-    .select()
-    .from(inviteCode)
-    .where(eq(inviteCode.code, code))
-    .limit(1);
+export async function validateInviteCode(code: string): Promise<InviteCodeValidation> {
+  const [row] = await db().select().from(inviteCode).where(eq(inviteCode.code, code)).limit(1);
 
   if (!row) {
     return { error: "Invalid invite code", valid: false };
@@ -171,9 +162,7 @@ async function redeemWithSqliteBatch(params: {
 }): Promise<RedeemResult> {
   const database = db();
   const redemptionId = getUuid();
-  const trialEndsAt = new Date(
-    params.now.getTime() + params.row.trialDays * MS_PER_DAY
-  );
+  const trialEndsAt = new Date(params.now.getTime() + params.row.trialDays * MS_PER_DAY);
   const insertRedemption = database.run(sql`
     insert or ignore into ${userInvite}
       (id, user_id, invite_code_id, activated_at, trial_ends_at)
@@ -223,10 +212,7 @@ async function redeemWithSqliteBatch(params: {
   if (!currentCode) {
     return { error: "Invalid invite code", ok: false };
   }
-  if (
-    currentCode.expiresAt &&
-    currentCode.expiresAt.getTime() <= params.now.getTime()
-  ) {
+  if (currentCode.expiresAt && currentCode.expiresAt.getTime() <= params.now.getTime()) {
     return { error: "Invite code has expired", ok: false };
   }
   return { error: "Invite code has been fully used", ok: false };
@@ -250,11 +236,7 @@ async function redeemWithLockedTransaction(params: {
         return { ok: true, trialEndsAt: existing.trialEndsAt };
       }
 
-      const query = tx
-        .select()
-        .from(inviteCode)
-        .where(eq(inviteCode.code, params.code))
-        .limit(1);
+      const query = tx.select().from(inviteCode).where(eq(inviteCode.code, params.code)).limit(1);
       const lockableQuery = query as typeof query & {
         for: (strength: "update") => typeof query;
       };
@@ -269,9 +251,7 @@ async function redeemWithLockedTransaction(params: {
         return { error: "Invite code has been fully used", ok: false };
       }
 
-      const trialEndsAt = new Date(
-        params.now.getTime() + row.trialDays * MS_PER_DAY
-      );
+      const trialEndsAt = new Date(params.now.getTime() + row.trialDays * MS_PER_DAY);
       await tx
         .update(inviteCode)
         .set({ usedCount: sql`${inviteCode.usedCount} + 1` })
@@ -279,11 +259,8 @@ async function redeemWithLockedTransaction(params: {
           and(
             eq(inviteCode.id, row.id),
             lt(inviteCode.usedCount, inviteCode.maxUses),
-            or(
-              isNull(inviteCode.expiresAt),
-              gt(inviteCode.expiresAt, params.now)
-            )
-          )
+            or(isNull(inviteCode.expiresAt), gt(inviteCode.expiresAt, params.now)),
+          ),
         );
       await tx.insert(userInvite).values({
         activatedAt: params.now,
@@ -360,17 +337,13 @@ export type UserPlan = "none" | "trial" | "expired" | "member";
  * `active` 订阅 → `member`；否则依 `user_invite`：无 → `none`，
  * `trialEndsAt > now` → `trial`，否则 → `expired`。
  */
-export async function getUserPlan(
-  userId: string
-): Promise<{ plan: UserPlan; trialEndsAt?: Date }> {
+export async function getUserPlan(userId: string): Promise<{ plan: UserPlan; trialEndsAt?: Date }> {
   const database = db();
 
   const [activeSub] = await database
     .select()
     .from(subscription)
-    .where(
-      and(eq(subscription.userId, userId), eq(subscription.status, "active"))
-    )
+    .where(and(eq(subscription.userId, userId), eq(subscription.status, "active")))
     .limit(1);
   if (activeSub) {
     return { plan: "member" };

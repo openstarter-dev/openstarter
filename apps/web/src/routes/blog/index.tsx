@@ -20,9 +20,7 @@ type BlogSearch = {
 export const Route = createFileRoute("/blog/")({
   validateSearch: (search: Record<string, unknown>): BlogSearch => ({
     category:
-      typeof search.category === "string" && search.category !== ""
-        ? search.category
-        : undefined,
+      typeof search.category === "string" && search.category !== "" ? search.category : undefined,
   }),
   loaderDeps: ({ search }) => ({ category: search.category }),
   loader: ({ deps }) => getBlogPostsFn({ data: { category: deps.category } }),
@@ -42,9 +40,7 @@ function BlogListPage() {
   if (activeCategory) {
     categorySet.add(activeCategory);
   }
-  const categories = Array.from(categorySet).sort((a, b) =>
-    a.localeCompare(b)
-  );
+  const categories = Array.from(categorySet).sort((a, b) => a.localeCompare(b));
 
   const activeChip = "bg-foreground text-background";
   const inactiveChip = "bg-muted text-muted-foreground hover:text-foreground";
@@ -58,9 +54,7 @@ function BlogListPage() {
               ? m["blog.in_category"]({ category: activeCategory })
               : m["blog.title"]()}
           </h1>
-          <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-            {m["blog.description"]()}
-          </p>
+          <p className="mx-auto mt-3 max-w-lg text-muted-foreground">{m["blog.description"]()}</p>
         </div>
 
         {categories.length > 0 ? (
@@ -93,9 +87,7 @@ function BlogListPage() {
         ) : null}
 
         {items.length === 0 ? (
-          <p className="text-center text-muted-foreground">
-            {m["blog.no_posts"]()}
-          </p>
+          <p className="text-center text-muted-foreground">{m["blog.no_posts"]()}</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {items.map((post) => (

@@ -16,13 +16,7 @@ const CENTS_PER_UNIT = 100;
 const QR_SIZE = 220;
 const AMOUNT_FRACTION_DIGITS = 2;
 
-export function WechatQrOverlay({
-  qr,
-  onClose,
-}: {
-  qr: WechatQr;
-  onClose: () => void;
-}) {
+export function WechatQrOverlay({ qr, onClose }: { qr: WechatQr; onClose: () => void }) {
   const amountLabel = `¥${(qr.amount / CENTS_PER_UNIT).toFixed(AMOUNT_FRACTION_DIGITS)}`;
 
   return (
@@ -33,18 +27,9 @@ export function WechatQrOverlay({
           Order {qr.orderNo} · {amountLabel}
         </p>
         <div className="mt-4 flex justify-center">
-          <QRCodeSVG
-            size={QR_SIZE}
-            title="WeChat Pay QR code"
-            value={qr.codeUrl}
-          />
+          <QRCodeSVG size={QR_SIZE} title="WeChat Pay QR code" value={qr.codeUrl} />
         </div>
-        <Button
-          className="mt-6 w-full"
-          onClick={onClose}
-          type="button"
-          variant="outline"
-        >
+        <Button className="mt-6 w-full" onClick={onClose} type="button" variant="outline">
           Close
         </Button>
       </div>

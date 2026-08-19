@@ -18,8 +18,7 @@ type CloudflareGlobal = {
 const cloudflareGlobal = globalThis as CloudflareGlobal;
 
 export const isCloudflareWorker =
-  cloudflareGlobal.navigator?.userAgent === "Cloudflare-Workers" ||
-  "Cloudflare" in globalThis;
+  cloudflareGlobal.navigator?.userAgent === "Cloudflare-Workers" || "Cloudflare" in globalThis;
 
 /**
  * Bindings the server entry stashes on `globalThis` under Cloudflare Workers:

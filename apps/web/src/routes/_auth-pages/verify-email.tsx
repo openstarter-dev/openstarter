@@ -15,11 +15,8 @@ import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_auth-pages/verify-email")({
   component: VerifyEmailPage,
-  validateSearch: (
-    search: Record<string, unknown>
-  ): { email?: string; callbackUrl?: string } => ({
-    callbackUrl:
-      typeof search.callbackUrl === "string" ? search.callbackUrl : undefined,
+  validateSearch: (search: Record<string, unknown>): { email?: string; callbackUrl?: string } => ({
+    callbackUrl: typeof search.callbackUrl === "string" ? search.callbackUrl : undefined,
     email: typeof search.email === "string" ? search.email : undefined,
   }),
 });
@@ -44,9 +41,7 @@ function VerifyEmailPage() {
         email,
       });
       if (result.error) {
-        toast.error(
-          result.error.message || "Failed to send verification email"
-        );
+        toast.error(result.error.message || "Failed to send verification email");
         return;
       }
       toast.success("Verification email sent");
@@ -74,8 +69,8 @@ function VerifyEmailPage() {
       <CardHeader>
         <CardTitle>Verify your email</CardTitle>
         <CardDescription>
-          We sent a verification link{email ? ` to ${email}` : ""}. Click it to
-          activate your account.
+          We sent a verification link{email ? ` to ${email}` : ""}. Click it to activate your
+          account.
         </CardDescription>
       </CardHeader>
       <CardContent>

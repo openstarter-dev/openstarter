@@ -12,10 +12,7 @@
 // 单一事实源保持一致。Config 读取走 `@openstarter/shared/config`（env + DB 双源合并、秘密解密、
 // 1h 缓存）。依赖分层 api → db / shared / billing，无反向、无环。
 
-import {
-  CreditStatus,
-  CreditTransactionType,
-} from "@openstarter/billing-web/credits";
+import { CreditStatus, CreditTransactionType } from "@openstarter/billing-web/credits";
 import { credit, order, subscription, user } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getAllConfigs } from "@openstarter/shared/config";
@@ -64,21 +61,20 @@ function toConsumedTotal(total: string | null | undefined): number {
  */
 export async function getAdminMetrics(): Promise<AdminMetrics> {
   const database = db();
-  const [userRows, orderRows, subscriptionRows, consumedRows] =
-    await Promise.all([
-      database.select({ value: count() }).from(user),
-      database.select({ value: count() }).from(order),
-      database.select({ value: count() }).from(subscription),
-      database
-        .select({ total: sum(credit.credits) })
-        .from(credit)
-        .where(
-          and(
-            eq(credit.transactionType, CreditTransactionType.CONSUME),
-            eq(credit.status, CreditStatus.ACTIVE)
-          )
+  const [userRows, orderRows, subscriptionRows, consumedRows] = await Promise.all([
+    database.select({ value: count() }).from(user),
+    database.select({ value: count() }).from(order),
+    database.select({ value: count() }).from(subscription),
+    database
+      .select({ total: sum(credit.credits) })
+      .from(credit)
+      .where(
+        and(
+          eq(credit.transactionType, CreditTransactionType.CONSUME),
+          eq(credit.status, CreditStatus.ACTIVE),
         ),
-    ]);
+      ),
+  ]);
 
   return {
     creditsConsumed: toConsumedTotal(consumedRows[0]?.total),

@@ -49,10 +49,7 @@ export function formatTable(data: Record<string, unknown>[]): void {
   }
 
   const columnWidths = keys.map((key) => {
-    const maxLength = Math.max(
-      key.length,
-      ...data.map((row) => String(row[key] ?? "").length)
-    );
+    const maxLength = Math.max(key.length, ...data.map((row) => String(row[key] ?? "").length));
     return Math.min(maxLength, MAX_COLUMN_WIDTH);
   });
 

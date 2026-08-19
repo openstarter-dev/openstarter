@@ -51,9 +51,7 @@ export function SecurityPage() {
       onSubmit: z.object({
         confirmPassword: z.string().min(1, "Please confirm the new password"),
         currentPassword: z.string().min(1, "Current password is required"),
-        newPassword: z
-          .string()
-          .min(8, "Password must be at least 8 characters"),
+        newPassword: z.string().min(8, "Password must be at least 8 characters"),
       }),
     },
   });
@@ -70,9 +68,7 @@ export function SecurityPage() {
           toast.error(result.error.message || "Failed to change email");
           return;
         }
-        toast.success(
-          "Email update requested. Check your inbox to confirm the change."
-        );
+        toast.success("Email update requested. Check your inbox to confirm the change.");
       } finally {
         setChangingEmail(false);
       }
@@ -89,9 +85,7 @@ export function SecurityPage() {
       <Card>
         <CardHeader>
           <CardTitle>Change password</CardTitle>
-          <CardDescription>
-            Use a strong password of at least 8 characters.
-          </CardDescription>
+          <CardDescription>Use a strong password of at least 8 characters.</CardDescription>
         </CardHeader>
         <CardContent>
           <form
@@ -179,8 +173,7 @@ export function SecurityPage() {
         <CardHeader>
           <CardTitle>Change email</CardTitle>
           <CardDescription>
-            A confirmation link will be sent to the new address before the
-            change takes effect.
+            A confirmation link will be sent to the new address before the change takes effect.
           </CardDescription>
         </CardHeader>
         <CardContent>

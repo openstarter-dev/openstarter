@@ -22,35 +22,31 @@ describe("RBAC middleware properties", () => {
         async (resource, action, unrelatedActions) => {
           const requiredPermission = `${resource}.${action}`;
           const deniedCodes = unrelatedActions.map(
-            (unrelatedAction) => `other_${resource}.${unrelatedAction}`
+            (unrelatedAction) => `other_${resource}.${unrelatedAction}`,
           );
           const routeHandler = vi.fn((context) => context.json({ ok: true }));
           const app = new Hono<{ Variables: { userId: string } }>();
 
           app.use(
             "*",
-            createMiddleware<{ Variables: { userId: string } }>(
-              async (context, next) => {
-                context.set("userId", "user-1");
-                await next();
-              }
-            )
+            createMiddleware<{ Variables: { userId: string } }>(async (context, next) => {
+              context.set("userId", "user-1");
+              await next();
+            }),
           );
           app.get(
             "/protected",
-            createRequirePermission(requiredPermission, (_userId) =>
-              Promise.resolve(deniedCodes)
-            ),
-            routeHandler
+            createRequirePermission(requiredPermission, (_userId) => Promise.resolve(deniedCodes)),
+            routeHandler,
           );
 
           const response = await app.request("/protected");
 
           expect(response.status).toBe(403);
           expect(routeHandler).not.toHaveBeenCalled();
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

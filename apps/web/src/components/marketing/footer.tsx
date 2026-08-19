@@ -1,12 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Github, MessageCircle, Twitter } from "lucide-react";
 
-import {
-  BRAND_NAME,
-  BRAND_TAGLINE,
-  COPYRIGHT_YEAR_START,
-  SOCIAL_LINKS,
-} from "@/lib/branding";
+import { BRAND_NAME, BRAND_TAGLINE, COPYRIGHT_YEAR_START, SOCIAL_LINKS } from "@/lib/branding";
 
 const PRODUCT_LINKS = [
   { label: "Features", to: "/", hash: "features" },

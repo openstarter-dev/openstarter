@@ -9,11 +9,7 @@ let tray: Tray | null = null;
 
 export function createTray(window: BrowserWindow): Tray | null {
   try {
-    const iconPath = join(
-      app.getAppPath(),
-      "build-resources",
-      "tray-icon.png"
-    );
+    const iconPath = join(app.getAppPath(), "build-resources", "tray-icon.png");
     const icon = nativeImage.createFromPath(iconPath);
     tray = new Tray(icon);
 

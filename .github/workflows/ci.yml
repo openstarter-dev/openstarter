@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -39,9 +39,9 @@ jobs:
       - name: Check types
         run: pnpm exec turbo check-types
       - name: Check formatting and lint
-        env:
-          ULTRACITE_BASE_SHA: ${{ github.event.before }}
-        run: pnpm ultracite:check
+        run: |
+          pnpm format:check
+          pnpm lint
       - name: Build Node target
         run: pnpm build
       - name: Build Cloudflare target

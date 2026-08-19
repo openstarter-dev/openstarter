@@ -25,22 +25,18 @@ describe("auth adapter provider mapping (Property 54)", () => {
         const result = getAuthAdapterProvider(provider);
 
         expect(result).toBe(PROVIDER_TO_ADAPTER[provider]);
-        expect(
-          result === "pg" || result === "mysql" || result === "sqlite"
-        ).toBe(true);
+        expect(result === "pg" || result === "mysql" || result === "sqlite").toBe(true);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
   it("P54/P1 throws immediately for any unsupported DATABASE_PROVIDER", () => {
     fc.assert(
       fc.property(invalidProviderArbitrary, (provider) => {
-        expect(() => getAuthAdapterProvider(provider)).toThrow(
-          UNSUPPORTED_PROVIDER_REGEX
-        );
+        expect(() => getAuthAdapterProvider(provider)).toThrow(UNSUPPORTED_PROVIDER_REGEX);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

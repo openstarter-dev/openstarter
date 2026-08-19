@@ -31,8 +31,8 @@ function isEmailSendingConfigured(configs: Record<string, string>): boolean {
   if (provider === "cloudflare") {
     return Boolean(
       configs.cloudflare_email_api_token &&
-        configs.cloudflare_email_account_id &&
-        configs.cloudflare_email_sender_email
+      configs.cloudflare_email_account_id &&
+      configs.cloudflare_email_sender_email,
     );
   }
   return Boolean(configs.resend_api_key && configs.resend_sender_email);
@@ -52,13 +52,9 @@ export const configRouter = new Hono()
 
     const emailConfigured = isEmailSendingConfigured(configs);
     result.password_reset_enabled =
-      configs.email_auth_enabled !== "false" && emailConfigured
-        ? "true"
-        : "false";
+      configs.email_auth_enabled !== "false" && emailConfigured ? "true" : "false";
     result.email_verification_enabled =
-      configs.email_verification_enabled === "true" && emailConfigured
-        ? "true"
-        : "false";
+      configs.email_verification_enabled === "true" && emailConfigured ? "true" : "false";
 
     return c.json(respData(result));
   })

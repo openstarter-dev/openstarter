@@ -1,14 +1,6 @@
 import { credit, role, user, userRole } from "@openstarter/db/schema";
 import type { Database } from "@openstarter/db/server";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   closeAuthTestDatabase,
@@ -28,8 +20,7 @@ const state = vi.hoisted(() => ({
 }));
 
 vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@openstarter/db/server")>();
+  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
   return {
     ...actual,
     db: () => {
@@ -126,9 +117,7 @@ describe("Task 15.2 new user initialization hook", () => {
     }
     const assignedRoles = await state.database.select().from(userRole);
     const grantedCredits = await state.database.select().from(credit);
-    expect(assignedRoles).toMatchObject([
-      { roleId: "member-role", userId: createdUser.id },
-    ]);
+    expect(assignedRoles).toMatchObject([{ roleId: "member-role", userId: createdUser.id }]);
     expect(grantedCredits).toMatchObject([
       {
         credits: INITIAL_CREDITS,
@@ -139,9 +128,7 @@ describe("Task 15.2 new user initialization hook", () => {
         userId: createdUser.id,
       },
     ]);
-    expect(grantedCredits.at(0)?.expiresAt).toEqual(
-      new Date("2026-08-23T00:00:00.000Z")
-    );
+    expect(grantedCredits.at(0)?.expiresAt).toEqual(new Date("2026-08-23T00:00:00.000Z"));
   });
 
   it("keeps role and credit grants idempotent when the hook repeats", async () => {
@@ -181,9 +168,7 @@ describe("Task 15.2 new user initialization hook", () => {
     const grantedCredits = await state.database.select().from(credit);
     expect(assignedRoles).toHaveLength(1);
     expect(grantedCredits).toHaveLength(1);
-    expect(grantedCredits.at(0)?.transactionNo).toBe(
-      `welcome-credit:${createdUser.id}`
-    );
+    expect(grantedCredits.at(0)?.transactionNo).toBe(`welcome-credit:${createdUser.id}`);
   });
 
   it("does not grant role or credits when both switches are disabled", async () => {

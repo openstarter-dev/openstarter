@@ -7,13 +7,7 @@
 // 平台级授权仅依通配符 RBAC，与 organization 解耦。ssr:false 对齐 _app（认证态在客户端解析）。
 
 import { cn } from "@openstarter/ui-web/lib/utils";
-import {
-  createFileRoute,
-  Link,
-  Outlet,
-  redirect,
-  useRouterState,
-} from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 
 import { client } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
@@ -66,9 +60,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   },
 ];
 
-const ALL_ADMIN_PERMISSIONS = ADMIN_NAV.flatMap((g) =>
-  g.items.map((item) => item.permission)
-);
+const ALL_ADMIN_PERMISSIONS = ADMIN_NAV.flatMap((g) => g.items.map((item) => item.permission));
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: async () => {
@@ -97,9 +89,7 @@ function AdminLayout() {
 
   const visibleGroups = ADMIN_NAV.map((group) => ({
     group: group.group,
-    items: group.items.filter((item) =>
-      matchPermission(item.permission, permissions)
-    ),
+    items: group.items.filter((item) => matchPermission(item.permission, permissions)),
   })).filter((group) => group.items.length > 0);
 
   return (
@@ -119,16 +109,14 @@ function AdminLayout() {
               <div className="flex flex-col gap-0.5">
                 {group.items.map((item) => {
                   const active =
-                    item.to === "/admin"
-                      ? pathname === "/admin"
-                      : pathname.startsWith(item.to);
+                    item.to === "/admin" ? pathname === "/admin" : pathname.startsWith(item.to);
                   return (
                     <Link
                       className={cn(
                         "rounded-md px-2 py-1.5 text-sm transition-colors",
                         active
                           ? "bg-muted font-medium text-foreground"
-                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                          : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                       )}
                       key={item.to}
                       to={item.to}
@@ -142,10 +130,7 @@ function AdminLayout() {
           ))}
         </nav>
         <div className="border-t p-3">
-          <Link
-            className="text-muted-foreground text-sm hover:text-foreground"
-            to="/dashboard"
-          >
+          <Link className="text-muted-foreground text-sm hover:text-foreground" to="/dashboard">
             ← Back to app
           </Link>
         </div>

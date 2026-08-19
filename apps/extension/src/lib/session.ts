@@ -9,14 +9,11 @@ import { browser } from "wxt/browser";
 const COOKIE_NAME = "openstarter.session_token";
 const SECURE_COOKIE_NAME = `__Secure-${COOKIE_NAME}`;
 
-export type CookieReader = (
-  origin: string,
-  name: string
-) => Promise<{ value: string } | null>;
+export type CookieReader = (origin: string, name: string) => Promise<{ value: string } | null>;
 
 export async function readSessionToken(
   origin: string,
-  cookieReader: CookieReader
+  cookieReader: CookieReader,
 ): Promise<string | null> {
   const secure = await cookieReader(origin, SECURE_COOKIE_NAME);
   if (secure) {

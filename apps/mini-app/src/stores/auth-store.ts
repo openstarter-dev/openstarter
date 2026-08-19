@@ -1,9 +1,9 @@
 // apps/mini-app/src/stores/auth-store.ts
 // 认证状态管理（整合 better-auth client）
 
-import { create } from 'zustand';
-import { authClient } from '@/lib/auth-client';
-import { getToken, setToken, removeToken } from '@/utils/storage';
+import { create } from "zustand";
+import { authClient } from "@/lib/auth-client";
+import { getToken, setToken, removeToken } from "@/utils/storage";
 
 export type UserInfo = {
   id: string;

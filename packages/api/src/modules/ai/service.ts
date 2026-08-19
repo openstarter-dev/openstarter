@@ -21,12 +21,7 @@ import {
   normalizeProviderError,
 } from "./errors";
 import { getAIManager } from "./manager";
-import type {
-  AIGenerateParams,
-  AIMediaType,
-  AIProvider,
-  AITaskResult,
-} from "./types";
+import type { AIGenerateParams, AIMediaType, AIProvider, AITaskResult } from "./types";
 
 /**
  * 路由分派结果（判别联合）：
@@ -59,11 +54,10 @@ async function resolveProvider(name?: string): Promise<AIProvider> {
 function toDispatchError(
   providerName: string,
   model: string | undefined,
-  error: unknown
+  error: unknown,
 ): AIDispatchResult {
   logger.error(`[ai] provider '${providerName}' request failed`, error);
-  const statusCode =
-    error instanceof AIProviderRequestError ? error.statusCode : undefined;
+  const statusCode = error instanceof AIProviderRequestError ? error.statusCode : undefined;
   return {
     success: false,
     error: normalizeProviderError({
@@ -104,11 +98,7 @@ export async function dispatchQuery(args: {
 }): Promise<AIDispatchResult> {
   const provider = await resolveProvider(args.provider);
   if (!provider.query) {
-    return toDispatchError(
-      provider.name,
-      args.model,
-      new Error("provider does not support query")
-    );
+    return toDispatchError(provider.name, args.model, new Error("provider does not support query"));
   }
   try {
     const data = await provider.query({

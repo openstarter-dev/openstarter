@@ -11,28 +11,19 @@ describe("readSessionToken", () => {
   it("returns the value of the __Secure- prefixed cookie when present", () => {
     const cookieReader = vi.fn((_origin: string, name: string) =>
       Promise.resolve(
-        name === "__Secure-openstarter.session_token"
-          ? { value: "secure-token-value" }
-          : null
-      )
+        name === "__Secure-openstarter.session_token" ? { value: "secure-token-value" } : null,
+      ),
     );
 
     const token = readSessionToken(ORIGIN, cookieReader);
 
     expect(token).resolves.toBe("secure-token-value");
-    expect(cookieReader).toHaveBeenCalledWith(
-      ORIGIN,
-      "__Secure-openstarter.session_token"
-    );
+    expect(cookieReader).toHaveBeenCalledWith(ORIGIN, "__Secure-openstarter.session_token");
   });
 
   it("falls back to the unprefixed cookie when the secure variant is absent", () => {
     const cookieReader = vi.fn((_origin: string, name: string) =>
-      Promise.resolve(
-        name === "openstarter.session_token"
-          ? { value: "plain-token-value" }
-          : null
-      )
+      Promise.resolve(name === "openstarter.session_token" ? { value: "plain-token-value" } : null),
     );
 
     const token = readSessionToken(ORIGIN, cookieReader);

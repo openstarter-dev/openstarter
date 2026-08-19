@@ -10,9 +10,7 @@ export function DashboardPage() {
           <CardTitle>Dashboard</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">
-            Welcome to OpenStarter Desktop.
-          </p>
+          <p className="text-muted-foreground text-sm">Welcome to OpenStarter Desktop.</p>
         </CardContent>
       </Card>
     </div>

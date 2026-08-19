@@ -16,11 +16,11 @@ describe("calculateCreditExpirationTime (Property 26)", () => {
               creditsValidDays: days,
               currentPeriodEnd,
               now,
-            })
+            }),
           ).toBe(null);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -38,9 +38,9 @@ describe("calculateCreditExpirationTime (Property 26)", () => {
           });
 
           expect(result?.getTime()).toBe(currentPeriodEnd.getTime());
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -59,9 +59,9 @@ describe("calculateCreditExpirationTime (Property 26)", () => {
           expected.setDate(expected.getDate() + days);
 
           expect(result?.getTime()).toBe(expected.getTime());
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -90,9 +90,9 @@ describe("calculateCreditExpirationTime (Property 26)", () => {
           });
 
           expect(result === null || result instanceof Date).toBe(true);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

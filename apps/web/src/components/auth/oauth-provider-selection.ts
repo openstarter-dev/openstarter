@@ -10,9 +10,7 @@ const CONFIG_KEYS: Record<OAuthProvider, string> = {
   google: "google_auth_enabled",
 };
 
-export const getEnabledOAuthProviders = (
-  configs: PublicConfig
-): OAuthProvider[] => {
+export const getEnabledOAuthProviders = (configs: PublicConfig): OAuthProvider[] => {
   const enabledProviders: OAuthProvider[] = [];
   for (const provider of OAUTH_PROVIDERS) {
     if (configs[CONFIG_KEYS[provider]] === "true") {

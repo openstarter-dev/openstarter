@@ -57,9 +57,7 @@ function BlogPostPage() {
         </Link>
 
         <header className="mt-8 border-b pb-6">
-          <h1 className="font-semibold text-3xl tracking-tight md:text-4xl">
-            {title}
-          </h1>
+          <h1 className="font-semibold text-3xl tracking-tight md:text-4xl">{title}</h1>
           {post.description ? (
             <p className="mt-3 text-muted-foreground">{post.description}</p>
           ) : null}
@@ -68,11 +66,7 @@ function BlogPostPage() {
             {post.authorName ? (
               <span className="inline-flex items-center gap-2">
                 {post.authorImage ? (
-                  <img
-                    alt=""
-                    className="size-5 rounded-full object-cover"
-                    src={post.authorImage}
-                  />
+                  <img alt="" className="size-5 rounded-full object-cover" src={post.authorImage} />
                 ) : null}
                 {post.authorName}
               </span>
@@ -88,9 +82,7 @@ function BlogPostPage() {
           />
         ) : null}
 
-        {post.content ? (
-          <Markdown content={post.content} />
-        ) : null}
+        {post.content ? <Markdown content={post.content} /> : null}
       </article>
     </BlogShell>
   );

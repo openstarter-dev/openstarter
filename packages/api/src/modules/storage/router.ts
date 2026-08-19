@@ -71,7 +71,7 @@ async function parseMultipart(request: Request): Promise<UploadInput[]> {
       body: new Uint8Array(await file.arrayBuffer()),
       contentType: file.type,
       filename: file.name,
-    }))
+    })),
   );
 }
 
@@ -110,10 +110,7 @@ export const storageRouter = new Hono().post(
       return c.json(respErr("no files provided"), BAD_REQUEST_STATUS);
     }
     if (inputs.length > MAX_FILES) {
-      return c.json(
-        respErr(`too many files (max ${MAX_FILES})`),
-        BAD_REQUEST_STATUS
-      );
+      return c.json(respErr(`too many files (max ${MAX_FILES})`), BAD_REQUEST_STATUS);
     }
 
     const maxKb = await resolveMaxKb();
@@ -125,8 +122,8 @@ export const storageRouter = new Hono().post(
             body: input.body,
             contentType: input.contentType,
             maxKb,
-          })
-        )
+          }),
+        ),
       );
 
       return c.json(
@@ -137,7 +134,7 @@ export const storageRouter = new Hono().post(
             url: r.url,
           })),
           urls: results.map((r) => r.url),
-        })
+        }),
       );
     } catch (err) {
       if (err instanceof UploadLimitError) {
@@ -148,5 +145,5 @@ export const storageRouter = new Hono().post(
       }
       throw err;
     }
-  }
+  },
 );

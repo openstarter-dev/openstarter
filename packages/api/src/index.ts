@@ -63,17 +63,17 @@ api.on(["POST", "GET"], "/auth/*", (c) => createAuth().handler(c.req.raw));
 //   - 有明确域前缀 → 挂载于该前缀下（如 /admin → admin 域）。
 //   - 子域聚合 → 模块内聚合器下设子路由（如 /content/{posts,blog,taxonomy,seo}）。
 const routes = api
-  .route("/", statusRouter)       // GET /api/health, GET /api/status
-  .route("/", configRouter)       // GET /api/config/public, GET /api/analytics/config
-  .route("/", userRouter)         // GET /api/user/*, GET/PATCH /api/profile
-  .route("/", demoRouter)         // GET /api/private-data, /api/notes*
-  .route("/", billingRouter)      // POST /api/checkout, POST /api/payment/webhook/:provider
-  .route("/", storageRouter)      // POST /api/storage/upload-image
-  .route("/", aiRouter)           // POST/GET /api/ai-tasks, GET /api/ai-tasks/:id
-  .route("/", llmRouter)          // POST/GET /api/llm/chats, /api/llm/chats/:id/messages
-  .route("/", supportRouter)      // /api/tickets*, /api/apikeys
-  .route("/", contentRouter)      // /api/posts*, /api/blog*, /api/taxonomy*, /api/seo*
-  .route("/admin", adminRouter);  // /api/admin/*
+  .route("/", statusRouter) // GET /api/health, GET /api/status
+  .route("/", configRouter) // GET /api/config/public, GET /api/analytics/config
+  .route("/", userRouter) // GET /api/user/*, GET/PATCH /api/profile
+  .route("/", demoRouter) // GET /api/private-data, /api/notes*
+  .route("/", billingRouter) // POST /api/checkout, POST /api/payment/webhook/:provider
+  .route("/", storageRouter) // POST /api/storage/upload-image
+  .route("/", aiRouter) // POST/GET /api/ai-tasks, GET /api/ai-tasks/:id
+  .route("/", llmRouter) // POST/GET /api/llm/chats, /api/llm/chats/:id/messages
+  .route("/", supportRouter) // /api/tickets*, /api/apikeys
+  .route("/", contentRouter) // /api/posts*, /api/blog*, /api/taxonomy*, /api/seo*
+  .route("/admin", adminRouter); // /api/admin/*
 
 export { api as app };
 export type AppType = typeof routes;

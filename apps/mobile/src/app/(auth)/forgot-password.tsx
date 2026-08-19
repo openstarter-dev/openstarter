@@ -55,9 +55,7 @@ export default function ForgotPasswordScreen() {
               {(field) => (
                 <Input
                   autoComplete="email"
-                  errors={field.state.meta.errors.map(
-                    (item) => item?.message ?? ""
-                  )}
+                  errors={field.state.meta.errors.map((item) => item?.message ?? "")}
                   label={m["common.sign.email_title"]()}
                   onBlur={field.handleBlur}
                   onChangeText={field.handleChange}

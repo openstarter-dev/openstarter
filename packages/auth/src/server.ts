@@ -3,10 +3,7 @@ import { expo } from "@better-auth/expo";
 import { passkey } from "@better-auth/passkey";
 import { db, getAuthAdapterProvider } from "@openstarter/db/server";
 import { EmailTemplate } from "@openstarter/email";
-import {
-  sendEmail as deliverEmail,
-  type SendEmailParams,
-} from "@openstarter/email/server";
+import { sendEmail as deliverEmail, type SendEmailParams } from "@openstarter/email/server";
 import { getLocaleFromRequest } from "@openstarter/i18n/server";
 import { getAllConfigs } from "@openstarter/shared/config";
 import { NodeEnv } from "@openstarter/shared/constants";
@@ -25,16 +22,9 @@ import {
   organization,
   twoFactor,
 } from "better-auth/plugins";
-import {
-  MAGIC_LINK_EXPIRES_IN,
-  OTP_EXPIRES_IN,
-  REQUIRE_EMAIL_VERIFICATION,
-} from "./auth.config";
+import { MAGIC_LINK_EXPIRES_IN, OTP_EXPIRES_IN, REQUIRE_EMAIL_VERIFICATION } from "./auth.config";
 import { authSchema, organizationTeams } from "./auth-database-schema";
-import {
-  createAuthEmailCallbacks,
-  createChangeEmailOptions,
-} from "./email-callbacks";
+import { createAuthEmailCallbacks, createChangeEmailOptions } from "./email-callbacks";
 import { env } from "./env";
 import { hooks } from "./hooks";
 import { getUrl } from "./lib/utils";
@@ -73,14 +63,11 @@ const LOGIN_METHOD_BY_PATH = new Map<string, AuthProvider>([
 const runtimeConfigs = await getAllConfigs();
 const isEnabled = (key: string): boolean => runtimeConfigs[key] === "true";
 const googleEnabled =
-  isEnabled("google_auth_enabled") &&
-  Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
+  isEnabled("google_auth_enabled") && Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 const githubEnabled =
-  isEnabled("github_auth_enabled") &&
-  Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
+  isEnabled("github_auth_enabled") && Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
 const appleEnabled =
-  isEnabled("apple_auth_enabled") &&
-  Boolean(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET);
+  isEnabled("apple_auth_enabled") && Boolean(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET);
 const magicLinkEnabled = isEnabled("magic_link_enabled");
 const emailOtpEnabled = isEnabled("email_otp_enabled");
 
@@ -181,7 +168,7 @@ export const auth = betterAuth({
       roles,
       sendInvitationEmail: (
         { invitation, inviter, organization: invitedOrganization },
-        request
+        request,
       ) => {
         const url = getUrl({
           request,
@@ -273,18 +260,13 @@ export const auth = betterAuth({
     "openstarter://",
     /* Needed only for Apple ID authentication */
     "https://appleid.apple.com",
-    ...(env.NODE_ENV === NodeEnv.DEVELOPMENT
-      ? ["http://localhost*", "https://localhost*"]
-      : []),
+    ...(env.NODE_ENV === NodeEnv.DEVELOPMENT ? ["http://localhost*", "https://localhost*"] : []),
   ],
   user: {
-    changeEmail: createChangeEmailOptions(
-      emailCallbacks.sendChangeEmailConfirmation
-    ),
+    changeEmail: createChangeEmailOptions(emailCallbacks.sendChangeEmailConfirmation),
     deleteUser: {
       enabled: true,
-      sendDeleteAccountVerification:
-        emailCallbacks.sendDeleteAccountVerification,
+      sendDeleteAccountVerification: emailCallbacks.sendDeleteAccountVerification,
       ...hooks.deleteUser,
     },
   },
@@ -307,7 +289,5 @@ export type Organization = typeof auth.$Infer.Organization;
 export type ActiveOrganization = typeof auth.$Infer.ActiveOrganization;
 export type Member = typeof auth.$Infer.Member;
 export type Permissions = NonNullable<
-  NonNullable<
-    Parameters<typeof auth.api.hasPermission>[0]
-  >["body"]["permissions"]
+  NonNullable<Parameters<typeof auth.api.hasPermission>[0]>["body"]["permissions"]
 >;

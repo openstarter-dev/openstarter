@@ -4,9 +4,7 @@ import { logError, logInfo, logWarn } from "./log";
 
 describe("log", () => {
   it("logInfo writes a prefixed line to stdout", () => {
-    const spy = vi
-      .spyOn(process.stdout, "write")
-      .mockImplementation(() => true);
+    const spy = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
 
     logInfo("server ready", "on port", 3000);
 
@@ -22,9 +20,7 @@ describe("log", () => {
   });
 
   it("logWarn writes a prefixed line to stderr", () => {
-    const spy = vi
-      .spyOn(process.stderr, "write")
-      .mockImplementation(() => true);
+    const spy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     logWarn("update check skipped");
 
@@ -37,9 +33,7 @@ describe("log", () => {
   });
 
   it("logError writes a prefixed line to stderr", () => {
-    const spy = vi
-      .spyOn(process.stderr, "write")
-      .mockImplementation(() => true);
+    const spy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
 
     logError("failed to load", new Error("boom"));
 

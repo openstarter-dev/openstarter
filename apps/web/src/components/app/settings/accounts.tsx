@@ -25,7 +25,7 @@ const PROVIDER_META: Record<string, { label: string }> = {
 const getLinkLabel = (
   provider: (typeof LINKABLE_PROVIDERS)[number],
   alreadyLinked: boolean,
-  isLinking: boolean
+  isLinking: boolean,
 ) => {
   if (isLinking) {
     return "Redirecting...";
@@ -63,9 +63,7 @@ export function AccountsPage() {
       return;
     }
     if (accounts.length <= 1) {
-      toast.error(
-        "Cannot unlink your last sign-in method. Add another one first."
-      );
+      toast.error("Cannot unlink your last sign-in method. Add another one first.");
       return;
     }
 
@@ -92,18 +90,14 @@ export function AccountsPage() {
     <Card>
       <CardHeader>
         <CardTitle>Accounts</CardTitle>
-        <CardDescription>
-          Manage linked social accounts and sign-in methods.
-        </CardDescription>
+        <CardDescription>Manage linked social accounts and sign-in methods.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {accountsQuery.isPending ? (
           <p className="text-muted-foreground text-sm">Loading accounts...</p>
         ) : null}
         {accountsQuery.error ? (
-          <p className="text-destructive text-sm">
-            {accountsQuery.error.message}
-          </p>
+          <p className="text-destructive text-sm">{accountsQuery.error.message}</p>
         ) : null}
         {accounts.length > 0 && (
           <div className="space-y-2">
@@ -114,36 +108,26 @@ export function AccountsPage() {
                   label: account.providerId,
                 };
                 return (
-                  <div
-                    className="flex items-center justify-between px-4 py-3"
-                    key={account.id}
-                  >
+                  <div className="flex items-center justify-between px-4 py-3" key={account.id}>
                     <span className="text-sm">{meta.label}</span>
-                    <span className="text-muted-foreground text-xs">
-                      {account.accountId}
-                    </span>
+                    <span className="text-muted-foreground text-xs">{account.accountId}</span>
                     <Button
                       disabled={unlinking !== null || accounts.length <= 1}
                       onClick={() => {
-                        handleUnlink(
-                          account.accountId,
-                          account.providerId
-                        ).catch((error: Error) => {
-                          toast.error(error.message);
-                        });
+                        handleUnlink(account.accountId, account.providerId).catch(
+                          (error: Error) => {
+                            toast.error(error.message);
+                          },
+                        );
                       }}
                       size="sm"
                       title={
-                        accounts.length <= 1
-                          ? "Cannot unlink your last sign-in method"
-                          : undefined
+                        accounts.length <= 1 ? "Cannot unlink your last sign-in method" : undefined
                       }
                       type="button"
                       variant="ghost"
                     >
-                      {unlinking === account.accountId
-                        ? "Unlinking..."
-                        : "Unlink"}
+                      {unlinking === account.accountId ? "Unlinking..." : "Unlink"}
                     </Button>
                   </div>
                 );
@@ -156,9 +140,7 @@ export function AccountsPage() {
           <p className="font-medium text-sm">Link a new account</p>
           <div className="flex flex-wrap gap-2">
             {LINKABLE_PROVIDERS.map((provider) => {
-              const alreadyLinked = accounts.some(
-                (account) => account.providerId === provider
-              );
+              const alreadyLinked = accounts.some((account) => account.providerId === provider);
               return (
                 <Button
                   disabled={alreadyLinked || linking === provider}
@@ -181,8 +163,8 @@ export function AccountsPage() {
 
         {session?.user?.email === null && (
           <div className="rounded-md bg-muted p-4 text-sm">
-            You're currently signed in anonymously. Link an account above to
-            save your data permanently.
+            You're currently signed in anonymously. Link an account above to save your data
+            permanently.
           </div>
         )}
       </CardContent>

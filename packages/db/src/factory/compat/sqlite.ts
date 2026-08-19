@@ -13,10 +13,7 @@ type UnknownFunction = (...args: unknown[]) => unknown;
 // transactions) reuses the same proxy and preserves identity.
 const sqliteCompatCache = new WeakMap<object, object>();
 
-function withSqliteCompat<T extends object>(
-  dbInstance: T,
-  provider?: string,
-): T {
+function withSqliteCompat<T extends object>(dbInstance: T, provider?: string): T {
   const cached = sqliteCompatCache.get(dbInstance);
   if (cached) {
     return cached as T;
@@ -37,8 +34,7 @@ function withSqliteCompat<T extends object>(
           return value;
         }
         const method = value as UnknownFunction;
-        return (...args: unknown[]): unknown =>
-          wrapQuery(method.apply(target, args));
+        return (...args: unknown[]): unknown => wrapQuery(method.apply(target, args));
       },
     });
   };
@@ -47,8 +43,7 @@ function withSqliteCompat<T extends object>(
     get(target, prop, receiver) {
       if (prop === "transaction") {
         if (provider === "d1") {
-          return (callback: unknown): unknown =>
-            (callback as (tx: unknown) => unknown)(proxied);
+          return (callback: unknown): unknown => (callback as (tx: unknown) => unknown)(proxied);
         }
         const original = Reflect.get(target, prop, receiver) as unknown;
         if (typeof original !== "function") {
@@ -60,7 +55,7 @@ function withSqliteCompat<T extends object>(
           return runTransaction.call(
             target,
             (tx: object) => userCallback(withSqliteCompat(tx, provider)),
-            ...rest
+            ...rest,
           );
         };
       }
@@ -71,8 +66,7 @@ function withSqliteCompat<T extends object>(
       }
       const method = value as UnknownFunction;
       if (typeof prop === "string" && prop.startsWith("select")) {
-        return (...args: unknown[]): unknown =>
-          wrapQuery(method.apply(target, args));
+        return (...args: unknown[]): unknown => wrapQuery(method.apply(target, args));
       }
       return method.bind(target);
     },

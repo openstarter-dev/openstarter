@@ -12,7 +12,7 @@ describe("shouldCheckForUpdates", () => {
         disabled: false,
         hasPublishConfig: true,
         isPackaged: true,
-      })
+      }),
     ).toBe(true);
   });
 
@@ -22,7 +22,7 @@ describe("shouldCheckForUpdates", () => {
         disabled: false,
         hasPublishConfig: true,
         isPackaged: false,
-      })
+      }),
     ).toBe(false);
   });
 
@@ -32,7 +32,7 @@ describe("shouldCheckForUpdates", () => {
         disabled: true,
         hasPublishConfig: true,
         isPackaged: true,
-      })
+      }),
     ).toBe(false);
   });
 
@@ -42,7 +42,7 @@ describe("shouldCheckForUpdates", () => {
         disabled: false,
         hasPublishConfig: false,
         isPackaged: true,
-      })
+      }),
     ).toBe(false);
   });
 
@@ -52,7 +52,7 @@ describe("shouldCheckForUpdates", () => {
         disabled: true,
         hasPublishConfig: false,
         isPackaged: false,
-      })
+      }),
     ).toBe(false);
   });
 });

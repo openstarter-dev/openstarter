@@ -18,13 +18,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const ENV_FILE = fileURLToPath(
-  new URL("../../../apps/web/.env", import.meta.url)
-);
+const ENV_FILE = fileURLToPath(new URL("../../../apps/web/.env", import.meta.url));
 if (!existsSync(ENV_FILE)) {
   console.error(`[seed-admin] 未找到环境文件:${ENV_FILE}`);
   console.error(
-    "请先复制 apps/web/.env.example 为 apps/web/.env 并填写 BETTER_AUTH_SECRET / DATABASE_URL。"
+    "请先复制 apps/web/.env.example 为 apps/web/.env 并填写 BETTER_AUTH_SECRET / DATABASE_URL。",
   );
   process.exit(1);
 }

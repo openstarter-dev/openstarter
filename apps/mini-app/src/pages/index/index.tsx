@@ -1,20 +1,20 @@
-import { View, Text } from '@tarojs/components';
-import Taro from '@tarojs/taro';
-import { useAuthStore } from '@/stores/auth-store';
-import Layout from '@/components/Layout';
-import Button from '@/components/Button';
-import './index.scss';
+import { View, Text } from "@tarojs/components";
+import Taro from "@tarojs/taro";
+import { useAuthStore } from "@/stores/auth-store";
+import Layout from "@/components/Layout";
+import Button from "@/components/Button";
+import "./index.scss";
 
 export default function IndexPage() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const user = useAuthStore((s) => s.user);
 
   const handleGetStarted = () => {
-    Taro.navigateTo({ url: '/pages/login/index' });
+    Taro.navigateTo({ url: "/pages/login/index" });
   };
 
   const handleViewProfile = () => {
-    Taro.navigateTo({ url: '/pages/profile/index' });
+    Taro.navigateTo({ url: "/pages/profile/index" });
   };
 
   return (

@@ -21,8 +21,7 @@ const copy = {
       `We received a request to permanently delete your ${app} account. Confirm below to remove your account and all associated data.`,
     button: "Delete my account",
     expiry: "This link will expire in 24 hours.",
-    fallbackIntro:
-      "If the button doesn't work, copy and paste this link into your browser:",
+    fallbackIntro: "If the button doesn't work, copy and paste this link into your browser:",
     footer:
       "If you didn't request this, you can safely ignore this email and your account will stay active.",
   },

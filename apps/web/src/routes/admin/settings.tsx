@@ -10,11 +10,7 @@
 // 仅展示拥有 admin.* 权限的用户可见（路由外壳已守卫）。
 
 import { Button } from "@openstarter/ui-web/components/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@openstarter/ui-web/components/card";
+import { Card, CardContent, CardHeader } from "@openstarter/ui-web/components/card";
 import { Input } from "@openstarter/ui-web/components/input";
 import { Label } from "@openstarter/ui-web/components/label";
 import {
@@ -91,10 +87,7 @@ function AdminSettingsPage() {
   if (configQuery.isPending || !data) {
     return (
       <div>
-        <AdminHeader
-          description="Configure system-wide settings"
-          title="System Settings"
-        />
+        <AdminHeader description="Configure system-wide settings" title="System Settings" />
         <StatusText empty emptyLabel="" error={null} loading />
       </div>
     );
@@ -103,13 +96,8 @@ function AdminSettingsPage() {
   if (configQuery.error) {
     return (
       <div>
-        <AdminHeader
-          description="Configure system-wide settings"
-          title="System Settings"
-        />
-        <p className="text-destructive text-sm">
-          {(configQuery.error as Error).message}
-        </p>
+        <AdminHeader description="Configure system-wide settings" title="System Settings" />
+        <p className="text-destructive text-sm">{(configQuery.error as Error).message}</p>
       </div>
     );
   }
@@ -126,11 +114,9 @@ function AdminSettingsPage() {
 
   // 已编辑且未掩码(被改动的真实值)的字段统计。
   const dirtyCount = Object.entries(pending).filter(
-    ([name, value]) => configs[name] !== value && !isMasked(value)
+    ([name, value]) => configs[name] !== value && !isMasked(value),
   ).length;
-  const dirtyEntries = Object.entries(pending).filter(
-    ([name, value]) => configs[name] !== value
-  );
+  const dirtyEntries = Object.entries(pending).filter(([name, value]) => configs[name] !== value);
 
   const onFieldChange = (name: string, value: string) => {
     setPending((prev) => ({ ...prev, [name]: value }));
@@ -179,7 +165,7 @@ function AdminSettingsPage() {
               (field) =>
                 field.tab === tab.name &&
                 pending[field.name] !== configs[field.name] &&
-                !isMasked(pending[field.name] ?? "")
+                !isMasked(pending[field.name] ?? ""),
             ).length;
             const active = tab.name === currentTabName;
             return (
@@ -188,7 +174,7 @@ function AdminSettingsPage() {
                   "flex items-center justify-between gap-2 whitespace-nowrap rounded-md px-3 py-2 text-left text-sm transition-colors",
                   active
                     ? "bg-muted font-medium text-foreground"
-                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
                 key={tab.name}
                 onClick={() => setActiveTab(tab.name)}
@@ -216,9 +202,7 @@ function AdminSettingsPage() {
                 <CardHeader>
                   <h2 className="font-semibold">{group.title}</h2>
                   {group.description ? (
-                    <p className="text-muted-foreground text-xs">
-                      {group.description}
-                    </p>
+                    <p className="text-muted-foreground text-xs">{group.description}</p>
                   ) : null}
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -235,9 +219,7 @@ function AdminSettingsPage() {
             );
           })}
           {tabGroups.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
-              No settings for this section.
-            </p>
+            <p className="text-muted-foreground text-sm">No settings for this section.</p>
           ) : null}
         </div>
       </div>
@@ -259,9 +241,7 @@ function FieldRow({
   return (
     <div className="space-y-1.5">
       <Label htmlFor={`setting-${field.name}`}>{field.title}</Label>
-      {field.tip ? (
-        <p className="text-muted-foreground text-xs">{field.tip}</p>
-      ) : null}
+      {field.tip ? <p className="text-muted-foreground text-xs">{field.tip}</p> : null}
       {renderControl(field, value, onChange)}
     </div>
   );
@@ -270,12 +250,11 @@ function FieldRow({
 function renderControl(
   field: SettingField,
   value: string,
-  onChange: (name: string, value: string) => void
+  onChange: (name: string, value: string) => void,
 ) {
   const inputId = `setting-${field.name}`;
-  const handleText = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => onChange(field.name, e.target.value);
+  const handleText = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    onChange(field.name, e.target.value);
 
   switch (field.type) {
     case "switch":
@@ -283,9 +262,7 @@ function renderControl(
         <SwitchField
           checked={value === "true"}
           id={inputId}
-          onChange={(checked) =>
-            onChange(field.name, checked ? "true" : "false")
-          }
+          onChange={(checked) => onChange(field.name, checked ? "true" : "false")}
         />
       );
     case "textarea":
@@ -358,7 +335,7 @@ function SwitchField({
       aria-label={id}
       className={cn(
         "relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-transparent transition-colors",
-        checked ? "bg-primary" : "bg-input"
+        checked ? "bg-primary" : "bg-input",
       )}
       id={id}
       onClick={() => onChange(!checked)}
@@ -368,7 +345,7 @@ function SwitchField({
       <span
         className={cn(
           "pointer-events-none block size-4 rounded-full bg-background shadow ring-1 ring-foreground/5 transition-transform",
-          checked ? "translate-x-4" : "translate-x-0.5"
+          checked ? "translate-x-4" : "translate-x-0.5",
         )}
       />
     </button>

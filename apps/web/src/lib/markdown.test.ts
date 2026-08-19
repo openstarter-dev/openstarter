@@ -36,9 +36,7 @@ describe("renderMarkdown", () => {
     });
 
     it("processes inline formatting in headings", () => {
-      expect(renderMarkdown("# **Bold** heading")).toBe(
-        "<h1><strong>Bold</strong> heading</h1>",
-      );
+      expect(renderMarkdown("# **Bold** heading")).toBe("<h1><strong>Bold</strong> heading</h1>");
     });
   });
 
@@ -72,9 +70,7 @@ describe("renderMarkdown", () => {
 
   describe("links", () => {
     it("renders a link", () => {
-      expect(renderMarkdown("[text](url)")).toBe(
-        '<p><a href="url">text</a></p>',
-      );
+      expect(renderMarkdown("[text](url)")).toBe('<p><a href="url">text</a></p>');
     });
 
     it("renders a link with inline formatting", () => {
@@ -86,9 +82,7 @@ describe("renderMarkdown", () => {
 
   describe("code blocks", () => {
     it("renders a code block", () => {
-      expect(renderMarkdown("```\ncode block\n```")).toBe(
-        "<pre><code>code block</code></pre>",
-      );
+      expect(renderMarkdown("```\ncode block\n```")).toBe("<pre><code>code block</code></pre>");
     });
 
     it("renders a code block with language", () => {
@@ -126,9 +120,7 @@ describe("renderMarkdown", () => {
 
   describe("blockquotes", () => {
     it("renders a blockquote", () => {
-      expect(renderMarkdown("> Quote")).toBe(
-        "<blockquote><p>Quote</p></blockquote>",
-      );
+      expect(renderMarkdown("> Quote")).toBe("<blockquote><p>Quote</p></blockquote>");
     });
   });
 

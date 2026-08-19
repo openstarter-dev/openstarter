@@ -12,7 +12,7 @@ import { getApiBaseUrl } from "@/lib/env";
 function handleUnauthorized() {
   removeToken();
   useAuthStore.getState().logout();
-  Taro.reLaunch({ url: '/pages/login/index' });
+  Taro.reLaunch({ url: "/pages/login/index" });
 }
 
 export function createClient() {

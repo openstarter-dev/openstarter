@@ -54,12 +54,7 @@ export const PRICING_TIERS: PricingTier[] = [
     icon: Sparkles,
     priceMonthly: 29,
     description: "Everything you need to grow a real business.",
-    features: [
-      "Unlimited projects",
-      "Up to 50K MAU",
-      "Email support",
-      "Custom domains",
-    ],
+    features: ["Unlimited projects", "Up to 50K MAU", "Email support", "Custom domains"],
     cta: {
       kind: "checkout",
       label: "Start free trial",

@@ -3,7 +3,7 @@
 /** 返回不含指定键的浅拷贝（替代 `delete`，遵循 ultracite 的「禁用 delete」）。 */
 export function omitKeys(
   obj: Record<string, unknown>,
-  keys: readonly string[]
+  keys: readonly string[],
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
@@ -18,8 +18,8 @@ export function omitKeys(
 export function isValidCallbackUrl(callbackUrl?: string): boolean {
   return Boolean(
     callbackUrl &&
-      callbackUrl.startsWith("http") &&
-      !callbackUrl.includes("localhost") &&
-      !callbackUrl.includes("127.0.0.1")
+    callbackUrl.startsWith("http") &&
+    !callbackUrl.includes("localhost") &&
+    !callbackUrl.includes("127.0.0.1"),
   );
 }

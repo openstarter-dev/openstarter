@@ -84,22 +84,10 @@ export function MarketingHeader() {
         </div>
       </div>
 
-      <Drawer
-        className="gap-4 p-4"
-        label="Menu"
-        onClose={close}
-        open={open}
-        side="right"
-      >
+      <Drawer className="gap-4 p-4" label="Menu" onClose={close} open={open} side="right">
         <div className="flex items-center justify-between">
           <span className="font-semibold">{BRAND_NAME}</span>
-          <Button
-            aria-label="Close menu"
-            onClick={close}
-            size="icon"
-            type="button"
-            variant="ghost"
-          >
+          <Button aria-label="Close menu" onClick={close} size="icon" type="button" variant="ghost">
             <X aria-hidden="true" />
           </Button>
         </div>

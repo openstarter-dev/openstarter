@@ -1,7 +1,7 @@
-import { useEffect, type ReactNode } from 'react';
-import { useAppStore } from './stores/app-store';
-import { useAuthStore } from './stores/auth-store';
-import './app.scss';
+import { useEffect, type ReactNode } from "react";
+import { useAppStore } from "./stores/app-store";
+import { useAuthStore } from "./stores/auth-store";
+import "./app.scss";
 
 interface Props {
   children: ReactNode;

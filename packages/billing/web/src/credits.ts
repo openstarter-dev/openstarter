@@ -160,7 +160,7 @@ function validGrantConditions(userId: string, now: Date) {
     eq(credit.transactionType, CreditTransactionType.GRANT),
     eq(credit.status, CreditStatus.ACTIVE),
     gt(credit.remainingCredits, 0),
-    or(isNull(credit.expiresAt), gt(credit.expiresAt, now))
+    or(isNull(credit.expiresAt), gt(credit.expiresAt, now)),
   );
 }
 
@@ -201,9 +201,7 @@ export interface ConsumedDetailItem {
  * 注入的 `tx` 完全一致。供 AI 任务（27.1）与 Webhook 成功编排（18.2）在其自身事务内
  * 调用 `consume`/`grant`/`createSubscription({ tx })`，实现「单事务」原子性。
  */
-export type BillingTransaction = Parameters<
-  Parameters<Database["transaction"]>[0]
->[0];
+export type BillingTransaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
 export interface ConsumeCreditsParams {
   credits: number;
@@ -232,7 +230,7 @@ export interface ConsumeCreditsResult {
  */
 async function consumeWithinTransaction(
   tx: BillingTransaction,
-  params: ConsumeCreditsParams
+  params: ConsumeCreditsParams,
 ): Promise<ConsumeCreditsResult> {
   const { userId, credits: amount } = params;
   const now = new Date();
@@ -252,10 +250,7 @@ async function consumeWithinTransaction(
     .select()
     .from(credit)
     .where(validGrantConditions(userId, now))
-    .orderBy(
-      sql`case when ${credit.expiresAt} is null then 1 else 0 end`,
-      asc(credit.expiresAt)
-    );
+    .orderBy(sql`case when ${credit.expiresAt} is null then 1 else 0 end`, asc(credit.expiresAt));
 
   // 3. 纯计算逐批扣减方案（无 I/O）：记录每批新剩余额与扣减额。
   let remaining = amount;
@@ -279,8 +274,8 @@ async function consumeWithinTransaction(
       tx
         .update(credit)
         .set({ remainingCredits: item.newRemaining })
-        .where(eq(credit.id, item.creditId))
-    )
+        .where(eq(credit.id, item.creditId)),
+    ),
   );
 
   // 5. 写入一条 consume 流水，`consumedDetail` 保存逐批明细 `[{ creditId, amount }]`。
@@ -313,9 +308,7 @@ async function consumeWithinTransaction(
  * 若注入了事务句柄 `tx`（如 AI 任务在其自身事务内），则在该事务内执行；
  * 否则自行开启事务，保证「余额核对 + 逐批扣减 + 写流水」整体原子。
  */
-export function consume(
-  params: ConsumeCreditsParams
-): Promise<ConsumeCreditsResult> {
+export function consume(params: ConsumeCreditsParams): Promise<ConsumeCreditsResult> {
   if (params.tx) {
     return consumeWithinTransaction(params.tx, params);
   }
@@ -349,8 +342,8 @@ export async function revoke(params: RevokeCreditsParams): Promise<void> {
       and(
         eq(credit.id, consumeCreditId),
         eq(credit.transactionType, CreditTransactionType.CONSUME),
-        eq(credit.status, CreditStatus.ACTIVE)
-      )
+        eq(credit.status, CreditStatus.ACTIVE),
+      ),
     )
     .limit(1);
 
@@ -369,8 +362,8 @@ export async function revoke(params: RevokeCreditsParams): Promise<void> {
           .set({
             remainingCredits: sql`${credit.remainingCredits} + ${item.amount}`,
           })
-          .where(eq(credit.id, item.creditId))
-      )
+          .where(eq(credit.id, item.creditId)),
+      ),
     );
 
     // 将该 consume 记录软删（status='deleted'），完成撤销。
@@ -394,10 +387,7 @@ export interface GetHistoryOptions {
  * 分页返回该用户的积分流水（grant 与 consume），按创建时间倒序。
  * 排除物理软删（`deletedAt` 非空）的记录。
  */
-export function getHistory(
-  userId: string,
-  options?: GetHistoryOptions
-): Promise<Credit[]> {
+export function getHistory(userId: string, options?: GetHistoryOptions): Promise<Credit[]> {
   const limit = options?.limit ?? DEFAULT_HISTORY_PAGE_SIZE;
   const offset = options?.offset ?? 0;
 
@@ -436,7 +426,7 @@ export interface GrantCreditsForNewUserParams {
  * 仅为独立函数——auth `databaseHooks` 的装配（幂等叠加于 `create.after`）属任务 15。
  */
 export async function grantCreditsForNewUser(
-  params: GrantCreditsForNewUserParams
+  params: GrantCreditsForNewUserParams,
 ): Promise<NewCredit | undefined> {
   const { userId, configs, userEmail } = params;
 
@@ -449,14 +439,10 @@ export async function grantCreditsForNewUser(
     return;
   }
 
-  const parsedValidDays = Number.parseInt(
-    configs[INITIAL_CREDITS_VALID_DAYS_KEY] ?? "",
-    10
-  );
+  const parsedValidDays = Number.parseInt(configs[INITIAL_CREDITS_VALID_DAYS_KEY] ?? "", 10);
   const creditsValidDays = Number.isNaN(parsedValidDays) ? 0 : parsedValidDays;
   const description =
-    configs[INITIAL_CREDITS_DESCRIPTION_KEY] ??
-    DEFAULT_INITIAL_CREDITS_DESCRIPTION;
+    configs[INITIAL_CREDITS_DESCRIPTION_KEY] ?? DEFAULT_INITIAL_CREDITS_DESCRIPTION;
   const expiresAt = calculateCreditExpirationTime({ creditsValidDays });
   const transactionNo = `welcome-credit:${userId}`;
 

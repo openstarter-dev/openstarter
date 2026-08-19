@@ -70,8 +70,8 @@ export function ApiKeysPage() {
         <div>
           <CardTitle>API keys</CardTitle>
           <CardDescription>
-            Create keys to call protected endpoints without a session. The
-            plaintext key is shown only once.
+            Create keys to call protected endpoints without a session. The plaintext key is shown
+            only once.
           </CardDescription>
         </div>
         <Button onClick={() => setCreateOpen(true)} size="sm" type="button">
@@ -83,9 +83,7 @@ export function ApiKeysPage() {
           <p className="text-muted-foreground text-sm">Loading API keys...</p>
         ) : null}
         {keysQuery.error ? (
-          <p className="text-destructive text-sm">
-            {(keysQuery.error as Error).message}
-          </p>
+          <p className="text-destructive text-sm">{(keysQuery.error as Error).message}</p>
         ) : null}
 
         {items.length > 0 ? (
@@ -111,10 +109,7 @@ export function ApiKeysPage() {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
-                        disabled={
-                          revokeMutation.isPending &&
-                          revokeMutation.variables === item.id
-                        }
+                        disabled={revokeMutation.isPending && revokeMutation.variables === item.id}
                         onClick={() => revokeMutation.mutate(item.id)}
                         size="sm"
                         type="button"
@@ -179,9 +174,7 @@ export function ApiKeysPage() {
               Copy this key now. For security, it will not be shown again.
             </DialogDescription>
           </DialogHeader>
-          <div className="break-all rounded-md bg-muted p-3 font-mono text-sm">
-            {revealedKey}
-          </div>
+          <div className="break-all rounded-md bg-muted p-3 font-mono text-sm">{revealedKey}</div>
           <DialogFooter>
             <Button
               onClick={() => {

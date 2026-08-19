@@ -30,7 +30,7 @@ describe("AccountPanel", () => {
         onManage={vi.fn()}
         onSignOut={vi.fn()}
         user={{ email: "user@example.com", name: "Ada" }}
-      />
+      />,
     );
 
     expect(screen.getByText("member")).toBeTruthy();
@@ -40,14 +40,7 @@ describe("AccountPanel", () => {
   });
 
   it("renders without the identity row when user is null", () => {
-    render(
-      <AccountPanel
-        data={SNAPSHOT}
-        onManage={vi.fn()}
-        onSignOut={vi.fn()}
-        user={null}
-      />
-    );
+    render(<AccountPanel data={SNAPSHOT} onManage={vi.fn()} onSignOut={vi.fn()} user={null} />);
 
     expect(screen.getByText("member")).toBeTruthy();
   });
@@ -59,7 +52,7 @@ describe("AccountPanel", () => {
         onManage={vi.fn()}
         onSignOut={vi.fn()}
         user={{ email: "user@example.com", name: "Ada" }}
-      />
+      />,
     );
 
     expect(screen.getByText(SHARED_SESSION_WARNING)).toBeTruthy();

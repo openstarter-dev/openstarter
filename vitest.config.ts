@@ -3,12 +3,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     coverage: {
-      exclude: [
-        "**/*.d.ts",
-        "**/*.test.{ts,tsx}",
-        "**/routeTree.gen.ts",
-        "**/test/**",
-      ],
+      exclude: ["**/*.d.ts", "**/*.test.{ts,tsx}", "**/routeTree.gen.ts", "**/test/**"],
       include: [
         "apps/*/src/**/*.{ts,tsx}",
         "packages/*/src/**/*.{ts,tsx}",

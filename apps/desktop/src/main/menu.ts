@@ -8,9 +8,7 @@
 import type { MenuItemConstructorOptions } from "electron";
 
 /** 构造应用菜单模板。isMac 为 true 时加入 macOS 专属的 App 菜单与编辑菜单扩展项。 */
-export function buildMenuTemplate(
-  isMac: boolean
-): MenuItemConstructorOptions[] {
+export function buildMenuTemplate(isMac: boolean): MenuItemConstructorOptions[] {
   const appMenu: MenuItemConstructorOptions[] = isMac
     ? [
         {
@@ -62,10 +60,7 @@ export function buildMenuTemplate(
 
   const windowMenu: MenuItemConstructorOptions = {
     label: "Window",
-    submenu: [
-      { role: "minimize" },
-      isMac ? { role: "close" } : { role: "quit" },
-    ],
+    submenu: [{ role: "minimize" }, isMac ? { role: "close" } : { role: "quit" }],
   };
 
   return [appMenu, fileMenu, editMenu, viewMenu, windowMenu].flat();

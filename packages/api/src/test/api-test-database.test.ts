@@ -41,13 +41,9 @@ describe("api-test-database harness smoke", () => {
   it("creates a user row and can read it back", async () => {
     const database = getDatabase();
     const id = await insertUser(database, {});
-    const rows = await database.all(
-      sql`SELECT id, email FROM user WHERE id = ${id}`
-    );
+    const rows = await database.all(sql`SELECT id, email FROM user WHERE id = ${id}`);
     expect(rows).toHaveLength(1);
-    expect((rows[0] as { email: string }).email).toBe(
-      "test-user-1@example.com"
-    );
+    expect((rows[0] as { email: string }).email).toBe("test-user-1@example.com");
   });
 
   it("resetApiTestDatabase empties user (and dependent) tables", async () => {
@@ -71,9 +67,7 @@ describe("api-test-database harness smoke", () => {
     ] as const;
     await TABLES.reduce(async (previous, table) => {
       await previous;
-      const rows = await database.all(
-        sql.raw(`SELECT count(*) AS c FROM ${table}`)
-      );
+      const rows = await database.all(sql.raw(`SELECT count(*) AS c FROM ${table}`));
       expect(rows).toHaveLength(1);
     }, Promise.resolve());
   });

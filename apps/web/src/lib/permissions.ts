@@ -13,10 +13,7 @@ const GLOBAL_WILDCARD = "*";
  *   - 资源通配：`granted` 含 `resource.*` 且 `required` 以 `resource.` 为前缀；
  *   - 全局通配：`granted` 含 `*`。
  */
-export function matchPermission(
-  required: string,
-  granted: readonly string[]
-): boolean {
+export function matchPermission(required: string, granted: readonly string[]): boolean {
   if (granted.includes(GLOBAL_WILDCARD)) {
     return true;
   }
@@ -36,7 +33,7 @@ export function matchPermission(
 /** 是否满足任一所需权限码（含通配符）。 */
 export function matchAnyPermission(
   requiredCodes: readonly string[],
-  granted: readonly string[]
+  granted: readonly string[],
 ): boolean {
   return requiredCodes.some((code) => matchPermission(code, granted));
 }

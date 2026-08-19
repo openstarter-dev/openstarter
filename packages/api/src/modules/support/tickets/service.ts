@@ -194,18 +194,12 @@ function parseAttachments(raw: string | null): string[] {
 
 /** 按 id 读取单条工单；不存在返回 `undefined`。所有权校验由路由层负责（R21.6）。 */
 export async function getTicketById(id: string): Promise<Ticket | undefined> {
-  const [row] = await db()
-    .select()
-    .from(ticket)
-    .where(eq(ticket.id, id))
-    .limit(1);
+  const [row] = await db().select().from(ticket).where(eq(ticket.id, id)).limit(1);
   return row;
 }
 
 /** 读取工单的消息线程（按时间升序），附发送人名称与头像。 */
-export async function getTicketMessages(
-  ticketId: string
-): Promise<TicketMessageView[]> {
+export async function getTicketMessages(ticketId: string): Promise<TicketMessageView[]> {
   const rows = await db()
     .select({
       id: ticketMessage.id,
@@ -233,9 +227,7 @@ export async function getTicketMessages(
  * 批量取每个工单的**最近一条**管理员回复（用于列表预览）。整页工单一次查询，
  * 按创建时间倒序扫描，每个工单保留首次遇到（即最新）的回复内容。
  */
-async function getLatestAdminReplies(
-  ticketIds: string[]
-): Promise<Map<string, string>> {
+async function getLatestAdminReplies(ticketIds: string[]): Promise<Map<string, string>> {
   const latest = new Map<string, string>();
   if (ticketIds.length === 0) {
     return latest;
@@ -248,10 +240,7 @@ async function getLatestAdminReplies(
     })
     .from(ticketMessage)
     .where(
-      and(
-        inArray(ticketMessage.ticketId, ticketIds),
-        eq(ticketMessage.role, TICKET_ROLE.ADMIN)
-      )
+      and(inArray(ticketMessage.ticketId, ticketIds), eq(ticketMessage.role, TICKET_ROLE.ADMIN)),
     )
     .orderBy(desc(ticketMessage.createdAt));
 
@@ -295,11 +284,7 @@ export function createTicket(params: CreateTicketParams): Promise<Ticket> {
       createdAt: now,
     });
 
-    const [created] = await tx
-      .select()
-      .from(ticket)
-      .where(eq(ticket.id, ticketId))
-      .limit(1);
+    const [created] = await tx.select().from(ticket).where(eq(ticket.id, ticketId)).limit(1);
     if (!created) {
       throw new Error("Failed to load ticket after creation");
     }
@@ -318,10 +303,7 @@ export function createTicket(params: CreateTicketParams): Promise<Ticket> {
 export function addMessage(params: AddMessageParams): Promise<TicketMessage> {
   const messageId = getUuid();
   const now = new Date();
-  const nextStatus =
-    params.role === TICKET_ROLE.ADMIN
-      ? TICKET_STATUS.REPLIED
-      : TICKET_STATUS.OPEN;
+  const nextStatus = params.role === TICKET_ROLE.ADMIN ? TICKET_STATUS.REPLIED : TICKET_STATUS.OPEN;
 
   return db().transaction(async (tx) => {
     await tx.insert(ticketMessage).values({
@@ -359,12 +341,9 @@ export function addMessage(params: AddMessageParams): Promise<TicketMessage> {
  */
 export async function updateTicketStatus(
   id: string,
-  status: TicketStatus
+  status: TicketStatus,
 ): Promise<Ticket | undefined> {
-  await db()
-    .update(ticket)
-    .set({ status, updatedAt: new Date() })
-    .where(eq(ticket.id, id));
+  await db().update(ticket).set({ status, updatedAt: new Date() }).where(eq(ticket.id, id));
   return getTicketById(id);
 }
 
@@ -375,13 +354,10 @@ export async function updateTicketStatus(
  * 按最近活动（`updatedAt`）倒序，并附每单最近一条管理员回复预览。
  */
 export async function listUserTickets(
-  params: ListUserTicketsParams
+  params: ListUserTicketsParams,
 ): Promise<ListUserTicketsResult> {
   const page = Math.max(1, params.page ?? DEFAULT_PAGE);
-  const pageSize = Math.min(
-    MAX_PAGE_SIZE,
-    Math.max(1, params.pageSize ?? DEFAULT_PAGE_SIZE)
-  );
+  const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, params.pageSize ?? DEFAULT_PAGE_SIZE));
 
   const conditions: SQL[] = [eq(ticket.userId, params.userId)];
   if (params.status) {
@@ -392,10 +368,7 @@ export async function listUserTickets(
   }
   const where = and(...conditions);
 
-  const [totalRow] = await db()
-    .select({ value: count() })
-    .from(ticket)
-    .where(where);
+  const [totalRow] = await db().select({ value: count() }).from(ticket).where(where);
 
   const rows = await db()
     .select()
@@ -418,14 +391,9 @@ export async function listUserTickets(
  * 分页列出**全部**工单（R21.6，供具工单管理权限的管理员使用）：可选按状态筛选、
  * 按标题 / 提交人邮箱 / 提交人姓名模糊搜索，按最近活动倒序，并附提交人信息与最近回复预览。
  */
-export async function listAllTickets(
-  params: ListAllTicketsParams
-): Promise<ListAllTicketsResult> {
+export async function listAllTickets(params: ListAllTicketsParams): Promise<ListAllTicketsResult> {
   const page = Math.max(1, params.page ?? DEFAULT_PAGE);
-  const pageSize = Math.min(
-    MAX_PAGE_SIZE,
-    Math.max(1, params.pageSize ?? DEFAULT_PAGE_SIZE)
-  );
+  const pageSize = Math.min(MAX_PAGE_SIZE, Math.max(1, params.pageSize ?? DEFAULT_PAGE_SIZE));
 
   const conditions: SQL[] = [];
   if (params.status) {
@@ -436,7 +404,7 @@ export async function listAllTickets(
     const searchCondition = or(
       like(ticket.title, term),
       like(user.email, term),
-      like(user.name, term)
+      like(user.name, term),
     );
     if (searchCondition) {
       conditions.push(searchCondition);

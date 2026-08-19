@@ -53,9 +53,7 @@ export function buildPageHead(input: PageHeadInput): PageHead {
     meta.push({ name: "twitter:image", content: image });
   }
 
-  const links: Record<string, string>[] = [
-    { rel: "canonical", href: url },
-  ];
+  const links: Record<string, string>[] = [{ rel: "canonical", href: url }];
 
   return { meta, links };
 }

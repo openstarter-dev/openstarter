@@ -16,19 +16,12 @@ import {
   dispatchQuery,
   getAIManager,
 } from "./index";
-import {
-  createTask,
-  findTask,
-  getTasks,
-  InsufficientCreditsError,
-  updateTask,
-} from "../ai-tasks";
+import { createTask, findTask, getTasks, InsufficientCreditsError, updateTask } from "../ai-tasks";
 import { requireAuth } from "../../middleware/auth";
 import { requirePlan } from "../../middleware/plan-gate";
 import { paginationSchema } from "../../schema";
 
-const PROVIDER_UNAVAILABLE_MESSAGE =
-  "AI provider is not enabled or its credentials are missing";
+const PROVIDER_UNAVAILABLE_MESSAGE = "AI provider is not enabled or its credentials are missing";
 
 const STATUS_NOT_FOUND = 404;
 const STATUS_INSUFFICIENT_CREDITS = 402;
@@ -115,7 +108,7 @@ type GenerationOutcome =
 async function runGeneration(
   taskId: string,
   providerName: string,
-  params: AIGenerateParams
+  params: AIGenerateParams,
 ): Promise<GenerationOutcome> {
   let dispatch: AIDispatchResult;
   try {
@@ -171,63 +164,72 @@ async function refreshTaskStatus(task: AiTask): Promise<AiTask> {
 }
 
 export const aiRouter = new Hono()
-  .post("/ai-tasks", requireAuth, requirePlan("member"), zValidator("json", createBody), async (c) => {
-    const body = c.req.valid("json");
-    const userId = c.get("userId");
+  .post(
+    "/ai-tasks",
+    requireAuth,
+    requirePlan("member"),
+    zValidator("json", createBody),
+    async (c) => {
+      const body = c.req.valid("json");
+      const userId = c.get("userId");
 
-    const providerName = await resolveProviderName(body.provider);
-    if (!providerName) {
-      return c.json(
-        respErr(PROVIDER_UNAVAILABLE_MESSAGE),
-        STATUS_PROVIDER_UNAVAILABLE
-      );
-    }
-
-    const costCredits = await resolveCostCredits(body.mediaType);
-
-    let task: AiTask;
-    try {
-      task = await createTask({
-        userId,
-        mediaType: body.mediaType,
-        provider: providerName,
-        model: body.model,
-        prompt: body.prompt,
-        options: body.options,
-        costCredits,
-      });
-    } catch (error) {
-      if (error instanceof InsufficientCreditsError) {
-        return c.json(respErr("insufficient credits"), STATUS_INSUFFICIENT_CREDITS);
+      const providerName = await resolveProviderName(body.provider);
+      if (!providerName) {
+        return c.json(respErr(PROVIDER_UNAVAILABLE_MESSAGE), STATUS_PROVIDER_UNAVAILABLE);
       }
-      throw error;
-    }
 
-    const params: AIGenerateParams = {
-      mediaType: body.mediaType,
-      prompt: body.prompt,
-      model: body.model,
-      options: body.options,
-    };
-    const outcome = await runGeneration(task.id, providerName, params);
-    if (!outcome.ok) {
-      return c.json(respErr(outcome.message), outcome.status);
-    }
+      const costCredits = await resolveCostCredits(body.mediaType);
 
-    const updated = await findTask(task.id);
-    return c.json(respData(updated ?? task));
-  })
-  .get("/ai-tasks", requireAuth, requirePlan("member"), zValidator("query", listQuery), async (c) => {
-    const { page, pageSize, mediaType, status } = c.req.valid("query");
-    const { items, total } = await getTasks({
-      userId: c.get("userId"),
-      mediaType,
-      status,
-      page,
-      pageSize,
-    });
-    return c.json(respPage(items, total));
-  })
+      let task: AiTask;
+      try {
+        task = await createTask({
+          userId,
+          mediaType: body.mediaType,
+          provider: providerName,
+          model: body.model,
+          prompt: body.prompt,
+          options: body.options,
+          costCredits,
+        });
+      } catch (error) {
+        if (error instanceof InsufficientCreditsError) {
+          return c.json(respErr("insufficient credits"), STATUS_INSUFFICIENT_CREDITS);
+        }
+        throw error;
+      }
+
+      const params: AIGenerateParams = {
+        mediaType: body.mediaType,
+        prompt: body.prompt,
+        model: body.model,
+        options: body.options,
+      };
+      const outcome = await runGeneration(task.id, providerName, params);
+      if (!outcome.ok) {
+        return c.json(respErr(outcome.message), outcome.status);
+      }
+
+      const updated = await findTask(task.id);
+      return c.json(respData(updated ?? task));
+    },
+  )
+  .get(
+    "/ai-tasks",
+    requireAuth,
+    requirePlan("member"),
+    zValidator("query", listQuery),
+    async (c) => {
+      const { page, pageSize, mediaType, status } = c.req.valid("query");
+      const { items, total } = await getTasks({
+        userId: c.get("userId"),
+        mediaType,
+        status,
+        page,
+        pageSize,
+      });
+      return c.json(respPage(items, total));
+    },
+  )
   .get("/ai-tasks/:id", requireAuth, requirePlan("member"), async (c) => {
     const userId = c.get("userId");
     const id = c.req.param("id");

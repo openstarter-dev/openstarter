@@ -101,9 +101,7 @@ interface StripeInvoiceShape {
 const MS_PER_SECOND = 1000;
 
 /** 把归一化周期映射为 Stripe recurring interval（订阅不会是 one-time）。 */
-function toStripeInterval(
-  interval: PaymentInterval
-): "day" | "week" | "month" | "year" {
+function toStripeInterval(interval: PaymentInterval): "day" | "week" | "month" | "year" {
   switch (interval) {
     case "day":
       return "day";
@@ -132,11 +130,7 @@ export class StripeProvider implements PaymentProvider {
     });
   }
 
-  async createPayment({
-    order,
-  }: {
-    order: PaymentOrder;
-  }): Promise<CheckoutSession> {
+  async createPayment({ order }: { order: PaymentOrder }): Promise<CheckoutSession> {
     if (!order.price) {
       throw new Error("price is required");
     }
@@ -199,18 +193,12 @@ export class StripeProvider implements PaymentProvider {
     };
   }
 
-  async getPaymentSession({
-    sessionId,
-  }: {
-    sessionId: string;
-  }): Promise<PaymentSession> {
+  async getPaymentSession({ sessionId }: { sessionId: string }): Promise<PaymentSession> {
     if (!sessionId) {
       throw new Error("sessionId is required");
     }
     const session = await this.client.checkout.sessions.retrieve(sessionId);
-    return await this.buildSessionFromCheckout(
-      session as unknown as StripeCheckoutSessionShape
-    );
+    return await this.buildSessionFromCheckout(session as unknown as StripeCheckoutSessionShape);
   }
 
   async getPaymentEvent({ req }: { req: Request }): Promise<PaymentEvent> {
@@ -228,7 +216,7 @@ export class StripeProvider implements PaymentProvider {
     const event = await this.client.webhooks.constructEventAsync(
       rawBody,
       signature,
-      this.configs.signingSecret
+      this.configs.signingSecret,
     );
 
     const eventType = mapStripeEventType(event.type);
@@ -273,7 +261,7 @@ export class StripeProvider implements PaymentProvider {
 
   private applyCnyPaymentMethods(
     sessionParams: Stripe.Checkout.SessionCreateParams,
-    order: PaymentOrder
+    order: PaymentOrder,
   ): void {
     const currency = order.price?.currency.toLowerCase();
     if (currency !== "cny" || order.type !== PaymentType.ONE_TIME) {
@@ -282,8 +270,7 @@ export class StripeProvider implements PaymentProvider {
 
     const allowed = this.configs.allowedPaymentMethods || [];
     const methods: Stripe.Checkout.SessionCreateParams.PaymentMethodType[] = [];
-    const methodOptions: Stripe.Checkout.SessionCreateParams.PaymentMethodOptions =
-      {};
+    const methodOptions: Stripe.Checkout.SessionCreateParams.PaymentMethodOptions = {};
 
     if (allowed.includes("card")) {
       methods.push("card");
@@ -306,53 +293,39 @@ export class StripeProvider implements PaymentProvider {
 
   private buildSessionForEvent(
     eventType: PaymentEventType,
-    event: Stripe.Event
+    event: Stripe.Event,
   ): Promise<PaymentSession> {
     const object = event.data.object;
     if (eventType === PaymentEventType.CHECKOUT_SUCCESS) {
-      return this.buildSessionFromCheckout(
-        object as unknown as StripeCheckoutSessionShape
-      );
+      return this.buildSessionFromCheckout(object as unknown as StripeCheckoutSessionShape);
     }
     if (
       eventType === PaymentEventType.PAYMENT_SUCCESS ||
       eventType === PaymentEventType.PAYMENT_FAILED
     ) {
-      return this.buildSessionFromInvoice(
-        object as unknown as StripeInvoiceShape,
-        eventType
-      );
+      return this.buildSessionFromInvoice(object as unknown as StripeInvoiceShape, eventType);
     }
     // SUBSCRIBE_UPDATED / SUBSCRIBE_CANCELED
-    return this.buildSessionFromSubscription(
-      object as unknown as StripeSubscriptionShape
-    );
+    return this.buildSessionFromSubscription(object as unknown as StripeSubscriptionShape);
   }
 
   private async buildSessionFromCheckout(
-    session: StripeCheckoutSessionShape
+    session: StripeCheckoutSessionShape,
   ): Promise<PaymentSession> {
     const result: PaymentSession = {
       provider: this.name,
       paymentStatus: mapStripeStatus(session),
       paymentInfo: {
         transactionId: session.id,
-        discountCode:
-          session.discounts?.find((d) => d.promotion_code)?.promotion_code ??
-          "",
+        discountCode: session.discounts?.find((d) => d.promotion_code)?.promotion_code ?? "",
         discountAmount: session.total_details?.amount_discount || 0,
         discountCurrency: session.currency || "",
         paymentAmount: session.amount_total || 0,
         paymentCurrency: session.currency || "",
-        paymentEmail:
-          session.customer_email ||
-          session.customer_details?.email ||
-          undefined,
+        paymentEmail: session.customer_email || session.customer_details?.email || undefined,
         paymentUserName: session.customer_details?.name || "",
         paymentUserId: session.customer || undefined,
-        paidAt: session.created
-          ? new Date(session.created * MS_PER_SECOND)
-          : undefined,
+        paidAt: session.created ? new Date(session.created * MS_PER_SECOND) : undefined,
         invoiceId: session.invoice || undefined,
       },
       paymentResult: session,
@@ -361,7 +334,7 @@ export class StripeProvider implements PaymentProvider {
 
     if (session.subscription) {
       const subscription = (await this.client.subscriptions.retrieve(
-        session.subscription
+        session.subscription,
       )) as unknown as StripeSubscriptionShape;
       result.subscriptionId = subscription.id;
       result.subscriptionInfo = buildSubscriptionInfo(subscription);
@@ -373,12 +346,10 @@ export class StripeProvider implements PaymentProvider {
 
   private async buildSessionFromInvoice(
     invoice: StripeInvoiceShape,
-    eventType: PaymentEventType
+    eventType: PaymentEventType,
   ): Promise<PaymentSession> {
     const status =
-      eventType === PaymentEventType.PAYMENT_FAILED
-        ? PaymentStatus.FAILED
-        : PaymentStatus.SUCCESS;
+      eventType === PaymentEventType.PAYMENT_FAILED ? PaymentStatus.FAILED : PaymentStatus.SUCCESS;
 
     const result: PaymentSession = {
       provider: this.name,
@@ -392,9 +363,7 @@ export class StripeProvider implements PaymentProvider {
         paymentEmail: invoice.customer_email || "",
         paymentUserName: invoice.customer_name || "",
         paymentUserId: invoice.customer || undefined,
-        paidAt: invoice.created
-          ? new Date(invoice.created * MS_PER_SECOND)
-          : undefined,
+        paidAt: invoice.created ? new Date(invoice.created * MS_PER_SECOND) : undefined,
         invoiceId: invoice.id ?? undefined,
         invoiceUrl: invoice.hosted_invoice_url || "",
         subscriptionCycleType: mapBillingReason(invoice.billing_reason),
@@ -406,7 +375,7 @@ export class StripeProvider implements PaymentProvider {
     const subscriptionId = extractInvoiceSubscriptionId(invoice);
     if (subscriptionId) {
       const subscription = (await this.client.subscriptions.retrieve(
-        subscriptionId
+        subscriptionId,
       )) as unknown as StripeSubscriptionShape;
       result.subscriptionId = subscription.id;
       result.subscriptionInfo = buildSubscriptionInfo(subscription);
@@ -417,7 +386,7 @@ export class StripeProvider implements PaymentProvider {
   }
 
   private buildSessionFromSubscription(
-    subscription: StripeSubscriptionShape
+    subscription: StripeSubscriptionShape,
   ): Promise<PaymentSession> {
     return Promise.resolve({
       provider: this.name,
@@ -450,9 +419,7 @@ function mapStripeEventType(eventType: string): PaymentEventType {
 function mapStripeStatus(session: StripeCheckoutSessionShape): PaymentStatus {
   switch (session.status) {
     case "complete":
-      return session.payment_status === "unpaid"
-        ? PaymentStatus.PROCESSING
-        : PaymentStatus.SUCCESS;
+      return session.payment_status === "unpaid" ? PaymentStatus.PROCESSING : PaymentStatus.SUCCESS;
     case "expired":
       return PaymentStatus.CANCELED;
     default:
@@ -460,9 +427,7 @@ function mapStripeStatus(session: StripeCheckoutSessionShape): PaymentStatus {
   }
 }
 
-function mapBillingReason(
-  reason: string | null | undefined
-): SubscriptionCycleType | undefined {
+function mapBillingReason(reason: string | null | undefined): SubscriptionCycleType | undefined {
   if (reason === "subscription_create") {
     return SubscriptionCycleType.CREATE;
   }
@@ -472,23 +437,15 @@ function mapBillingReason(
   return undefined;
 }
 
-function extractInvoiceSubscriptionId(
-  invoice: StripeInvoiceShape
-): string | undefined {
+function extractInvoiceSubscriptionId(invoice: StripeInvoiceShape): string | undefined {
   const line = invoice.lines.data[0];
   if (!line) {
     return undefined;
   }
-  return (
-    line.subscription ||
-    line.parent?.subscription_item_details?.subscription ||
-    undefined
-  );
+  return line.subscription || line.parent?.subscription_item_details?.subscription || undefined;
 }
 
-function buildSubscriptionInfo(
-  subscription: StripeSubscriptionShape
-): SubscriptionInfo {
+function buildSubscriptionInfo(subscription: StripeSubscriptionShape): SubscriptionInfo {
   const item = subscription.items.data[0];
   const price = item?.price;
   const now = Date.now();
@@ -517,7 +474,7 @@ function buildSubscriptionInfo(
 
 function applyStripeCancelInfo(
   info: SubscriptionInfo,
-  subscription: StripeSubscriptionShape
+  subscription: StripeSubscriptionShape,
 ): void {
   const canceledAt = subscription.canceled_at
     ? new Date(subscription.canceled_at * MS_PER_SECOND)

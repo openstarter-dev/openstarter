@@ -12,7 +12,13 @@ interface ApiContextValue {
 
 const ApiContext = createContext<ApiContextValue | null>(null);
 
-export function ApiClientProvider({ children, value }: { children: ReactNode; value: ApiContextValue }) {
+export function ApiClientProvider({
+  children,
+  value,
+}: {
+  children: ReactNode;
+  value: ApiContextValue;
+}) {
   return <ApiContext.Provider value={value}>{children}</ApiContext.Provider>;
 }
 

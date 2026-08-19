@@ -79,13 +79,9 @@ function AdminOrdersPage() {
                   <TableCell className="tabular-nums">
                     {formatAmount(item.amount, item.currency)}
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {item.paymentProvider}
-                  </TableCell>
+                  <TableCell className="text-muted-foreground">{item.paymentProvider}</TableCell>
                   <TableCell>
-                    <Badge
-                      variant={item.status === "paid" ? "secondary" : "outline"}
-                    >
+                    <Badge variant={item.status === "paid" ? "secondary" : "outline"}>
                       {item.status}
                     </Badge>
                   </TableCell>

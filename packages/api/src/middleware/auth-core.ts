@@ -18,7 +18,7 @@ export interface AuthDependencies {
 
 export async function resolveApiKeyUserId(
   headers: Headers,
-  validateKey: AuthDependencies["validateApiKey"]
+  validateKey: AuthDependencies["validateApiKey"],
 ): Promise<string | null> {
   const authorization = headers.get("authorization");
   if (!authorization?.startsWith(BEARER_PREFIX)) {
@@ -45,10 +45,7 @@ export function createRequireAuth(dependencies: AuthDependencies) {
       return;
     }
 
-    const userId = await resolveApiKeyUserId(
-      c.req.raw.headers,
-      dependencies.validateApiKey
-    );
+    const userId = await resolveApiKeyUserId(c.req.raw.headers, dependencies.validateApiKey);
     if (userId) {
       c.set("session", null);
       c.set("userId", userId);
@@ -72,10 +69,7 @@ export function createAuthMiddlewares(dependencies: AuthDependencies) {
   const apiKeyAuth = createMiddleware<{
     Variables: { userId: string };
   }>(async (c, next) => {
-    const userId = await resolveApiKeyUserId(
-      c.req.raw.headers,
-      dependencies.validateApiKey
-    );
+    const userId = await resolveApiKeyUserId(c.req.raw.headers, dependencies.validateApiKey);
     if (!userId) {
       return c.json(respErr("unauthorized"), 401);
     }

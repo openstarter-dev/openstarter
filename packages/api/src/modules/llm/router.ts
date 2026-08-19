@@ -107,40 +107,30 @@ export const llmRouter = new Hono()
     },
   )
   // GET /llm/chats/:id — Get specific chat
-  .get(
-    "/llm/chats/:id",
-    requireAuth,
-    requirePlan("member"),
-    async (c) => {
-      const userId = c.get("userId") as string;
-      const id = c.req.param("id");
+  .get("/llm/chats/:id", requireAuth, requirePlan("member"), async (c) => {
+    const userId = c.get("userId") as string;
+    const id = c.req.param("id");
 
-      const foundChat = await getChat({ id, userId });
-      if (!foundChat) {
-        return c.json(respErr("Chat not found"), STATUS_NOT_FOUND);
-      }
+    const foundChat = await getChat({ id, userId });
+    if (!foundChat) {
+      return c.json(respErr("Chat not found"), STATUS_NOT_FOUND);
+    }
 
-      return c.json(respData(foundChat));
-    },
-  )
+    return c.json(respData(foundChat));
+  })
   // DELETE /llm/chats/:id — Delete chat
-  .delete(
-    "/llm/chats/:id",
-    requireAuth,
-    requirePlan("member"),
-    async (c) => {
-      const userId = c.get("userId") as string;
-      const id = c.req.param("id");
+  .delete("/llm/chats/:id", requireAuth, requirePlan("member"), async (c) => {
+    const userId = c.get("userId") as string;
+    const id = c.req.param("id");
 
-      const foundChat = await getChat({ id, userId });
-      if (!foundChat) {
-        return c.json(respErr("Chat not found"), STATUS_NOT_FOUND);
-      }
+    const foundChat = await getChat({ id, userId });
+    if (!foundChat) {
+      return c.json(respErr("Chat not found"), STATUS_NOT_FOUND);
+    }
 
-      await deleteChat({ id, userId });
-      return c.json(respData(null));
-    },
-  )
+    await deleteChat({ id, userId });
+    return c.json(respData(null));
+  })
   // GET /llm/chats/:id/messages — Get chat message history
   .get(
     "/llm/chats/:id/messages",
@@ -199,18 +189,14 @@ export const llmRouter = new Hono()
       const history = await getMessageHistory({ chatId, userId });
 
       // Build messages array for AI SDK
-      const messages = [
-        ...history,
-        { role: "user" as const, content },
-      ];
+      const messages = [...history, { role: "user" as const, content }];
 
       // Load the model
       let model;
       try {
         model = await getModel(foundChat.provider, foundChat.model);
       } catch (error) {
-        const message =
-          error instanceof Error ? error.message : "Unknown error";
+        const message = error instanceof Error ? error.message : "Unknown error";
         return c.json(respErr(message), STATUS_PROVIDER_ERROR);
       }
 

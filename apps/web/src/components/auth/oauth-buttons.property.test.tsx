@@ -31,8 +31,7 @@ vi.mock("@/lib/use-public-config", () => ({
 }));
 
 vi.mock("@tanstack/react-router", async (importOriginal) => {
-  const router =
-    await importOriginal<typeof import("@tanstack/react-router")>();
+  const router = await importOriginal<typeof import("@tanstack/react-router")>();
   return { ...router, useNavigate: () => navigateMock };
 });
 
@@ -68,7 +67,7 @@ describe("OAuth provider visibility", () => {
             appleEnabled={enabledProviders.includes("apple")}
             githubEnabled={enabledProviders.includes("github")}
             googleEnabled={enabledProviders.includes("google")}
-          />
+          />,
         );
         const renderedProviders = within(view.container)
           .queryAllByRole("button")
@@ -89,7 +88,7 @@ describe("OAuth provider visibility", () => {
         expect(new Set(renderedProviders)).toEqual(new Set(enabledProviders));
         view.unmount();
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -110,46 +109,36 @@ describe("OAuth provider visibility", () => {
           ...(apple ? ["apple"] : []),
         ];
         const expectedButtonNames = expectedProviders.map(
-          (provider) => `Continue with ${CONTINUE_WITH_LABEL[provider]}`
+          (provider) => `Continue with ${CONTINUE_WITH_LABEL[provider]}`,
         );
 
-        expect(getEnabledOAuthProviders(publicConfigResult.current)).toEqual(
-          expectedProviders
-        );
+        expect(getEnabledOAuthProviders(publicConfigResult.current)).toEqual(expectedProviders);
 
-        const signInView = render(
-          <SignInForm onSwitchToSignUp={() => undefined} />
-        );
+        const signInView = render(<SignInForm onSwitchToSignUp={() => undefined} />);
         const signInButtons = within(signInView.container);
         expect(
           signInButtons.queryAllByRole("button", {
             name: CONTINUE_WITH_PATTERN,
-          })
+          }),
         ).toHaveLength(expectedButtonNames.length);
         for (const buttonName of expectedButtonNames) {
-          expect(
-            signInButtons.queryAllByRole("button", { name: buttonName })
-          ).toHaveLength(1);
+          expect(signInButtons.queryAllByRole("button", { name: buttonName })).toHaveLength(1);
         }
         signInView.unmount();
 
-        const signUpView = render(
-          <SignUpForm onSwitchToSignIn={() => undefined} />
-        );
+        const signUpView = render(<SignUpForm onSwitchToSignIn={() => undefined} />);
         const signUpButtons = within(signUpView.container);
         expect(
           signUpButtons.queryAllByRole("button", {
             name: CONTINUE_WITH_PATTERN,
-          })
+          }),
         ).toHaveLength(expectedButtonNames.length);
         for (const buttonName of expectedButtonNames) {
-          expect(
-            signUpButtons.queryAllByRole("button", { name: buttonName })
-          ).toHaveLength(1);
+          expect(signUpButtons.queryAllByRole("button", { name: buttonName })).toHaveLength(1);
         }
         signUpView.unmount();
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

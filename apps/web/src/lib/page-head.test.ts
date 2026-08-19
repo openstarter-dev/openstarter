@@ -27,8 +27,7 @@ describe("buildPageHead", () => {
     const result = buildPageHead({ title: "About", path: "/about" });
     expect(result.meta).toContainEqual({
       name: "description",
-      content:
-        "A production-ready full-stack starter with auth, billing, and a polished UI.",
+      content: "A production-ready full-stack starter with auth, billing, and a polished UI.",
     });
   });
 

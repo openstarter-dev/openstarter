@@ -57,9 +57,7 @@ export function PaymentsPage() {
       </CardHeader>
       <CardContent className="space-y-4">
         {ordersQuery.error ? (
-          <p className="text-destructive text-sm">
-            {(ordersQuery.error as Error).message}
-          </p>
+          <p className="text-destructive text-sm">{(ordersQuery.error as Error).message}</p>
         ) : null}
 
         {items.length > 0 ? (
@@ -87,13 +85,9 @@ export function PaymentsPage() {
                     <TableCell className="tabular-nums">
                       {formatAmount(item.amount, item.currency)}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {item.paymentProvider}
-                    </TableCell>
+                    <TableCell className="text-muted-foreground">{item.paymentProvider}</TableCell>
                     <TableCell>
-                      <Badge variant={statusVariant(item.status)}>
-                        {item.status}
-                      </Badge>
+                      <Badge variant={statusVariant(item.status)}>{item.status}</Badge>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {formatDate(item.createdAt)}

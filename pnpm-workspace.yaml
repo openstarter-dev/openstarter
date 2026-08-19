@@ -10,20 +10,20 @@ allowBuilds:
   workerd: true
 
 catalog:
-  '@ai-sdk/anthropic': 3.0.108
-  '@ai-sdk/google': 3.0.105
-  '@ai-sdk/openai': 3.0.92
-  '@better-auth/drizzle-adapter': 1.6.11
-  '@better-auth/expo': 1.6.11
-  '@better-auth/passkey': 1.6.11
-  '@inlang/paraglide-js': 2.18.2
-  '@mdx-js/react': 3.1.1
-  '@mdx-js/rollup': 3.1.1
-  '@react-email/components': ^1.0.0
-  '@types/mdx': 2.0.13
-  '@types/node': ^22.13.14
-  '@types/react': ^19.2.15
-  '@types/react-dom': ^19.2.3
+  "@ai-sdk/anthropic": 3.0.108
+  "@ai-sdk/google": 3.0.105
+  "@ai-sdk/openai": 3.0.92
+  "@better-auth/drizzle-adapter": 1.6.11
+  "@better-auth/expo": 1.6.11
+  "@better-auth/passkey": 1.6.11
+  "@inlang/paraglide-js": 2.18.2
+  "@mdx-js/react": 3.1.1
+  "@mdx-js/rollup": 3.1.1
+  "@react-email/components": ^1.0.0
+  "@types/mdx": 2.0.13
+  "@types/node": ^22.13.14
+  "@types/react": ^19.2.15
+  "@types/react-dom": ^19.2.3
   ai: 6.0.247
   aws4fetch: 1.0.20
   better-auth: 1.6.11

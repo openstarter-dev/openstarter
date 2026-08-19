@@ -16,12 +16,10 @@ const permissionCodeArbitrary = fc
 const platformGrantArbitrary = fc.oneof(
   permissionCodeArbitrary,
   segmentArbitrary.map((resource) => `${resource}.*`),
-  fc.constant("*")
+  fc.constant("*"),
 );
 
-const createRepository = (
-  grants: PlatformPermissionGrant[]
-): PlatformAuthorizationRepository => ({
+const createRepository = (grants: PlatformPermissionGrant[]): PlatformAuthorizationRepository => ({
   listUserPermissionGrants: (_userId: string) => Promise.resolve(grants),
 });
 
@@ -47,15 +45,11 @@ describe("platform authorization service properties", () => {
             ]),
           });
 
-          await expect(service.getPermissionCodes("user-1")).resolves.toEqual(
-            []
-          );
-          await expect(
-            service.hasPermission("user-1", permissionCode)
-          ).resolves.toBe(false);
-        }
+          await expect(service.getPermissionCodes("user-1")).resolves.toEqual([]);
+          await expect(service.hasPermission("user-1", permissionCode)).resolves.toBe(false);
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -69,27 +63,23 @@ describe("platform authorization service properties", () => {
           const now = new Date("2026-07-24T00:00:00.000Z");
           const organizationRepository = {
             listOrganizationPermissionGrants: vi.fn(() =>
-              Promise.resolve([requiredPermission, "*", ...organizationGrants])
+              Promise.resolve([requiredPermission, "*", ...organizationGrants]),
             ),
           };
           const options = {
             now: () => now,
             organizationRepository,
-            repository: createRepository(
-              platformGrants.map((code) => ({ code, expiresAt: null }))
-            ),
+            repository: createRepository(platformGrants.map((code) => ({ code, expiresAt: null }))),
           };
           const service = createPlatformAuthorizationService(options);
 
-          await expect(
-            service.hasPermission("user-1", requiredPermission)
-          ).resolves.toBe(matchPermission(requiredPermission, platformGrants));
-          expect(
-            organizationRepository.listOrganizationPermissionGrants
-          ).not.toHaveBeenCalled();
-        }
+          await expect(service.hasPermission("user-1", requiredPermission)).resolves.toBe(
+            matchPermission(requiredPermission, platformGrants),
+          );
+          expect(organizationRepository.listOrganizationPermissionGrants).not.toHaveBeenCalled();
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

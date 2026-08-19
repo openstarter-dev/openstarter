@@ -10,15 +10,7 @@
 import type { Database } from "@openstarter/db/server";
 import { sql } from "drizzle-orm";
 import fc from "fast-check";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   closeApiTestDatabase,
@@ -41,8 +33,7 @@ const state = vi.hoisted(() => ({
 }));
 
 vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@openstarter/db/server")>();
+  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
   return {
     ...actual,
     db: () => {
@@ -76,8 +67,7 @@ const RESHAPE_TABLES = [
   )`,
 ];
 
-const seedUser = async (database: Database, id: string) =>
-  insertUser(database, { id });
+const seedUser = async (database: Database, id: string) => insertUser(database, { id });
 
 describe("tickets service (P44, P45, P46)", () => {
   const getDatabase = (): Database => state.database as Database;
@@ -127,9 +117,9 @@ describe("tickets service (P44, P45, P46)", () => {
           expect(firstMessage.role).toBe("user");
           expect(firstMessage.userId).toBe(userId);
           expect(firstMessage.content).toBe(content);
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   });
 
@@ -138,7 +128,7 @@ describe("tickets service (P44, P45, P46)", () => {
     const transition = fc.constantFrom<"reply-admin" | "reply-user" | "close">(
       "reply-admin",
       "reply-user",
-      "close"
+      "close",
     );
 
     await fc.assert(
@@ -183,9 +173,9 @@ describe("tickets service (P44, P45, P46)", () => {
             const reopened = await updateTicketStatus(created.id, "open");
             expect(reopened?.status).toBe("open");
           }
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   });
 
@@ -200,10 +190,7 @@ describe("tickets service (P44, P45, P46)", () => {
           const database = getDatabase();
           await resetApiTestDatabase(database);
           const pageSize = 100;
-          const userIds = Array.from(
-            { length: userCount },
-            (_, index) => `owner-${index}`
-          );
+          const userIds = Array.from({ length: userCount }, (_, index) => `owner-${index}`);
           await userIds.reduce(async (previous, userId) => {
             await previous;
             await seedUser(database, userId);
@@ -213,13 +200,10 @@ describe("tickets service (P44, P45, P46)", () => {
           for (const userId of userIds) {
             expectedPerUser.set(userId, 0);
           }
-          const ticketJobs = Array.from(
-            { length: userCount * ticketsPerUser },
-            (_, index) => ({
-              ticketIndex: Math.floor(index / userCount),
-              userIndex: index % userCount,
-            })
-          );
+          const ticketJobs = Array.from({ length: userCount * ticketsPerUser }, (_, index) => ({
+            ticketIndex: Math.floor(index / userCount),
+            userIndex: index % userCount,
+          }));
           await ticketJobs.reduce(async (previous, { userIndex }) => {
             await previous;
             const userId = userIds[userIndex] as string;
@@ -264,9 +248,9 @@ describe("tickets service (P44, P45, P46)", () => {
               expect(item.userId).not.toBe(probeUserId);
             }
           }, Promise.resolve());
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   }, 30_000);
 });

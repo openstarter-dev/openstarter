@@ -23,8 +23,7 @@ export const styles: Record<string, CSSProperties> = {
     borderRadius: 16,
     padding: "28px 24px",
     border: "1px solid rgba(15, 23, 42, 0.08)",
-    boxShadow:
-      "0 20px 50px rgba(2, 6, 23, 0.10), 0 2px 8px rgba(2, 6, 23, 0.05)",
+    boxShadow: "0 20px 50px rgba(2, 6, 23, 0.10), 0 2px 8px rgba(2, 6, 23, 0.05)",
   },
   accentBar: {
     height: 6,
@@ -81,8 +80,7 @@ export const styles: Record<string, CSSProperties> = {
     fontWeight: 700,
     letterSpacing: "0.35em",
     padding: "14px 24px",
-    fontFamily:
-      'ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace',
+    fontFamily: 'ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace',
   },
   muted: {
     margin: "0 0 10px",

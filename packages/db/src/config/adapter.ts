@@ -24,9 +24,7 @@ export type AuthAdapterProvider = "pg" | "mysql" | "sqlite";
  * An unsupported value throws immediately (R1.4/R1.7) so the auth adapter can
  * never be mismatched against the active dialect.
  */
-export function getAuthAdapterProvider(
-  provider = env.DATABASE_PROVIDER
-): AuthAdapterProvider {
+export function getAuthAdapterProvider(provider = env.DATABASE_PROVIDER): AuthAdapterProvider {
   switch (provider) {
     case "postgres":
       return "pg";

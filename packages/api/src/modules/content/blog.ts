@@ -9,10 +9,7 @@
 // 安全：仅经 CMS_Service 的**已发布**查询取数（草稿/下线/软删不可见），本模块不新增任何可绕过
 // 发布可见性的读取路径。
 
-import {
-  listPublishedArticles,
-  type PublishedArticleItem,
-} from "./posts";
+import { listPublishedArticles, type PublishedArticleItem } from "./posts";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 12;
@@ -78,17 +75,12 @@ function splitDelimited(value: string): string[] {
  *
  * 例：`categories="fintech"` 不归属分类 `"tech"`；`categories="tech,news"` 归属 `"tech"`。
  */
-export function postBelongsToCategory(
-  raw: string | null | undefined,
-  category: string
-): boolean {
+export function postBelongsToCategory(raw: string | null | undefined, category: string): boolean {
   const target = category.trim().toLowerCase();
   if (target === "") {
     return false;
   }
-  return parsePostCategories(raw).some(
-    (token) => token.toLowerCase() === target
-  );
+  return parsePostCategories(raw).some((token) => token.toLowerCase() === target);
 }
 
 /** 博客列表筛选入参。`category` 为可选分类（精确归属）；分页从 1 起。 */
@@ -112,7 +104,7 @@ export type ListBlogArticlesResult = {
  *   过滤），按 {@link postBelongsToCategory} 精确归属过滤后再在内存分页，`total` 为精确匹配总数。
  */
 export async function listBlogArticles(
-  params: ListBlogArticlesParams = {}
+  params: ListBlogArticlesParams = {},
 ): Promise<ListBlogArticlesResult> {
   const page = params.page ?? DEFAULT_PAGE;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
@@ -126,9 +118,7 @@ export async function listBlogArticles(
     page: DEFAULT_PAGE,
     pageSize: CATEGORY_CANDIDATE_CAP,
   });
-  const matched = items.filter((item) =>
-    postBelongsToCategory(item.categories, category)
-  );
+  const matched = items.filter((item) => postBelongsToCategory(item.categories, category));
   const offset = (page - 1) * pageSize;
   return {
     items: matched.slice(offset, offset + pageSize),

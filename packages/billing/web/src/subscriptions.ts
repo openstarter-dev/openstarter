@@ -103,7 +103,7 @@ export type CreateSubscriptionParams = {
  * 原子性），否则直接经 `db()` 写入；不传 `tx` 时与既有调用完全向后兼容。
  */
 export async function createSubscription(
-  params: CreateSubscriptionParams
+  params: CreateSubscriptionParams,
 ): Promise<NewSubscription> {
   const record: NewSubscription = {
     id: getUuid(),
@@ -144,7 +144,7 @@ export async function createSubscription(
 
 /** 按订阅号查询单条订阅记录。 */
 export async function findBySubscriptionNo(
-  subscriptionNo: string
+  subscriptionNo: string,
 ): Promise<Subscription | undefined> {
   const [result] = await db()
     .select()
@@ -167,8 +167,8 @@ export async function findByProviderSubscriptionId(params: {
     .where(
       and(
         eq(subscription.paymentProvider, params.provider),
-        eq(subscription.subscriptionId, params.subscriptionId)
-      )
+        eq(subscription.subscriptionId, params.subscriptionId),
+      ),
     );
   return result;
 }
@@ -178,17 +178,15 @@ export async function findByProviderSubscriptionId(params: {
  * （`active`/`pending_cancel`/`trialing`）中最新创建的一条；无则返回 `undefined`。
  * 供 settings 展示（R11.4）与方案状态判定（R11.5 的 `member`）复用。
  */
-export async function getCurrentSubscription(
-  userId: string
-): Promise<Subscription | undefined> {
+export async function getCurrentSubscription(userId: string): Promise<Subscription | undefined> {
   const [result] = await db()
     .select()
     .from(subscription)
     .where(
       and(
         eq(subscription.userId, userId),
-        inArray(subscription.status, [...CURRENT_SUBSCRIPTION_STATUSES])
-      )
+        inArray(subscription.status, [...CURRENT_SUBSCRIPTION_STATUSES]),
+      ),
     )
     .orderBy(desc(subscription.createdAt))
     .limit(1);
@@ -205,12 +203,9 @@ export async function getCurrentSubscription(
  */
 export async function updateBySubscriptionNo(
   subscriptionNo: string,
-  data: UpdateSubscription
+  data: UpdateSubscription,
 ): Promise<Subscription | undefined> {
-  await db()
-    .update(subscription)
-    .set(data)
-    .where(eq(subscription.subscriptionNo, subscriptionNo));
+  await db().update(subscription).set(data).where(eq(subscription.subscriptionNo, subscriptionNo));
   return findBySubscriptionNo(subscriptionNo);
 }
 
@@ -236,7 +231,7 @@ export type CancelSubscriptionParams = {
  * 取消可传 `pending_cancel`）。返回更新后的订阅记录。
  */
 export function cancelSubscription(
-  params: CancelSubscriptionParams
+  params: CancelSubscriptionParams,
 ): Promise<Subscription | undefined> {
   return updateBySubscriptionNo(params.subscriptionNo, {
     status: params.status ?? SubscriptionStatus.CANCELED,
@@ -282,7 +277,7 @@ export type RenewSubscriptionResult = {
  * 按 `(transactionId, provider)` 去重，避免重复投递导致重复授予）。
  */
 export async function renewSubscription(
-  params: RenewSubscriptionParams
+  params: RenewSubscriptionParams,
 ): Promise<RenewSubscriptionResult> {
   const updated = await updateBySubscriptionNo(params.subscriptionNo, {
     currentPeriodStart: params.currentPeriodStart,
@@ -337,9 +332,7 @@ export type SubscriptionStatusView = {
  * 仅为 billing 服务函数，供后续 settings 面板（任务 34）经 RPC 消费——本任务不新增 api 路由。
  * 复用 {@link getCurrentSubscription} 的「当前订阅」口径。
  */
-export async function getSubscriptionStatusView(
-  userId: string
-): Promise<SubscriptionStatusView> {
+export async function getSubscriptionStatusView(userId: string): Promise<SubscriptionStatusView> {
   const current = await getCurrentSubscription(userId);
 
   if (!current) {

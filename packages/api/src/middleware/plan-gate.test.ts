@@ -29,7 +29,7 @@ const mockGetUserPlan = vi.mocked(getUserPlan);
  */
 function buildApp(
   userId: string | null,
-  requiredPlan: Parameters<typeof requirePlan>[0] = "member"
+  requiredPlan: Parameters<typeof requirePlan>[0] = "member",
 ) {
   const handler = vi.fn((c) => c.json({ ok: true }));
   const app = new Hono<{ Variables: { userId: string } }>();
@@ -38,12 +38,10 @@ function buildApp(
     // 模拟 `requireAuth` 的契约：设置 c.var.userId。
     app.use(
       "/protected",
-      createMiddleware<{ Variables: { userId: string } }>(
-        async (c, next) => {
-          c.set("userId", userId);
-          await next();
-        }
-      )
+      createMiddleware<{ Variables: { userId: string } }>(async (c, next) => {
+        c.set("userId", userId);
+        await next();
+      }),
     );
   }
 

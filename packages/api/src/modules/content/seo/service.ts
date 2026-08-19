@@ -8,10 +8,7 @@
 // （见设计「SEO 数据（R24）」——`listPublishedArticles` 提供 URL，apps/web 负责渲染）。
 // 时间字段统一以 ISO 8601 字符串返回，消除跨 RPC（JSON）的 Date/字符串歧义。
 
-import {
-  listPublishedArticles,
-  listPublishedArticlesWithContent,
-} from "../posts";
+import { listPublishedArticles, listPublishedArticlesWithContent } from "../posts";
 
 // 站点地图 / llms 列举的已发布文章上限。sitemap 单文件 URL 上限为 5 万，此处取足够大的保守值；
 // 超出规模的站点应改用分片 sitemap（超出本任务范围）。
@@ -53,9 +50,7 @@ export async function listSeoArticles(): Promise<SeoArticle[]> {
 /**
  * 列出已发布文章全文（含正文），按发布时间倒序。仅含已发布内容（R24.4）。
  */
-export async function listSeoArticlesWithContent(): Promise<
-  SeoArticleWithContent[]
-> {
+export async function listSeoArticlesWithContent(): Promise<SeoArticleWithContent[]> {
   const items = await listPublishedArticlesWithContent({
     page: 1,
     pageSize: SEO_FULL_ARTICLE_LIMIT,

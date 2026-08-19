@@ -16,12 +16,7 @@ const listQuery = createPaginationSchema(100, 10).extend({
 export const apikeysRouter = new Hono()
   .get("/", requireAuth, zValidator("query", listQuery), async (c) => {
     const { page, pageSize, search } = c.req.valid("query");
-    const { items, total } = await listApiKeys(
-      c.get("userId"),
-      page,
-      pageSize,
-      search
-    );
+    const { items, total } = await listApiKeys(c.get("userId"), page, pageSize, search);
     return c.json(respPage(items, total));
   })
   .post("/", requireAuth, zValidator("json", createBody), async (c) => {

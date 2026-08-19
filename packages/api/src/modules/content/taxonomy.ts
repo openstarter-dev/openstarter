@@ -92,10 +92,7 @@ export type ListTaxonomyResult = {
  * 查询覆盖**全部**记录（含已软删），因 DB `slug` 唯一约束对软删记录同样生效；
  * 更新场景经 `excludeId` 排除记录自身。
  */
-async function assertSlugAvailable(
-  slug: string,
-  excludeId?: string
-): Promise<void> {
+async function assertSlugAvailable(slug: string, excludeId?: string): Promise<void> {
   const [existing] = await db()
     .select({ id: taxonomy.id })
     .from(taxonomy)
@@ -109,9 +106,7 @@ async function assertSlugAvailable(
 // ─── 读取（Read，R15.1）─────────────────────────────────────────────────────────
 
 /** 按 id 读取单条分类（排除已软删记录）；不存在返回 `undefined`。 */
-export async function getTaxonomyById(
-  id: string
-): Promise<Taxonomy | undefined> {
+export async function getTaxonomyById(id: string): Promise<Taxonomy | undefined> {
   const [result] = await db()
     .select()
     .from(taxonomy)
@@ -126,9 +121,7 @@ export async function getTaxonomyById(
  * 创建分类：`slug` 统一小写并做唯一校验（冲突抛 {@link SlugConflictError}）；
  * `status` 缺省为 `published`，`sort` 缺省为 0。插入后按 id 回读返回完整记录（跨方言一致）。
  */
-export async function createTaxonomy(
-  input: CreateTaxonomyInput
-): Promise<Taxonomy> {
+export async function createTaxonomy(input: CreateTaxonomyInput): Promise<Taxonomy> {
   const slug = input.slug.toLowerCase();
   await assertSlugAvailable(slug);
 
@@ -164,7 +157,7 @@ export async function createTaxonomy(
  */
 export async function updateTaxonomy(
   id: string,
-  input: UpdateTaxonomyInput
+  input: UpdateTaxonomyInput,
 ): Promise<Taxonomy | undefined> {
   const patch: Partial<NewTaxonomy> = {};
 
@@ -224,9 +217,7 @@ export async function deleteTaxonomy(id: string): Promise<void> {
  * 按 `type`/`status` 组合筛选，并按 `sort` 升序返回（`createdAt` 升序为稳定次序）。
  * 默认排除已软删记录；可选按 `parentId` 取某父级下的子分类（支撑 R15.2 分层的可查询性）。
  */
-export async function listTaxonomy(
-  params: ListTaxonomyParams
-): Promise<ListTaxonomyResult> {
+export async function listTaxonomy(params: ListTaxonomyParams): Promise<ListTaxonomyResult> {
   const page = params.page ?? DEFAULT_PAGE;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
   const offset = (page - 1) * pageSize;
@@ -243,10 +234,7 @@ export async function listTaxonomy(
   }
   const where = and(...conditions);
 
-  const [totalRow] = await db()
-    .select({ value: count() })
-    .from(taxonomy)
-    .where(where);
+  const [totalRow] = await db().select({ value: count() }).from(taxonomy).where(where);
 
   const items = await db()
     .select()

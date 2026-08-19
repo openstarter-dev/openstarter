@@ -11,12 +11,7 @@
 // drizzle 参数化查询（无字符串拼接）。
 
 import type { Permission, Role } from "@openstarter/db/schema";
-import {
-  permission,
-  role,
-  rolePermission,
-  userRole,
-} from "@openstarter/db/schema";
+import { permission, role, rolePermission, userRole } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
 import { and, desc, eq, gt, inArray, isNull, or } from "drizzle-orm";
@@ -27,20 +22,12 @@ import { matchAnyPermission, matchPermission } from "./matcher";
 
 /** 列出全部启用中的角色（按创建时间倒序）。 */
 export function getRoles(): Promise<Role[]> {
-  return db()
-    .select()
-    .from(role)
-    .where(eq(role.status, "active"))
-    .orderBy(desc(role.createdAt));
+  return db().select().from(role).where(eq(role.status, "active")).orderBy(desc(role.createdAt));
 }
 
 /** 依名称查角色（不存在返回 undefined）。 */
 export async function getRoleByName(name: string): Promise<Role | undefined> {
-  const [result] = await db()
-    .select()
-    .from(role)
-    .where(eq(role.name, name))
-    .limit(1);
+  const [result] = await db().select().from(role).where(eq(role.name, name)).limit(1);
   return result;
 }
 
@@ -60,13 +47,9 @@ export async function createRole(data: {
 /** 更新角色。 */
 export async function updateRole(
   id: string,
-  data: { name?: string; title?: string; description?: string }
+  data: { name?: string; title?: string; description?: string },
 ): Promise<Role | undefined> {
-  const [result] = await db()
-    .update(role)
-    .set(data)
-    .where(eq(role.id, id))
-    .returning();
+  const [result] = await db().update(role).set(data).where(eq(role.id, id)).returning();
   return result;
 }
 
@@ -106,13 +89,9 @@ export async function updatePermission(
     action?: string;
     title?: string;
     description?: string;
-  }
+  },
 ): Promise<Permission | undefined> {
-  const [result] = await db()
-    .update(permission)
-    .set(data)
-    .where(eq(permission.id, id))
-    .returning();
+  const [result] = await db().update(permission).set(data).where(eq(permission.id, id)).returning();
   return result;
 }
 
@@ -124,9 +103,7 @@ export async function deletePermission(id: string): Promise<void> {
 // ─── 角色-权限映射（Role ↔ Permission）─────────────────────────────────────────
 
 /** 读取某角色的权限 id 列表。 */
-export function getRolePermissions(
-  roleId: string
-): Promise<{ permissionId: string }[]> {
+export function getRolePermissions(roleId: string): Promise<{ permissionId: string }[]> {
   return db()
     .select({ permissionId: rolePermission.permissionId })
     .from(rolePermission)
@@ -136,19 +113,17 @@ export function getRolePermissions(
 /** 覆盖式设置某角色的权限集合（先清空再写入）。 */
 export async function assignPermissionsToRole(
   roleId: string,
-  permissionIds: string[]
+  permissionIds: string[],
 ): Promise<void> {
   const database = db();
-  await database
-    .delete(rolePermission)
-    .where(eq(rolePermission.roleId, roleId));
+  await database.delete(rolePermission).where(eq(rolePermission.roleId, roleId));
   if (permissionIds.length > 0) {
     await database.insert(rolePermission).values(
       permissionIds.map((permissionId) => ({
         id: getUuid(),
         permissionId,
         roleId,
-      }))
+      })),
     );
   }
 }
@@ -182,7 +157,7 @@ export function getUserRoles(userId: string): Promise<
 export async function assignRoleToUser(
   userId: string,
   roleId: string,
-  expiresAt?: Date
+  expiresAt?: Date,
 ): Promise<void> {
   const expiration = expiresAt ?? null;
   await db()
@@ -195,10 +170,7 @@ export async function assignRoleToUser(
 }
 
 /** 移除用户的某个角色。 */
-export async function removeRoleFromUser(
-  userId: string,
-  roleId: string
-): Promise<void> {
+export async function removeRoleFromUser(userId: string, roleId: string): Promise<void> {
   await db()
     .delete(userRole)
     .where(and(eq(userRole.userId, userId), eq(userRole.roleId, roleId)));
@@ -214,18 +186,12 @@ export interface PlatformPermissionGrant {
 
 /** 平台授权的数据访问边界；不包含任何 organization 成员关系或团队角色。 */
 export interface PlatformAuthorizationRepository {
-  listUserPermissionGrants: (
-    userId: string,
-    now: Date
-  ) => Promise<PlatformPermissionGrant[]>;
+  listUserPermissionGrants: (userId: string, now: Date) => Promise<PlatformPermissionGrant[]>;
 }
 
 export interface PlatformAuthorizationService {
   getPermissionCodes: (userId: string) => Promise<string[]>;
-  hasAnyPermission: (
-    userId: string,
-    permissionCodes: string[]
-  ) => Promise<boolean>;
+  hasAnyPermission: (userId: string, permissionCodes: string[]) => Promise<boolean>;
   hasPermission: (userId: string, permissionCode: string) => Promise<boolean>;
 }
 
@@ -241,15 +207,10 @@ export function createPlatformAuthorizationService(options: {
 
   const getPermissionCodes = async (userId: string): Promise<string[]> => {
     const currentTime = now();
-    const grants = await repository.listUserPermissionGrants(
-      userId,
-      currentTime
-    );
+    const grants = await repository.listUserPermissionGrants(userId, currentTime);
     const activeCodes = grants
       .filter(
-        (grant) =>
-          grant.expiresAt === null ||
-          grant.expiresAt.getTime() > currentTime.getTime()
+        (grant) => grant.expiresAt === null || grant.expiresAt.getTime() > currentTime.getTime(),
       )
       .map((grant) => grant.code);
     return [...new Set(activeCodes)];
@@ -268,49 +229,45 @@ export function createPlatformAuthorizationService(options: {
   };
 }
 
-const databasePlatformAuthorizationRepository: PlatformAuthorizationRepository =
-  {
-    listUserPermissionGrants: async (userId, now) => {
-      const database = db();
-      const activeRoles = await database
-        .select({
-          expiresAt: userRole.expiresAt,
-          roleId: userRole.roleId,
-        })
-        .from(userRole)
-        .where(
-          and(
-            eq(userRole.userId, userId),
-            or(isNull(userRole.expiresAt), gt(userRole.expiresAt, now))
-          )
-        );
-
-      if (activeRoles.length === 0) {
-        return [];
-      }
-
-      const roleIds = activeRoles.map((activeRole) => activeRole.roleId);
-      const expirationByRoleId = new Map(
-        activeRoles.map((activeRole) => [
-          activeRole.roleId,
-          activeRole.expiresAt,
-        ])
+const databasePlatformAuthorizationRepository: PlatformAuthorizationRepository = {
+  listUserPermissionGrants: async (userId, now) => {
+    const database = db();
+    const activeRoles = await database
+      .select({
+        expiresAt: userRole.expiresAt,
+        roleId: userRole.roleId,
+      })
+      .from(userRole)
+      .where(
+        and(
+          eq(userRole.userId, userId),
+          or(isNull(userRole.expiresAt), gt(userRole.expiresAt, now)),
+        ),
       );
-      const grants = await database
-        .select({
-          code: permission.code,
-          roleId: rolePermission.roleId,
-        })
-        .from(rolePermission)
-        .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
-        .where(inArray(rolePermission.roleId, roleIds));
 
-      return grants.map((grant) => ({
-        code: grant.code,
-        expiresAt: expirationByRoleId.get(grant.roleId) ?? null,
-      }));
-    },
-  };
+    if (activeRoles.length === 0) {
+      return [];
+    }
+
+    const roleIds = activeRoles.map((activeRole) => activeRole.roleId);
+    const expirationByRoleId = new Map(
+      activeRoles.map((activeRole) => [activeRole.roleId, activeRole.expiresAt]),
+    );
+    const grants = await database
+      .select({
+        code: permission.code,
+        roleId: rolePermission.roleId,
+      })
+      .from(rolePermission)
+      .innerJoin(permission, eq(rolePermission.permissionId, permission.id))
+      .where(inArray(rolePermission.roleId, roleIds));
+
+    return grants.map((grant) => ({
+      code: grant.code,
+      expiresAt: expirationByRoleId.get(grant.roleId) ?? null,
+    }));
+  },
+};
 
 const platformAuthorizationService = createPlatformAuthorizationService({
   repository: databasePlatformAuthorizationRepository,
@@ -324,18 +281,12 @@ export function getUserPermissionCodes(userId: string): Promise<string[]> {
 }
 
 /** 判定用户是否具备某权限码（含通配符）。 */
-export function hasPermission(
-  userId: string,
-  permissionCode: string
-): Promise<boolean> {
+export function hasPermission(userId: string, permissionCode: string): Promise<boolean> {
   return platformAuthorizationService.hasPermission(userId, permissionCode);
 }
 
 /** 判定用户是否具备给定权限码中的任一项（含通配符）。 */
-export function hasAnyPermission(
-  userId: string,
-  permissionCodes: string[]
-): Promise<boolean> {
+export function hasAnyPermission(userId: string, permissionCodes: string[]): Promise<boolean> {
   return platformAuthorizationService.hasAnyPermission(userId, permissionCodes);
 }
 

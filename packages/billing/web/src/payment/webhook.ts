@@ -21,11 +21,7 @@ import { type NewOrder, order } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUniSeq, getUuid } from "@openstarter/shared/id";
 import { and, eq, inArray, isNull, or, type SQL } from "drizzle-orm";
-import {
-  calculateCreditExpirationTime,
-  CreditTransactionScene,
-  grant,
-} from "../credits";
+import { calculateCreditExpirationTime, CreditTransactionScene, grant } from "../credits";
 import {
   cancelSubscription,
   createSubscription,
@@ -62,10 +58,7 @@ const RENEWAL_ORDER_DESCRIPTION = "Subscription Renewal";
  * - `subscribe.canceled` → {@link handleSubscriptionCanceled}
  * - 其它（`payment.failed`/`payment.refunded`）→ 不做订单/订阅变更（最小副作用）。
  */
-export function handlePaymentEvent(
-  event: PaymentEvent,
-  provider: string
-): Promise<void> {
+export function handlePaymentEvent(event: PaymentEvent, provider: string): Promise<void> {
   const session = event.paymentSession;
   if (!session) {
     return Promise.resolve();
@@ -101,7 +94,7 @@ function isRenewalEvent(session: PaymentSession): boolean {
 /** 从归一化 metadata 中读取指定键的非空字符串值。 */
 function readMetadataString(
   metadata: Record<string, unknown> | undefined,
-  key: string
+  key: string,
 ): string | undefined {
   const value = metadata?.[key];
   return typeof value === "string" && value.length > 0 ? value : undefined;
@@ -120,8 +113,8 @@ function readMetadataString(
 function buildOrderMatchCondition(session: PaymentSession): SQL | undefined {
   const orderNo = readMetadataString(session.metadata, ORDER_NO_METADATA_KEY);
   const transactionId = session.paymentInfo?.transactionId;
-  const sessionIdCandidates = [transactionId, orderNo].filter(
-    (value): value is string => Boolean(value)
+  const sessionIdCandidates = [transactionId, orderNo].filter((value): value is string =>
+    Boolean(value),
   );
 
   const matchers: SQL[] = [];
@@ -154,7 +147,7 @@ function buildOrderMatchCondition(session: PaymentSession): SQL | undefined {
  */
 export async function handleCheckoutSuccess(
   session: PaymentSession,
-  provider: string
+  provider: string,
 ): Promise<void> {
   const condition = buildOrderMatchCondition(session);
   if (!condition) {
@@ -167,11 +160,7 @@ export async function handleCheckoutSuccess(
   }
 
   await db().transaction(async (tx) => {
-    const [existingOrder] = await tx
-      .select()
-      .from(order)
-      .where(condition)
-      .limit(1);
+    const [existingOrder] = await tx.select().from(order).where(condition).limit(1);
     if (!existingOrder) {
       return;
     }
@@ -190,8 +179,7 @@ export async function handleCheckoutSuccess(
     if (subscriptionInfo && session.subscriptionId) {
       const created = await createSubscription({
         userId: existingOrder.userId,
-        userEmail:
-          existingOrder.userEmail ?? existingOrder.paymentEmail ?? undefined,
+        userEmail: existingOrder.userEmail ?? existingOrder.paymentEmail ?? undefined,
         paymentProvider: provider,
         subscriptionId: session.subscriptionId,
         status: subscriptionInfo.status ?? SubscriptionStatus.ACTIVE,
@@ -206,8 +194,7 @@ export async function handleCheckoutSuccess(
         currentPeriodStart: subscriptionInfo.currentPeriodStart,
         currentPeriodEnd: subscriptionInfo.currentPeriodEnd,
         billingUrl: subscriptionInfo.billingUrl ?? undefined,
-        planName:
-          existingOrder.planName ?? existingOrder.productName ?? undefined,
+        planName: existingOrder.planName ?? existingOrder.productName ?? undefined,
         productName: existingOrder.productName ?? undefined,
         creditsAmount: existingOrder.creditsAmount ?? undefined,
         creditsValidDays: existingOrder.creditsValidDays ?? undefined,
@@ -267,10 +254,7 @@ export async function handleCheckoutSuccess(
 }
 
 /** 失败/取消：将仍处 `created`/`pending` 的订单置为 `failed`（不建订阅/不授分）。 */
-async function markOrderFailedIfPending(
-  session: PaymentSession,
-  condition: SQL
-): Promise<void> {
+async function markOrderFailedIfPending(session: PaymentSession, condition: SQL): Promise<void> {
   if (
     session.paymentStatus !== PaymentStatus.FAILED &&
     session.paymentStatus !== PaymentStatus.CANCELED
@@ -278,15 +262,10 @@ async function markOrderFailedIfPending(
     return;
   }
 
-  const [failedOrder] = await db()
-    .select()
-    .from(order)
-    .where(condition)
-    .limit(1);
+  const [failedOrder] = await db().select().from(order).where(condition).limit(1);
   if (
     !failedOrder ||
-    (failedOrder.status !== OrderStatus.CREATED &&
-      failedOrder.status !== OrderStatus.PENDING)
+    (failedOrder.status !== OrderStatus.CREATED && failedOrder.status !== OrderStatus.PENDING)
   ) {
     return;
   }
@@ -312,7 +291,7 @@ async function markOrderFailedIfPending(
  */
 export async function handleSubscriptionRenewal(
   session: PaymentSession,
-  provider: string
+  provider: string,
 ): Promise<void> {
   const info = session.subscriptionInfo;
   if (!(session.subscriptionId && info)) {
@@ -338,12 +317,7 @@ export async function handleSubscriptionRenewal(
     const [duplicate] = await db()
       .select({ id: order.id })
       .from(order)
-      .where(
-        and(
-          eq(order.transactionId, transactionId),
-          eq(order.paymentProvider, provider)
-        )
-      )
+      .where(and(eq(order.transactionId, transactionId), eq(order.paymentProvider, provider)))
       .limit(1);
     if (duplicate) {
       return;
@@ -404,7 +378,7 @@ export async function handleSubscriptionRenewal(
  */
 export async function handleSubscriptionUpdated(
   session: PaymentSession,
-  provider: string
+  provider: string,
 ): Promise<void> {
   const info = session.subscriptionInfo;
   if (!(session.subscriptionId && info)) {
@@ -440,7 +414,7 @@ export async function handleSubscriptionUpdated(
  */
 export async function handleSubscriptionCanceled(
   session: PaymentSession,
-  provider: string
+  provider: string,
 ): Promise<void> {
   const info = session.subscriptionInfo;
   if (!(session.subscriptionId && info)) {

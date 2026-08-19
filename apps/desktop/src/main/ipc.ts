@@ -26,9 +26,7 @@ export function getSettingsPath(userDataPath: string): string {
   return join(userDataPath, "settings.json");
 }
 
-export function readSettings(
-  userDataPath: string
-): AppSettings {
+export function readSettings(userDataPath: string): AppSettings {
   try {
     const filePath = getSettingsPath(userDataPath);
     if (!existsSync(filePath)) {
@@ -41,10 +39,7 @@ export function readSettings(
   }
 }
 
-export function writeSettings(
-  settings: Partial<AppSettings>,
-  userDataPath: string
-): AppSettings {
+export function writeSettings(settings: Partial<AppSettings>, userDataPath: string): AppSettings {
   const current = readSettings(userDataPath);
   const merged = { ...current, ...settings };
   const filePath = getSettingsPath(userDataPath);
@@ -59,12 +54,9 @@ export function registerIpcHandlers(userDataPath: string): void {
     return readSettings(userDataPath);
   });
 
-  ipcMain.handle(
-    "desktop:set-settings",
-    (_event, settings: Partial<AppSettings>) => {
-      return writeSettings(settings, userDataPath);
-    }
-  );
+  ipcMain.handle("desktop:set-settings", (_event, settings: Partial<AppSettings>) => {
+    return writeSettings(settings, userDataPath);
+  });
 
   ipcMain.handle("desktop:show-window", () => {
     const win = BrowserWindow.getAllWindows()[0];
@@ -87,7 +79,7 @@ export function registerIpcHandlers(userDataPath: string): void {
       _event,
       options?: {
         filters?: { name: string; extensions: string[] }[];
-      }
+      },
     ) => {
       const win = BrowserWindow.getAllWindows()[0];
       if (!win) return null;
@@ -96,16 +88,12 @@ export function registerIpcHandlers(userDataPath: string): void {
         filters: options?.filters,
       });
       return result.canceled ? null : result.filePaths[0];
-    }
+    },
   );
 
   ipcMain.handle(
     "desktop:save-file",
-    async (
-      _event,
-      data: string,
-      options?: { defaultName?: string }
-    ) => {
+    async (_event, data: string, options?: { defaultName?: string }) => {
       const win = BrowserWindow.getAllWindows()[0];
       if (!win) return null;
       const result = await dialog.showSaveDialog(win, {
@@ -114,7 +102,7 @@ export function registerIpcHandlers(userDataPath: string): void {
       if (result.canceled || !result.filePath) return null;
       writeFileSync(result.filePath, data, "utf8");
       return result.filePath;
-    }
+    },
   );
 
   ipcMain.handle("desktop:read-file", (_event, filePath: string) => {
@@ -126,18 +114,15 @@ export function registerIpcHandlers(userDataPath: string): void {
     }
   });
 
-  ipcMain.handle(
-    "desktop:write-file",
-    (_event, filePath: string, data: string) => {
-      try {
-        writeFileSync(filePath, data, "utf8");
-        return true;
-      } catch (error) {
-        logError("failed to write file", filePath, error);
-        return false;
-      }
+  ipcMain.handle("desktop:write-file", (_event, filePath: string, data: string) => {
+    try {
+      writeFileSync(filePath, data, "utf8");
+      return true;
+    } catch (error) {
+      logError("failed to write file", filePath, error);
+      return false;
     }
-  );
+  });
 
   logInfo("IPC handlers registered");
 }

@@ -34,9 +34,7 @@ const mutations = {
           };
         }
         const message =
-          "message" in json && typeof json.message === "string"
-            ? json.message
-            : "Checkout failed";
+          "message" in json && typeof json.message === "string" ? json.message : "Checkout failed";
         throw new Error(message);
       },
     }),

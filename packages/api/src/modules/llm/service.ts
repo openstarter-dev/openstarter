@@ -116,14 +116,9 @@ export async function getUserChats(args: {
 /**
  * Delete a chat and its messages (cascade delete).
  */
-export async function deleteChat(args: {
-  id: string;
-  userId: string;
-}): Promise<void> {
+export async function deleteChat(args: { id: string; userId: string }): Promise<void> {
   const database = db();
-  await database
-    .delete(chat)
-    .where(and(eq(chat.id, args.id), eq(chat.userId, args.userId)));
+  await database.delete(chat).where(and(eq(chat.id, args.id), eq(chat.userId, args.userId)));
 }
 
 /**
@@ -203,22 +198,12 @@ export async function getChatMessages(args: {
   const [totalResult] = await database
     .select({ count: sql<number>`COUNT(*)` })
     .from(chatMessage)
-    .where(
-      and(
-        eq(chatMessage.chatId, args.chatId),
-        eq(chatMessage.userId, args.userId),
-      ),
-    );
+    .where(and(eq(chatMessage.chatId, args.chatId), eq(chatMessage.userId, args.userId)));
 
   const rows = await database
     .select()
     .from(chatMessage)
-    .where(
-      and(
-        eq(chatMessage.chatId, args.chatId),
-        eq(chatMessage.userId, args.userId),
-      ),
-    )
+    .where(and(eq(chatMessage.chatId, args.chatId), eq(chatMessage.userId, args.userId)))
     .orderBy(desc(chatMessage.createdAt))
     .limit(pageSize)
     .offset(offset);
@@ -255,12 +240,7 @@ export async function getMessageHistory(args: {
   const rows = await database
     .select()
     .from(chatMessage)
-    .where(
-      and(
-        eq(chatMessage.chatId, args.chatId),
-        eq(chatMessage.userId, args.userId),
-      ),
-    )
+    .where(and(eq(chatMessage.chatId, args.chatId), eq(chatMessage.userId, args.userId)))
     .orderBy(chatMessage.createdAt);
 
   return rows.map((m) => ({

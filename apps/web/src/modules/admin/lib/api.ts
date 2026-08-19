@@ -141,19 +141,14 @@ const mutations = {
         const res = await client.api.admin.config.$post({ json: payload });
         if (!res.ok) {
           const text = await res.json().catch(() => null);
-          const message =
-            (text as { error?: string } | null)?.error ?? "Failed to save";
+          const message = (text as { error?: string } | null)?.error ?? "Failed to save";
           throw new Error(message);
         }
       },
     }),
   saveRole: () =>
     mutationOptions({
-      mutationFn: async (input: {
-        id: string | null;
-        name: string;
-        title: string;
-      }) => {
+      mutationFn: async (input: { id: string | null; name: string; title: string }) => {
         if (input.id) {
           const res = await client.api.admin.roles[":id"].$put({
             json: { name: input.name, title: input.title },

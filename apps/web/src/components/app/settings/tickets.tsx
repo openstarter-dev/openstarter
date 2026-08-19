@@ -93,9 +93,7 @@ export function TicketsPage() {
         <CardHeader className="flex flex-row items-start justify-between gap-4">
           <div>
             <CardTitle>Support tickets</CardTitle>
-            <CardDescription>
-              Create a ticket and chat with our support team.
-            </CardDescription>
+            <CardDescription>Create a ticket and chat with our support team.</CardDescription>
           </div>
           <Button onClick={() => setCreateOpen(true)} size="sm" type="button">
             New ticket
@@ -106,9 +104,7 @@ export function TicketsPage() {
             <p className="text-muted-foreground text-sm">Loading tickets...</p>
           ) : null}
           {listQuery.error ? (
-            <p className="text-destructive text-sm">
-              {(listQuery.error as Error).message}
-            </p>
+            <p className="text-destructive text-sm">{(listQuery.error as Error).message}</p>
           ) : null}
 
           {items.length > 0 ? (
@@ -126,9 +122,7 @@ export function TicketsPage() {
                       {formatDateTime(item.createdAt)}
                     </span>
                   </div>
-                  <Badge variant={statusVariant(item.status)}>
-                    {item.status}
-                  </Badge>
+                  <Badge variant={statusVariant(item.status)}>{item.status}</Badge>
                 </button>
               ))}
             </div>
@@ -146,17 +140,10 @@ export function TicketsPage() {
             <div>
               <CardTitle>{detail.ticket.title}</CardTitle>
               <CardDescription>
-                <Badge variant={statusVariant(detail.ticket.status)}>
-                  {detail.ticket.status}
-                </Badge>
+                <Badge variant={statusVariant(detail.ticket.status)}>{detail.ticket.status}</Badge>
               </CardDescription>
             </div>
-            <Button
-              onClick={() => setSelectedId(null)}
-              size="sm"
-              type="button"
-              variant="ghost"
-            >
+            <Button onClick={() => setSelectedId(null)} size="sm" type="button" variant="ghost">
               Close
             </Button>
           </CardHeader>
@@ -165,31 +152,23 @@ export function TicketsPage() {
               {detail.messages.map((message) => (
                 <div
                   className={
-                    message.role === "admin"
-                      ? "rounded-lg bg-muted p-3"
-                      : "rounded-lg border p-3"
+                    message.role === "admin" ? "rounded-lg bg-muted p-3" : "rounded-lg border p-3"
                   }
                   key={message.id}
                 >
                   <div className="mb-1 flex items-center gap-2">
-                    <span className="font-medium text-xs uppercase">
-                      {message.role}
-                    </span>
+                    <span className="font-medium text-xs uppercase">{message.role}</span>
                     <span className="text-muted-foreground text-xs">
                       {formatDateTime(message.createdAt)}
                     </span>
                   </div>
-                  <p className="whitespace-pre-wrap text-sm">
-                    {message.content}
-                  </p>
+                  <p className="whitespace-pre-wrap text-sm">{message.content}</p>
                 </div>
               ))}
             </div>
 
             {detail.ticket.status === "closed" ? (
-              <p className="text-muted-foreground text-sm">
-                This ticket is closed.
-              </p>
+              <p className="text-muted-foreground text-sm">This ticket is closed.</p>
             ) : (
               <div className="space-y-2">
                 <Label htmlFor="ticket-reply">Reply</Label>
@@ -200,9 +179,7 @@ export function TicketsPage() {
                   value={reply}
                 />
                 <Button
-                  disabled={
-                    reply.trim().length === 0 || replyMutation.isPending
-                  }
+                  disabled={reply.trim().length === 0 || replyMutation.isPending}
                   onClick={() =>
                     replyMutation.mutate({
                       content: reply.trim(),
@@ -251,9 +228,7 @@ export function TicketsPage() {
           <DialogFooter>
             <Button
               disabled={
-                title.trim().length === 0 ||
-                content.trim().length === 0 ||
-                createMutation.isPending
+                title.trim().length === 0 || content.trim().length === 0 || createMutation.isPending
               }
               onClick={() =>
                 createMutation.mutate({

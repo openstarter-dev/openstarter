@@ -9,9 +9,7 @@ import { loadThemePreference, saveThemePreference } from "./preferences";
 
 export function useThemePreference() {
   const { setColorScheme } = useColorScheme();
-  const [preference, setStoredPreference] = useState<ThemePreference>(() =>
-    loadThemePreference()
-  );
+  const [preference, setStoredPreference] = useState<ThemePreference>(() => loadThemePreference());
 
   useEffect(() => {
     setColorScheme(preference);

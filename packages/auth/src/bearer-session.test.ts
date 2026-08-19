@@ -12,7 +12,7 @@ const createBearerTestInstance = () =>
       logger: { disabled: true },
       plugins: [bearer({ requireSignature: true })],
     },
-    { port: 3100, testUser: { email: "bearer-test@example.com" } }
+    { port: 3100, testUser: { email: "bearer-test@example.com" } },
   );
 
 type AuthTestInstance = Awaited<ReturnType<typeof createBearerTestInstance>>;
@@ -34,23 +34,18 @@ describe("bearer plugin session bridging", () => {
         }),
         headers: { "content-type": "application/json" },
         method: "POST",
-      }
+      },
     );
     const setCookie = signInResponse.headers.get("set-cookie") ?? "";
-    const sessionToken = parseSetCookieHeader(setCookie).get(
-      "better-auth.session_token"
-    )?.value;
+    const sessionToken = parseSetCookieHeader(setCookie).get("better-auth.session_token")?.value;
     if (!sessionToken) {
       throw new Error("Expected a session token cookie after sign-in");
     }
 
-    const response = await instance.customFetchImpl(
-      "http://localhost:3100/api/auth/get-session",
-      {
-        headers: { authorization: `Bearer ${sessionToken}` },
-        method: "GET",
-      }
-    );
+    const response = await instance.customFetchImpl("http://localhost:3100/api/auth/get-session", {
+      headers: { authorization: `Bearer ${sessionToken}` },
+      method: "GET",
+    });
 
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -58,10 +53,9 @@ describe("bearer plugin session bridging", () => {
   });
 
   it("rejects a request with no Authorization header and no cookie", async () => {
-    const response = await instance.customFetchImpl(
-      "http://localhost:3100/api/auth/get-session",
-      { method: "GET" }
-    );
+    const response = await instance.customFetchImpl("http://localhost:3100/api/auth/get-session", {
+      method: "GET",
+    });
 
     expect(response.status).toBe(200);
     const body = await response.json();

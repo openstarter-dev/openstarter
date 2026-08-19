@@ -1,9 +1,4 @@
-import {
-  createCipheriv,
-  createDecipheriv,
-  createHash,
-  randomBytes,
-} from "node:crypto";
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 
 /**
  * config 秘密项的静态加密工具（AES-256-GCM），用于将后台设置中的敏感配置
@@ -28,7 +23,7 @@ function deriveEncryptionKey(): Buffer {
   const secret = process.env.CONFIG_ENCRYPTION_KEY;
   if (!secret) {
     throw new Error(
-      'Missing required environment variable "CONFIG_ENCRYPTION_KEY" for config secret encryption'
+      'Missing required environment variable "CONFIG_ENCRYPTION_KEY" for config secret encryption',
     );
   }
   return createHash("sha256").update(secret).digest();
@@ -52,10 +47,7 @@ export function encryptSecret(plain: string): string {
   const key = deriveEncryptionKey();
   const iv = randomBytes(IV_LENGTH);
   const cipher = createCipheriv("aes-256-gcm", key, iv);
-  const ciphertext = Buffer.concat([
-    cipher.update(plain, "utf8"),
-    cipher.final(),
-  ]);
+  const ciphertext = Buffer.concat([cipher.update(plain, "utf8"), cipher.final()]);
   const tag = cipher.getAuthTag();
   const packed = Buffer.concat([iv, tag, ciphertext]);
   return `${ENC_PREFIX}${packed.toString("base64")}`;
@@ -79,8 +71,5 @@ export function decryptSecret(value: string): string {
   const ciphertext = packed.subarray(IV_LENGTH + TAG_LENGTH);
   const decipher = createDecipheriv("aes-256-gcm", key, iv);
   decipher.setAuthTag(tag);
-  return Buffer.concat([
-    decipher.update(ciphertext),
-    decipher.final(),
-  ]).toString("utf8");
+  return Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString("utf8");
 }

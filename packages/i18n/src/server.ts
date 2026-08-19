@@ -21,9 +21,7 @@ function toSupportedLocale(value: string): SupportedLocale | null {
 }
 
 // 将任意语言标签收敛为受支持的 locale（大小写无关，兼容 en-US 之类的区域标签）。
-function normalizeLocale(
-  value: string | null | undefined
-): SupportedLocale | null {
+function normalizeLocale(value: string | null | undefined): SupportedLocale | null {
   if (!value) {
     return null;
   }
@@ -83,9 +81,7 @@ function getLocaleFromUrl(url: string): SupportedLocale | null {
 }
 
 // 用户偏好来源：Paraglide 写入的 locale cookie。
-function getLocaleFromCookie(
-  cookieHeader: string | null
-): SupportedLocale | null {
+function getLocaleFromCookie(cookieHeader: string | null): SupportedLocale | null {
   if (!cookieHeader) {
     return null;
   }
@@ -100,9 +96,7 @@ function getLocaleFromCookie(
 }
 
 // 内容协商来源：Accept-Language，按 q 权重取受支持语言中权重最高者（并列取先出现者）。
-function getLocaleFromAcceptLanguage(
-  header: string | null
-): SupportedLocale | null {
+function getLocaleFromAcceptLanguage(header: string | null): SupportedLocale | null {
   if (!header) {
     return null;
   }
@@ -157,9 +151,7 @@ export function getLocaleFromRequest(request?: Request): string {
     return fromCookie;
   }
 
-  const fromHeader = getLocaleFromAcceptLanguage(
-    request.headers.get("accept-language")
-  );
+  const fromHeader = getLocaleFromAcceptLanguage(request.headers.get("accept-language"));
   if (fromHeader) {
     return fromHeader;
   }

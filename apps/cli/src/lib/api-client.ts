@@ -20,7 +20,7 @@ export interface ApiClient {
   /** 发起请求并解包信封；失败抛出 AuthError/ApiError/NetworkError。 */
   request: <TData = unknown>(
     path: string,
-    init?: RequestInit & { headers?: HeaderOverride }
+    init?: RequestInit & { headers?: HeaderOverride },
   ) => Promise<TData>;
 }
 
@@ -45,7 +45,7 @@ export function createApiClient(): ApiClient {
 
   async function request<TData = unknown>(
     path: string,
-    init?: RequestInit & { headers?: HeaderOverride }
+    init?: RequestInit & { headers?: HeaderOverride },
   ): Promise<TData> {
     const response = await send(`${apiUrl}${path}`, {
       ...init,
@@ -129,7 +129,7 @@ async function send(input: string, init: RequestInit): Promise<Response> {
 
 function mergeHeaders(
   base: Record<string, string>,
-  override?: HeaderOverride
+  override?: HeaderOverride,
 ): Record<string, string> {
   if (!override) {
     return { ...base };

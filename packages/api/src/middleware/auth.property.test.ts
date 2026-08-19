@@ -5,13 +5,11 @@ import { describe, expect, it } from "vitest";
 import { createRequireAuth } from "./auth-core";
 
 const headerCharacter = fc.constantFrom(
-  ..."ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 _-./"
+  ..."ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 _-./",
 );
 const authorizationHeader = fc.option(
-  fc
-    .array(headerCharacter, { maxLength: 80 })
-    .map((characters) => characters.join("")),
-  { nil: undefined }
+  fc.array(headerCharacter, { maxLength: 80 }).map((characters) => characters.join("")),
+  { nil: undefined },
 );
 
 describe("authentication middleware properties", () => {
@@ -24,7 +22,7 @@ describe("authentication middleware properties", () => {
             getSession: () => Promise.resolve(null),
             validateApiKey: () => Promise.resolve(null),
           }),
-          (c) => c.json({ userId: c.get("userId") })
+          (c) => c.json({ userId: c.get("userId") }),
         );
         const headers = new Headers();
         if (authorization !== undefined) {
@@ -39,7 +37,7 @@ describe("authentication middleware properties", () => {
           message: "unauthorized",
         });
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

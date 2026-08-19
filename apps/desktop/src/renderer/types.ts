@@ -31,20 +31,26 @@ export interface ElectronAPI {
   getVersion: () => Promise<string>;
 
   // 认证
-  authSignInEmail: (params: { email: string; password: string }) => Promise<{ code: number; message: string; data?: AuthResult }>;
-  authSignInOAuth: (params: { provider: "google" | "github" }) => Promise<{ code: number; message: string; data?: AuthResult }>;
+  authSignInEmail: (params: {
+    email: string;
+    password: string;
+  }) => Promise<{ code: number; message: string; data?: AuthResult }>;
+  authSignInOAuth: (params: {
+    provider: "google" | "github";
+  }) => Promise<{ code: number; message: string; data?: AuthResult }>;
   authSignOut: () => Promise<{ code: number; message: string }>;
-  authGetSession: () => Promise<{ code: number; message: string; data?: { user: AuthUser } | null }>;
+  authGetSession: () => Promise<{
+    code: number;
+    message: string;
+    data?: { user: AuthUser } | null;
+  }>;
   apiRequest: (request: { method: string; path: string; body?: unknown }) => Promise<ApiResponse>;
 
   // 文件系统
   openFile: (options?: {
     filters?: { name: string; extensions: string[] }[];
   }) => Promise<string | null>;
-  saveFile: (
-    data: string,
-    options?: { defaultName?: string }
-  ) => Promise<string | null>;
+  saveFile: (data: string, options?: { defaultName?: string }) => Promise<string | null>;
   readFile: (path: string) => Promise<string | null>;
   writeFile: (path: string, data: string) => Promise<boolean>;
 

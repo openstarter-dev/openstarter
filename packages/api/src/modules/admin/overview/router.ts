@@ -1,9 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import {
-  createInviteCodesBatch,
-  deleteInviteCode,
-  listInviteCodes,
-} from "@openstarter/auth";
+import { createInviteCodesBatch, deleteInviteCode, listInviteCodes } from "@openstarter/auth";
 import { respData, respOk, respPage } from "@openstarter/shared";
 import {
   getAdminConfigs,
@@ -16,12 +12,7 @@ import { Hono } from "hono";
 import { z } from "zod";
 
 import { idParam, paginationSchema } from "../../../schema";
-import {
-  listCredits,
-  listOrders,
-  listSubscriptions,
-  listUsers,
-} from "../index";
+import { listCredits, listOrders, listSubscriptions, listUsers } from "../index";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
 
@@ -74,30 +65,22 @@ export const overviewRouter = new Hono()
     const items = await listInviteCodes();
     return c.json(respData(items));
   })
-  .post(
-    "/invite-codes",
-    zValidator("json", inviteBatchBody),
-    async (c) => {
-      const body = c.req.valid("json");
-      const created = await createInviteCodesBatch({
-        count: body.count,
-        createdBy: c.get("userId"),
-        maxUses: body.maxUses ?? DEFAULT_MAX_USES,
-        note: body.note,
-        trialDays: body.trialDays ?? DEFAULT_TRIAL_DAYS,
-      });
-      return c.json(respData(created));
-    }
-  )
-  .delete(
-    "/invite-codes/:id",
-    zValidator("param", idParam),
-    async (c) => {
-      const { id } = c.req.valid("param");
-      await deleteInviteCode(id);
-      return c.json(respOk());
-    }
-  )
+  .post("/invite-codes", zValidator("json", inviteBatchBody), async (c) => {
+    const body = c.req.valid("json");
+    const created = await createInviteCodesBatch({
+      count: body.count,
+      createdBy: c.get("userId"),
+      maxUses: body.maxUses ?? DEFAULT_MAX_USES,
+      note: body.note,
+      trialDays: body.trialDays ?? DEFAULT_TRIAL_DAYS,
+    });
+    return c.json(respData(created));
+  })
+  .delete("/invite-codes/:id", zValidator("param", idParam), async (c) => {
+    const { id } = c.req.valid("param");
+    await deleteInviteCode(id);
+    return c.json(respOk());
+  })
   // ── 站点设置（Config_Service） ────────────────────────────────────────────────
   .get("/config", async (c) => {
     const configs = await getAdminConfigs();
@@ -106,12 +89,8 @@ export const overviewRouter = new Hono()
     const tabs = getSettingTabs();
     return c.json(respData({ configs, groups, settings, tabs }));
   })
-  .post(
-    "/config",
-    zValidator("json", saveConfigBody),
-    async (c) => {
-      const body = c.req.valid("json");
-      await saveConfigs(body);
-      return c.json(respOk());
-    }
-  );
+  .post("/config", zValidator("json", saveConfigBody), async (c) => {
+    const body = c.req.valid("json");
+    await saveConfigs(body);
+    return c.json(respOk());
+  });

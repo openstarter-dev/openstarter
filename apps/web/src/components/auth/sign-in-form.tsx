@@ -14,11 +14,7 @@ import { OAuthButtons } from "./oauth-buttons";
 import { getEnabledOAuthProviders } from "./oauth-provider-selection";
 import { PasswordlessForm } from "./passwordless-form";
 
-export default function SignInForm({
-  onSwitchToSignUp,
-}: {
-  onSwitchToSignUp: () => void;
-}) {
+export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) {
   const navigate = useNavigate({ from: "/" });
   const { isPending } = authClient.useSession();
 
@@ -49,9 +45,7 @@ export default function SignInForm({
         {
           onError: (error) => {
             if (error.error.code === "EMAIL_NOT_VERIFIED") {
-              authClient
-                .sendVerificationEmail({ email: value.email })
-                .catch(() => undefined);
+              authClient.sendVerificationEmail({ email: value.email }).catch(() => undefined);
               navigate({ search: { email: value.email }, to: "/verify-email" });
               return;
             }
@@ -61,7 +55,7 @@ export default function SignInForm({
             navigate({ to: "/dashboard" });
             toast.success("Sign in successful");
           },
-        }
+        },
       );
     },
     validators: {
@@ -100,10 +94,7 @@ export default function SignInForm({
 
       {hasPasswordless ? (
         <div className="mb-4">
-          <PasswordlessForm
-            emailOtpEnabled={emailOtpEnabled}
-            magicLinkEnabled={magicLinkEnabled}
-          />
+          <PasswordlessForm emailOtpEnabled={emailOtpEnabled} magicLinkEnabled={magicLinkEnabled} />
         </div>
       ) : null}
 
@@ -187,11 +178,7 @@ export default function SignInForm({
             })}
           >
             {({ canSubmit, isSubmitting }) => (
-              <Button
-                className="w-full"
-                disabled={!canSubmit || isSubmitting}
-                type="submit"
-              >
+              <Button className="w-full" disabled={!canSubmit || isSubmitting} type="submit">
                 {isSubmitting ? "Submitting..." : "Sign In"}
               </Button>
             )}

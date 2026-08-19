@@ -1,12 +1,7 @@
 // apps/desktop/src/renderer/pages/settings.tsx —— 设置页
 
 import { useEffect, useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@openstarter/ui-web/components/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@openstarter/ui-web/components/card";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Checkbox } from "@openstarter/ui-web/components/checkbox";
 import {
@@ -44,9 +39,7 @@ export function SettingsPage() {
             <Checkbox
               id="minimize-to-tray"
               checked={settings.minimizeToTray}
-              onCheckedChange={(checked) =>
-                updateSetting({ minimizeToTray: !!checked })
-              }
+              onCheckedChange={(checked) => updateSetting({ minimizeToTray: !!checked })}
             />
             <label htmlFor="minimize-to-tray" className="text-sm">
               Minimize to tray on close
@@ -56,9 +49,7 @@ export function SettingsPage() {
             <Checkbox
               id="auto-start"
               checked={settings.autoStart}
-              onCheckedChange={(checked) =>
-                updateSetting({ autoStart: !!checked })
-              }
+              onCheckedChange={(checked) => updateSetting({ autoStart: !!checked })}
             />
             <label htmlFor="auto-start" className="text-sm">
               Launch at startup
@@ -84,11 +75,7 @@ export function SettingsPage() {
               </SelectContent>
             </Select>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => updateSetting({ ...settings })}
-            type="button"
-          >
+          <Button variant="outline" onClick={() => updateSetting({ ...settings })} type="button">
             Save
           </Button>
         </CardContent>

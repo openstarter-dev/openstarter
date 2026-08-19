@@ -12,13 +12,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-type Phase =
-  | "claiming"
-  | "ready"
-  | "approving"
-  | "approved"
-  | "denied"
-  | "error";
+type Phase = "claiming" | "ready" | "approving" | "approved" | "denied" | "error";
 
 interface DeviceState {
   message: string;
@@ -38,11 +32,8 @@ const STATUS_BY_PHASE: Record<Phase, string> = {
 export const Route = createFileRoute("/_app/device")({
   component: DeviceAuthPage,
   ssr: false,
-  validateSearch: (
-    search: Record<string, unknown>
-  ): { user_code?: string } => ({
-    user_code:
-      typeof search.user_code === "string" ? search.user_code : undefined,
+  validateSearch: (search: Record<string, unknown>): { user_code?: string } => ({
+    user_code: typeof search.user_code === "string" ? search.user_code : undefined,
   }),
 });
 
@@ -68,10 +59,9 @@ function DeviceAuthPage() {
 
     const loadClaim = async () => {
       try {
-        const claim = await fetch(
-          `/api/auth/device?user_code=${encodeURIComponent(userCode)}`,
-          { method: "GET" }
-        );
+        const claim = await fetch(`/api/auth/device?user_code=${encodeURIComponent(userCode)}`, {
+          method: "GET",
+        });
         if (!claim.ok) {
           const err = await safeError(claim);
           if (!cancelled) {
@@ -176,9 +166,7 @@ function DeviceAuthPage() {
       <div className="flex flex-col items-center gap-6 text-center">
         <div className="text-6xl">✓</div>
         <h1 className="font-bold text-2xl">授权成功！</h1>
-        <p className="text-muted-foreground">
-          您可以关闭此页面并返回终端继续操作。
-        </p>
+        <p className="text-muted-foreground">您可以关闭此页面并返回终端继续操作。</p>
       </div>
     );
   }
@@ -207,9 +195,7 @@ function DeviceAuthPage() {
     <div className="flex flex-col gap-6">
       <div className="space-y-2 text-center">
         <h1 className="font-bold text-2xl">设备授权</h1>
-        <p className="text-muted-foreground">
-          命令行终端正在请求登录您的账户，请在下方确认。
-        </p>
+        <p className="text-muted-foreground">命令行终端正在请求登录您的账户，请在下方确认。</p>
       </div>
 
       {state.phase === "claiming" && (

@@ -29,10 +29,7 @@ export function Input(props: {
         value={props.value}
       />
       {errors.map((message) => (
-        <Text
-          className="text-destructive text-xs dark:text-dark-destructive"
-          key={message}
-        >
+        <Text className="text-destructive text-xs dark:text-dark-destructive" key={message}>
           {message}
         </Text>
       ))}

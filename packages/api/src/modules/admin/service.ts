@@ -29,9 +29,7 @@ function offsetOf(page: number, pageSize: number): number {
 }
 
 /** 用户列表（可按名称/邮箱模糊搜索），按创建时间倒序。R26.2 */
-export async function listUsers(
-  params: AdminListParams
-): Promise<AdminListResult<User>> {
+export async function listUsers(params: AdminListParams): Promise<AdminListResult<User>> {
   const { page, pageSize, search } = params;
   const database = db();
   const where = search ? like(user.email, `%${search}%`) : undefined;
@@ -50,9 +48,7 @@ export async function listUsers(
 }
 
 /** 订单列表（可按状态过滤），排除软删，按创建时间倒序。R26.2 */
-export async function listOrders(
-  params: AdminListParams
-): Promise<AdminListResult<Order>> {
+export async function listOrders(params: AdminListParams): Promise<AdminListResult<Order>> {
   const { page, pageSize, status } = params;
   const database = db();
   const conditions: SQL[] = [isNull(order.deletedAt)];
@@ -76,7 +72,7 @@ export async function listOrders(
 
 /** 订阅列表(可按状态过滤)，排除软删，按创建时间倒序。R26.2 */
 export async function listSubscriptions(
-  params: AdminListParams
+  params: AdminListParams,
 ): Promise<AdminListResult<Subscription>> {
   const { page, pageSize, status } = params;
   const database = db();
@@ -100,9 +96,7 @@ export async function listSubscriptions(
 }
 
 /** 积分流水列表（可按交易类型过滤），排除软删，按创建时间倒序。R26.2 */
-export async function listCredits(
-  params: AdminListParams
-): Promise<AdminListResult<Credit>> {
+export async function listCredits(params: AdminListParams): Promise<AdminListResult<Credit>> {
   const { page, pageSize, status } = params;
   const database = db();
   const conditions: SQL[] = [isNull(credit.deletedAt)];

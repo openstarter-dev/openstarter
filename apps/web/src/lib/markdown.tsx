@@ -39,10 +39,7 @@ function processInline(text: string): string {
   // Inline code (`text`)
   text = text.replace(/`(.+?)`/g, "<code>$1</code>");
   // Links [text](url)
-  text = text.replace(
-    /\[(.+?)\]\((.+?)\)/g,
-    '<a href="$2">$1</a>',
-  );
+  text = text.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
   return text;
 }
 
@@ -81,9 +78,7 @@ export function renderMarkdown(content: string): string {
   function flushList() {
     if (listItems.length > 0) {
       const tag = listType;
-      const items = listItems
-        .map((item) => `<li>${item}</li>`)
-        .join("\n");
+      const items = listItems.map((item) => `<li>${item}</li>`).join("\n");
       result.push(`<${tag}>\n${items}\n</${tag}>`);
       listItems = [];
       inList = false;

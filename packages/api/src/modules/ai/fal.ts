@@ -24,9 +24,7 @@ import { isValidCallbackUrl, omitKeys } from "./utils";
 const DEFAULT_BASE_URL = "https://queue.fal.run";
 
 /** 图片输入需重映射为 `input_images` 的模型（其余映射为 `image_url`）。 */
-const KLING_EDIT_MODELS: readonly string[] = [
-  "fal-ai/kling-video/o1/video-to-video/edit",
-];
+const KLING_EDIT_MODELS: readonly string[] = ["fal-ai/kling-video/o1/video-to-video/edit"];
 
 /**
  * Fal 配置。`apiKey` 为必填凭证；`saveFiles`/`uuid`/`customStorage` 为可注入项。
@@ -78,11 +76,7 @@ export class FalProvider implements AIProvider {
     };
   }
 
-  async generate({
-    params,
-  }: {
-    params: AIGenerateParams;
-  }): Promise<AITaskResult> {
+  async generate({ params }: { params: AIGenerateParams }): Promise<AITaskResult> {
     const { mediaType, model, prompt, callbackUrl } = params;
 
     if (!mediaType) {

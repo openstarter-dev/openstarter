@@ -5,11 +5,7 @@ import { buildOAuthUrl, extractTokenFromCookies } from "./oauth-window";
 
 describe("buildOAuthUrl", () => {
   it("should build URL with provider and callback", () => {
-    const url = buildOAuthUrl(
-      "http://localhost:3000",
-      "google",
-      "openstarter://oauth-callback"
-    );
+    const url = buildOAuthUrl("http://localhost:3000", "google", "openstarter://oauth-callback");
 
     expect(url).toContain("/api/auth/sign-in/social");
     expect(url).toContain("provider=google");
@@ -18,11 +14,7 @@ describe("buildOAuthUrl", () => {
   });
 
   it("should support github provider", () => {
-    const url = buildOAuthUrl(
-      "http://localhost:3000",
-      "github",
-      "openstarter://oauth-callback"
-    );
+    const url = buildOAuthUrl("http://localhost:3000", "github", "openstarter://oauth-callback");
 
     expect(url).toContain("provider=github");
   });

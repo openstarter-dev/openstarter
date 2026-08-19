@@ -13,9 +13,7 @@ import { defineConfig } from "vite";
 // packages/i18n) into the locale runtime consumed here in apps/web. The inlang
 // project + messages live in packages/i18n; the compiled runtime lands in
 // src/paraglide (git-ignored, regenerated on every dev/build).
-const inlangProject = fileURLToPath(
-  new URL("../../packages/i18n/project.inlang", import.meta.url)
-);
+const inlangProject = fileURLToPath(new URL("../../packages/i18n/project.inlang", import.meta.url));
 
 // Cloudflare Workers build (`pnpm cf:build`, NITRO_PRESET=cloudflare_module):
 // stub out DB drivers that don't match the runtime database. mysql2 crashes
@@ -30,18 +28,13 @@ const inlangProject = fileURLToPath(
 // for the Hyperdrive binding. Node builds (`pnpm dev`/`pnpm build`) keep every
 // driver and skip this stubbing entirely. Mirrors ShipAny's vite.config.ts.
 const isCloudflareBuild = (process.env.NITRO_PRESET || "").includes("cloudflare");
-const driverStub = fileURLToPath(
-  new URL("./src/db-driver-stub.ts", import.meta.url)
-);
+const driverStub = fileURLToPath(new URL("./src/db-driver-stub.ts", import.meta.url));
 
 // Prefer wrangler.jsonc over the build-time env, which can be polluted by
 // .env.local (e.g. DATABASE_PROVIDER=sqlite for local dev).
 function workersDbProvider(): string {
   try {
-    const raw = readFileSync(
-      fileURLToPath(new URL("./wrangler.jsonc", import.meta.url)),
-      "utf8"
-    );
+    const raw = readFileSync(fileURLToPath(new URL("./wrangler.jsonc", import.meta.url)), "utf8");
     // Strip JSONC line comments before regexing — wrangler.jsonc may carry
     // commented-out Hyperdrive / KV / R2 blocks.
     const cleaned = raw.replace(/\/\/.*$/gm, "");

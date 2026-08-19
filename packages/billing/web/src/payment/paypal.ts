@@ -113,11 +113,7 @@ export class PayPalProvider implements PaymentProvider {
         : "https://api-m.sandbox.paypal.com";
   }
 
-  async createPayment({
-    order,
-  }: {
-    order: PaymentOrder;
-  }): Promise<CheckoutSession> {
+  async createPayment({ order }: { order: PaymentOrder }): Promise<CheckoutSession> {
     if (!order.price) {
       throw new Error("price is required");
     }
@@ -129,11 +125,7 @@ export class PayPalProvider implements PaymentProvider {
     return await this.createOneTimePayment(order);
   }
 
-  async getPaymentSession({
-    sessionId,
-  }: {
-    sessionId: string;
-  }): Promise<PaymentSession> {
+  async getPaymentSession({ sessionId }: { sessionId: string }): Promise<PaymentSession> {
     if (!sessionId) {
       throw new Error("sessionId is required");
     }
@@ -142,28 +134,24 @@ export class PayPalProvider implements PaymentProvider {
     try {
       let orderResult = (await this.makeRequest(
         `/v2/checkout/orders/${sessionId}`,
-        "GET"
+        "GET",
       )) as PayPalOrderResource;
 
       // APPROVED 表示用户已授权但未捕获，触发一次捕获。
       if (orderResult.status === "APPROVED") {
         orderResult = (await this.makeRequest(
           `/v2/checkout/orders/${sessionId}/capture`,
-          "POST"
+          "POST",
         )) as PayPalOrderResource;
       }
 
       return this.buildSessionFromOrder(orderResult);
     } catch (orderError) {
-      const message =
-        orderError instanceof Error ? orderError.message : String(orderError);
-      if (
-        message.includes("RESOURCE_NOT_FOUND") ||
-        message.includes("INVALID_RESOURCE_ID")
-      ) {
+      const message = orderError instanceof Error ? orderError.message : String(orderError);
+      if (message.includes("RESOURCE_NOT_FOUND") || message.includes("INVALID_RESOURCE_ID")) {
         const subscription = (await this.makeRequest(
           `/v1/billing/subscriptions/${sessionId}`,
-          "GET"
+          "GET",
         )) as PayPalSubscriptionResource;
         return this.buildSessionFromSubscription(subscription);
       }
@@ -195,9 +183,7 @@ export class PayPalProvider implements PaymentProvider {
 
   // ─── 结账（Create） ────────────────────────────────────────────────────────
 
-  private async createOneTimePayment(
-    order: PaymentOrder
-  ): Promise<CheckoutSession> {
+  private async createOneTimePayment(order: PaymentOrder): Promise<CheckoutSession> {
     const price = order.price;
     if (!price) {
       throw new Error("price is required");
@@ -238,7 +224,7 @@ export class PayPalProvider implements PaymentProvider {
     const result = (await this.makeRequest(
       "/v2/checkout/orders",
       "POST",
-      payload
+      payload,
     )) as PayPalOrderResource;
 
     return {
@@ -253,9 +239,7 @@ export class PayPalProvider implements PaymentProvider {
     };
   }
 
-  private async createSubscriptionPayment(
-    order: PaymentOrder
-  ): Promise<CheckoutSession> {
+  private async createSubscriptionPayment(order: PaymentOrder): Promise<CheckoutSession> {
     const price = order.price;
     const plan = order.plan;
     if (!(price && plan)) {
@@ -311,7 +295,7 @@ export class PayPalProvider implements PaymentProvider {
     const subscription = (await this.makeRequest(
       "/v1/billing/subscriptions",
       "POST",
-      payload
+      payload,
     )) as PayPalSubscriptionResource;
 
     return {
@@ -330,21 +314,17 @@ export class PayPalProvider implements PaymentProvider {
 
   private buildSessionForEvent(
     eventType: PaymentEventType,
-    resource: Record<string, unknown>
+    resource: Record<string, unknown>,
   ): Promise<PaymentSession> {
     if (eventType === PaymentEventType.CHECKOUT_SUCCESS) {
-      return Promise.resolve(
-        this.buildSessionFromOrder(resource as PayPalOrderResource)
-      );
+      return Promise.resolve(this.buildSessionFromOrder(resource as PayPalOrderResource));
     }
     if (
       eventType === PaymentEventType.SUBSCRIBE_UPDATED ||
       eventType === PaymentEventType.SUBSCRIBE_CANCELED
     ) {
       return Promise.resolve(
-        this.buildSessionFromSubscription(
-          resource as PayPalSubscriptionResource
-        )
+        this.buildSessionFromSubscription(resource as PayPalSubscriptionResource),
       );
     }
     if (eventType === PaymentEventType.PAYMENT_FAILED) {
@@ -355,9 +335,7 @@ export class PayPalProvider implements PaymentProvider {
       });
     }
     // PAYMENT_SUCCESS / PAYMENT_REFUNDED（capture 事件）
-    return Promise.resolve(
-      this.buildSessionFromCapture(resource as PayPalCapture)
-    );
+    return Promise.resolve(this.buildSessionFromCapture(resource as PayPalCapture));
   }
 
   private buildSessionFromOrder(order: PayPalOrderResource): PaymentSession {
@@ -411,9 +389,7 @@ export class PayPalProvider implements PaymentProvider {
     };
   }
 
-  private buildSessionFromSubscription(
-    subscription: PayPalSubscriptionResource
-  ): PaymentSession {
+  private buildSessionFromSubscription(subscription: PayPalSubscriptionResource): PaymentSession {
     const lastPayment = subscription.billing_info?.last_payment;
     const start = parseDate(lastPayment?.time ?? subscription.start_time);
     const end = parseDate(subscription.billing_info?.next_billing_time);
@@ -445,7 +421,7 @@ export class PayPalProvider implements PaymentProvider {
     }
 
     const credentials = Buffer.from(
-      `${this.configs.clientId}:${this.configs.clientSecret}`
+      `${this.configs.clientId}:${this.configs.clientSecret}`,
     ).toString("base64");
 
     const response = await fetch(`${this.baseUrl}/v1/oauth2/token`, {
@@ -460,7 +436,7 @@ export class PayPalProvider implements PaymentProvider {
     const data = (await response.json()) as PayPalTokenResponse;
     if (data.error || !data.access_token) {
       throw new Error(
-        `PayPal authentication failed: ${data.error_description ?? data.error ?? "unknown"}`
+        `PayPal authentication failed: ${data.error_description ?? data.error ?? "unknown"}`,
       );
     }
 
@@ -471,7 +447,7 @@ export class PayPalProvider implements PaymentProvider {
   private async makeRequest(
     endpoint: string,
     method: string,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
   ): Promise<unknown> {
     const response = await fetch(`${this.baseUrl}${endpoint}`, {
       method,
@@ -489,17 +465,13 @@ export class PayPalProvider implements PaymentProvider {
     const result = (await response.json()) as Record<string, unknown>;
     if (!response.ok) {
       const name = typeof result.name === "string" ? result.name : "";
-      const errMsg =
-        typeof result.message === "string" ? result.message : "Unknown error";
+      const errMsg = typeof result.message === "string" ? result.message : "Unknown error";
       throw new Error(`PayPal request failed: ${name || errMsg}`);
     }
     return result;
   }
 
-  private async verifyWebhookSignature(
-    req: Request,
-    event: PayPalWebhookEvent
-  ): Promise<void> {
+  private async verifyWebhookSignature(req: Request, event: PayPalWebhookEvent): Promise<void> {
     const header = (name: string): string => req.headers.get(name) || "";
     const authAlgo = header("paypal-auth-algo");
     const certUrl = header("paypal-cert-url");
@@ -508,29 +480,23 @@ export class PayPalProvider implements PaymentProvider {
     const transmissionTime = header("paypal-transmission-time");
 
     // fail-closed：缺少任一签名头即拒绝，不区分环境。
-    if (
-      !(authAlgo && transmissionId && transmissionSig && transmissionTime)
-    ) {
+    if (!(authAlgo && transmissionId && transmissionSig && transmissionTime)) {
       throw new Error("Missing PayPal webhook signature headers");
     }
 
-    const verify = (await this.makeRequest(
-      "/v1/notifications/verify-webhook-signature",
-      "POST",
-      {
-        auth_algo: authAlgo,
-        cert_url: certUrl,
-        transmission_id: transmissionId,
-        transmission_sig: transmissionSig,
-        transmission_time: transmissionTime,
-        webhook_id: this.configs.webhookId,
-        webhook_event: event,
-      }
-    )) as { verification_status?: string };
+    const verify = (await this.makeRequest("/v1/notifications/verify-webhook-signature", "POST", {
+      auth_algo: authAlgo,
+      cert_url: certUrl,
+      transmission_id: transmissionId,
+      transmission_sig: transmissionSig,
+      transmission_time: transmissionTime,
+      webhook_id: this.configs.webhookId,
+      webhook_event: event,
+    })) as { verification_status?: string };
 
     if (verify.verification_status !== "SUCCESS") {
       throw new Error(
-        `Invalid PayPal webhook signature: ${verify.verification_status ?? "unknown"}`
+        `Invalid PayPal webhook signature: ${verify.verification_status ?? "unknown"}`,
       );
     }
   }
@@ -561,9 +527,7 @@ function parseDate(value: string | undefined): Date | undefined {
   return value ? new Date(value) : undefined;
 }
 
-function parseMetadata(
-  customId: string | undefined
-): Record<string, unknown> | undefined {
+function parseMetadata(customId: string | undefined): Record<string, unknown> | undefined {
   if (!customId) {
     return undefined;
   }
@@ -623,9 +587,7 @@ function mapPayPalStatus(status: string | undefined): PaymentStatus {
   }
 }
 
-function mapPayPalSubscriptionStatus(
-  status: string | undefined
-): SubscriptionStatus {
+function mapPayPalSubscriptionStatus(status: string | undefined): SubscriptionStatus {
   switch (status) {
     case "CANCELLED":
       return SubscriptionStatus.CANCELED;
@@ -638,9 +600,7 @@ function mapPayPalSubscriptionStatus(
   }
 }
 
-function mapIntervalToPayPal(
-  interval: PaymentInterval
-): "DAY" | "WEEK" | "MONTH" | "YEAR" {
+function mapIntervalToPayPal(interval: PaymentInterval): "DAY" | "WEEK" | "MONTH" | "YEAR" {
   switch (interval) {
     case "day":
       return "DAY";

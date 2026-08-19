@@ -45,11 +45,7 @@ export const PostStatus = {
 export type PostStatus = (typeof PostStatus)[keyof typeof PostStatus];
 
 // 取值元组（非空 tuple），供路由层 `zValidator` 的 `z.enum` 复用。
-export const POST_TYPE_VALUES = [
-  PostType.ARTICLE,
-  PostType.PAGE,
-  PostType.LOG,
-] as const;
+export const POST_TYPE_VALUES = [PostType.ARTICLE, PostType.PAGE, PostType.LOG] as const;
 
 export const POST_STATUS_VALUES = [
   PostStatus.PUBLISHED,
@@ -168,10 +164,7 @@ export type PagedParams = {
  * 查询覆盖**全部**记录（含已软删），因 DB `slug` 唯一约束对软删记录同样生效；
  * 更新场景经 `excludeId` 排除记录自身。
  */
-async function assertSlugAvailable(
-  slug: string,
-  excludeId?: string
-): Promise<void> {
+async function assertSlugAvailable(slug: string, excludeId?: string): Promise<void> {
   const [existing] = await db()
     .select({ id: post.id })
     .from(post)
@@ -238,10 +231,7 @@ export async function createPost(input: CreatePostInput): Promise<Post> {
  * 更新文章（部分字段）：传入 `slug` 时统一小写并做唯一校验（排除自身，冲突抛
  * {@link SlugConflictError}）。更新后按 id 回读返回完整记录；记录不存在（或已软删）返回 `undefined`。
  */
-export async function updatePost(
-  id: string,
-  input: UpdatePostInput
-): Promise<Post | undefined> {
+export async function updatePost(id: string, input: UpdatePostInput): Promise<Post | undefined> {
   const patch: Partial<NewPost> = {};
 
   if (input.slug !== undefined) {
@@ -312,9 +302,7 @@ export async function deletePost(id: string): Promise<void> {
  * 管理列表：按 `type`/`status` 组合筛选（R14.5），可选按标题 / `slug` 模糊搜索，
  * 按 `updatedAt`/`createdAt` 倒序返回。默认排除已软删记录。
  */
-export async function listPosts(
-  params: ListPostsParams
-): Promise<ListPostsResult> {
+export async function listPosts(params: ListPostsParams): Promise<ListPostsResult> {
   const page = params.page ?? DEFAULT_PAGE;
   const pageSize = params.pageSize ?? DEFAULT_PAGE_SIZE;
   const offset = (page - 1) * pageSize;
@@ -335,10 +323,7 @@ export async function listPosts(
   }
   const where = and(...conditions);
 
-  const [totalRow] = await db()
-    .select({ value: count() })
-    .from(post)
-    .where(where);
+  const [totalRow] = await db().select({ value: count() }).from(post).where(where);
 
   const items = await db()
     .select()
@@ -358,9 +343,7 @@ export async function listPosts(
  * 草稿 / 下线 / 软删记录返回 `undefined`（R14.2/R14.3）。`slug` 统一小写匹配。
  * 供博客详情（任务 23）经只读 RPC 复用。
  */
-export async function findPublishedBySlug(
-  slug: string
-): Promise<Post | undefined> {
+export async function findPublishedBySlug(slug: string): Promise<Post | undefined> {
   const [result] = await db()
     .select()
     .from(post)
@@ -368,8 +351,8 @@ export async function findPublishedBySlug(
       and(
         eq(post.slug, slug.toLowerCase()),
         eq(post.status, PostStatus.PUBLISHED),
-        isNull(post.deletedAt)
-      )
+        isNull(post.deletedAt),
+      ),
     )
     .limit(1);
   return result;
@@ -399,7 +382,7 @@ function publishedArticleConditions(): SQL[] {
 }
 
 export async function listPublishedArticles(
-  params: ListPublishedArticlesParams = {}
+  params: ListPublishedArticlesParams = {},
 ): Promise<ListPublishedArticlesResult> {
   const page = params.page ?? DEFAULT_PAGE;
   const pageSize = params.pageSize ?? DEFAULT_PUBLISHED_PAGE_SIZE;
@@ -411,10 +394,7 @@ export async function listPublishedArticles(
   }
   const where = and(...conditions);
 
-  const [totalRow] = await db()
-    .select({ value: count() })
-    .from(post)
-    .where(where);
+  const [totalRow] = await db().select({ value: count() }).from(post).where(where);
 
   const items = await db()
     .select({
@@ -447,7 +427,7 @@ export async function listPublishedArticles(
  * {@link PublishedArticleItem} 对齐、额外携带 `content`。
  */
 export async function listPublishedArticlesWithContent(
-  params: PagedParams = {}
+  params: PagedParams = {},
 ): Promise<PublishedArticleWithContent[]> {
   const page = params.page ?? DEFAULT_PAGE;
   const pageSize = params.pageSize ?? DEFAULT_PUBLISHED_PAGE_SIZE;

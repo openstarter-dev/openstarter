@@ -38,9 +38,7 @@ export default function SignUpScreen() {
       onSubmit: z.object({
         email: z.email("Invalid email address"),
         name: z.string().min(MIN_NAME_LENGTH, "Name is too short"),
-        password: z
-          .string()
-          .min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
+        password: z.string().min(MIN_PASSWORD_LENGTH, "Password must be at least 8 characters"),
       }),
     },
   });
@@ -57,9 +55,7 @@ export default function SignUpScreen() {
             {(field) => (
               <Input
                 autoComplete="name"
-                errors={field.state.meta.errors.map(
-                  (item) => item?.message ?? ""
-                )}
+                errors={field.state.meta.errors.map((item) => item?.message ?? "")}
                 label={m["common.sign.name_title"]()}
                 onBlur={field.handleBlur}
                 onChangeText={field.handleChange}
@@ -73,9 +69,7 @@ export default function SignUpScreen() {
             {(field) => (
               <Input
                 autoComplete="email"
-                errors={field.state.meta.errors.map(
-                  (item) => item?.message ?? ""
-                )}
+                errors={field.state.meta.errors.map((item) => item?.message ?? "")}
                 label={m["common.sign.email_title"]()}
                 onBlur={field.handleBlur}
                 onChangeText={field.handleChange}
@@ -89,9 +83,7 @@ export default function SignUpScreen() {
             {(field) => (
               <Input
                 autoComplete="password"
-                errors={field.state.meta.errors.map(
-                  (item) => item?.message ?? ""
-                )}
+                errors={field.state.meta.errors.map((item) => item?.message ?? "")}
                 label={m["common.sign.password_title"]()}
                 onBlur={field.handleBlur}
                 onChangeText={field.handleChange}

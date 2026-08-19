@@ -21,10 +21,7 @@ interface PasswordlessFormProps {
   magicLinkEnabled: boolean;
 }
 
-export function PasswordlessForm({
-  magicLinkEnabled,
-  emailOtpEnabled,
-}: PasswordlessFormProps) {
+export function PasswordlessForm({ magicLinkEnabled, emailOtpEnabled }: PasswordlessFormProps) {
   const modes: PasswordlessMode[] = [];
   if (magicLinkEnabled) {
     modes.push("magic-link");
@@ -33,9 +30,7 @@ export function PasswordlessForm({
     modes.push("email-otp");
   }
 
-  const [mode, setMode] = useState<PasswordlessMode | null>(
-    modes.at(0) ?? null
-  );
+  const [mode, setMode] = useState<PasswordlessMode | null>(modes.at(0) ?? null);
   const [email, setEmail] = useState("");
   const [otpInputMode, setOtpInputMode] = useState(false);
   const [otp, setOtp] = useState("");
@@ -129,9 +124,7 @@ export function PasswordlessForm({
 
       {otpInputMode ? (
         <div className="space-y-2">
-          <Label htmlFor="passwordless-otp">
-            Enter the code sent to {email}
-          </Label>
+          <Label htmlFor="passwordless-otp">Enter the code sent to {email}</Label>
           <Input
             id="passwordless-otp"
             inputMode="numeric"
@@ -170,9 +163,7 @@ export function PasswordlessForm({
           <Button
             className="w-full"
             disabled={submitting}
-            onClick={
-              mode === "magic-link" ? handleMagicLink : handleEmailOtpRequest
-            }
+            onClick={mode === "magic-link" ? handleMagicLink : handleEmailOtpRequest}
             type="button"
           >
             {submitActionLabel}

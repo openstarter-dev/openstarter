@@ -51,9 +51,7 @@ export interface StorageProvider {
 
   uploadFile(options: StorageUploadOptions): Promise<StorageUploadResult>;
 
-  downloadAndUpload(
-    options: StorageDownloadUploadOptions
-  ): Promise<StorageUploadResult>;
+  downloadAndUpload(options: StorageDownloadUploadOptions): Promise<StorageUploadResult>;
 
   exists?(options: { key: string; bucket?: string }): Promise<boolean>;
 

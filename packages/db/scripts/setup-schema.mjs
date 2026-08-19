@@ -33,7 +33,7 @@ const resolveDialect = (provider) => {
   const dialect = DIALECT_BY_PROVIDER[provider];
   if (!dialect) {
     throw new Error(
-      `Unsupported DATABASE_PROVIDER: ${provider}. Expected one of: ${Object.keys(DIALECT_BY_PROVIDER).join(", ")}`
+      `Unsupported DATABASE_PROVIDER: ${provider}. Expected one of: ${Object.keys(DIALECT_BY_PROVIDER).join(", ")}`,
     );
   }
   return dialect;
@@ -48,9 +48,7 @@ const main = () => {
   const lines = source.split("\n");
   const markerIndex = lines.findIndex((line) => line.includes(ACTIVE_MARKER));
   if (markerIndex === -1 || markerIndex + 1 >= lines.length) {
-    throw new Error(
-      `Could not find active-dialect marker "${ACTIVE_MARKER}" in ${barrelPath}`
-    );
+    throw new Error(`Could not find active-dialect marker "${ACTIVE_MARKER}" in ${barrelPath}`);
   }
 
   lines[markerIndex + 1] = `export * from "./${dialect}";`;

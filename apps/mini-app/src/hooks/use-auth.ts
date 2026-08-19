@@ -1,9 +1,9 @@
 // apps/mini-app/src/hooks/use-auth.ts
 // 认证 hook（整合 better-auth client）
 
-import { useCallback } from 'react';
-import { useAuthStore, type UserInfo } from '@/stores/auth-store';
-import { authClient } from '@/lib/auth-client';
+import { useCallback } from "react";
+import { useAuthStore, type UserInfo } from "@/stores/auth-store";
+import { authClient } from "@/lib/auth-client";
 
 export function useAuth() {
   const {
@@ -28,11 +28,11 @@ export function useAuth() {
             onSuccess: (ctx: any) => {
               bearerToken = ctx.response.headers.get("set-auth-token");
             },
-          }
+          },
         );
 
         if (result.error) {
-          return { error: result.error.message || 'Login failed' };
+          return { error: result.error.message || "Login failed" };
         }
 
         if (result.data?.user && bearerToken) {
@@ -40,9 +40,9 @@ export function useAuth() {
           return { data: result.data };
         }
 
-        return { error: 'Login failed: missing token or user' };
+        return { error: "Login failed: missing token or user" };
       } catch (err) {
-        return { error: err instanceof Error ? err.message : 'Login failed' };
+        return { error: err instanceof Error ? err.message : "Login failed" };
       }
     },
     [setSession],

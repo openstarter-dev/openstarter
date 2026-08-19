@@ -211,10 +211,7 @@ const removeDatabaseFiles = (path: string) => {
  * seed only the rows they require.
  */
 export const createApiTestDatabase = async (suiteName: string) => {
-  const databasePath = join(
-    tmpdir(),
-    `openstarter-api-${process.pid}-${suiteName}.sqlite`
-  );
+  const databasePath = join(tmpdir(), `openstarter-api-${process.pid}-${suiteName}.sqlite`);
   removeDatabaseFiles(databasePath);
   const database = createDb({
     provider: "sqlite",
@@ -239,10 +236,8 @@ export const closeApiTestDatabase = (database: Database) => {
 export const resetApiTestDatabase = (database: Database) =>
   Promise.all(
     ALL_TABLES.map((table) =>
-      database.run(
-        sql.raw(`DELETE FROM ${table === "order" ? '"order"' : table}`)
-      )
-    )
+      database.run(sql.raw(`DELETE FROM ${table === "order" ? '"order"' : table}`)),
+    ),
   );
 
 /** Insert a single user row with sensible defaults; tests override only what they assert on. */
@@ -253,12 +248,12 @@ export const insertUser = async (
     email: string;
     name: string;
     emailVerified: boolean;
-  }> = {}
+  }> = {},
 ) => {
   const id = overrides.id ?? "user-1";
   await database.run(
     sql`INSERT INTO user (id, name, email, email_verified)
-        VALUES (${id}, ${overrides.name ?? "Test"}, ${overrides.email ?? `test-${id}@example.com`}, ${overrides.emailVerified ? 1 : 0})`
+        VALUES (${id}, ${overrides.name ?? "Test"}, ${overrides.email ?? `test-${id}@example.com`}, ${overrides.emailVerified ? 1 : 0})`,
   );
   return id;
 };

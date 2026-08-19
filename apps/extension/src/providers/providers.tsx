@@ -19,9 +19,7 @@ export function AppProviders({ children, value }: AppProvidersProps) {
     <I18nProvider>
       <AuthStateProvider>
         <ApiClientProvider value={value}>
-          <QueryClientProvider>
-            {children}
-          </QueryClientProvider>
+          <QueryClientProvider>{children}</QueryClientProvider>
         </ApiClientProvider>
       </AuthStateProvider>
     </I18nProvider>

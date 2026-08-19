@@ -126,16 +126,13 @@ const DATA_TABLES = [
   "user",
 ] as const;
 
-const runStatements = (
-  database: ReturnType<typeof createDb>,
-  statements: readonly string[]
-) =>
+const runStatements = (database: ReturnType<typeof createDb>, statements: readonly string[]) =>
   statements.reduce<Promise<void>>(
     (pending, statement) =>
       pending.then(async () => {
         await database.run(sql.raw(statement));
       }),
-    Promise.resolve()
+    Promise.resolve(),
   );
 
 const databasePaths = new WeakMap<object, string>();
@@ -147,10 +144,7 @@ const removeDatabaseFiles = (databasePath: string) => {
 };
 
 export const createAuthTestDatabase = async (suiteName: string) => {
-  const databasePath = join(
-    tmpdir(),
-    `openstarter-auth-${process.pid}-${suiteName}.sqlite`
-  );
+  const databasePath = join(tmpdir(), `openstarter-auth-${process.pid}-${suiteName}.sqlite`);
   removeDatabaseFiles(databasePath);
   const database = createDb({
     provider: "sqlite",
@@ -162,7 +156,7 @@ export const createAuthTestDatabase = async (suiteName: string) => {
 };
 
 export const closeAuthTestDatabase = (
-  database: Awaited<ReturnType<typeof createAuthTestDatabase>>
+  database: Awaited<ReturnType<typeof createAuthTestDatabase>>,
 ) => {
   const databasePath = databasePaths.get(database);
   if (databasePath) {
@@ -172,9 +166,9 @@ export const closeAuthTestDatabase = (
 };
 
 export const resetAuthTestDatabase = (
-  database: Awaited<ReturnType<typeof createAuthTestDatabase>>
+  database: Awaited<ReturnType<typeof createAuthTestDatabase>>,
 ) =>
   runStatements(
     database,
-    DATA_TABLES.map((tableName) => `delete from ${tableName}`)
+    DATA_TABLES.map((tableName) => `delete from ${tableName}`),
   );

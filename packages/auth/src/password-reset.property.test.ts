@@ -46,13 +46,11 @@ const createPasswordResetTestInstance = () => {
     {
       port: 3000,
       testUser: { email: "registered@example.com" },
-    }
+    },
   );
 };
 
-type AuthTestInstance = Awaited<
-  ReturnType<typeof createPasswordResetTestInstance>
->;
+type AuthTestInstance = Awaited<ReturnType<typeof createPasswordResetTestInstance>>;
 
 let instance: AuthTestInstance;
 
@@ -66,7 +64,7 @@ const requestPasswordReset = async (email: string) => {
       }),
       headers: { "content-type": "application/json" },
       method: "POST",
-    }
+    },
   );
   return {
     body: await response.json(),
@@ -107,7 +105,7 @@ describe("password reset security properties", () => {
             where: byField("userId", user.id),
           });
           const passwordBefore = accountsBefore.find(
-            (account) => account.providerId === "credential"
+            (account) => account.providerId === "credential",
           )?.password;
 
           const response = await instance.customFetchImpl(
@@ -119,21 +117,21 @@ describe("password reset security properties", () => {
               }),
               headers: { "content-type": "application/json" },
               method: "POST",
-            }
+            },
           );
           const accountsAfter = await instance.db.findMany<StoredAccount>({
             model: "account",
             where: byField("userId", user.id),
           });
           const passwordAfter = accountsAfter.find(
-            (account) => account.providerId === "credential"
+            (account) => account.providerId === "credential",
           )?.password;
 
           expect(response.status).toBe(400);
           expect(passwordAfter).toBe(passwordBefore);
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -141,14 +139,12 @@ describe("password reset security properties", () => {
     await fc.assert(
       fc.asyncProperty(localPartArbitrary, async (localPart) => {
         const registered = await requestPasswordReset(instance.testUser.email);
-        const missing = await requestPasswordReset(
-          `missing-${localPart}@example.test`
-        );
+        const missing = await requestPasswordReset(`missing-${localPart}@example.test`);
 
         expect(missing.status).toBe(registered.status);
         expect(missing.body).toEqual(registered.body);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
 
     expect(deliveries.length).toBeGreaterThan(0);

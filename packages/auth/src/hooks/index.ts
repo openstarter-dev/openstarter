@@ -27,25 +27,19 @@ import type { OrganizationOptions } from "better-auth/plugins/organization";
 import { grantRoleForNewUser } from "../rbac";
 
 /** `databaseHooks.user`：用户表的 create / update / delete 生命周期钩子。 */
-type DatabaseUserHooks = NonNullable<
-  NonNullable<BetterAuthOptions["databaseHooks"]>["user"]
->;
+type DatabaseUserHooks = NonNullable<NonNullable<BetterAuthOptions["databaseHooks"]>["user"]>;
 
 /**
  * `databaseHooks.user.create.after` 回调类型，直接从 better-auth 选项派生，
  * 保证签名 `(user, context) => Promise<void>` 与装配点契约一致。
  */
-type UserCreateAfterHook = NonNullable<
-  NonNullable<DatabaseUserHooks["create"]>["after"]
->;
+type UserCreateAfterHook = NonNullable<NonNullable<DatabaseUserHooks["create"]>["after"]>;
 
 /** `create.after` 接收的已创建用户对象类型（含 `id` / `email` 等）。 */
 type CreatedUser = Parameters<UserCreateAfterHook>[0];
 
 /** `user.deleteUser` 完整配置（含 enabled / 验证发送 / 生命周期回调等）。 */
-type DeleteUserOptions = NonNullable<
-  NonNullable<BetterAuthOptions["user"]>["deleteUser"]
->;
+type DeleteUserOptions = NonNullable<NonNullable<BetterAuthOptions["user"]>["deleteUser"]>;
 
 /**
  * `user.deleteUser` 的“钩子片段”：仅生命周期回调。
@@ -63,10 +57,7 @@ type OrganizationHooks = NonNullable<OrganizationOptions["organizationHooks"]>;
  * 为新用户授予初始角色。并发幂等由 `user_role(user_id, role_id)` 唯一约束与原子 upsert
  * 保证，避免“先查再写”的竞态窗口。
  */
-function initializeNewUserRole(
-  userId: string,
-  configs: Record<string, string>
-): Promise<void> {
+function initializeNewUserRole(userId: string, configs: Record<string, string>): Promise<void> {
   return grantRoleForNewUser({ configs, userId });
 }
 
@@ -76,7 +67,7 @@ function initializeNewUserRole(
  */
 async function initializeNewUserCredits(
   createdUser: CreatedUser,
-  configs: Record<string, string>
+  configs: Record<string, string>,
 ): Promise<void> {
   await grantCreditsForNewUser({
     configs,
@@ -100,7 +91,7 @@ const runNewUserInitialization: UserCreateAfterHook = async (createdUser) => {
   } catch (error) {
     logger.error(
       `[auth] new user initialization: failed to read configs for user ${createdUser.id}`,
-      error
+      error,
     );
     return;
   }
@@ -114,7 +105,7 @@ const runNewUserInitialization: UserCreateAfterHook = async (createdUser) => {
     if (result.status === "rejected") {
       logger.error(
         `[auth] new user initialization step failed for user ${createdUser.id}`,
-        result.reason
+        result.reason,
       );
     }
   }

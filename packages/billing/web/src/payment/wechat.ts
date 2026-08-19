@@ -6,12 +6,7 @@
 // 解密通知内容。
 
 import { Buffer } from "node:buffer";
-import {
-  createDecipheriv,
-  createSign,
-  createVerify,
-  randomBytes,
-} from "node:crypto";
+import { createDecipheriv, createSign, createVerify, randomBytes } from "node:crypto";
 import {
   type CheckoutSession,
   type PaymentEvent,
@@ -77,11 +72,7 @@ export class WechatPayProvider implements PaymentProvider {
   /**
    * Native 下单：返回 `code_url` 及前端渲染二维码所需数据（R10.3）。
    */
-  async createPayment({
-    order,
-  }: {
-    order: PaymentOrder;
-  }): Promise<CheckoutSession> {
+  async createPayment({ order }: { order: PaymentOrder }): Promise<CheckoutSession> {
     if (!order.price) {
       throw new Error("price is required for WeChat payment");
     }
@@ -102,7 +93,7 @@ export class WechatPayProvider implements PaymentProvider {
     const result = (await this.request(
       "POST",
       "/v3/pay/transactions/native",
-      payload
+      payload,
     )) as WechatNativeResponse;
 
     if (!result.code_url) {
@@ -121,14 +112,10 @@ export class WechatPayProvider implements PaymentProvider {
     };
   }
 
-  async getPaymentSession({
-    sessionId,
-  }: {
-    sessionId: string;
-  }): Promise<PaymentSession> {
+  async getPaymentSession({ sessionId }: { sessionId: string }): Promise<PaymentSession> {
     const result = (await this.request(
       "GET",
-      `/v3/pay/transactions/out-trade-no/${sessionId}?mchid=${this.configs.mchId}`
+      `/v3/pay/transactions/out-trade-no/${sessionId}?mchid=${this.configs.mchId}`,
     )) as WechatTradeResult;
 
     if (!result.trade_state) {
@@ -155,10 +142,7 @@ export class WechatPayProvider implements PaymentProvider {
     // 拒绝过期/未来时间戳（±5 分钟窗口）。
     const tsNum = Number.parseInt(timestamp, 10);
     const nowSec = Math.floor(Date.now() / MS_PER_SECOND);
-    if (
-      !Number.isFinite(tsNum) ||
-      Math.abs(nowSec - tsNum) > TIMESTAMP_WINDOW_SECONDS
-    ) {
+    if (!Number.isFinite(tsNum) || Math.abs(nowSec - tsNum) > TIMESTAMP_WINDOW_SECONDS) {
       throw new Error("WeChat webhook timestamp outside acceptable window");
     }
 
@@ -173,9 +157,7 @@ export class WechatPayProvider implements PaymentProvider {
       throw new Error("Invalid webhook payload");
     }
 
-    const trade = JSON.parse(
-      this.decryptResource(notification.resource)
-    ) as WechatTradeResult;
+    const trade = JSON.parse(this.decryptResource(notification.resource)) as WechatTradeResult;
 
     const eventType =
       notification.event_type === "TRANSACTION.SUCCESS"
@@ -212,7 +194,7 @@ export class WechatPayProvider implements PaymentProvider {
   private async request(
     method: string,
     path: string,
-    body?: Record<string, unknown>
+    body?: Record<string, unknown>,
   ): Promise<unknown> {
     const timestamp = Math.floor(Date.now() / MS_PER_SECOND).toString();
     const nonce = randomBytes(NONCE_BYTES).toString("hex");
@@ -271,9 +253,7 @@ export class WechatPayProvider implements PaymentProvider {
       ? Buffer.from(resource.associated_data, "utf-8")
       : Buffer.alloc(0);
 
-    const authTag = ciphertext.subarray(
-      ciphertext.length - GCM_AUTH_TAG_LENGTH
-    );
+    const authTag = ciphertext.subarray(ciphertext.length - GCM_AUTH_TAG_LENGTH);
     const data = ciphertext.subarray(0, ciphertext.length - GCM_AUTH_TAG_LENGTH);
 
     const decipher = createDecipheriv("aes-256-gcm", key, iv);
@@ -282,17 +262,13 @@ export class WechatPayProvider implements PaymentProvider {
       decipher.setAAD(aad);
     }
 
-    return Buffer.concat([decipher.update(data), decipher.final()]).toString(
-      "utf-8"
-    );
+    return Buffer.concat([decipher.update(data), decipher.final()]).toString("utf-8");
   }
 }
 
 // ─── 纯辅助（模块级） ────────────────────────────────────────────────────────
 
-function parseAttach(
-  attach: string | undefined
-): Record<string, unknown> | undefined {
+function parseAttach(attach: string | undefined): Record<string, unknown> | undefined {
   if (!attach) {
     return undefined;
   }
@@ -332,8 +308,6 @@ function normalizePlatformCert(cert: string): string {
 }
 
 /** 依配置创建微信支付 provider。 */
-export function createWechatPayProvider(
-  configs: WechatPayConfigs
-): WechatPayProvider {
+export function createWechatPayProvider(configs: WechatPayConfigs): WechatPayProvider {
   return new WechatPayProvider(configs);
 }

@@ -37,9 +37,7 @@ export function Button(props: {
       {props.loading ? (
         <ActivityIndicator />
       ) : (
-        <Text className={`font-medium text-base ${LABEL_CLASS[variant]}`}>
-          {props.label}
-        </Text>
+        <Text className={`font-medium text-base ${LABEL_CLASS[variant]}`}>{props.label}</Text>
       )}
     </Pressable>
   );

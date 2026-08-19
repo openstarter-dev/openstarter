@@ -83,7 +83,7 @@ const buildTemplateElement = (
   template: EmailTemplate,
   locale: string,
   variables: Record<string, string>,
-  appName: string
+  appName: string,
 ): ReactElement => {
   const url = variables.url ?? "";
   switch (template) {
@@ -201,10 +201,7 @@ const createResendProvider = (apiKey: string, from: string): EmailProvider => ({
 
       if (!response.ok) {
         const detail = await readErrorDetail(response);
-        logger.error(
-          `[email] resend delivery failed (status ${response.status})`,
-          detail
-        );
+        logger.error(`[email] resend delivery failed (status ${response.status})`, detail);
         return { success: false, provider: "resend", error: detail };
       }
 
@@ -222,10 +219,7 @@ const createResendProvider = (apiKey: string, from: string): EmailProvider => ({
  * Cloudflare 邮件通道（备选）：经 MailChannels 事务发送 API。
  * 同样以失败结果 + 日志处理任何异常，不抛出。
  */
-const createCloudflareProvider = (
-  apiKey: string,
-  from: string
-): EmailProvider => ({
+const createCloudflareProvider = (apiKey: string, from: string): EmailProvider => ({
   name: "cloudflare",
   async sendEmail(message: EmailMessage): Promise<EmailSendResult> {
     try {
@@ -245,10 +239,7 @@ const createCloudflareProvider = (
 
       if (!response.ok) {
         const detail = await readErrorDetail(response);
-        logger.error(
-          `[email] cloudflare delivery failed (status ${response.status})`,
-          detail
-        );
+        logger.error(`[email] cloudflare delivery failed (status ${response.status})`, detail);
         return { success: false, provider: "cloudflare", error: detail };
       }
 
@@ -318,10 +309,7 @@ const buildManagerFromConfig = (configs: ConfigMap): EmailManager => {
   const resendApiKey = configs.resend_api_key ?? "";
   const resendFrom = configs.resend_sender_email ?? "";
   if (resendApiKey && resendFrom) {
-    manager.addProvider(
-      createResendProvider(resendApiKey, resendFrom),
-      selected === "resend"
-    );
+    manager.addProvider(createResendProvider(resendApiKey, resendFrom), selected === "resend");
   }
 
   const cloudflareToken = configs.cloudflare_email_api_token ?? "";
@@ -329,7 +317,7 @@ const buildManagerFromConfig = (configs: ConfigMap): EmailManager => {
   if (cloudflareToken && cloudflareFrom) {
     manager.addProvider(
       createCloudflareProvider(cloudflareToken, cloudflareFrom),
-      selected === "cloudflare"
+      selected === "cloudflare",
     );
   }
 
@@ -346,20 +334,13 @@ const buildManagerFromConfig = (configs: ConfigMap): EmailManager => {
  * - 以结构化 EmailSendResult 回传（R22.3）；
  * - 渠道未配置 / 渲染或投递失败：记日志并返回失败结果，**不抛未捕获异常**（R22.4）。
  */
-export const sendEmail = async (
-  params: SendEmailParams
-): Promise<EmailSendResult> => {
+export const sendEmail = async (params: SendEmailParams): Promise<EmailSendResult> => {
   try {
     const configs = await getAllConfigs();
     const appName = configs.app_name || DEFAULT_APP_NAME;
     const manager = buildManagerFromConfig(configs);
 
-    const element = buildTemplateElement(
-      params.template,
-      params.locale,
-      params.variables,
-      appName
-    );
+    const element = buildTemplateElement(params.template, params.locale, params.variables, appName);
     const html = await render(element);
     const subject = getSubject(params.template, params.locale);
 

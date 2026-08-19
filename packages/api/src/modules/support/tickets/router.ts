@@ -45,10 +45,7 @@ export const ticketsRouter = new Hono()
     const title = body.title.trim();
     const content = body.content.trim();
     if (title === "" || content === "") {
-      return c.json(
-        respErr("title and content are required"),
-        BAD_REQUEST_STATUS
-      );
+      return c.json(respErr("title and content are required"), BAD_REQUEST_STATUS);
     }
 
     const attachments = sanitizeAttachments(body.attachments);
@@ -84,34 +81,40 @@ export const ticketsRouter = new Hono()
     const messages = await getTicketMessages(id);
     return c.json(respData({ ticket: owned, messages }));
   })
-  .post("/:id/messages", requireAuth, zValidator("param", idParam), zValidator("json", replyBody), async (c) => {
-    const { id } = c.req.valid("param");
-    const body = c.req.valid("json");
-    const userId = c.get("userId");
+  .post(
+    "/:id/messages",
+    requireAuth,
+    zValidator("param", idParam),
+    zValidator("json", replyBody),
+    async (c) => {
+      const { id } = c.req.valid("param");
+      const body = c.req.valid("json");
+      const userId = c.get("userId");
 
-    const owned = await getTicketById(id);
-    if (!owned || owned.userId !== userId) {
-      return c.json(respErr("ticket not found"), NOT_FOUND_STATUS);
-    }
-    if (owned.status === TICKET_STATUS.CLOSED) {
-      return c.json(respErr("ticket is closed"), BAD_REQUEST_STATUS);
-    }
+      const owned = await getTicketById(id);
+      if (!owned || owned.userId !== userId) {
+        return c.json(respErr("ticket not found"), NOT_FOUND_STATUS);
+      }
+      if (owned.status === TICKET_STATUS.CLOSED) {
+        return c.json(respErr("ticket is closed"), BAD_REQUEST_STATUS);
+      }
 
-    const content = body.content.trim();
-    if (content === "") {
-      return c.json(respErr("content is required"), BAD_REQUEST_STATUS);
-    }
-    const attachments = sanitizeAttachments(body.attachments);
-    if (attachments === null) {
-      return c.json(respErr("invalid attachments"), BAD_REQUEST_STATUS);
-    }
+      const content = body.content.trim();
+      if (content === "") {
+        return c.json(respErr("content is required"), BAD_REQUEST_STATUS);
+      }
+      const attachments = sanitizeAttachments(body.attachments);
+      if (attachments === null) {
+        return c.json(respErr("invalid attachments"), BAD_REQUEST_STATUS);
+      }
 
-    const message = await addMessage({
-      ticketId: id,
-      userId,
-      role: TICKET_ROLE.USER,
-      content,
-      attachments,
-    });
-    return c.json(respData(message));
-  });
+      const message = await addMessage({
+        ticketId: id,
+        userId,
+        role: TICKET_ROLE.USER,
+        content,
+        attachments,
+      });
+      return c.json(respData(message));
+    },
+  );

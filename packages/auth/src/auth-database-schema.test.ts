@@ -34,14 +34,13 @@ it("matches the local Better Auth plugin runtime model fields", () => {
   const organizationSchema = organization({
     teams: organizationTeams,
   }).schema;
-  const withGeneratedId = (fields: Record<string, object>) =>
-    ["id", ...Object.keys(fields)].sort();
+  const withGeneratedId = (fields: Record<string, object>) => ["id", ...Object.keys(fields)].sort();
 
   expect(Object.keys(getTableColumns(authSchema.passkey)).sort()).toEqual(
-    withGeneratedId(passkeySchema.passkey.fields)
+    withGeneratedId(passkeySchema.passkey.fields),
   );
   expect(Object.keys(getTableColumns(authSchema.twoFactor)).sort()).toEqual(
-    withGeneratedId(twoFactorSchema.twoFactor.fields)
+    withGeneratedId(twoFactorSchema.twoFactor.fields),
   );
 
   const organizationModels = [
@@ -52,9 +51,7 @@ it("matches the local Better Auth plugin runtime model fields", () => {
     [authSchema.teamMember, organizationSchema.teamMember.fields],
   ] as const;
   for (const [table, fields] of organizationModels) {
-    expect(Object.keys(getTableColumns(table)).sort()).toEqual(
-      withGeneratedId(fields)
-    );
+    expect(Object.keys(getTableColumns(table)).sort()).toEqual(withGeneratedId(fields));
   }
 
   expect(Object.keys(getTableColumns(authSchema.user))).toEqual(
@@ -62,12 +59,12 @@ it("matches the local Better Auth plugin runtime model fields", () => {
       ...Object.keys(twoFactorSchema.user.fields),
       ...Object.keys(anonymousSchema.user.fields),
       ...Object.keys(adminSchema.user.fields),
-    ])
+    ]),
   );
   expect(Object.keys(getTableColumns(authSchema.session))).toEqual(
     expect.arrayContaining([
       ...Object.keys(adminSchema.session.fields),
       ...Object.keys(organizationSchema.session.fields),
-    ])
+    ]),
   );
 });

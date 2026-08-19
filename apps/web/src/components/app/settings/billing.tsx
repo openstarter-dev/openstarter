@@ -38,9 +38,7 @@ export function BillingPage() {
   const billingPortalMutation = useMutation({
     ...user.mutations.billingPortal(),
     onError: (err) => {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to open billing portal"
-      );
+      toast.error(err instanceof Error ? err.message : "Failed to open billing portal");
     },
     onSuccess: (data: { billingUrl?: string } | undefined) => {
       if (data?.billingUrl) {
@@ -54,9 +52,7 @@ export function BillingPage() {
       <Card>
         <CardHeader>
           <CardTitle>Plan</CardTitle>
-          <CardDescription>
-            Your current plan and subscription status.
-          </CardDescription>
+          <CardDescription>Your current plan and subscription status.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
@@ -85,15 +81,11 @@ export function BillingPage() {
             </div>
             <div className="rounded-lg border p-4">
               <p className="text-muted-foreground text-xs">Plan name</p>
-              <p className="font-medium text-sm">
-                {subscription?.planName ?? "—"}
-              </p>
+              <p className="font-medium text-sm">{subscription?.planName ?? "—"}</p>
             </div>
             <div className="rounded-lg border p-4">
               <p className="text-muted-foreground text-xs">Next billing date</p>
-              <p className="font-medium text-sm">
-                {formatDate(subscription?.nextBillingDate)}
-              </p>
+              <p className="font-medium text-sm">{formatDate(subscription?.nextBillingDate)}</p>
             </div>
           </div>
 
@@ -107,9 +99,7 @@ export function BillingPage() {
               onClick={() => billingPortalMutation.mutate()}
               variant="outline"
             >
-              {billingPortalMutation.isPending
-                ? "Opening..."
-                : "Manage on Stripe"}
+              {billingPortalMutation.isPending ? "Opening..." : "Manage on Stripe"}
             </Button>
           ) : null}
         </CardContent>

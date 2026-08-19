@@ -35,9 +35,7 @@ export function CreditsPage() {
       <Card>
         <CardHeader>
           <CardTitle>Credits</CardTitle>
-          <CardDescription>
-            Your available balance and transaction history.
-          </CardDescription>
+          <CardDescription>Your available balance and transaction history.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="rounded-lg border p-4">
@@ -48,9 +46,7 @@ export function CreditsPage() {
           </div>
 
           {creditsQuery.error ? (
-            <p className="text-destructive text-sm">
-              {(creditsQuery.error as Error).message}
-            </p>
+            <p className="text-destructive text-sm">{(creditsQuery.error as Error).message}</p>
           ) : null}
 
           {history.length > 0 ? (
@@ -69,19 +65,11 @@ export function CreditsPage() {
                   {history.map((item) => (
                     <TableRow key={item.id}>
                       <TableCell>
-                        <Badge
-                          variant={
-                            item.transactionType === "grant"
-                              ? "secondary"
-                              : "outline"
-                          }
-                        >
+                        <Badge variant={item.transactionType === "grant" ? "secondary" : "outline"}>
                           {item.transactionType}
                         </Badge>
                       </TableCell>
-                      <TableCell className="tabular-nums">
-                        {item.credits}
-                      </TableCell>
+                      <TableCell className="tabular-nums">{item.credits}</TableCell>
                       <TableCell className="text-muted-foreground tabular-nums">
                         {item.remainingCredits}
                       </TableCell>
@@ -99,9 +87,7 @@ export function CreditsPage() {
           ) : null}
 
           {history.length === 0 && !creditsQuery.isPending ? (
-            <p className="text-muted-foreground text-sm">
-              No credit transactions yet.
-            </p>
+            <p className="text-muted-foreground text-sm">No credit transactions yet.</p>
           ) : null}
         </CardContent>
       </Card>

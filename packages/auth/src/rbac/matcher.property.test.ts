@@ -15,8 +15,7 @@ const unrelatedResourcePairArbitrary = fc
   .tuple(resourceArbitrary, resourceArbitrary)
   .filter(
     ([grantedResource, requiredResource]) =>
-      requiredResource !== grantedResource &&
-      !requiredResource.startsWith(`${grantedResource}.`)
+      requiredResource !== grantedResource && !requiredResource.startsWith(`${grantedResource}.`),
   );
 
 describe("platform RBAC wildcard matcher properties", () => {
@@ -30,12 +29,10 @@ describe("platform RBAC wildcard matcher properties", () => {
           const suffix = [...descendants, action].join(".");
           const requiredPermission = `${resource}.${suffix}`;
 
-          expect(matchPermission(requiredPermission, [`${resource}.*`])).toBe(
-            true
-          );
-        }
+          expect(matchPermission(requiredPermission, [`${resource}.*`])).toBe(true);
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -47,12 +44,10 @@ describe("platform RBAC wildcard matcher properties", () => {
         ([grantedResource, requiredResource], action) => {
           const requiredPermission = `${requiredResource}.${action}`;
 
-          expect(
-            matchPermission(requiredPermission, [`${grantedResource}.*`])
-          ).toBe(false);
-        }
+          expect(matchPermission(requiredPermission, [`${grantedResource}.*`])).toBe(false);
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 
@@ -61,7 +56,7 @@ describe("platform RBAC wildcard matcher properties", () => {
       fc.property(permissionCodeArbitrary, (requiredPermission) => {
         expect(matchPermission(requiredPermission, ["*"])).toBe(true);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
   });
 });

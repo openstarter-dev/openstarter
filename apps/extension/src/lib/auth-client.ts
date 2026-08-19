@@ -18,16 +18,12 @@ import {
 import type { CookieReader } from "./session";
 import { readSessionToken } from "./session";
 
-export function createExtensionAuthClient(
-  origin: string,
-  cookieReader: CookieReader
-) {
+export function createExtensionAuthClient(origin: string, cookieReader: CookieReader) {
   return createAuthClient({
     baseURL: origin,
     fetchOptions: {
       auth: {
-        token: () =>
-          readSessionToken(origin, cookieReader).then((t) => t ?? ""),
+        token: () => readSessionToken(origin, cookieReader).then((t) => t ?? ""),
         type: "Bearer",
       },
     },

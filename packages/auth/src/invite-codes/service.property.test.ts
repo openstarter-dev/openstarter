@@ -1,21 +1,8 @@
-import {
-  inviteCode,
-  subscription,
-  user,
-  userInvite,
-} from "@openstarter/db/schema";
+import { inviteCode, subscription, user, userInvite } from "@openstarter/db/schema";
 import type { Database } from "@openstarter/db/server";
 import { eq } from "drizzle-orm";
 import fc from "fast-check";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   closeAuthTestDatabase,
@@ -87,15 +74,13 @@ vi.mock("@openstarter/db/env", () => ({
   env: new Proxy(
     {},
     {
-      get: (_target, property) =>
-        property === "DATABASE_PROVIDER" ? state.provider : undefined,
-    }
+      get: (_target, property) => (property === "DATABASE_PROVIDER" ? state.provider : undefined),
+    },
   ),
 }));
 
 vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@openstarter/db/server")>();
+  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
   return {
     ...actual,
     db: () => {
@@ -186,40 +171,33 @@ describe("invite code properties", () => {
             });
             expect(row.code).toMatch(CODE_PATTERN);
           }
-        }
+        },
       ),
-      PROPERTY_OPTIONS
+      PROPERTY_OPTIONS,
     );
   });
 
   it("P16 generated codes have fixed charset and unbiased symbol mapping", () => {
     fc.assert(
-      fc.property(
-        fc.integer({ max: CODE_ALPHABET.length - 1, min: 0 }),
-        (offset) => {
-          state.codeByte = offset;
-          state.uniformCodeBytes = true;
-          const codes = Array.from({ length: CODE_ALPHABET.length }, () =>
-            generateCode()
-          );
-          const frequencies = new Map(
-            [...CODE_ALPHABET].map((symbol) => [symbol, 0])
-          );
+      fc.property(fc.integer({ max: CODE_ALPHABET.length - 1, min: 0 }), (offset) => {
+        state.codeByte = offset;
+        state.uniformCodeBytes = true;
+        const codes = Array.from({ length: CODE_ALPHABET.length }, () => generateCode());
+        const frequencies = new Map([...CODE_ALPHABET].map((symbol) => [symbol, 0]));
 
-          for (const code of codes) {
-            expect(code).toHaveLength(12);
-            expect(code).toMatch(CODE_PATTERN);
-            for (const symbol of code) {
-              frequencies.set(symbol, (frequencies.get(symbol) ?? 0) + 1);
-            }
+        for (const code of codes) {
+          expect(code).toHaveLength(12);
+          expect(code).toMatch(CODE_PATTERN);
+          for (const symbol of code) {
+            frequencies.set(symbol, (frequencies.get(symbol) ?? 0) + 1);
           }
-
-          expect([...frequencies.values()]).toEqual(
-            Array.from({ length: CODE_ALPHABET.length }, () => 12)
-          );
         }
-      ),
-      PROPERTY_OPTIONS
+
+        expect([...frequencies.values()]).toEqual(
+          Array.from({ length: CODE_ALPHABET.length }, () => 12),
+        );
+      }),
+      PROPERTY_OPTIONS,
     );
   });
 
@@ -248,62 +226,59 @@ describe("invite code properties", () => {
           throw new Error("Expected redemption to be stored");
         }
         const expectedTrialEnd = new Date(
-          storedRedemption.activatedAt.getTime() + trialDays * MS_PER_DAY
+          storedRedemption.activatedAt.getTime() + trialDays * MS_PER_DAY,
         );
 
         expect(result).toEqual({ ok: true, trialEndsAt: expectedTrialEnd });
         expect(storedCode?.usedCount).toBe(1);
         expect(storedRedemption.trialEndsAt).toEqual(expectedTrialEnd);
       }),
-      PROPERTY_OPTIONS
+      PROPERTY_OPTIONS,
     );
   });
 
   it("P18 invalid, expired, and exhausted rejection never changes used counts", async () => {
     await fc.assert(
-      fc.asyncProperty(
-        fc.constantFrom("invalid", "expired", "exhausted"),
-        async (scenario) => {
-          if (!state.database) {
-            throw new Error("Test database is not initialized");
-          }
-          state.caseSequence += 1;
-          const userId = `user-${state.caseSequence}`;
-          const code = codeForRun(state.caseSequence);
-          await insertUser(userId);
-
-          if (scenario === "expired") {
-            await createInviteCode({ code, expiresAt: FIXED_NOW });
-          } else if (scenario === "exhausted") {
-            const row = await createInviteCode({ code, maxUses: 1 });
-            if (!row) {
-              throw new Error("Expected invite code to be created");
-            }
-            await state.database
-              .update(inviteCode)
-              .set({ usedCount: 1 })
-              .where(eq(inviteCode.id, row.id));
-          }
-
-          const countsBefore = (await state.database.select().from(inviteCode))
-            .map((row) => [row.id, row.usedCount] as const)
-            .sort(([leftId], [rightId]) => leftId.localeCompare(rightId));
-          const result = await redeemInviteCode({ code, userId });
-          const countsAfter = (await state.database.select().from(inviteCode))
-            .map((row) => [row.id, row.usedCount] as const)
-            .sort(([leftId], [rightId]) => leftId.localeCompare(rightId));
-          const redemptions = await state.database
-            .select()
-            .from(userInvite)
-            .where(eq(userInvite.userId, userId));
-
-          expect(result.ok).toBe(false);
-          expect(result.error).toMatch(REJECTION_ERROR_PATTERN);
-          expect(countsAfter).toEqual(countsBefore);
-          expect(redemptions).toHaveLength(0);
+      fc.asyncProperty(fc.constantFrom("invalid", "expired", "exhausted"), async (scenario) => {
+        if (!state.database) {
+          throw new Error("Test database is not initialized");
         }
-      ),
-      PROPERTY_OPTIONS
+        state.caseSequence += 1;
+        const userId = `user-${state.caseSequence}`;
+        const code = codeForRun(state.caseSequence);
+        await insertUser(userId);
+
+        if (scenario === "expired") {
+          await createInviteCode({ code, expiresAt: FIXED_NOW });
+        } else if (scenario === "exhausted") {
+          const row = await createInviteCode({ code, maxUses: 1 });
+          if (!row) {
+            throw new Error("Expected invite code to be created");
+          }
+          await state.database
+            .update(inviteCode)
+            .set({ usedCount: 1 })
+            .where(eq(inviteCode.id, row.id));
+        }
+
+        const countsBefore = (await state.database.select().from(inviteCode))
+          .map((row) => [row.id, row.usedCount] as const)
+          .sort(([leftId], [rightId]) => leftId.localeCompare(rightId));
+        const result = await redeemInviteCode({ code, userId });
+        const countsAfter = (await state.database.select().from(inviteCode))
+          .map((row) => [row.id, row.usedCount] as const)
+          .sort(([leftId], [rightId]) => leftId.localeCompare(rightId));
+        const redemptions = await state.database
+          .select()
+          .from(userInvite)
+          .where(eq(userInvite.userId, userId));
+
+        expect(result.ok).toBe(false);
+        expect(result.error).toMatch(REJECTION_ERROR_PATTERN);
+        expect(countsAfter).toEqual(countsBefore);
+        expect(redemptions).toHaveLength(0);
+      }),
+      PROPERTY_OPTIONS,
     );
   });
 
@@ -334,18 +309,14 @@ describe("invite code properties", () => {
               code: firstCode,
               userId,
             });
-            const countsAfterFirst = (
-              await state.database.select().from(inviteCode)
-            )
+            const countsAfterFirst = (await state.database.select().from(inviteCode))
               .map((row) => [row.id, row.usedCount] as const)
               .sort(([leftId], [rightId]) => leftId.localeCompare(rightId));
             const repeatedResult = await redeemInviteCode({
               code: useSecondCode ? secondCode : firstCode,
               userId,
             });
-            const countsAfterRepeat = (
-              await state.database.select().from(inviteCode)
-            )
+            const countsAfterRepeat = (await state.database.select().from(inviteCode))
               .map((row) => [row.id, row.usedCount] as const)
               .sort(([leftId], [rightId]) => leftId.localeCompare(rightId));
             const redemptions = await state.database
@@ -357,12 +328,12 @@ describe("invite code properties", () => {
             expect(repeatedResult).toEqual(firstResult);
             expect(countsAfterRepeat).toEqual(countsAfterFirst);
             expect(redemptions).toHaveLength(1);
-          }
+          },
         ),
-        PROPERTY_OPTIONS
+        PROPERTY_OPTIONS,
       );
     },
-    PROPERTY_TEST_TIMEOUT_MS
+    PROPERTY_TEST_TIMEOUT_MS,
   );
 
   it("P20 active subscription wins over any trial, expired, or absent invite state", async () => {
@@ -403,9 +374,7 @@ describe("invite code properties", () => {
               activatedAt: FIXED_NOW,
               id: `redemption-${caseId}`,
               inviteCodeId: row.id,
-              trialEndsAt: new Date(
-                FIXED_NOW.getTime() + direction * offsetDays * MS_PER_DAY
-              ),
+              trialEndsAt: new Date(FIXED_NOW.getTime() + direction * offsetDays * MS_PER_DAY),
               userId,
             });
           }
@@ -419,9 +388,9 @@ describe("invite code properties", () => {
           } else {
             expect(result.trialEndsAt).toBeUndefined();
           }
-        }
+        },
       ),
-      PROPERTY_OPTIONS
+      PROPERTY_OPTIONS,
     );
   });
 });
@@ -449,15 +418,11 @@ describe("invite code concurrency", () => {
       .from(userInvite)
       .where(eq(userInvite.userId, userId));
 
-    expect(
-      settledResults.every(
-        (result) => result.status === "fulfilled" && result.value.ok
-      )
-    ).toBe(true);
-    expect(redemptions).toHaveLength(1);
-    expect(storedCodes.reduce((total, row) => total + row.usedCount, 0)).toBe(
-      1
+    expect(settledResults.every((result) => result.status === "fulfilled" && result.value.ok)).toBe(
+      true,
     );
+    expect(redemptions).toHaveLength(1);
+    expect(storedCodes.reduce((total, row) => total + row.usedCount, 0)).toBe(1);
   });
 
   it("allows only one user to claim the final use", async () => {
@@ -470,7 +435,7 @@ describe("invite code concurrency", () => {
     await createInviteCode({ code, maxUses: 1 });
 
     const settledResults = await Promise.allSettled(
-      userIds.map((userId) => redeemInviteCode({ code, userId }))
+      userIds.map((userId) => redeemInviteCode({ code, userId })),
     );
     const fulfilledResults = settledResults
       .filter((result) => result.status === "fulfilled")

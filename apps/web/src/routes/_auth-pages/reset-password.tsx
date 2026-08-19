@@ -19,9 +19,7 @@ import { authClient } from "@/lib/auth-client";
 export const Route = createFileRoute("/_auth-pages/reset-password")({
   component: ResetPasswordPage,
   // 令牌与错误标记来自邮件重置链接的 query（R6.2/R6.3）。
-  validateSearch: (
-    search: Record<string, unknown>
-  ): { token?: string; error?: string } => ({
+  validateSearch: (search: Record<string, unknown>): { token?: string; error?: string } => ({
     error: typeof search.error === "string" ? search.error : undefined,
     token: typeof search.token === "string" ? search.token : undefined,
   }),
@@ -71,9 +69,7 @@ function ResetPasswordPage() {
     <Card>
       <CardHeader>
         <CardTitle>Reset password</CardTitle>
-        {!tokenInvalid && (
-          <CardDescription>Choose a new password.</CardDescription>
-        )}
+        {!tokenInvalid && <CardDescription>Choose a new password.</CardDescription>}
       </CardHeader>
       <CardContent>
         {tokenInvalid ? (
@@ -144,11 +140,7 @@ function ResetPasswordPage() {
             </form.Field>
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
-                <Button
-                  className="w-full"
-                  disabled={isSubmitting}
-                  type="submit"
-                >
+                <Button className="w-full" disabled={isSubmitting} type="submit">
                   {isSubmitting ? "Updating..." : "Update password"}
                 </Button>
               )}

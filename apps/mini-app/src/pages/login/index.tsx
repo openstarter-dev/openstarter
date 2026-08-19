@@ -1,30 +1,30 @@
 // apps/mini-app/src/pages/login/index.tsx
 // 登录页（用 useAuth hook）
 
-import { useState } from 'react';
-import { View, Text } from '@tarojs/components';
-import Taro from '@tarojs/taro';
-import { useAuth } from '@/hooks/use-auth';
-import Input from '@/components/Input';
-import Button from '@/components/Button';
-import Layout from '@/components/Layout';
-import './index.scss';
+import { useState } from "react";
+import { View, Text } from "@tarojs/components";
+import Taro from "@tarojs/taro";
+import { useAuth } from "@/hooks/use-auth";
+import Input from "@/components/Input";
+import Button from "@/components/Button";
+import Layout from "@/components/Layout";
+import "./index.scss";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { login } = useAuth();
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      setError('Please enter email and password');
+      setError("Please enter email and password");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
 
     const result = await login(email.trim(), password);
 
@@ -34,7 +34,7 @@ export default function LoginPage() {
       return;
     }
 
-    Taro.reLaunch({ url: '/pages/index/index' });
+    Taro.reLaunch({ url: "/pages/index/index" });
   };
 
   return (
@@ -62,12 +62,7 @@ export default function LoginPage() {
 
         {error && <Text className="login-page__error">{error}</Text>}
 
-        <Button
-          variant="primary"
-          fullWidth
-          loading={loading}
-          onClick={handleLogin}
-        >
+        <Button variant="primary" fullWidth loading={loading} onClick={handleLogin}>
           Sign In
         </Button>
       </View>

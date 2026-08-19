@@ -13,15 +13,7 @@ import { aiTask, credit } from "@openstarter/db/schema";
 import { type Database, db } from "@openstarter/db/server";
 import { sql } from "drizzle-orm";
 import fc from "fast-check";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { AITaskStatus } from "../ai";
 import {
   closeApiTestDatabase,
@@ -29,20 +21,14 @@ import {
   insertUser,
   resetApiTestDatabase,
 } from "../../test/api-test-database";
-import {
-  createTask,
-  getTasks,
-  InsufficientCreditsError,
-  updateTask,
-} from "./service";
+import { createTask, getTasks, InsufficientCreditsError, updateTask } from "./service";
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
 }));
 
 vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@openstarter/db/server")>();
+  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
   return {
     ...actual,
     db: () => {
@@ -85,12 +71,10 @@ const sumRemainingCredits = async (userId: string): Promise<number> => {
     .select({ value: sql<number>`coalesce(sum(remaining_credits), 0)` })
     .from(credit)
     .where(
-      sql`user_id = ${userId} and transaction_type = 'grant' and status = 'active' and remaining_credits > 0`
+      sql`user_id = ${userId} and transaction_type = 'grant' and status = 'active' and remaining_credits > 0`,
     );
   const value = rows[0]?.value;
-  return typeof value === "number"
-    ? value
-    : Number.parseInt(String(value ?? "0"), 10);
+  return typeof value === "number" ? value : Number.parseInt(String(value ?? "0"), 10);
 };
 
 const PROVIDERS = ["replicate", "fal", "openai"] as const;
@@ -182,9 +166,9 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
           expect(balanceAfter).toBe(balanceBefore - costCredits);
 
           await resetApiTestDatabase(db());
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   });
 
@@ -223,7 +207,7 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
               prompt: "test-prompt",
               provider,
               userId,
-            })
+            }),
           ).rejects.toBeInstanceOf(InsufficientCreditsError);
 
           const taskRows = await db().select().from(aiTask);
@@ -233,9 +217,9 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
           expect(balanceAfter).toBe(balanceBefore);
 
           await resetApiTestDatabase(db());
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   });
 
@@ -291,9 +275,9 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
           expect(taskRows[0]?.creditId).toBe(consumedCreditId);
 
           await resetApiTestDatabase(db());
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   });
 
@@ -356,9 +340,9 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
           expect(taskRows[0]?.creditId).toBe(consumedCreditId);
 
           await resetApiTestDatabase(db());
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   });
 
@@ -369,10 +353,7 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
         fc.integer({ max: 4, min: 1 }),
         fc.integer({ max: 12, min: 0 }),
         async (userCount, tasksPerUser) => {
-          const userIds = Array.from(
-            { length: userCount },
-            (_, index) => `owner-${index}`
-          );
+          const userIds = Array.from({ length: userCount }, (_, index) => `owner-${index}`);
           await userIds.reduce(async (previous, userId) => {
             await previous;
             await insertUser(db(), {
@@ -418,13 +399,10 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
             });
           }
 
-          const taskJobs = Array.from(
-            { length: userCount * tasksPerUser },
-            (_, index) => ({
-              taskIndex: index % tasksPerUser,
-              userIndex: Math.floor(index / tasksPerUser),
-            })
-          );
+          const taskJobs = Array.from({ length: userCount * tasksPerUser }, (_, index) => ({
+            taskIndex: index % tasksPerUser,
+            userIndex: Math.floor(index / tasksPerUser),
+          }));
           await taskJobs.reduce(async (previous, { taskIndex, userIndex }) => {
             await previous;
             const userId = userIds[userIndex] as string;
@@ -439,9 +417,7 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
               mediaType: chosenMedia,
               model: "test-model",
               prompt: `t-${taskIndex}`,
-              provider: PROVIDERS[
-                taskIndex % PROVIDERS.length
-              ] as (typeof PROVIDERS)[number],
+              provider: PROVIDERS[taskIndex % PROVIDERS.length] as (typeof PROVIDERS)[number],
               userId,
             });
             if (targetStatus !== AITaskStatus.PENDING) {
@@ -455,10 +431,8 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
               total: number;
             };
             profile.total += 1;
-            profile.perMedia[chosenMedia] =
-              (profile.perMedia[chosenMedia] ?? 0) + 1;
-            profile.perStatus[targetStatus] =
-              (profile.perStatus[targetStatus] ?? 0) + 1;
+            profile.perMedia[chosenMedia] = (profile.perMedia[chosenMedia] ?? 0) + 1;
+            profile.perStatus[targetStatus] = (profile.perStatus[targetStatus] ?? 0) + 1;
             profile.perCombo[`${chosenMedia}|${targetStatus}`] =
               (profile.perCombo[`${chosenMedia}|${targetStatus}`] ?? 0) + 1;
           }, Promise.resolve());
@@ -475,22 +449,16 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
             const listAll = await getTasks({ userId });
             expect(listAll.total).toBe(profile.total);
             expect(listAll.items).toHaveLength(profile.total);
-            expect(
-              listAll.items
-                .map((item) => item.userId)
-                .every((id) => id === userId)
-            ).toBe(true);
+            expect(listAll.items.map((item) => item.userId).every((id) => id === userId)).toBe(
+              true,
+            );
 
             await MEDIA_TYPES.reduce(async (prevMedia, media) => {
               await prevMedia;
               const list = await getTasks({ mediaType: media, userId });
               expect(list.total).toBe(profile.perMedia[media]);
               expect(list.items).toHaveLength(profile.perMedia[media] ?? 0);
-              expect(
-                list.items
-                  .map((item) => item.mediaType)
-                  .every((m) => m === media)
-              ).toBe(true);
+              expect(list.items.map((item) => item.mediaType).every((m) => m === media)).toBe(true);
             }, Promise.resolve());
 
             await TASK_STATUSES.reduce(async (prevStatus, status) => {
@@ -498,9 +466,7 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
               const list = await getTasks({ status, userId });
               expect(list.total).toBe(profile.perStatus[status]);
               expect(list.items).toHaveLength(profile.perStatus[status] ?? 0);
-              expect(
-                list.items.map((item) => item.status).every((s) => s === status)
-              ).toBe(true);
+              expect(list.items.map((item) => item.status).every((s) => s === status)).toBe(true);
             }, Promise.resolve());
 
             await MEDIA_TYPES.reduce(async (prevMedia, media) => {
@@ -512,26 +478,22 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
                   status,
                   userId,
                 });
-                const expectedCount =
-                  profile.perCombo[`${media}|${status}`] ?? 0;
+                const expectedCount = profile.perCombo[`${media}|${status}`] ?? 0;
                 expect(list.total).toBe(expectedCount);
                 expect(list.items).toHaveLength(expectedCount);
                 expect(
                   list.items
-                    .map(
-                      (item) =>
-                        item.mediaType === media && item.status === status
-                    )
-                    .every(Boolean)
+                    .map((item) => item.mediaType === media && item.status === status)
+                    .every(Boolean),
                 ).toBe(true);
               }, Promise.resolve());
             }, Promise.resolve());
           }, Promise.resolve());
 
           await resetApiTestDatabase(db());
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   }, 30_000);
 });

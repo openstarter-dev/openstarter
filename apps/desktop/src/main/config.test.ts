@@ -18,17 +18,11 @@ describe("isUpdaterDisabled", () => {
   });
 
   it("is true when the env var is 'true'", () => {
-    expect(
-      isUpdaterDisabled({ OPENSTARTER_DESKTOP_DISABLE_UPDATER: "true" })
-    ).toBe(true);
+    expect(isUpdaterDisabled({ OPENSTARTER_DESKTOP_DISABLE_UPDATER: "true" })).toBe(true);
   });
 
   it("is false for any other value", () => {
-    expect(
-      isUpdaterDisabled({ OPENSTARTER_DESKTOP_DISABLE_UPDATER: "false" })
-    ).toBe(false);
-    expect(
-      isUpdaterDisabled({ OPENSTARTER_DESKTOP_DISABLE_UPDATER: "1" })
-    ).toBe(false);
+    expect(isUpdaterDisabled({ OPENSTARTER_DESKTOP_DISABLE_UPDATER: "false" })).toBe(false);
+    expect(isUpdaterDisabled({ OPENSTARTER_DESKTOP_DISABLE_UPDATER: "1" })).toBe(false);
   });
 });

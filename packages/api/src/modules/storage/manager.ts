@@ -73,9 +73,7 @@ export class StorageManager {
   }
 
   /** 用默认渠道从远端 URL 拉取后转存。 */
-  downloadAndUpload(
-    options: StorageDownloadUploadOptions
-  ): Promise<StorageUploadResult> {
+  downloadAndUpload(options: StorageDownloadUploadOptions): Promise<StorageUploadResult> {
     return this.ensureDefaultProvider().downloadAndUpload(options);
   }
 
@@ -101,23 +99,18 @@ let hasCache = false;
 function isS3Configured(configs: Record<string, string>): boolean {
   return Boolean(
     configs.storage_endpoint &&
-      configs.storage_access_key &&
-      configs.storage_secret_key &&
-      configs.storage_bucket
+    configs.storage_access_key &&
+    configs.storage_secret_key &&
+    configs.storage_bucket,
   );
 }
 
 /** Cloudflare R2 渠道是否凭证齐备（访问密钥 + 桶，对齐 ShipAny 的判定）。 */
 function isR2Configured(configs: Record<string, string>): boolean {
-  return Boolean(
-    configs.r2_access_key && configs.r2_secret_key && configs.r2_bucket_name
-  );
+  return Boolean(configs.r2_access_key && configs.r2_secret_key && configs.r2_bucket_name);
 }
 
-function assembleS3(
-  manager: StorageManager,
-  configs: Record<string, string>
-): void {
+function assembleS3(manager: StorageManager, configs: Record<string, string>): void {
   if (!isS3Configured(configs)) {
     return;
   }
@@ -129,14 +122,11 @@ function assembleS3(
       secretAccessKey: configs.storage_secret_key || "",
       bucket: configs.storage_bucket || "",
       publicDomain: configs.storage_public_domain || undefined,
-    })
+    }),
   );
 }
 
-function assembleR2(
-  manager: StorageManager,
-  configs: Record<string, string>
-): void {
+function assembleR2(manager: StorageManager, configs: Record<string, string>): void {
   if (!isR2Configured(configs)) {
     return;
   }
@@ -150,7 +140,7 @@ function assembleR2(
       region: DEFAULT_R2_REGION,
       endpoint: configs.r2_endpoint || undefined,
       publicDomain: configs.r2_domain || undefined,
-    })
+    }),
   );
 }
 

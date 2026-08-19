@@ -26,14 +26,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("api:request", request),
 
   // 文件系统
-  openFile: (
-    options?: { filters?: { name: string; extensions: string[] }[] }
-  ) => ipcRenderer.invoke("desktop:open-file", options),
+  openFile: (options?: { filters?: { name: string; extensions: string[] }[] }) =>
+    ipcRenderer.invoke("desktop:open-file", options),
   saveFile: (data: string, options?: { defaultName?: string }) =>
     ipcRenderer.invoke("desktop:save-file", data, options),
   readFile: (path: string) => ipcRenderer.invoke("desktop:read-file", path),
-  writeFile: (path: string, data: string) =>
-    ipcRenderer.invoke("desktop:write-file", path, data),
+  writeFile: (path: string, data: string) => ipcRenderer.invoke("desktop:write-file", path, data),
 
   // 设置
   getSettings: () => ipcRenderer.invoke("desktop:get-settings"),
@@ -46,10 +44,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   // 快捷键事件监听
   onShortcut: (callback: (action: string) => void) => {
-    const handler = (
-      _event: Electron.IpcRendererEvent,
-      action: string
-    ) => {
+    const handler = (_event: Electron.IpcRendererEvent, action: string) => {
       callback(action);
     };
     ipcRenderer.on("shortcut-triggered", handler);

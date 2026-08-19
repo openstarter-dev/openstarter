@@ -10,15 +10,22 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { sql } from "drizzle-orm";
 import type { Database } from "@openstarter/db";
 import { createDb } from "@openstarter/db";
-import { createChat, getChat, getUserChats, getChatMessages, createMessage, getMessageHistory, deleteChat } from "../service";
+import {
+  createChat,
+  getChat,
+  getUserChats,
+  getChatMessages,
+  createMessage,
+  getMessageHistory,
+  deleteChat,
+} from "../service";
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
 }));
 
 vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@openstarter/db/server")>();
+  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
   return {
     ...actual,
     db: () => {

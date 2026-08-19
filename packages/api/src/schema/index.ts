@@ -4,8 +4,4 @@
 // optionally live here too, but the primary goal is to eliminate duplication
 // of pagination, id param, and other common patterns across routers.
 
-export {
-  idParam,
-  paginationSchema,
-  createPaginationSchema,
-} from "./shared";
+export { idParam, paginationSchema, createPaginationSchema } from "./shared";

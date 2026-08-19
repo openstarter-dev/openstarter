@@ -31,19 +31,14 @@ const { config: loadDotenv } = await import(dotenvModulePath);
 // dotenv v17 的 config() 只在返回对象里给 parsed，不会把键展开到返回对象顶层，
 // 但会把解析到的键写入 process.env（override 默认 false，不覆盖已存在的）。
 // 这里统一从 parsed 取显式来源，避免依赖 process.env 的副作用顺序。
-const mobileParsed =
-  loadDotenv({ path: resolve(mobileDir, ".env"), quiet: true })?.parsed ?? {};
-const rootParsed =
-  loadDotenv({ path: resolve(monorepoRoot, ".env"), quiet: true })?.parsed ??
-  {};
+const mobileParsed = loadDotenv({ path: resolve(mobileDir, ".env"), quiet: true })?.parsed ?? {};
+const rootParsed = loadDotenv({ path: resolve(monorepoRoot, ".env"), quiet: true })?.parsed ?? {};
 
 // process.argv 形如 [nodeBin, /path/to/env.mjs, ...透传参数]，前两项不是用户传入的子命令，
 // 必须 drop 两位。用 [, , ...args] 而非 [, ...args]——后者会误把 env.mjs 自身当子命令 spawn。
 const [, , ...args] = process.argv;
 if (args.length === 0) {
-  console.error(
-    "[mobile/env.mjs] 需要透传子命令，例如：node scripts/env.mjs expo start"
-  );
+  console.error("[mobile/env.mjs] 需要透传子命令，例如：node scripts/env.mjs expo start");
   process.exitCode = 2;
 }
 
@@ -55,7 +50,7 @@ const fromRoot = rootParsed.OPENSTARTER_API_URL;
 const resolved = inherited ?? fromMobile ?? fromRoot;
 if (!resolved) {
   console.error(
-    "[mobile/env.mjs] EXPO_PUBLIC_API_URL 仍为空：既未在 process.env，也未在 apps/mobile/.env 或根 .env 找到。"
+    "[mobile/env.mjs] EXPO_PUBLIC_API_URL 仍为空：既未在 process.env，也未在 apps/mobile/.env 或根 .env 找到。",
   );
   process.exit(1);
 }

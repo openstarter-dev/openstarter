@@ -8,25 +8,27 @@ const fixedPrefixArbitrary = fc.stringMatching(/^[a-z][a-z0-9_-]{0,7}$/);
 const SNOWFLAKE_ID_REGEX = /^\d{17,22}$/;
 
 describe("identifier uniqueness and format (Property 4)", () => {
-  it.each(
-    NON_EMPTY_BATCHES
-  )("P4 UUIDs generated in a batch of size %d are pairwise distinct", (size) => {
-    const ids = new Set<string>();
-    for (let index = 0; index < size; index += 1) {
-      ids.add(getUuid());
-    }
-    expect(ids.size).toBe(size);
-  });
+  it.each(NON_EMPTY_BATCHES)(
+    "P4 UUIDs generated in a batch of size %d are pairwise distinct",
+    (size) => {
+      const ids = new Set<string>();
+      for (let index = 0; index < size; index += 1) {
+        ids.add(getUuid());
+      }
+      expect(ids.size).toBe(size);
+    },
+  );
 
-  it.each(
-    NON_EMPTY_BATCHES
-  )("P4 unique sequences generated in a batch of size %d are pairwise distinct", (size) => {
-    const ids = new Set<string>();
-    for (let index = 0; index < size; index += 1) {
-      ids.add(getUniSeq("tst"));
-    }
-    expect(ids.size).toBe(size);
-  });
+  it.each(NON_EMPTY_BATCHES)(
+    "P4 unique sequences generated in a batch of size %d are pairwise distinct",
+    (size) => {
+      const ids = new Set<string>();
+      for (let index = 0; index < size; index += 1) {
+        ids.add(getUniSeq("tst"));
+      }
+      expect(ids.size).toBe(size);
+    },
+  );
 
   it("P4 snowflake ids have the expected numeric format", () => {
     const id = getSnowId();
@@ -51,7 +53,7 @@ describe("identifier uniqueness and format (Property 4)", () => {
         expect(sequence.length).toBeGreaterThan(prefix.length);
         ids.add(sequence);
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     );
     expect(ids.size).toBe(100);
   });

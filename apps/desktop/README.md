@@ -47,6 +47,7 @@ GH_TOKEN=<your-token> pnpm release:desktop
 ```
 
 发版前必须：
+
 1. 更新 `apps/desktop/package.json` 里的 `version`（electron-builder 和
    electron-updater 都从这里读版本号做比对，不会跟随根 `package.json`）。
 2. 确认 `apps/desktop/electron-builder.yml` 里的 `publish.owner` / `publish.repo`
@@ -56,14 +57,14 @@ GH_TOKEN=<your-token> pnpm release:desktop
 
 把这个模板变成你自己的产品前，至少要改：
 
-| 位置 | 字段 | 说明 |
-|---|---|---|
-| `electron-builder.yml` | `appId` | 改成你自己的反向域名标识，如 `com.yourcompany.yourapp` |
-| `electron-builder.yml` | `productName` | 窗口标题、安装包文件名里显示的产品名 |
-| `electron-builder.yml` | `publish.owner` / `publish.repo` | 你的 GitHub 仓库，自动更新依赖这个 |
-| `build-resources/icon.png` | — | 换成你自己的 1024×1024 图标，当前是占位图 |
-| `package.json` | `version` | 每次发版前手动递增 |
-| `.env` | `OPENSTARTER_API_URL` | 你部署好的站点地址（构建时注入，见上方"构建"一节）|
+| 位置                       | 字段                             | 说明                                                   |
+| -------------------------- | -------------------------------- | ------------------------------------------------------ |
+| `electron-builder.yml`     | `appId`                          | 改成你自己的反向域名标识，如 `com.yourcompany.yourapp` |
+| `electron-builder.yml`     | `productName`                    | 窗口标题、安装包文件名里显示的产品名                   |
+| `electron-builder.yml`     | `publish.owner` / `publish.repo` | 你的 GitHub 仓库，自动更新依赖这个                     |
+| `build-resources/icon.png` | —                                | 换成你自己的 1024×1024 图标，当前是占位图              |
+| `package.json`             | `version`                        | 每次发版前手动递增                                     |
+| `.env`                     | `OPENSTARTER_API_URL`            | 你部署好的站点地址（构建时注入，见上方"构建"一节）     |
 
 ## 已知限制
 

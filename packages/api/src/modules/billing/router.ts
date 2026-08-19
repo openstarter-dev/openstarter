@@ -77,7 +77,7 @@ export const billingRouter = new Hono()
           orderNo: result.orderNo,
           provider: result.provider,
           qrData: result.qrData,
-        })
+        }),
       );
     } catch (err) {
       if (err instanceof PaymentProviderUnavailableError) {
@@ -95,9 +95,7 @@ export const billingRouter = new Hono()
     const manager = await getPaymentManager();
     const provider = manager.getProvider(providerName);
     if (!provider) {
-      logger.warn(
-        `[webhook] provider unavailable, rejecting callback: ${providerName}`
-      );
+      logger.warn(`[webhook] provider unavailable, rejecting callback: ${providerName}`);
       return c.json(respErr("unauthorized"), UNAUTHORIZED);
     }
 
@@ -109,7 +107,7 @@ export const billingRouter = new Hono()
       logger.warn(
         `[webhook] signature verification failed: ${providerName} - ${
           err instanceof Error ? err.message : String(err)
-        }`
+        }`,
       );
       return c.json(respErr("invalid webhook signature"), UNAUTHORIZED);
     }

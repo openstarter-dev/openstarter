@@ -49,10 +49,7 @@ export const user = table(
       .notNull(),
     utmSource: text("utm_source").notNull().default(""),
   },
-  (t) => [
-    index("idx_user_name").on(t.name),
-    index("idx_user_created_at").on(t.createdAt),
-  ]
+  (t) => [index("idx_user_name").on(t.name), index("idx_user_created_at").on(t.createdAt)],
 );
 
 export const session = table(
@@ -74,7 +71,7 @@ export const session = table(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
-  (t) => [index("idx_session_user_expires").on(t.userId, t.expiresAt)]
+  (t) => [index("idx_session_user_expires").on(t.userId, t.expiresAt)],
 );
 
 export const account = table(
@@ -101,7 +98,7 @@ export const account = table(
   (t) => [
     index("idx_account_user_id").on(t.userId),
     index("idx_account_provider_account").on(t.providerId, t.accountId),
-  ]
+  ],
 );
 
 export const verification = table(
@@ -117,7 +114,7 @@ export const verification = table(
       .notNull(),
     value: text("value").notNull(),
   },
-  (t) => [index("idx_verification_identifier").on(t.identifier)]
+  (t) => [index("idx_verification_identifier").on(t.identifier)],
 );
 
 export const passkey = table(
@@ -140,7 +137,7 @@ export const passkey = table(
   (t) => [
     index("idx_passkey_user_id").on(t.userId),
     index("idx_passkey_credential_id").on(t.credentialID),
-  ]
+  ],
 );
 
 export const twoFactor = table(
@@ -157,7 +154,7 @@ export const twoFactor = table(
   (t) => [
     index("idx_two_factor_secret").on(t.secret),
     index("idx_two_factor_user_id").on(t.userId),
-  ]
+  ],
 );
 
 export const organization = table(
@@ -170,7 +167,7 @@ export const organization = table(
     name: text("name").notNull(),
     slug: text("slug").notNull().unique(),
   },
-  (t) => [index("idx_organization_slug").on(t.slug)]
+  (t) => [index("idx_organization_slug").on(t.slug)],
 );
 
 export const member = table(
@@ -189,7 +186,7 @@ export const member = table(
   (t) => [
     index("idx_member_organization_id").on(t.organizationId),
     index("idx_member_user_id").on(t.userId),
-  ]
+  ],
 );
 
 export const invitation = table(
@@ -212,7 +209,7 @@ export const invitation = table(
   (t) => [
     index("idx_invitation_organization_id").on(t.organizationId),
     index("idx_invitation_email").on(t.email),
-  ]
+  ],
 );
 
 export const team = table(
@@ -226,7 +223,7 @@ export const team = table(
       .references(() => organization.id, { onDelete: "cascade" }),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
-  (t) => [index("idx_team_organization_id").on(t.organizationId)]
+  (t) => [index("idx_team_organization_id").on(t.organizationId)],
 );
 
 export const teamMember = table(
@@ -244,7 +241,7 @@ export const teamMember = table(
   (t) => [
     index("idx_team_member_team_id").on(t.teamId),
     index("idx_team_member_user_id").on(t.userId),
-  ]
+  ],
 );
 
 // ─── Device Authorization (RFC 8628) ─────────────────────────────────────────
@@ -268,7 +265,7 @@ export const deviceCode = table(
   (t) => [
     index("idx_device_code_user_code").on(t.userCode),
     index("idx_device_code_status").on(t.status),
-  ]
+  ],
 );
 
 // ─── Content ─────────────────────────────────────────────────────────────────
@@ -300,7 +297,7 @@ export const taxonomy = table(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
-  (t) => [index("idx_taxonomy_type_status").on(t.type, t.status)]
+  (t) => [index("idx_taxonomy_type_status").on(t.type, t.status)],
 );
 
 export const post = table(
@@ -329,7 +326,7 @@ export const post = table(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
-  (t) => [index("idx_post_type_status").on(t.type, t.status)]
+  (t) => [index("idx_post_type_status").on(t.type, t.status)],
 );
 
 // ─── Business ────────────────────────────────────────────────────────────────
@@ -384,17 +381,10 @@ export const order = table(
       .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
-    index("idx_order_user_status_payment_type").on(
-      t.userId,
-      t.status,
-      t.paymentType
-    ),
-    index("idx_order_transaction_provider").on(
-      t.transactionId,
-      t.paymentProvider
-    ),
+    index("idx_order_user_status_payment_type").on(t.userId, t.status, t.paymentType),
+    index("idx_order_transaction_provider").on(t.transactionId, t.paymentProvider),
     index("idx_order_created_at").on(t.createdAt),
-  ]
+  ],
 );
 
 export const subscription = table(
@@ -437,17 +427,10 @@ export const subscription = table(
       .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
-    index("idx_subscription_user_status_interval").on(
-      t.userId,
-      t.status,
-      t.interval
-    ),
-    index("idx_subscription_provider_id").on(
-      t.subscriptionId,
-      t.paymentProvider
-    ),
+    index("idx_subscription_user_status_interval").on(t.userId, t.status, t.interval),
+    index("idx_subscription_provider_id").on(t.subscriptionId, t.paymentProvider),
     index("idx_subscription_created_at").on(t.createdAt),
-  ]
+  ],
 );
 
 export const credit = table(
@@ -482,11 +465,11 @@ export const credit = table(
       t.status,
       t.transactionType,
       t.remainingCredits,
-      t.expiresAt
+      t.expiresAt,
     ),
     index("idx_credit_order_no").on(t.orderNo),
     index("idx_credit_subscription_no").on(t.subscriptionNo),
-  ]
+  ],
 );
 
 export const apikey = table(
@@ -509,7 +492,7 @@ export const apikey = table(
   (t) => [
     index("idx_apikey_user_status").on(t.userId, t.status),
     index("idx_apikey_keyhash_status").on(t.keyHash, t.status),
-  ]
+  ],
 );
 
 // ─── RBAC ────────────────────────────────────────────────────────────────────
@@ -528,7 +511,7 @@ export const role = table(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (t) => [index("idx_role_status").on(t.status)]
+  (t) => [index("idx_role_status").on(t.status)],
 );
 
 export const permission = table(
@@ -545,7 +528,7 @@ export const permission = table(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (t) => [index("idx_permission_resource_action").on(t.resource, t.action)]
+  (t) => [index("idx_permission_resource_action").on(t.resource, t.action)],
 );
 
 export const rolePermission = table(
@@ -564,9 +547,7 @@ export const rolePermission = table(
       .$onUpdate(() => new Date())
       .notNull(),
   },
-  (t) => [
-    index("idx_role_permission_role_permission").on(t.roleId, t.permissionId),
-  ]
+  (t) => [index("idx_role_permission_role_permission").on(t.roleId, t.permissionId)],
 );
 
 export const userRole = table(
@@ -588,7 +569,7 @@ export const userRole = table(
   (t) => [
     index("idx_user_role_user_expires").on(t.userId, t.expiresAt),
     uniqueIndex("uq_user_role_user_role").on(t.userId, t.roleId),
-  ]
+  ],
 );
 
 // ─── AI ──────────────────────────────────────────────────────────────────────
@@ -621,7 +602,7 @@ export const aiTask = table(
   (t) => [
     index("idx_ai_task_user_media_type").on(t.userId, t.mediaType),
     index("idx_ai_task_media_type_status").on(t.mediaType, t.status),
-  ]
+  ],
 );
 
 export const chat = table(
@@ -643,7 +624,7 @@ export const chat = table(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
   },
-  (t) => [index("idx_chat_user_status").on(t.userId, t.status)]
+  (t) => [index("idx_chat_user_status").on(t.userId, t.status)],
 );
 
 export const chatMessage = table(
@@ -670,7 +651,7 @@ export const chatMessage = table(
   (t) => [
     index("idx_chat_message_chat_id").on(t.chatId, t.status),
     index("idx_chat_message_user_id").on(t.userId, t.status),
-  ]
+  ],
 );
 
 // ─── Tickets (support) ─────────────────────────────────────────────────────────
@@ -687,10 +668,7 @@ export const ticket = table(
       .notNull()
       .references(() => user.id),
   },
-  (t) => [
-    index("idx_ticket_user").on(t.userId),
-    index("idx_ticket_status").on(t.status),
-  ]
+  (t) => [index("idx_ticket_user").on(t.userId), index("idx_ticket_status").on(t.status)],
 );
 
 export const ticketMessage = table(
@@ -708,7 +686,7 @@ export const ticketMessage = table(
       .notNull()
       .references(() => user.id),
   },
-  (t) => [index("idx_ticket_message_ticket").on(t.ticketId)]
+  (t) => [index("idx_ticket_message_ticket").on(t.ticketId)],
 );
 
 // ─── Invite Codes ──────────────────────────────────────────────────────────────
@@ -726,7 +704,7 @@ export const inviteCode = table(
     trialDays: integer("trial_days").notNull().default(15),
     usedCount: integer("used_count").notNull().default(0),
   },
-  (t) => [index("idx_invite_code_code").on(t.code)]
+  (t) => [index("idx_invite_code_code").on(t.code)],
 );
 
 export const userInvite = table(
@@ -746,7 +724,7 @@ export const userInvite = table(
   (t) => [
     index("idx_user_invite_user").on(t.userId),
     index("idx_user_invite_code").on(t.inviteCodeId),
-  ]
+  ],
 );
 
 // ─── Types ───────────────────────────────────────────────────────────────────

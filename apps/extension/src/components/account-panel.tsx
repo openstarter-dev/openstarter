@@ -3,12 +3,7 @@
 // 见 spec §6。
 import { Badge } from "@openstarter/ui-web/components/badge";
 import { Button } from "@openstarter/ui-web/components/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@openstarter/ui-web/components/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@openstarter/ui-web/components/card";
 
 import type { AccountSnapshot } from "../lib/types";
 
@@ -32,9 +27,7 @@ export function AccountPanel(props: {
       {props.user ? (
         <div className="flex flex-col gap-0.5">
           <span className="font-medium text-sm">{props.user.name}</span>
-          <span className="text-muted-foreground text-xs">
-            {props.user.email}
-          </span>
+          <span className="text-muted-foreground text-xs">{props.user.email}</span>
         </div>
       ) : null}
 
@@ -49,9 +42,7 @@ export function AccountPanel(props: {
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground text-xs">Credits</span>
-            <span className="font-medium text-sm tabular-nums">
-              {props.data.creditsBalance}
-            </span>
+            <span className="font-medium text-sm tabular-nums">{props.data.creditsBalance}</span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground text-xs">Subscription</span>
@@ -62,12 +53,8 @@ export function AccountPanel(props: {
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-muted-foreground text-xs">
-              Next billing date
-            </span>
-            <span className="font-medium text-sm">
-              {formatDate(subscription.nextBillingDate)}
-            </span>
+            <span className="text-muted-foreground text-xs">Next billing date</span>
+            <span className="font-medium text-sm">{formatDate(subscription.nextBillingDate)}</span>
           </div>
         </CardContent>
       </Card>
@@ -81,8 +68,7 @@ export function AccountPanel(props: {
           Sign out
         </Button>
         <p className="text-muted-foreground text-xs">
-          This will also sign you out of the web app, since the extension shares
-          its session.
+          This will also sign you out of the web app, since the extension shares its session.
         </p>
       </div>
     </div>

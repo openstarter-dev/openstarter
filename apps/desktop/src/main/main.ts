@@ -13,11 +13,7 @@ import { buildMenuTemplate } from "./menu";
 import { createTray, destroyTray } from "./tray";
 import { registerShortcuts, unregisterShortcuts } from "./shortcuts";
 import { maybeCheckForUpdates } from "./updater";
-import {
-  applyGlobalWebContentsPolicy,
-  createMainWindow,
-  waitForDevServer,
-} from "./window";
+import { applyGlobalWebContentsPolicy, createMainWindow, waitForDevServer } from "./window";
 import { createFileWindowStateStore } from "./window-state";
 import { createTokenStore } from "./token-store";
 import { createApiProxy } from "./api-proxy";
@@ -37,9 +33,7 @@ async function main(): Promise<void> {
 
   applyGlobalWebContentsPolicy();
 
-  Menu.setApplicationMenu(
-    Menu.buildFromTemplate(buildMenuTemplate(process.platform === "darwin"))
-  );
+  Menu.setApplicationMenu(Menu.buildFromTemplate(buildMenuTemplate(process.platform === "darwin")));
 
   await app.whenReady();
 
@@ -118,14 +112,12 @@ async function main(): Promise<void> {
     logInfo("waiting for renderer dev server at", resolvedUrl.url);
     const ready = await waitForDevServer(resolvedUrl.url);
     if (!ready) {
-      logWarn(
-        `renderer dev server ${resolvedUrl.url} did not respond in time; loading anyway.`
-      );
+      logWarn(`renderer dev server ${resolvedUrl.url} did not respond in time; loading anyway.`);
     }
   }
 
   const windowStateStore = createFileWindowStateStore(
-    join(app.getPath("userData"), "window-state.json")
+    join(app.getPath("userData"), "window-state.json"),
   );
 
   let currentWindow = createMainWindow({ resolvedUrl, windowStateStore });

@@ -31,10 +31,7 @@ function withMysqlCompat<T extends object>(dbInstance: T): T {
           typeof Reflect.get(target, "onConflictDoUpdate") !== "function" &&
           typeof Reflect.get(target, "onDuplicateKeyUpdate") === "function"
         ) {
-          const onDuplicate = Reflect.get(
-            target,
-            "onDuplicateKeyUpdate"
-          ) as UnknownFunction;
+          const onDuplicate = Reflect.get(target, "onDuplicateKeyUpdate") as UnknownFunction;
           return (conflictConfig: unknown): unknown => {
             const set =
               conflictConfig && typeof conflictConfig === "object"
@@ -44,10 +41,7 @@ function withMysqlCompat<T extends object>(dbInstance: T): T {
           };
         }
 
-        if (
-          prop === "returning" &&
-          typeof Reflect.get(target, "returning") !== "function"
-        ) {
+        if (prop === "returning" && typeof Reflect.get(target, "returning") !== "function") {
           return async (): Promise<unknown[]> => {
             await (target as unknown as PromiseLike<unknown>);
             if (ctx.payload === undefined) {
@@ -85,7 +79,7 @@ function withMysqlCompat<T extends object>(dbInstance: T): T {
           return runTransaction.call(
             target,
             (tx: object) => userCallback(withMysqlCompat(tx)),
-            ...rest
+            ...rest,
           );
         };
       }
@@ -98,8 +92,7 @@ function withMysqlCompat<T extends object>(dbInstance: T): T {
       if (prop !== "insert" && prop !== "update" && prop !== "delete") {
         return method.bind(target);
       }
-      return (...args: unknown[]): unknown =>
-        wrapQuery(method.apply(target, args), {});
+      return (...args: unknown[]): unknown => wrapQuery(method.apply(target, args), {});
     },
   });
 

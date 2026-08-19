@@ -1,14 +1,6 @@
 import type { Database } from "@openstarter/db/server";
 import fc from "fast-check";
-import {
-  afterAll,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SubscriptionStatus } from "./payment/types";
 import { cancelSubscription, createSubscription } from "./subscriptions";
@@ -23,8 +15,7 @@ const state = vi.hoisted(() => ({
 }));
 
 vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("@openstarter/db/server")>();
+  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
   return {
     ...actual,
     db: () => {
@@ -44,14 +35,13 @@ const insertSubscription = async (
     subscriptionNo: string;
     userId: string;
     status: string;
-  }> = {}
+  }> = {},
 ) => {
   const created = await createSubscription({
     currentPeriodEnd: new Date("2027-01-01T00:00:00.000Z"),
     currentPeriodStart: FIXED_NOW,
     paymentProvider: "stripe",
-    status:
-      (overrides.status as SubscriptionStatus) ?? SubscriptionStatus.ACTIVE,
+    status: (overrides.status as SubscriptionStatus) ?? SubscriptionStatus.ACTIVE,
     subscriptionId: `sub_${overrides.subscriptionNo ?? "1234"}`,
     subscriptionNo: overrides.subscriptionNo ?? "sub-test-1",
     subscriptionResult: "ok",
@@ -164,9 +154,9 @@ describe("subscription cancellation (Property 23)", () => {
           if (state.database) {
             await resetBillingTestDatabase(state.database);
           }
-        }
+        },
       ),
-      { numRuns: 20 }
+      { numRuns: 20 },
     );
   });
 });

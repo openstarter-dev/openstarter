@@ -3,10 +3,7 @@ import type { SendEmailParams } from "@openstarter/email/server";
 import { getTestInstance } from "better-auth/test";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 
-import {
-  createAuthEmailCallbacks,
-  createChangeEmailOptions,
-} from "./email-callbacks";
+import { createAuthEmailCallbacks, createChangeEmailOptions } from "./email-callbacks";
 
 interface StoredUser {
   email: string;
@@ -31,26 +28,21 @@ const createConfirmationTestInstance = () => {
       },
       logger: { disabled: true },
       user: {
-        changeEmail: createChangeEmailOptions(
-          callbacks.sendChangeEmailConfirmation
-        ),
+        changeEmail: createChangeEmailOptions(callbacks.sendChangeEmailConfirmation),
         deleteUser: {
           enabled: true,
-          sendDeleteAccountVerification:
-            callbacks.sendDeleteAccountVerification,
+          sendDeleteAccountVerification: callbacks.sendDeleteAccountVerification,
         },
       },
     },
     {
       port: 3010,
       testUser: { email: "confirmation@example.com" },
-    }
+    },
   );
 };
 
-type AuthTestInstance = Awaited<
-  ReturnType<typeof createConfirmationTestInstance>
->;
+type AuthTestInstance = Awaited<ReturnType<typeof createConfirmationTestInstance>>;
 
 let instance: AuthTestInstance;
 
@@ -120,7 +112,7 @@ describe("account confirmation email flows", () => {
 
     const callbackUrl = callbackUrlFromDelivery(requiredDelivery(0));
     const response = await instance.auth.handler(
-      new Request(callbackUrl, { headers: signedIn.headers })
+      new Request(callbackUrl, { headers: signedIn.headers }),
     );
 
     expect(response.status).toBe(302);
@@ -137,7 +129,7 @@ describe("account confirmation email flows", () => {
     });
     const signedIn = await instance.signInWithUser(
       instance.testUser.email,
-      instance.testUser.password
+      instance.testUser.password,
     );
     const newEmail = "changed@example.com";
 
@@ -156,7 +148,7 @@ describe("account confirmation email flows", () => {
 
     const oldEmailCallback = callbackUrlFromDelivery(requiredDelivery(0));
     const oldEmailResponse = await instance.auth.handler(
-      new Request(oldEmailCallback, { headers: signedIn.headers })
+      new Request(oldEmailCallback, { headers: signedIn.headers }),
     );
 
     expect(oldEmailResponse.status).toBe(302);
@@ -169,7 +161,7 @@ describe("account confirmation email flows", () => {
 
     const newEmailCallback = callbackUrlFromDelivery(requiredDelivery(1));
     const newEmailResponse = await instance.auth.handler(
-      new Request(newEmailCallback, { headers: signedIn.headers })
+      new Request(newEmailCallback, { headers: signedIn.headers }),
     );
 
     expect(newEmailResponse.status).toBe(302);
@@ -207,7 +199,7 @@ describe("account confirmation email flows", () => {
 
     const callbackUrl = callbackUrlFromDelivery(requiredDelivery(0));
     const response = await instance.auth.handler(
-      new Request(callbackUrl, { headers: signedIn.headers })
+      new Request(callbackUrl, { headers: signedIn.headers }),
     );
 
     expect(response.status).toBe(302);

@@ -1,4 +1,4 @@
-import type { UserConfig } from '@tarojs/taro';
+import type { UserConfig } from "@tarojs/taro";
 
 const config: UserConfig = {
   logger: {

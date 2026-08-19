@@ -28,10 +28,7 @@ async function runViteBuild() {
 async function runEsbuild() {
   await build({
     bundle: true,
-    entryPoints: [
-      resolve(desktopDir, "src/main/main.ts"),
-      resolve(desktopDir, "src/preload.ts"),
-    ],
+    entryPoints: [resolve(desktopDir, "src/main/main.ts"), resolve(desktopDir, "src/preload.ts")],
     external: ["electron"],
     format: "cjs",
     outdir: resolve(desktopDir, "dist"),
@@ -48,14 +45,10 @@ async function runBuild() {
   process.stdout.write("[desktop] building main/preload (esbuild)...\n");
   await runEsbuild();
 
-  process.stdout.write(
-    `[desktop] built ${packageJson.name}@${packageJson.version}\n`
-  );
+  process.stdout.write(`[desktop] built ${packageJson.name}@${packageJson.version}\n`);
 }
 
 runBuild().catch((error) => {
-  process.stderr.write(
-    `[desktop] build failed: ${error.stack ?? error.message}\n`
-  );
+  process.stderr.write(`[desktop] build failed: ${error.stack ?? error.message}\n`);
   process.exitCode = 1;
 });

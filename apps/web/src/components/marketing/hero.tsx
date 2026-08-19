@@ -16,13 +16,9 @@ export function Hero() {
   return (
     <section className="mx-auto flex max-w-4xl flex-col items-center gap-6 px-4 py-20 text-center">
       <h1 className="font-bold text-4xl tracking-tight sm:text-5xl">
-        Ship your SaaS{" "}
-        <span className="text-primary">in days</span>
-        , not months.
+        Ship your SaaS <span className="text-primary">in days</span>, not months.
       </h1>
-      <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-        {COPY.subtitle}
-      </p>
+      <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">{COPY.subtitle}</p>
       <div className="flex flex-wrap items-center justify-center gap-3">
         <Button asChild size="lg">
           <Link to="/login">{COPY.primaryCta}</Link>

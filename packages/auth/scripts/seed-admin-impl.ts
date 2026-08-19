@@ -12,12 +12,7 @@ import {
   createRole,
   getRoleByName,
 } from "@openstarter/auth";
-import {
-  account,
-  permission,
-  rolePermission,
-  user,
-} from "@openstarter/db/schema";
+import { account, permission, rolePermission, user } from "@openstarter/db/schema";
 
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
@@ -74,16 +69,12 @@ function parseArgs(argv: string[]): Partial<SeedOptions> {
 
 const overrides = parseArgs(process.argv.slice(2));
 
-const ADMIN_EMAIL =
-  overrides.email ?? process.env.SEED_EMAIL ?? "admin@openstarter.dev";
-const ADMIN_PASSWORD =
-  overrides.password ?? process.env.SEED_PASSWORD ?? "Admin@123456";
+const ADMIN_EMAIL = overrides.email ?? process.env.SEED_EMAIL ?? "admin@openstarter.dev";
+const ADMIN_PASSWORD = overrides.password ?? process.env.SEED_PASSWORD ?? "Admin@123456";
 const ADMIN_NAME = overrides.name ?? "Admin";
 
 if (!ADMIN_EMAIL.includes("@") || ADMIN_PASSWORD.length < 8) {
-  console.error(
-    "[seed-admin] 参数校验失败:email 需合法、密码至少 8 位。当前值被拒绝。"
-  );
+  console.error("[seed-admin] 参数校验失败:email 需合法、密码至少 8 位。当前值被拒绝。");
   console.error(`  email:    ${ADMIN_EMAIL}`);
   console.error(`  password: ${"*".repeat(ADMIN_PASSWORD.length)}`);
   process.exit(1);
@@ -97,11 +88,7 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
   const now = new Date();
 
   // 1) upsert user
-  const [existingUser] = await db()
-    .select()
-    .from(user)
-    .where(eq(user.email, email))
-    .limit(1);
+  const [existingUser] = await db().select().from(user).where(eq(user.email, email)).limit(1);
   let userId: string;
   if (existingUser) {
     userId = existingUser.id;
@@ -135,9 +122,7 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
   const [existingAccountRow] = await db()
     .select()
     .from(account)
-    .where(
-      and(eq(account.userId, userId), eq(account.providerId, "credential"))
-    )
+    .where(and(eq(account.userId, userId), eq(account.providerId, "credential")))
     .limit(1);
   if (existingAccountRow) {
     await db()
@@ -205,8 +190,8 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
     .where(
       and(
         eq(rolePermission.roleId, adminRole.id),
-        eq(rolePermission.permissionId, adminPermissionId)
-      )
+        eq(rolePermission.permissionId, adminPermissionId),
+      ),
     )
     .limit(1);
   if (alreadyLinked.length === 0) {

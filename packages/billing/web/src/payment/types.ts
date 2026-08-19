@@ -66,8 +66,7 @@ export const PaymentInterval = {
   YEAR: "year",
 } as const;
 
-export type PaymentInterval =
-  (typeof PaymentInterval)[keyof typeof PaymentInterval];
+export type PaymentInterval = (typeof PaymentInterval)[keyof typeof PaymentInterval];
 
 /** 支付状态（归一化）：processing / paid / failed / canceled。 */
 export const PaymentStatus = {
@@ -98,8 +97,7 @@ export const SubscriptionStatus = {
   PAUSED: "paused",
 } as const;
 
-export type SubscriptionStatus =
-  (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
 
 /**
  * 归一化支付事件类型（供任务 18 Webhook 编排复用）。
@@ -114,8 +112,7 @@ export const PaymentEventType = {
   SUBSCRIBE_CANCELED: "subscribe.canceled",
 } as const;
 
-export type PaymentEventType =
-  (typeof PaymentEventType)[keyof typeof PaymentEventType];
+export type PaymentEventType = (typeof PaymentEventType)[keyof typeof PaymentEventType];
 
 // ─── 订阅套餐 / 下单（Plan / Order） ─────────────────────────────────────────
 
@@ -281,14 +278,9 @@ export interface PaymentProvider {
 
   getPaymentInvoice?(params: { invoiceId: string }): Promise<PaymentInvoice>;
 
-  getPaymentBilling?(params: {
-    customerId: string;
-    returnUrl?: string;
-  }): Promise<PaymentBilling>;
+  getPaymentBilling?(params: { customerId: string; returnUrl?: string }): Promise<PaymentBilling>;
 
-  cancelSubscription?(params: {
-    subscriptionId: string;
-  }): Promise<PaymentSession>;
+  cancelSubscription?(params: { subscriptionId: string }): Promise<PaymentSession>;
 }
 
 // ─── 错误（Errors） ──────────────────────────────────────────────────────────
@@ -301,9 +293,7 @@ export class PaymentProviderUnavailableError extends Error {
   readonly provider: string;
 
   constructor(provider: string) {
-    super(
-      `Payment provider '${provider}' is not enabled or its credentials are missing`
-    );
+    super(`Payment provider '${provider}' is not enabled or its credentials are missing`);
     this.name = "PaymentProviderUnavailableError";
     this.provider = provider;
   }

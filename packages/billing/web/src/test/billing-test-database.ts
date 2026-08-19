@@ -120,10 +120,7 @@ const removeDatabaseFiles = (path: string) => {
 };
 
 export const createBillingTestDatabase = async (suiteName: string) => {
-  const databasePath = join(
-    tmpdir(),
-    `openstarter-billing-${process.pid}-${suiteName}.sqlite`
-  );
+  const databasePath = join(tmpdir(), `openstarter-billing-${process.pid}-${suiteName}.sqlite`);
   removeDatabaseFiles(databasePath);
   const database = createDb({
     provider: "sqlite",
@@ -146,6 +143,4 @@ export const closeBillingTestDatabase = (database: Database) => {
 };
 
 export const resetBillingTestDatabase = (database: Database) =>
-  Promise.all(
-    DATA_TABLES.map((table) => database.run(sql.raw(`DELETE FROM ${table}`)))
-  );
+  Promise.all(DATA_TABLES.map((table) => database.run(sql.raw(`DELETE FROM ${table}`))));

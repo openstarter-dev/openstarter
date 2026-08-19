@@ -22,10 +22,7 @@ interface AccountSelector {
 }
 
 export interface AccountUnlinkRepository {
-  deleteIfMultiple: (params: {
-    accountId: string;
-    userId: string;
-  }) => Promise<boolean>;
+  deleteIfMultiple: (params: { accountId: string; userId: string }) => Promise<boolean>;
   findAccount: (params: AccountSelector) => Promise<{ id: string } | null>;
 }
 
@@ -41,13 +38,7 @@ const databaseRepository: AccountUnlinkRepository = {
       )`;
       await db()
         .delete(account)
-        .where(
-          and(
-            eq(account.id, accountId),
-            eq(account.userId, userId),
-            gt(userAccountCount, 1)
-          )
-        );
+        .where(and(eq(account.id, accountId), eq(account.userId, userId), gt(userAccountCount, 1)));
       const [remaining] = await db()
         .select({ id: account.id })
         .from(account)
@@ -73,17 +64,12 @@ const databaseRepository: AccountUnlinkRepository = {
         return false;
       }
 
-      await tx
-        .delete(account)
-        .where(and(eq(account.id, accountId), eq(account.userId, userId)));
+      await tx.delete(account).where(and(eq(account.id, accountId), eq(account.userId, userId)));
       return true;
     });
   },
   findAccount: async ({ accountId, providerId, userId }) => {
-    const conditions = [
-      eq(account.userId, userId),
-      eq(account.providerId, providerId),
-    ];
+    const conditions = [eq(account.userId, userId), eq(account.providerId, providerId)];
     if (accountId !== undefined) {
       conditions.push(eq(account.accountId, accountId));
     }
@@ -98,7 +84,7 @@ const databaseRepository: AccountUnlinkRepository = {
 
 export async function unlinkAccountWithRepository(
   params: AccountSelector,
-  repository: AccountUnlinkRepository
+  repository: AccountUnlinkRepository,
 ): Promise<void> {
   const target = await repository.findAccount(params);
   if (!target) {
@@ -110,15 +96,10 @@ export async function unlinkAccountWithRepository(
     userId: params.userId,
   });
   if (!deleted) {
-    throw new AccountUnlinkError(
-      "LAST_ACCOUNT",
-      "Cannot unlink the last sign-in method"
-    );
+    throw new AccountUnlinkError("LAST_ACCOUNT", "Cannot unlink the last sign-in method");
   }
 }
 
-export async function unlinkAccountSafely(
-  params: AccountSelector
-): Promise<void> {
+export async function unlinkAccountSafely(params: AccountSelector): Promise<void> {
   await unlinkAccountWithRepository(params, databaseRepository);
 }

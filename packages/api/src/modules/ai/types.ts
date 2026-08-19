@@ -130,9 +130,7 @@ export interface AIFile {
  * 由调用方（api 层）用 `packages/api/storage` 的上传能力提供；AI 模块只持有并调用此回调，
  * 不直接依赖具体存储实现，保持内聚与可测（R19.1 setSaveFiles 注入）。
  */
-export type SaveFilesFunction = (
-  files: AIFile[]
-) => Promise<AIFile[] | undefined>;
+export type SaveFilesFunction = (files: AIFile[]) => Promise<AIFile[] | undefined>;
 
 /** UUID 生成器（可注入，默认用 `@openstarter/shared/id` 的 getUuid）。 */
 export type UuidFunction = () => string;
@@ -160,9 +158,5 @@ export interface AIProvider {
 
   generate(args: { params: AIGenerateParams }): Promise<AITaskResult>;
 
-  query?(args: {
-    taskId: string;
-    mediaType?: AIMediaType;
-    model?: string;
-  }): Promise<AITaskResult>;
+  query?(args: { taskId: string; mediaType?: AIMediaType; model?: string }): Promise<AITaskResult>;
 }

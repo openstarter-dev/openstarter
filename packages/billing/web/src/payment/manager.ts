@@ -64,7 +64,7 @@ function isEnabled(configs: Record<string, string>, provider: string): boolean {
 function assembleStripe(
   manager: PaymentManager,
   configs: Record<string, string>,
-  defaultProvider: string
+  defaultProvider: string,
 ): void {
   const secretKey = configs.stripe_secret_key || "";
   if (!(isEnabled(configs, "stripe") && secretKey)) {
@@ -78,14 +78,14 @@ function assembleStripe(
       allowPromotionCodes: true,
       allowedPaymentMethods: ["card", "wechat_pay", "alipay"],
     }),
-    defaultProvider === "stripe" || defaultProvider === ""
+    defaultProvider === "stripe" || defaultProvider === "",
   );
 }
 
 function assemblePayPal(
   manager: PaymentManager,
   configs: Record<string, string>,
-  defaultProvider: string
+  defaultProvider: string,
 ): void {
   const clientId = configs.paypal_client_id || "";
   const clientSecret = configs.paypal_client_secret || "";
@@ -97,17 +97,16 @@ function assemblePayPal(
       clientId,
       clientSecret,
       webhookId: configs.paypal_webhook_id || undefined,
-      environment:
-        configs.paypal_environment === "live" ? "production" : "sandbox",
+      environment: configs.paypal_environment === "live" ? "production" : "sandbox",
     }),
-    defaultProvider === "paypal"
+    defaultProvider === "paypal",
   );
 }
 
 function assembleAlipay(
   manager: PaymentManager,
   configs: Record<string, string>,
-  defaultProvider: string
+  defaultProvider: string,
 ): void {
   const appId = configs.alipay_app_id || "";
   const privateKey = configs.alipay_private_key || "";
@@ -121,14 +120,14 @@ function assembleAlipay(
       alipayPublicKey: configs.alipay_public_key || "",
       notifyUrl: configs.alipay_notify_url || undefined,
     }),
-    defaultProvider === "alipay"
+    defaultProvider === "alipay",
   );
 }
 
 function assembleWechat(
   manager: PaymentManager,
   configs: Record<string, string>,
-  defaultProvider: string
+  defaultProvider: string,
 ): void {
   const mchId = configs.wechat_mch_id || "";
   const privateKey = configs.wechat_private_key || "";
@@ -146,7 +145,7 @@ function assembleWechat(
       notifyUrl: configs.wechat_notify_url || undefined,
       platformCert: configs.wechat_platform_cert || undefined,
     }),
-    defaultProvider === "wechat"
+    defaultProvider === "wechat",
   );
 }
 

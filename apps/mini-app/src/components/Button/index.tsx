@@ -1,7 +1,7 @@
-import { View, Text } from '@tarojs/components';
-import './index.scss';
+import { View, Text } from "@tarojs/components";
+import "./index.scss";
 
-type ButtonVariant = 'primary' | 'secondary' | 'text';
+type ButtonVariant = "primary" | "secondary" | "text";
 
 interface ButtonProps {
   children: React.ReactNode;
@@ -10,21 +10,21 @@ interface ButtonProps {
   disabled?: boolean;
   fullWidth?: boolean;
   onClick?: () => void;
-  type?: 'submit' | 'button';
+  type?: "submit" | "button";
 }
 
 function cn(...classes: (string | false | null | undefined)[]): string {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
 export default function Button({
   children,
-  variant = 'primary',
+  variant = "primary",
   loading = false,
   disabled = false,
   fullWidth = false,
   onClick,
-  type = 'button',
+  type = "button",
 }: ButtonProps) {
   const handleClick = () => {
     if (!loading && !disabled && onClick) {
@@ -35,11 +35,11 @@ export default function Button({
   return (
     <View
       className={cn(
-        'btn',
+        "btn",
         `btn--${variant}`,
-        loading && 'btn--loading',
-        disabled && 'btn--disabled',
-        fullWidth && 'btn--full-width',
+        loading && "btn--loading",
+        disabled && "btn--disabled",
+        fullWidth && "btn--full-width",
       )}
       onClick={handleClick}
     >

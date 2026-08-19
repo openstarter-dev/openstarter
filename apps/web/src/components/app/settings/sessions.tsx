@@ -13,13 +13,11 @@ import { authClient } from "@/lib/auth-client";
 import { auth } from "@/modules/auth/lib/api";
 
 export function SessionsPage() {
-  const { data: currentSessionData, isPending: isCurrentSessionPending } =
-    authClient.useSession();
+  const { data: currentSessionData, isPending: isCurrentSessionPending } = authClient.useSession();
   const sessionsQuery = useQuery({ ...auth.queries.sessions() });
   const sessions = sessionsQuery.data ?? [];
   const currentSessionToken = currentSessionData?.session.token;
-  const canRevokeSession =
-    !isCurrentSessionPending && currentSessionToken !== undefined;
+  const canRevokeSession = !isCurrentSessionPending && currentSessionToken !== undefined;
 
   const [revokingToken, setRevokingToken] = useState<string | null>(null);
   const [revokingOthers, setRevokingOthers] = useState(false);
@@ -61,9 +59,7 @@ export function SessionsPage() {
     <Card>
       <CardHeader>
         <CardTitle>Sessions</CardTitle>
-        <CardDescription>
-          Manage your active sessions across devices.
-        </CardDescription>
+        <CardDescription>Manage your active sessions across devices.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {sessions.length > 1 && (
@@ -86,48 +82,32 @@ export function SessionsPage() {
           <p className="text-muted-foreground text-sm">Loading sessions...</p>
         ) : null}
         {sessionsQuery.error ? (
-          <p className="text-destructive text-sm">
-            {sessionsQuery.error.message}
-          </p>
+          <p className="text-destructive text-sm">{sessionsQuery.error.message}</p>
         ) : null}
         <div className="divide-y rounded-lg border">
           {sessions.map((session) => {
             const isCurrent = currentSessionToken === session.token;
             return (
-              <div
-                className="flex items-center justify-between px-4 py-3"
-                key={session.id}
-              >
+              <div className="flex items-center justify-between px-4 py-3" key={session.id}>
                 <div className="flex flex-col gap-0.5">
                   <span className="font-medium text-sm">
-                    {session.userAgent?.split("/").at(0)?.trim() ||
-                      "Unknown device"}
-                    {isCurrent && (
-                      <span className="ml-2 text-primary text-xs">Current</span>
-                    )}
+                    {session.userAgent?.split("/").at(0)?.trim() || "Unknown device"}
+                    {isCurrent && <span className="ml-2 text-primary text-xs">Current</span>}
                   </span>
                   <span className="text-muted-foreground text-xs">
-                    {session.createdAt
-                      ? new Date(session.createdAt).toLocaleDateString()
-                      : ""}
+                    {session.createdAt ? new Date(session.createdAt).toLocaleDateString() : ""}
                     {session.ipAddress ? ` · ${session.ipAddress}` : null}
                   </span>
                 </div>
                 <Button
-                  disabled={
-                    !canRevokeSession ||
-                    revokingToken === session.token ||
-                    isCurrent
-                  }
+                  disabled={!canRevokeSession || revokingToken === session.token || isCurrent}
                   onClick={() => {
                     handleRevoke(session.token).catch((error: Error) => {
                       toast.error(error.message);
                     });
                   }}
                   size="sm"
-                  title={
-                    isCurrent ? "Cannot revoke current session" : undefined
-                  }
+                  title={isCurrent ? "Cannot revoke current session" : undefined}
                   type="button"
                   variant="ghost"
                 >
@@ -139,9 +119,7 @@ export function SessionsPage() {
         </div>
 
         {sessions.length === 0 && !sessionsQuery.isPending && (
-          <p className="text-muted-foreground text-sm">
-            No active sessions found.
-          </p>
+          <p className="text-muted-foreground text-sm">No active sessions found.</p>
         )}
       </CardContent>
     </Card>
