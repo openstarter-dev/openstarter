@@ -95,7 +95,9 @@ beforeAll(async () => {
       secret TEXT NOT NULL,
       backup_codes TEXT NOT NULL,
       user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
-      verified INTEGER DEFAULT 1
+      verified INTEGER DEFAULT 1,
+      failed_verification_count INTEGER DEFAULT 0,
+      locked_until INTEGER
     )
   `);
   await database.run(sql`

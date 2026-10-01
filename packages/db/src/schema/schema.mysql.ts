@@ -144,7 +144,9 @@ export const twoFactor = table(
   "two_factor",
   {
     backupCodes: longtext("backup_codes").notNull(),
+    failedVerificationCount: int("failed_verification_count").default(0),
     id: varchar255("id").primaryKey(),
+    lockedUntil: timestamp("locked_until"),
     secret: varchar255("secret").notNull(),
     userId: varchar255("user_id")
       .notNull()
