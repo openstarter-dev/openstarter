@@ -8,11 +8,11 @@
 // （turbo boundary：platform:extension 不引用 platform:web）。
 
 import enJson from "../locales/en.json";
-import zhJson from "../locales/zh.json";
+import zhCnJson from "../locales/zh_CN.json";
 
 // 受支持语言集合与默认语言（与 locales/ 文件名一一对应；default 需与
 // wxt.config.ts 的 manifest.default_locale 一致）。
-export const EXTENSION_LOCALES = ["en", "zh"] as const;
+export const EXTENSION_LOCALES = ["en", "zh_CN"] as const;
 
 export type ExtensionLocale = (typeof EXTENSION_LOCALES)[number];
 
@@ -34,7 +34,7 @@ export function flattenCatalog(catalog: unknown, prefix = ""): Record<string, st
 // （structure 类型由 @wxt-dev/i18n 从 en 生成，二者保持一致）。
 export const EXTENSION_MESSAGES: Record<ExtensionLocale, Record<string, string>> = {
   en: flattenCatalog(enJson),
-  zh: flattenCatalog(zhJson),
+  zh_CN: flattenCatalog(zhCnJson),
 };
 
 // {name} 占位符替换；未提供的占位符保留原样。
@@ -53,8 +53,10 @@ export function translateMessage(
   key: string,
   named?: Record<string, string | number>,
 ): string {
+  const normalizedLocale = locale === "zh" || locale === "zh-CN" ? "zh_CN" : locale;
   const catalog =
-    EXTENSION_MESSAGES[locale as ExtensionLocale] ?? EXTENSION_MESSAGES[EXTENSION_DEFAULT_LOCALE];
+    EXTENSION_MESSAGES[normalizedLocale as ExtensionLocale] ??
+    EXTENSION_MESSAGES[EXTENSION_DEFAULT_LOCALE];
   const message = catalog[key] ?? EXTENSION_MESSAGES[EXTENSION_DEFAULT_LOCALE][key];
   return applyNamedSubstitutions(message ?? key, named);
 }
