@@ -104,10 +104,7 @@ openstarter/
 │   ├── email/       # React Email templates (7 templates, bilingual)
 │   ├── billing/     # Subscriptions, credits, payment providers
 │   ├── analytics/   # Analytics provider abstraction (web + mobile)
-│   ├── monitoring/  # Monitoring (web + mobile)
-│   ├── notifications/# Notifications (web + mobile + shared)
 │   └── ai/          # AI features (scaffold)
-└── docs/            # Architecture & operations docs
 ```
 
 ## Quick Start
@@ -123,9 +120,9 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000). The API is served from the
-same origin under `/api/*`. For deployment, customization, per-platform
-commands, and the full roadmap, see [docs/](./docs) and
-[CUSTOMIZE.md](./CUSTOMIZE.md).
+same origin under `/api/*`. Product branding starts in
+apps/web/src/lib/branding.ts; each app README documents its platform-specific
+commands.
 
 ## Contact
 
