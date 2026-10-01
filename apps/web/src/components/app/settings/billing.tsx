@@ -39,9 +39,7 @@ export function BillingPage() {
   const billingPortalMutation = useMutation({
     ...user.mutations.billingPortal(),
     onError: (err) => {
-      toast.error(
-        err instanceof Error ? err.message : m["settings.billing.portal_failed"](),
-      );
+      toast.error(err instanceof Error ? err.message : m["settings.billing.portal_failed"]());
     },
     onSuccess: (data) => {
       if (data?.billingUrl) {
@@ -55,9 +53,7 @@ export function BillingPage() {
       <Card>
         <CardHeader>
           <CardTitle>{m["settings.billing.plan"]()}</CardTitle>
-          <CardDescription>
-            {m["settings.billing.subscription_details"]()}
-          </CardDescription>
+          <CardDescription>{m["settings.billing.subscription_details"]()}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading ? (
@@ -89,7 +85,9 @@ export function BillingPage() {
               <p className="font-medium text-sm">{subscription?.planName ?? "—"}</p>
             </div>
             <div className="rounded-lg border p-4">
-              <p className="text-muted-foreground text-xs">{m["settings.billing.next_billing_date"]()}</p>
+              <p className="text-muted-foreground text-xs">
+                {m["settings.billing.next_billing_date"]()}
+              </p>
               <p className="font-medium text-sm">{formatDate(subscription?.nextBillingDate)}</p>
             </div>
           </div>

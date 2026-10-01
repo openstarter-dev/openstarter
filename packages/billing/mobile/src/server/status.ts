@@ -13,8 +13,7 @@ export const SubscriptionStatus = {
   INCOMPLETE: "incomplete",
 } as const;
 
-export type SubscriptionStatus =
-  (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
+export type SubscriptionStatus = (typeof SubscriptionStatus)[keyof typeof SubscriptionStatus];
 
 export const PaymentStatus = {
   PROCESSING: "processing",

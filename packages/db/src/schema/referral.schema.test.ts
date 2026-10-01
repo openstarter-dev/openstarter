@@ -24,7 +24,13 @@ describe("referral schema 表结构", () => {
     // drizzle 表对象可解构列名集合做存在性断言
     expect(Object.keys(sql)).toEqual(
       expect.arrayContaining([
-        "id", "userId", "code", "customRate", "note", "createdAt", "updatedAt",
+        "id",
+        "userId",
+        "code",
+        "customRate",
+        "note",
+        "createdAt",
+        "updatedAt",
       ]),
     );
   });
@@ -32,9 +38,7 @@ describe("referral schema 表结构", () => {
   it("referralRelation: 一人一条关系（referredUserId 唯一）", () => {
     const sql = columnsOf(referralRelation);
     expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining(
-        ["id", "referrerId", "referredUserId", "code", "createdAt"],
-      ),
+      expect.arrayContaining(["id", "referrerId", "referredUserId", "code", "createdAt"]),
     );
   });
 
@@ -42,9 +46,22 @@ describe("referral schema 表结构", () => {
     const sql = columnsOf(commission);
     expect(Object.keys(sql)).toEqual(
       expect.arrayContaining([
-        "id", "orderNo", "referrerId", "referredUserId", "baseAmount",
-        "baseCurrency", "rate", "commissionCredits", "cashAmount", "status",
-        "settledAt", "settledBy", "transactionNo", "note", "createdAt", "updatedAt",
+        "id",
+        "orderNo",
+        "referrerId",
+        "referredUserId",
+        "baseAmount",
+        "baseCurrency",
+        "rate",
+        "commissionCredits",
+        "cashAmount",
+        "status",
+        "settledAt",
+        "settledBy",
+        "transactionNo",
+        "note",
+        "createdAt",
+        "updatedAt",
       ]),
     );
   });
@@ -56,7 +73,13 @@ describe("referral schema 表结构（postgres）", () => {
     expect(sql).toBeTruthy();
     expect(Object.keys(sql)).toEqual(
       expect.arrayContaining([
-        "id", "userId", "code", "customRate", "note", "createdAt", "updatedAt",
+        "id",
+        "userId",
+        "code",
+        "customRate",
+        "note",
+        "createdAt",
+        "updatedAt",
       ]),
     );
   });
@@ -64,9 +87,7 @@ describe("referral schema 表结构（postgres）", () => {
   it("referralRelation: 一人一条关系（referredUserId 唯一）", () => {
     const sql = columnsOf(pgReferralRelation);
     expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining(
-        ["id", "referrerId", "referredUserId", "code", "createdAt"],
-      ),
+      expect.arrayContaining(["id", "referrerId", "referredUserId", "code", "createdAt"]),
     );
   });
 
@@ -74,9 +95,22 @@ describe("referral schema 表结构（postgres）", () => {
     const sql = columnsOf(pgCommission);
     expect(Object.keys(sql)).toEqual(
       expect.arrayContaining([
-        "id", "orderNo", "referrerId", "referredUserId", "baseAmount",
-        "baseCurrency", "rate", "commissionCredits", "cashAmount", "status",
-        "settledAt", "settledBy", "transactionNo", "note", "createdAt", "updatedAt",
+        "id",
+        "orderNo",
+        "referrerId",
+        "referredUserId",
+        "baseAmount",
+        "baseCurrency",
+        "rate",
+        "commissionCredits",
+        "cashAmount",
+        "status",
+        "settledAt",
+        "settledBy",
+        "transactionNo",
+        "note",
+        "createdAt",
+        "updatedAt",
       ]),
     );
   });
@@ -88,7 +122,13 @@ describe("referral schema 表结构（mysql）", () => {
     expect(sql).toBeTruthy();
     expect(Object.keys(sql)).toEqual(
       expect.arrayContaining([
-        "id", "userId", "code", "customRate", "note", "createdAt", "updatedAt",
+        "id",
+        "userId",
+        "code",
+        "customRate",
+        "note",
+        "createdAt",
+        "updatedAt",
       ]),
     );
   });
@@ -96,9 +136,7 @@ describe("referral schema 表结构（mysql）", () => {
   it("referralRelation: 一人一条关系（referredUserId 唯一）", () => {
     const sql = columnsOf(mysqlReferralRelation);
     expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining(
-        ["id", "referrerId", "referredUserId", "code", "createdAt"],
-      ),
+      expect.arrayContaining(["id", "referrerId", "referredUserId", "code", "createdAt"]),
     );
   });
 
@@ -106,9 +144,22 @@ describe("referral schema 表结构（mysql）", () => {
     const sql = columnsOf(mysqlCommission);
     expect(Object.keys(sql)).toEqual(
       expect.arrayContaining([
-        "id", "orderNo", "referrerId", "referredUserId", "baseAmount",
-        "baseCurrency", "rate", "commissionCredits", "cashAmount", "status",
-        "settledAt", "settledBy", "transactionNo", "note", "createdAt", "updatedAt",
+        "id",
+        "orderNo",
+        "referrerId",
+        "referredUserId",
+        "baseAmount",
+        "baseCurrency",
+        "rate",
+        "commissionCredits",
+        "cashAmount",
+        "status",
+        "settledAt",
+        "settledBy",
+        "transactionNo",
+        "note",
+        "createdAt",
+        "updatedAt",
       ]),
     );
   });

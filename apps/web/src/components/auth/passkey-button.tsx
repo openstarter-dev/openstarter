@@ -48,7 +48,13 @@ export function PasskeyButton(_props: PasskeyButtonProps) {
   };
 
   return (
-    <Button className="w-full" disabled={submitting} onClick={handleSignIn} type="button" variant="outline">
+    <Button
+      className="w-full"
+      disabled={submitting}
+      onClick={handleSignIn}
+      type="button"
+      variant="outline"
+    >
       <Fingerprint aria-hidden="true" className="size-4" />
       {submitting ? m["common.sign.passkey_waiting"]() : m["common.sign.passkey_title"]()}
     </Button>

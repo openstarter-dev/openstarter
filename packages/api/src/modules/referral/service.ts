@@ -36,23 +36,28 @@ function generateReferralCode(): string {
 }
 
 /** 绑定推荐关系（注册后一次）。返回 { ok: true } 或 { ok: false, error }。 */
-export async function bindReferral(
-  params: { code: string; userId: string },
-): Promise<{ error?: BindReferralError; ok: boolean }> {
+export async function bindReferral(params: {
+  code: string;
+  userId: string;
+}): Promise<{ error?: BindReferralError; ok: boolean }> {
   const { code, userId } = params;
   const [codeRow] = await db().select().from(referral).where(eq(referral.code, code)).limit(1);
   if (!codeRow) return { error: BindReferralError.INVALID_CODE, ok: false };
   if (codeRow.userId === userId) return { error: BindReferralError.SELF_REFERRAL, ok: false };
 
   const [myRelation] = await db()
-    .select().from(referralRelation)
-    .where(eq(referralRelation.referredUserId, userId)).limit(1);
+    .select()
+    .from(referralRelation)
+    .where(eq(referralRelation.referredUserId, userId))
+    .limit(1);
   if (myRelation) return { error: BindReferralError.ALREADY_REFERRED, ok: false };
 
   // 防二级：码主人自己不能有推荐人。
   const [referrerRelation] = await db()
-    .select().from(referralRelation)
-    .where(eq(referralRelation.referredUserId, codeRow.userId)).limit(1);
+    .select()
+    .from(referralRelation)
+    .where(eq(referralRelation.referredUserId, codeRow.userId))
+    .limit(1);
   if (referrerRelation) return { error: BindReferralError.NO_SECOND_LEVEL, ok: false };
 
   await db().insert(referralRelation).values({
@@ -80,11 +85,18 @@ export async function getMyReferralStats(userId: string): Promise<{
     .select({ credits: commission.commissionCredits, status: commission.status })
     .from(commission)
     .where(eq(commission.referrerId, userId));
-  const pendingCredits = rows.filter((r) => r.status === CommissionStatus.PENDING)
+  const pendingCredits = rows
+    .filter((r) => r.status === CommissionStatus.PENDING)
     .reduce((sum, r) => sum + r.credits, 0);
-  const settledCredits = rows.filter((r) => r.status === CommissionStatus.SETTLED)
+  const settledCredits = rows
+    .filter((r) => r.status === CommissionStatus.SETTLED)
     .reduce((sum, r) => sum + r.credits, 0);
-  return { pendingCredits, referredCount, settledCredits, totalCredits: pendingCredits + settledCredits };
+  return {
+    pendingCredits,
+    referredCount,
+    settledCredits,
+    totalCredits: pendingCredits + settledCredits,
+  };
 }
 
 export interface ListCommissionsParams {
@@ -94,12 +106,14 @@ export interface ListCommissionsParams {
 }
 
 export interface ListCommissionsResult {
-  items: typeof commission.$inferSelect[];
+  items: (typeof commission.$inferSelect)[];
   total: number;
 }
 
 /** 分页返回当前用户的佣金流水，按创建时间倒序。 */
-export async function listMyCommissions(params: ListCommissionsParams): Promise<ListCommissionsResult> {
+export async function listMyCommissions(
+  params: ListCommissionsParams,
+): Promise<ListCommissionsResult> {
   const { userId, page, pageSize } = params;
   const where = eq(commission.referrerId, userId);
 
@@ -124,7 +138,7 @@ export interface ListRelationsParams {
 }
 
 export interface ListRelationsResult {
-  items: typeof referralRelation.$inferSelect[];
+  items: (typeof referralRelation.$inferSelect)[];
   total: number;
 }
 

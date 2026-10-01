@@ -24,12 +24,7 @@ import {
   type ReferralConfig,
 } from "./commission";
 
-import {
-  commission,
-  config,
-  referral,
-  referralRelation,
-} from "@openstarter/db/schema";
+import { commission, config, referral, referralRelation } from "@openstarter/db/schema";
 
 /** 已支付订单的最小字段（来自 webhook 编排的 {@link NewOrder} 子集，避免硬依赖 payment 模块）。 */
 export interface PaidOrder {

@@ -17,10 +17,7 @@ function ReferralEntryRow() {
   const { t } = useTranslation();
 
   return (
-    <Button
-      onPress={() => router.push("/(tabs)/profile/referral")}
-      variant="outline"
-    >
+    <Button onPress={() => router.push("/(tabs)/profile/referral")} variant="outline">
       <Text>{t("settings.referral.title")}</Text>
     </Button>
   );

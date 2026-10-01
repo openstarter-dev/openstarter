@@ -64,9 +64,7 @@ export const Route = createFileRoute("/admin")({
   beforeLoad: async ({ context: { queryClient } }) => {
     const [session, permissions] = await Promise.all([
       authClient.getSession(),
-      queryClient
-        .ensureQueryData(user.queries.permissions())
-        .catch(() => [] as string[]),
+      queryClient.ensureQueryData(user.queries.permissions()).catch(() => [] as string[]),
     ]);
 
     if (!session.data) {

@@ -6,7 +6,14 @@
 import type { Database } from "@openstarter/db/server";
 import { beforeAll, beforeEach, afterAll, describe, expect, it, vi } from "vitest";
 
-import { commission, config, order, referral, referralRelation, subscription } from "@openstarter/db/schema";
+import {
+  commission,
+  config,
+  order,
+  referral,
+  referralRelation,
+  subscription,
+} from "@openstarter/db/schema";
 import { getUuid } from "@openstarter/shared/id";
 
 import { handlePaymentEvent } from "./webhook";
@@ -38,10 +45,12 @@ vi.mock("@openstarter/db/server", async (importOriginal) => {
 });
 
 /** 在内存库中插入 userA(referrer) + userB(referred) + 推荐关系 + 默认 enabled 配置。 */
-async function seedReferralFixture(overrides: {
-  config?: { enabled: boolean; defaultRate: number };
-  customRate?: number | null;
-} = {}) {
+async function seedReferralFixture(
+  overrides: {
+    config?: { enabled: boolean; defaultRate: number };
+    customRate?: number | null;
+  } = {},
+) {
   const db = state.database!;
   // 推荐人 A 的 referral 行
   await db.insert(referral).values({

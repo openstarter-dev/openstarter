@@ -100,7 +100,8 @@ export default function ReferralScreen() {
   const me = meQuery.data;
   const commissions = commissionsQuery.data?.items ?? [];
   const commissionsTotal = commissionsQuery.data?.total ?? 0;
-  const filtered = filter === "all" ? commissions : commissions.filter((item) => item.status === filter);
+  const filtered =
+    filter === "all" ? commissions : commissions.filter((item) => item.status === filter);
 
   const handleCopy = async () => {
     if (!me.link) return;
@@ -187,32 +188,36 @@ export default function ReferralScreen() {
                 {t("settings.referral.no_records")}
               </Text>
             ) : (
-              filtered.map((item: { id: string; status: string; commissionCredits: number; createdAt: string }) => (
-                <View
-                  className="flex-row items-center justify-between py-1.5"
-                  key={item.id}
-                >
-                  <View className="flex-1 flex-col">
-                    <Text className="text-foreground text-sm dark:text-dark-foreground">
-                      {t(COMMISSION_STATUS_LABEL[item.status] ?? item.status)}
-                    </Text>
-                    <Text className="text-muted-foreground text-xs dark:text-dark-muted-foreground">
-                      {item.createdAt}
+              filtered.map(
+                (item: {
+                  id: string;
+                  status: string;
+                  commissionCredits: number;
+                  createdAt: string;
+                }) => (
+                  <View className="flex-row items-center justify-between py-1.5" key={item.id}>
+                    <View className="flex-1 flex-col">
+                      <Text className="text-foreground text-sm dark:text-dark-foreground">
+                        {t(COMMISSION_STATUS_LABEL[item.status] ?? item.status)}
+                      </Text>
+                      <Text className="text-muted-foreground text-xs dark:text-dark-muted-foreground">
+                        {item.createdAt}
+                      </Text>
+                    </View>
+                    <Text
+                      className={
+                        item.status === "settled"
+                          ? "font-medium text-sm text-success dark:text-dark-success"
+                          : item.status === "void"
+                            ? "font-medium text-sm text-destructive dark:text-dark-destructive"
+                            : "font-medium text-sm text-muted-foreground dark:text-dark-muted-foreground"
+                      }
+                    >
+                      {item.commissionCredits}
                     </Text>
                   </View>
-                  <Text
-                    className={
-                      item.status === "settled"
-                        ? "font-medium text-sm text-success dark:text-dark-success"
-                        : item.status === "void"
-                          ? "font-medium text-sm text-destructive dark:text-dark-destructive"
-                          : "font-medium text-sm text-muted-foreground dark:text-dark-muted-foreground"
-                    }
-                  >
-                    {item.commissionCredits}
-                  </Text>
-                </View>
-              ))
+                ),
+              )
             )}
             {commissionsTotal > 0 && (
               <View className="flex-row justify-end gap-2 mt-3">

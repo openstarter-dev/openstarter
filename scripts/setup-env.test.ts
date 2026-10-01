@@ -44,7 +44,9 @@ describe("materializeContent", () => {
   });
 
   it("未注入密钥时替换值满足 ≥32 字符", () => {
-    const out = materializeContent(`BETTER_AUTH_SECRET=replace-with-a-strong-secret-at-least-32-chars`);
+    const out = materializeContent(
+      `BETTER_AUTH_SECRET=replace-with-a-strong-secret-at-least-32-chars`,
+    );
     expect(out.startsWith("BETTER_AUTH_SECRET=")).toBe(true);
     expect(out.slice("BETTER_AUTH_SECRET=".length).length).toBeGreaterThanOrEqual(32);
   });

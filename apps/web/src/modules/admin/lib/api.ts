@@ -55,11 +55,8 @@ type CreditListData = NonNullable<
 >;
 export type AdminCreditRow = CreditListData["items"][number];
 
-type UserListData = NonNullable<
-  InferResponseType<typeof client.api.admin.users.$get, 200>["data"]
->;
+type UserListData = NonNullable<InferResponseType<typeof client.api.admin.users.$get, 200>["data"]>;
 export type AdminUserRow = UserListData["items"][number];
-
 
 /** admin 模型创建请求体，直接从后端 zod schema 推导。 */
 export type AiModelPayload = InferRequestType<typeof createAiModel>["json"];

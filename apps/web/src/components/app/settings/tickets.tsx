@@ -185,7 +185,9 @@ export function TicketsPage() {
             </div>
 
             {detail.ticket.status === "closed" ? (
-              <p className="text-muted-foreground text-sm">{m["settings.tickets.closed_notice"]()}</p>
+              <p className="text-muted-foreground text-sm">
+                {m["settings.tickets.closed_notice"]()}
+              </p>
             ) : (
               <div className="space-y-2">
                 <Label htmlFor="ticket-reply">{m["settings.tickets.reply_placeholder"]()}</Label>

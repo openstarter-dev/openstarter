@@ -10,7 +10,14 @@ import {
   insertUser,
   resetApiTestDatabase,
 } from "../../test/api-test-database";
-import { BindReferralError, bindReferral, getMyReferralStats, getOrCreateReferralCode, listMyCommissions, listMyRelations } from "./service";
+import {
+  BindReferralError,
+  bindReferral,
+  getMyReferralStats,
+  getOrCreateReferralCode,
+  listMyCommissions,
+  listMyRelations,
+} from "./service";
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,

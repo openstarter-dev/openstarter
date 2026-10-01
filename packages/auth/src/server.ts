@@ -50,7 +50,6 @@ const LOGIN_METHOD_BY_PATH = new Map<string, AuthProvider>([
   ["/one-tap/callback", AuthProvider.GOOGLE],
 ]) as Map<string, AuthProvider>;
 
-
 // ─── 运行时配置读取（Runtime config-driven enablement）──────────────────────────
 //
 // 此前 OAuth provider 与无密码插件是否注册仅由 `env` 决定（client_id/secret 是否齐备），

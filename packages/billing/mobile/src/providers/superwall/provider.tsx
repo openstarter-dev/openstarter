@@ -22,12 +22,7 @@ export interface SuperwallProviderProps {
   locale?: string;
 }
 
-export const Provider = ({
-  children,
-  loading,
-  error,
-  locale,
-}: SuperwallProviderProps) => {
+export const Provider = ({ children, loading, error, locale }: SuperwallProviderProps) => {
   // Provider 挂载即置位：SDK 初始化由 SuperwallProvider 内部完成（zustand store），
   // 本标志只表达「已进入初始化流程」，与 RC 的同步置位语义一致。
   useEffect(() => {
@@ -47,11 +42,7 @@ export const Provider = ({
     >
       {loading && <SuperwallLoading>{loading}</SuperwallLoading>}
       {error && <SuperwallError>{error}</SuperwallError>}
-      {loading || error ? (
-        <SuperwallLoaded>{children}</SuperwallLoaded>
-      ) : (
-        children
-      )}
+      {loading || error ? <SuperwallLoaded>{children}</SuperwallLoaded> : children}
     </SuperwallProvider>
   );
 };

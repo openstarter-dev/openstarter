@@ -301,7 +301,9 @@ function AdminAiModelsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ai-model-display-name">{m["admin.ai_models.display_name_field"]()}</Label>
+                <Label htmlFor="ai-model-display-name">
+                  {m["admin.ai_models.display_name_field"]()}
+                </Label>
                 <Input
                   id="ai-model-display-name"
                   onChange={(e) => setForm({ ...form, displayName: e.target.value })}
@@ -311,7 +313,9 @@ function AdminAiModelsPage() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="ai-model-media-type">{m["admin.ai_models.media_type_field"]()}</Label>
+                  <Label htmlFor="ai-model-media-type">
+                    {m["admin.ai_models.media_type_field"]()}
+                  </Label>
                   <Select
                     onValueChange={(value) => setForm({ ...form, mediaType: value as MediaType })}
                     value={form.mediaType}
@@ -329,7 +333,9 @@ function AdminAiModelsPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="ai-model-price">{m["admin.ai_models.credit_price_field"]()}</Label>
+                  <Label htmlFor="ai-model-price">
+                    {m["admin.ai_models.credit_price_field"]()}
+                  </Label>
                   <Input
                     id="ai-model-price"
                     inputMode="numeric"
@@ -340,7 +346,9 @@ function AdminAiModelsPage() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="ai-model-max-tokens">{m["admin.ai_models.max_output_tokens_field"]()}</Label>
+                  <Label htmlFor="ai-model-max-tokens">
+                    {m["admin.ai_models.max_output_tokens_field"]()}
+                  </Label>
                   <Input
                     id="ai-model-max-tokens"
                     inputMode="numeric"
@@ -350,7 +358,9 @@ function AdminAiModelsPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="ai-model-sort-order">{m["admin.ai_models.sort_order_field"]()}</Label>
+                  <Label htmlFor="ai-model-sort-order">
+                    {m["admin.ai_models.sort_order_field"]()}
+                  </Label>
                   <Input
                     id="ai-model-sort-order"
                     inputMode="numeric"
@@ -360,7 +370,9 @@ function AdminAiModelsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ai-model-options-schema">{m["admin.ai_models.options_schema_field"]()}</Label>
+                <Label htmlFor="ai-model-options-schema">
+                  {m["admin.ai_models.options_schema_field"]()}
+                </Label>
                 <Textarea
                   id="ai-model-options-schema"
                   onChange={(e) => setForm({ ...form, optionsSchema: e.target.value })}
@@ -385,7 +397,9 @@ function AdminAiModelsPage() {
                   id="ai-model-form-enabled"
                   onChange={(checked) => setForm({ ...form, enabled: checked })}
                 />
-                <Label htmlFor="ai-model-form-enabled">{m["admin.ai_models.enabled_field"]()}</Label>
+                <Label htmlFor="ai-model-form-enabled">
+                  {m["admin.ai_models.enabled_field"]()}
+                </Label>
               </div>
             </div>
           ) : null}

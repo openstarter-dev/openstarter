@@ -33,15 +33,11 @@ const notWired = (fn: string): Error =>
     `billing/mobile server upsert "${fn}" is not wired yet (docs/superpowers/specs/2026-09-08-mobile-billing-provider-strategy-design.md §5/§8)`,
   );
 
-export const upsertCustomer = async (
-  _input: UpsertCustomerInput,
-): Promise<[{ id: string }]> => {
+export const upsertCustomer = async (_input: UpsertCustomerInput): Promise<[{ id: string }]> => {
   throw notWired("upsertCustomer");
 };
 
-export const upsertOrders = async (
-  _orders: (UpsertOrderInput | null)[],
-): Promise<void> => {
+export const upsertOrders = async (_orders: (UpsertOrderInput | null)[]): Promise<void> => {
   throw notWired("upsertOrders");
 };
 
@@ -51,14 +47,10 @@ export const upsertSubscriptions = async (
   throw notWired("upsertSubscriptions");
 };
 
-export const upsertOrder = async (
-  _order: UpsertOrderInput,
-): Promise<void> => {
+export const upsertOrder = async (_order: UpsertOrderInput): Promise<void> => {
   throw notWired("upsertOrder");
 };
 
-export const upsertSubscription = async (
-  _subscription: UpsertSubscriptionInput,
-): Promise<void> => {
+export const upsertSubscription = async (_subscription: UpsertSubscriptionInput): Promise<void> => {
   throw notWired("upsertSubscription");
 };

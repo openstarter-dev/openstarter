@@ -6,8 +6,7 @@ export const HttpStatusCode = {
   INTERNAL_SERVER_ERROR: 500,
 } as const;
 
-export type HttpStatusCode =
-  (typeof HttpStatusCode)[keyof typeof HttpStatusCode];
+export type HttpStatusCode = (typeof HttpStatusCode)[keyof typeof HttpStatusCode];
 
 export class HttpException extends Error {
   readonly status: HttpStatusCode;

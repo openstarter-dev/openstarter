@@ -143,7 +143,9 @@ function AdminSettingsPage() {
             size="sm"
             type="button"
           >
-            {saveMutation.isPending ? m["admin.settings.saving"]() : m["admin.settings.save_changes"]()}
+            {saveMutation.isPending
+              ? m["admin.settings.saving"]()
+              : m["admin.settings.save_changes"]()}
           </Button>
         }
         description={m["admin.settings.description"]()}
@@ -214,7 +216,9 @@ function AdminSettingsPage() {
             );
           })}
           {tabGroups.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{m["admin.settings.no_settings_for_section"]()}</p>
+            <p className="text-muted-foreground text-sm">
+              {m["admin.settings.no_settings_for_section"]()}
+            </p>
           ) : null}
         </div>
       </div>

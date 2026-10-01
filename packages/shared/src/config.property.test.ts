@@ -104,8 +104,19 @@ describe("getSettingGroups — RevenueCat group", () => {
 
 describe("getSettingGroups — AI provider groups", () => {
   it("exposes the AI provider groups on the ai tab", () => {
-    const groups = getSettingGroups().filter((g) => g.tab === "ai").map((g) => g.name);
-    for (const name of ["openai", "anthropic", "google", "openrouter", "deepseek", "ollama", "replicate", "fal"]) {
+    const groups = getSettingGroups()
+      .filter((g) => g.tab === "ai")
+      .map((g) => g.name);
+    for (const name of [
+      "openai",
+      "anthropic",
+      "google",
+      "openrouter",
+      "deepseek",
+      "ollama",
+      "replicate",
+      "fal",
+    ]) {
       expect(groups).toContain(name);
     }
   });

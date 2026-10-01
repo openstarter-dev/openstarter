@@ -62,9 +62,7 @@ function AdminOrdersPage() {
       ),
       columnHelper.accessor("paymentProvider", {
         header: () => m["admin.orders.provider_col"](),
-        cell: (info) => (
-          <span className="text-muted-foreground">{info.getValue()}</span>
-        ),
+        cell: (info) => <span className="text-muted-foreground">{info.getValue()}</span>,
       }),
       columnHelper.accessor("status", {
         header: () => m["admin.orders.status_col"](),

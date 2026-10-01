@@ -92,7 +92,9 @@ export function ApiKeysPage() {
                   <TableHead>{m["settings.apikeys.title_col"]()}</TableHead>
                   <TableHead>{m["settings.apikeys.prefix_col"]()}</TableHead>
                   <TableHead>{m["settings.apikeys.created_col"]()}</TableHead>
-                  <TableHead className="text-right">{m["settings.apikeys.actions_col"]()}</TableHead>
+                  <TableHead className="text-right">
+                    {m["settings.apikeys.actions_col"]()}
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -149,7 +151,9 @@ export function ApiKeysPage() {
               onClick={() => createMutation.mutate(title.trim())}
               type="button"
             >
-              {createMutation.isPending ? m["settings.apikeys.creating"]() : m["settings.apikeys.create"]()}
+              {createMutation.isPending
+                ? m["settings.apikeys.creating"]()
+                : m["settings.apikeys.create"]()}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -75,7 +75,9 @@ export function SessionsPage() {
             type="button"
             variant="outline"
           >
-            {revokingOthers ? m["settings.sessions.revoking_all"]() : m["settings.sessions.revoke_all"]()}
+            {revokingOthers
+              ? m["settings.sessions.revoking_all"]()
+              : m["settings.sessions.revoke_all"]()}
           </Button>
         )}
 
@@ -92,9 +94,12 @@ export function SessionsPage() {
               <div className="flex items-center justify-between px-4 py-3" key={session.id}>
                 <div className="flex flex-col gap-0.5">
                   <span className="font-medium text-sm">
-                    {session.userAgent?.split("/").at(0)?.trim() || m["settings.sessions.unknown_device"]()}
+                    {session.userAgent?.split("/").at(0)?.trim() ||
+                      m["settings.sessions.unknown_device"]()}
                     {isCurrent && (
-                      <span className="ml-2 text-primary text-xs">{m["settings.sessions.current"]()}</span>
+                      <span className="ml-2 text-primary text-xs">
+                        {m["settings.sessions.current"]()}
+                      </span>
                     )}
                   </span>
                   <span className="text-muted-foreground text-xs">

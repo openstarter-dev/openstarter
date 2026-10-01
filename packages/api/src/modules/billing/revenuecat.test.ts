@@ -8,17 +8,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // mock requireAuth：绕开 @openstarter/auth 的 import 期 env 校验（BETTER_AUTH_SECRET
 // 等与本套件无关；同 checkout.test.ts 的做法）。
-vi.mock("../../middleware/auth", () => ({ requireAuth: (_c: unknown, next: () => Promise<void>) => next() }));
+vi.mock("../../middleware/auth", () => ({
+  requireAuth: (_c: unknown, next: () => Promise<void>) => next(),
+}));
 
 // mock 配置读取：默认未启用 / 无 secret，各用例按需覆写。
 const configsState = vi.hoisted(() => ({
   map: {} as Record<string, string>,
 }));
 vi.mock("@openstarter/shared/config", async () => {
-  const actual =
-    await vi.importActual<typeof import("@openstarter/shared/config")>(
-      "@openstarter/shared/config",
-    );
+  const actual = await vi.importActual<typeof import("@openstarter/shared/config")>(
+    "@openstarter/shared/config",
+  );
   return {
     ...actual,
     getAllConfigs: () => Promise.resolve(configsState.map),
@@ -64,10 +65,7 @@ function postWebhook(headers: Record<string, string>, body: string) {
 function enabledHeaders() {
   return {
     "content-type": "application/json",
-    "x-revenuecat-webhook-signature": signBody(
-      Math.floor(Date.now() / 1000),
-      RAW_BODY,
-    ),
+    "x-revenuecat-webhook-signature": signBody(Math.floor(Date.now() / 1000), RAW_BODY),
   };
 }
 
@@ -129,10 +127,7 @@ describe("POST /payment/webhook/revenuecat", () => {
     expect(data.data?.received).toBe(true);
     expect(mapRevenueCatEventMock).toHaveBeenCalledTimes(1);
 
-    const payload = mapRevenueCatEventMock.mock.calls[0]?.[0] as Record<
-      string,
-      unknown
-    >;
+    const payload = mapRevenueCatEventMock.mock.calls[0]?.[0] as Record<string, unknown>;
     expect(payload).toEqual({ event: { app_user_id: "user-1", type: "TEST" } });
   });
 });

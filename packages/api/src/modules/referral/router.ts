@@ -39,8 +39,8 @@ export const referralRouter = new Hono()
     const { code } = c.req.valid("json");
     const res = await bindReferral({ code, userId: c.get("userId") });
     if (!res.ok) {
-      const status = res.error === "INVALID_CODE" ? 404
-        : res.error === "ALREADY_REFERRED" ? 409 : 422;
+      const status =
+        res.error === "INVALID_CODE" ? 404 : res.error === "ALREADY_REFERRED" ? 409 : 422;
       return c.json(respErr(res.error ?? "BIND_FAILED"), status);
     }
     return c.json(respData(null));

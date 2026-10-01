@@ -90,7 +90,9 @@ function TwoFactorPage() {
           />
         </div>
         <Button className="w-full" disabled={submitting} onClick={handleVerifyTotp} type="button">
-          {submitting ? m["common.sign.two_factor_verifying"]() : m["common.sign.two_factor_verify"]()}
+          {submitting
+            ? m["common.sign.two_factor_verifying"]()
+            : m["common.sign.two_factor_verify"]()}
         </Button>
         <Button
           className="w-full"

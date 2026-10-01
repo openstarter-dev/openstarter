@@ -108,10 +108,7 @@ export function DataTable<TData extends RowData>({
             <div className="space-y-2">
               <p className="font-medium text-sm">{m["admin.table.columns"]()}</p>
               {table.getAllLeafColumns().map((column) => (
-                <label
-                  className="flex items-center gap-2 text-sm"
-                  key={column.id}
-                >
+                <label className="flex items-center gap-2 text-sm" key={column.id}>
                   <Checkbox
                     aria-label={column.id}
                     checked={column.getIsVisible()}
@@ -133,7 +130,10 @@ export function DataTable<TData extends RowData>({
         <Table>
           <TableHeader>
             {headerRows.map((headerGroup) => (
-              <TableRow className={virtualized ? "sticky top-0 bg-background z-10" : undefined} key={headerGroup.id}>
+              <TableRow
+                className={virtualized ? "sticky top-0 bg-background z-10" : undefined}
+                key={headerGroup.id}
+              >
                 {headerGroup.headers
                   .filter((header) => header.column.getIsVisible())
                   .map((header) => (

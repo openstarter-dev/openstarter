@@ -260,7 +260,9 @@ function AdminRolesPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{m["admin.roles.manage_permissions_title"]()}</DialogTitle>
-            <DialogDescription>{m["admin.roles.manage_permissions_description"]()}</DialogDescription>
+            <DialogDescription>
+              {m["admin.roles.manage_permissions_description"]()}
+            </DialogDescription>
           </DialogHeader>
           <div className="max-h-80 space-y-2 overflow-y-auto">
             {permissions.map((permission) => (

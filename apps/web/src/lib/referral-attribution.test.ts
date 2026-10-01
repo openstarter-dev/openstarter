@@ -32,9 +32,7 @@ describe("referral 归因存储", () => {
   });
   it("bindReferralAfterSignup 有码时 POST /api/referral/bind", async () => {
     captureReferralAttribution("testcode");
-    global.fetch = vi.fn(() =>
-      Promise.resolve({ ok: true, status: 200 } as Response),
-    );
+    global.fetch = vi.fn(() => Promise.resolve({ ok: true, status: 200 } as Response));
     await bindReferralAfterSignup();
     expect(fetch).toHaveBeenCalledWith(
       "/api/referral/bind",

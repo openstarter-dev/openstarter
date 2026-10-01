@@ -32,10 +32,7 @@ export function LanguageSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {LANGUAGE_OPTIONS.map((option) => (
-          <DropdownMenuItem
-            key={option.value}
-            onClick={() => handleLanguageChange(option.value)}
-          >
+          <DropdownMenuItem key={option.value} onClick={() => handleLanguageChange(option.value)}>
             <span className={currentLocale === option.value ? "font-medium" : ""}>
               {option.label}
             </span>

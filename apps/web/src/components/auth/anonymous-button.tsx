@@ -36,7 +36,13 @@ export function AnonymousButton({ callbackURL = "/dashboard" }: AnonymousButtonP
   };
 
   return (
-    <Button className="w-full" disabled={submitting} onClick={handleSignIn} type="button" variant="outline">
+    <Button
+      className="w-full"
+      disabled={submitting}
+      onClick={handleSignIn}
+      type="button"
+      variant="outline"
+    >
       <Ghost aria-hidden="true" className="size-4" />
       {submitting ? m["common.sign.guest_creating"]() : m["common.sign.guest_title"]()}
     </Button>

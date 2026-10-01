@@ -36,7 +36,10 @@ vi.mock("@openstarter/auth", () => ({
 }));
 
 vi.mock("../../../middleware/auth", () => {
-  const requireAuth = async (c: { set: (k: string, v: unknown) => void; req: { header: (h: string) => string | null } }, next: () => Promise<void>) => {
+  const requireAuth = async (
+    c: { set: (k: string, v: unknown) => void; req: { header: (h: string) => string | null } },
+    next: () => Promise<void>,
+  ) => {
     c.set("session", null);
     c.set("userId", c.req.header("x-test-user-id") ?? "admin-user");
     await next();
@@ -45,9 +48,14 @@ vi.mock("../../../middleware/auth", () => {
 });
 
 vi.mock("../../../middleware/rbac", () => {
-  const requirePermission = () => async (_c: { set: (k: string, v: unknown) => void; req: { header: (h: string) => string | null } }, next: () => Promise<void>) => {
-    await next();
-  };
+  const requirePermission =
+    () =>
+    async (
+      _c: { set: (k: string, v: unknown) => void; req: { header: (h: string) => string | null } },
+      next: () => Promise<void>,
+    ) => {
+      await next();
+    };
   return { requirePermission };
 });
 
@@ -79,8 +87,7 @@ vi.mock("@openstarter/billing-web", () => {
       },
     },
     getReferralConfig: vi.fn(async () => state.savedConfig),
-    resolveRate: (custom: number | null | undefined, def: number) =>
-      custom ?? def,
+    resolveRate: (custom: number | null | undefined, def: number) => custom ?? def,
     calcCommissionCredits: (base: number, rate: number) => Math.round((base * rate) / 10000),
   };
 });
@@ -230,7 +237,7 @@ function request(path: string, init: RequestInit = {}) {
 
 async function insertTestUser(userId: string, email: string) {
   await state.database!.run(
-    sql`INSERT INTO user (id, name, email, email_verified) VALUES (${userId}, ${'Test'}, ${email}, 1)`,
+    sql`INSERT INTO user (id, name, email, email_verified) VALUES (${userId}, ${"Test"}, ${email}, 1)`,
   );
 }
 
@@ -258,7 +265,10 @@ describe("admin referral", () => {
   it("GET config → 返回当前配置", async () => {
     const res = await request("/config");
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { code: number; data: { enabled: boolean; defaultRate: number; minSettleCredits: number } };
+    const body = (await res.json()) as {
+      code: number;
+      data: { enabled: boolean; defaultRate: number; minSettleCredits: number };
+    };
     expect(body.code).toBe(0);
     expect(body.data.enabled).toBe(true);
     expect(body.data.defaultRate).toBe(state.savedConfig.defaultRate);
@@ -301,9 +311,11 @@ describe("admin referral", () => {
     expect(body.data.transactionNo).toBe("tx-1");
 
     // Verify commission status changed to settled
-    const rows = await state.database!.all(
+    const rows = (await state.database!.all(
       sql`SELECT status, transaction_no, settled_by FROM commission WHERE id = ${commissionId}`,
-    ) as Array<{ status: string; transaction_no: string; settled_by: string } & { [key: string]: unknown }>;
+    )) as Array<
+      { status: string; transaction_no: string; settled_by: string } & { [key: string]: unknown }
+    >;
     const row = rows[0];
     if (!row) throw new Error("commission row not found");
     expect(row.status).toBe("settled");
@@ -347,17 +359,17 @@ describe("admin referral", () => {
     expect(voidBody.code).toBe(0);
 
     // Verify status changed to void
-    const voidRows = await state.database!.all(
+    const voidRows = (await state.database!.all(
       sql`SELECT status FROM commission WHERE id = ${commissionId}`,
-    ) as Array<{ status: string } & { [key: string]: unknown }>;
+    )) as Array<{ status: string } & { [key: string]: unknown }>;
     const voidRow = voidRows[0];
     if (!voidRow) throw new Error("commission row not found");
     expect(voidRow.status).toBe("void");
 
     // Verify no credit records for referral scene
-    const credits = await state.database!.all(
+    const credits = (await state.database!.all(
       sql`SELECT * FROM credit WHERE transaction_scene = 'referral'`,
-    ) as Array<Record<string, unknown>>;
+    )) as Array<Record<string, unknown>>;
     expect(credits.length).toBe(0);
   });
 
@@ -378,9 +390,9 @@ describe("admin referral", () => {
     expect(setRes.status).toBe(200);
 
     // 回读
-    const rows1 = await state.database!.all(
+    const rows1 = (await state.database!.all(
       sql`SELECT custom_rate FROM referral WHERE user_id = 'user-1'`,
-    ) as Array<{ custom_rate: number | null } & { [key: string]: unknown }>;
+    )) as Array<{ custom_rate: number | null } & { [key: string]: unknown }>;
     const row1 = rows1[0];
     if (!row1) throw new Error("referral row not found");
     expect(row1.custom_rate).toBe(3000);
@@ -392,9 +404,9 @@ describe("admin referral", () => {
     });
     expect(clearRes.status).toBe(200);
 
-    const rows2 = await state.database!.all(
+    const rows2 = (await state.database!.all(
       sql`SELECT custom_rate FROM referral WHERE user_id = 'user-1'`,
-    ) as Array<{ custom_rate: number | null } & { [key: string]: unknown }>;
+    )) as Array<{ custom_rate: number | null } & { [key: string]: unknown }>;
     const row2 = rows2[0];
     if (!row2) throw new Error("referral row not found");
     expect(row2.custom_rate).toBeNull();
@@ -432,9 +444,9 @@ describe("admin referral", () => {
     expect(body2.data.id).toBe(body1.data.id);
 
     // 确认 commission 表只有 1 条
-    const countRows = await state.database!.all(
+    const countRows = (await state.database!.all(
       sql`SELECT COUNT(*) as cnt FROM commission WHERE order_no = 'order-manual-1'`,
-    ) as Array<{ cnt: number } & { [key: string]: unknown }>;
+    )) as Array<{ cnt: number } & { [key: string]: unknown }>;
     const countRow = countRows[0];
     if (!countRow) throw new Error("count row not found");
     expect(Number(countRow.cnt)).toBe(1);

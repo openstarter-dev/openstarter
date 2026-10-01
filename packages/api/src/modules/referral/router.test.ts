@@ -159,7 +159,7 @@ function request(path: string, init: RequestInit = {}) {
   return app.request(path, {
     ...init,
     headers: {
-      ...(init.headers as Record<string, string> ?? {}),
+      ...((init.headers as Record<string, string>) ?? {}),
       "content-type": "application/json",
       "x-test-user-id": userId,
     },
@@ -168,7 +168,7 @@ function request(path: string, init: RequestInit = {}) {
 
 async function insertTestUser(userId: string, email: string) {
   await state.database!.run(
-    sql`INSERT INTO user (id, name, email, email_verified) VALUES (${userId}, ${'Test'}, ${email}, 1)`,
+    sql`INSERT INTO user (id, name, email, email_verified) VALUES (${userId}, ${"Test"}, ${email}, 1)`,
   );
 }
 
@@ -179,7 +179,10 @@ describe("referral router composition (mount regression)", () => {
     const response = await request("/referral/me");
     expect(response.status).toBe(200);
 
-    const body = (await response.json()) as { code: number; data: { code: string; link: string; stats: object } };
+    const body = (await response.json()) as {
+      code: number;
+      data: { code: string; link: string; stats: object };
+    };
     expect(body.code).toBe(0);
     expect(body.data.code).toBeDefined();
     expect(body.data.link).toContain("register?ref=");
@@ -197,7 +200,10 @@ describe("referral router composition (mount regression)", () => {
     const response = await request("/referral/commissions?page=1&pageSize=20");
     expect(response.status).toBe(200);
 
-    const body = (await response.json()) as { code: number; data: { items: unknown[]; total: number } };
+    const body = (await response.json()) as {
+      code: number;
+      data: { items: unknown[]; total: number };
+    };
     expect(body.code).toBe(0);
     expect(body.data.items).toEqual([]);
     expect(body.data.total).toBe(0);
@@ -209,7 +215,10 @@ describe("referral router composition (mount regression)", () => {
     const response = await request("/referral/relations?page=1&pageSize=20");
     expect(response.status).toBe(200);
 
-    const body = (await response.json()) as { code: number; data: { items: unknown[]; total: number } };
+    const body = (await response.json()) as {
+      code: number;
+      data: { items: unknown[]; total: number };
+    };
     expect(body.code).toBe(0);
     expect(body.data.items).toEqual([]);
     expect(body.data.total).toBe(0);

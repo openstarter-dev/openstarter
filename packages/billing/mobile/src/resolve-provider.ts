@@ -5,9 +5,7 @@ import { BillingProvider } from "./providers/types";
 
 const VALID_VALUES = Object.values(BillingProvider) as readonly string[];
 
-export function resolveBillingProvider(
-  env: Record<string, string | undefined>,
-): BillingProvider {
+export function resolveBillingProvider(env: Record<string, string | undefined>): BillingProvider {
   const raw = env.EXPO_PUBLIC_BILLING_PROVIDER?.trim();
 
   if (!raw) {

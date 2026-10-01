@@ -39,19 +39,10 @@ export const useCustomer = () => {
   }, []);
 
   // useUser 为响应式订阅（状态经 React 树传播），无需独立推送通道。
-  const addCustomerInfoListener = useCallback(
-    (_listener: () => void) => () => undefined,
-    [],
-  );
+  const addCustomerInfoListener = useCallback((_listener: () => void) => () => undefined, []);
 
   const linkToPortal = useCallback(
-    async ({
-      store,
-      variantId,
-    }: {
-      store: string;
-      variantId?: string;
-    }) => {
+    async ({ store, variantId }: { store: string; variantId?: string }) => {
       if (!Object.values(MobileStore).includes(store as MobileStore)) {
         throw new Error(`Invalid store: ${store}`);
       }

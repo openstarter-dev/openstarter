@@ -9,35 +9,35 @@ describe("resolveBillingProvider", () => {
   });
 
   it("resolves each valid value", () => {
-    expect(
-      resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "revenuecat" }),
-    ).toBe(BillingProvider.REVENUECAT);
-    expect(
-      resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "superwall" }),
-    ).toBe(BillingProvider.SUPERWALL);
+    expect(resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "revenuecat" })).toBe(
+      BillingProvider.REVENUECAT,
+    );
+    expect(resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "superwall" })).toBe(
+      BillingProvider.SUPERWALL,
+    );
   });
 
   it("trims surrounding whitespace", () => {
-    expect(
-      resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: " superwall " }),
-    ).toBe(BillingProvider.SUPERWALL);
+    expect(resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: " superwall " })).toBe(
+      BillingProvider.SUPERWALL,
+    );
   });
 
   it("treats empty string as unset", () => {
-    expect(
-      resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "   " }),
-    ).toBe(BillingProvider.REVENUECAT);
+    expect(resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "   " })).toBe(
+      BillingProvider.REVENUECAT,
+    );
   });
 
   it("throws on unknown values, listing valid ones", () => {
-    expect(() =>
-      resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "wexin" }),
-    ).toThrow(/EXPO_PUBLIC_BILLING_PROVIDER.*revenuecat.*superwall/);
+    expect(() => resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "wexin" })).toThrow(
+      /EXPO_PUBLIC_BILLING_PROVIDER.*revenuecat.*superwall/,
+    );
   });
 
   it("is case-sensitive (rejects mixed case)", () => {
-    expect(() =>
-      resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "RevenueCat" }),
-    ).toThrow(/EXPO_PUBLIC_BILLING_PROVIDER/);
+    expect(() => resolveBillingProvider({ EXPO_PUBLIC_BILLING_PROVIDER: "RevenueCat" })).toThrow(
+      /EXPO_PUBLIC_BILLING_PROVIDER/,
+    );
   });
 });

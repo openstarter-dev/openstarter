@@ -2,7 +2,10 @@
 const STORAGE_KEY = "ref:code";
 const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-interface StoredReferral { at: number; code: string }
+interface StoredReferral {
+  at: number;
+  code: string;
+}
 
 function safeLocalStorage(): Storage | null {
   return typeof window === "undefined" ? null : window.localStorage;

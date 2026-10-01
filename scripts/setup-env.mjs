@@ -90,7 +90,9 @@ export function copyEnvFiles(rootDir, opts = {}) {
     const content = materializeContent(readFileSync(example, "utf8"));
     writeFileSync(target, content);
     created.push(rel);
-    log(`  ✓ 创建 ${rel}${content.includes("BETTER_AUTH_SECRET") ? "（已自动生成 BETTER_AUTH_SECRET）" : ""}`);
+    log(
+      `  ✓ 创建 ${rel}${content.includes("BETTER_AUTH_SECRET") ? "（已自动生成 BETTER_AUTH_SECRET）" : ""}`,
+    );
   }
 
   return { created, skipped };
@@ -101,7 +103,12 @@ export function copyEnvFiles(rootDir, opts = {}) {
  * @param {{ created: string[], skipped: string[] }} result
  */
 export function renderNextSteps(result) {
-  const lines = ["", "后续步骤：", "  1. pnpm install", "  2. 按需编辑各 .env 填写密钥（留空的功能以\"不启用\"姿态运行）"];
+  const lines = [
+    "",
+    "后续步骤：",
+    "  1. pnpm install",
+    '  2. 按需编辑各 .env 填写密钥（留空的功能以"不启用"姿态运行）',
+  ];
   if (result.created.some((p) => p === ".env")) {
     lines.push("  3. pnpm db:migrate    # 将迁移应用到本地 SQLite（file:local.db）");
     lines.push("  4. pnpm dev           # 启动开发服务");

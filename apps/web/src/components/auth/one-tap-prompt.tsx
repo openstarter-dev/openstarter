@@ -24,12 +24,10 @@ export function OneTapPrompt({ callbackURL = "/dashboard" }: OneTapPromptProps) 
     if (!client) {
       return;
     }
-    void client
-      .oneTap({ callbackURL })
-      .catch((error: unknown) => {
-        // One Tap 提示被浏览器拦截/用户已持久拒绝时静默；不打断正常登录流程。
-        console.warn("Google One Tap prompt failed:", error);
-      });
+    void client.oneTap({ callbackURL }).catch((error: unknown) => {
+      // One Tap 提示被浏览器拦截/用户已持久拒绝时静默；不打断正常登录流程。
+      console.warn("Google One Tap prompt failed:", error);
+    });
   }, [callbackURL, configs]);
 
   return null;

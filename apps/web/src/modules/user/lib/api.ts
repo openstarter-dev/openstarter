@@ -11,9 +11,7 @@ import { client } from "@/lib/api";
 import { LIST_PAGE_SIZE } from "@/lib/list-search";
 
 /** 创建 API key 的响应 data（含一次性展示的明文 key），从 RPC 响应推导。 */
-type ApiKeyRow = NonNullable<
-  InferResponseType<typeof client.api.apikeys.$post, 200>["data"]
->;
+type ApiKeyRow = NonNullable<InferResponseType<typeof client.api.apikeys.$post, 200>["data"]>;
 
 /** 用户积分流水行（积分历史列表），从 user.credits 响应推导。 */
 export type CreditHistoryRow = NonNullable<

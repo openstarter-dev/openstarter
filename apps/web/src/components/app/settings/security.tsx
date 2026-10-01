@@ -144,7 +144,9 @@ export function SecurityPage() {
             <passwordForm.Field name="confirmPassword">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name}>{m["settings.security.confirm_new_password"]()}</Label>
+                  <Label htmlFor={field.name}>
+                    {m["settings.security.confirm_new_password"]()}
+                  </Label>
                   <Input
                     autoComplete="new-password"
                     id={field.name}

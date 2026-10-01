@@ -39,9 +39,7 @@ export const authClient = createAuthClient({
 
 type AuthClient = typeof authClient;
 /** better-auth oneTapClient 暴露的动作签名（oneTap(opts?, fetchOptions?)）。 */
-export type OneTapAction = ReturnType<
-  ReturnType<typeof oneTapClient>["getActions"]
->["oneTap"];
+export type OneTapAction = ReturnType<ReturnType<typeof oneTapClient>["getActions"]>["oneTap"];
 /** 实际的 oneTapClient 动作挂载形状：`authClient.oneTap(...)`。 */
 type AuthClientWithOneTap = AuthClient & { oneTap: OneTapAction };
 

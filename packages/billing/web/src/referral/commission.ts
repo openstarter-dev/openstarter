@@ -30,7 +30,12 @@ export const DEFAULT_MIN_SETTLE_CREDITS = 100;
 /** config 表 `referral` 键的 JSON 值校验（系统边界）。 */
 export const referralConfigSchema = z.object({
   enabled: z.boolean().default(true),
-  defaultRate: z.number().int().min(0).max(REFERRAL_RATE_MAX_BPS).default(DEFAULT_REFERRAL_RATE_BPS),
+  defaultRate: z
+    .number()
+    .int()
+    .min(0)
+    .max(REFERRAL_RATE_MAX_BPS)
+    .default(DEFAULT_REFERRAL_RATE_BPS),
   minSettleCredits: z.number().int().min(0).default(DEFAULT_MIN_SETTLE_CREDITS),
 });
 
@@ -40,10 +45,7 @@ export type ReferralConfig = z.infer<typeof referralConfigSchema>;
 export const settleCommissionSchema = z.object({ note: z.string().max(200).optional() });
 
 /** 解析生效比例：用户级覆盖（代理）优先，否则全局默认。 */
-export function resolveRate(
-  customRate: number | null | undefined,
-  defaultRate: number,
-): number {
+export function resolveRate(customRate: number | null | undefined, defaultRate: number): number {
   if (customRate === null || customRate === undefined) {
     return defaultRate;
   }

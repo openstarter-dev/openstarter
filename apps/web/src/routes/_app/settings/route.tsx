@@ -24,9 +24,7 @@ function SettingsLayout() {
     <div className="flex w-full flex-col gap-6">
       <div>
         <h1 className="font-bold text-2xl">{m["settings.title"]()}</h1>
-        <p className="text-muted-foreground text-sm">
-          {m["settings.layout.description"]()}
-        </p>
+        <p className="text-muted-foreground text-sm">{m["settings.layout.description"]()}</p>
       </div>
 
       <div className="flex flex-col gap-6 md:flex-row">

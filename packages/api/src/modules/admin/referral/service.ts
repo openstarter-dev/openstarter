@@ -3,7 +3,12 @@
 import { and, count, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { CommissionStatus, getReferralConfig, REFERRAL_CONFIG_KEY, referralConfigSchema } from "@openstarter/billing-web";
+import {
+  CommissionStatus,
+  getReferralConfig,
+  REFERRAL_CONFIG_KEY,
+  referralConfigSchema,
+} from "@openstarter/billing-web";
 import { grant } from "@openstarter/billing-web";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
@@ -17,7 +22,11 @@ export async function settleCommission(params: {
   adminUserId: string;
   commissionId: string;
   note?: string;
-}): Promise<{ error?: "NOT_FOUND" | "NOT_PENDING" | "GRANT_FAILED"; ok: boolean; transactionNo?: string }> {
+}): Promise<{
+  error?: "NOT_FOUND" | "NOT_PENDING" | "GRANT_FAILED";
+  ok: boolean;
+  transactionNo?: string;
+}> {
   const { adminUserId, commissionId } = params;
   const [claimed] = await db()
     .update(commission)
@@ -26,7 +35,11 @@ export async function settleCommission(params: {
     .returning();
 
   if (!claimed) {
-    const [row] = await db().select().from(commission).where(eq(commission.id, commissionId)).limit(1);
+    const [row] = await db()
+      .select()
+      .from(commission)
+      .where(eq(commission.id, commissionId))
+      .limit(1);
     if (!row) return { error: "NOT_FOUND", ok: false };
     return { error: "NOT_PENDING", ok: false };
   }
@@ -39,12 +52,14 @@ export async function settleCommission(params: {
       scene: "referral",
       userId: claimed.referrerId,
     });
-    await db().update(commission)
+    await db()
+      .update(commission)
       .set({ transactionNo: granted.transactionNo })
       .where(eq(commission.id, commissionId));
     return { ok: true, transactionNo: granted.transactionNo };
   } catch (err) {
-    await db().update(commission)
+    await db()
+      .update(commission)
       .set({ settledAt: null, settledBy: null, status: CommissionStatus.PENDING })
       .where(eq(commission.id, commissionId));
     logger.error("[referral] 结算发分失败，已回滚为 pending", err);
@@ -65,7 +80,11 @@ export async function voidCommission(params: {
     .returning();
 
   if (!claimed) {
-    const [row] = await db().select().from(commission).where(eq(commission.id, commissionId)).limit(1);
+    const [row] = await db()
+      .select()
+      .from(commission)
+      .where(eq(commission.id, commissionId))
+      .limit(1);
     if (!row) return { error: "NOT_FOUND", ok: false };
     return { error: "NOT_PENDING", ok: false };
   }
@@ -82,7 +101,9 @@ const manualCreateBody = z.object({
   referrerId: z.string().min(1),
 });
 
-export async function manualCreateCommission(input: unknown): Promise<{ error?: string; ok: boolean; data?: { id: string } }> {
+export async function manualCreateCommission(
+  input: unknown,
+): Promise<{ error?: string; ok: boolean; data?: { id: string } }> {
   const body = manualCreateBody.parse(input);
   const id = getUuid();
 
@@ -126,15 +147,14 @@ export async function setCustomRate(params: {
   const { userId, customRate } = params;
 
   // 无 referral 行则先建
-  const [existing] = await db()
-    .select()
-    .from(referral)
-    .where(eq(referral.userId, userId))
-    .limit(1);
+  const [existing] = await db().select().from(referral).where(eq(referral.userId, userId)).limit(1);
 
   if (!existing) {
     const code = generateReferralCode();
-    await db().insert(referral).values({ code, customRate, id: getUuid(), userId }).onConflictDoNothing();
+    await db()
+      .insert(referral)
+      .values({ code, customRate, id: getUuid(), userId })
+      .onConflictDoNothing();
     return { ok: true };
   }
 
@@ -160,11 +180,13 @@ export interface ListCommissionsParams {
 }
 
 export interface ListCommissionsResult {
-  items: typeof commission.$inferSelect[];
+  items: (typeof commission.$inferSelect)[];
   total: number;
 }
 
-export async function listCommissions(params: ListCommissionsParams): Promise<ListCommissionsResult> {
+export async function listCommissions(
+  params: ListCommissionsParams,
+): Promise<ListCommissionsResult> {
   const { page, pageSize, status } = params;
   const where = status ? eq(commission.status, status) : undefined;
 
@@ -188,7 +210,7 @@ export interface ListRelationsParams {
 }
 
 export interface ListRelationsResult {
-  items: typeof referralRelation.$inferSelect[];
+  items: (typeof referralRelation.$inferSelect)[];
   total: number;
 }
 
