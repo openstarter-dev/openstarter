@@ -42,7 +42,7 @@ function statsFixture(days: number): DashboardStats {
     spendTotal: null,
     trend: Array.from({ length: days }, (_, index) => ({
       consumed: 3 + ((index * 7) % 23),
-      date: `2026-08-${String((index % 28) + 1).padStart(2, "0")}`,
+      date: `2026-08-${String(index + 1).padStart(2, "0")}`,
       granted: 5 + ((index * 13) % 41),
     })),
   };

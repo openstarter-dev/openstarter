@@ -1,5 +1,6 @@
 {
   "name": "extension",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -43,6 +44,7 @@
     "@wxt-dev/module-react": "1.2.2",
     "jsdom": "29.1.1",
     "typescript": "catalog:",
+    "vite": "^8.0.8",
     "vite-plugin-svgr": "^5.2.0",
     "vitest": "4.1.10",
     "wxt": "0.21.3"

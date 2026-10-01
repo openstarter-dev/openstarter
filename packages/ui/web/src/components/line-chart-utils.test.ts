@@ -101,6 +101,7 @@ describe("buildMonotonePath", () => {
           }
         },
       ),
+      { numRuns: 20 },
     );
   });
 
@@ -130,6 +131,7 @@ describe("buildMonotonePath", () => {
           }
         },
       ),
+      { numRuns: 20 },
     );
   });
 

@@ -41,7 +41,9 @@
   "devDependencies": {
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "fast-check": "4.9.0",
     "tailwindcss": "^4.1.18",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "4.1.10"
   }
 }

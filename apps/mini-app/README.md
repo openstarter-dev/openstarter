@@ -11,7 +11,7 @@ pnpm install
 # 开发（监听文件变化）
 pnpm dev:mini-app
 
-# 生产构建
+# 生产构建（Taro 4.2.x 在 macOS 上跳过易崩溃的系统环境检查）
 pnpm build:mini-app
 ```
 

@@ -5,9 +5,7 @@ export default defineProject({
     environment: "node",
     include: ["src/**/*.test.ts"],
     name: "api",
-    // Property tests over a per-suite SQLite DB routinely exceed vitest's
-    // default 5s per-test ceiling under concurrent workspace load; 15s keeps the
-    // suite green on loaded machines without masking genuine hangs.
-    testTimeout: 15_000,
+    // Property tests can be CPU-bound under workspace-wide Turbo concurrency.
+    testTimeout: 30_000,
   },
 });

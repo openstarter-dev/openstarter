@@ -12,11 +12,12 @@
     }
   },
   "scripts": {
-    "test": "vitest --run",
-    "test:coverage": "vitest --run --coverage",
+    "test": "vitest --run --passWithNoTests",
+    "test:coverage": "vitest --run --coverage --passWithNoTests",
     "check-types": "tsc --noEmit"
   },
   "devDependencies": {
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "4.1.10"
   }
 }

@@ -19,6 +19,7 @@ const desktopDir = resolve(repoRoot, "apps/desktop");
 
 const RENDERER_PORT = process.env.OPENSTARTER_RENDERER_PORT || "5173";
 const RENDERER_URL = `http://localhost:${RENDERER_PORT}`;
+const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 
 // 递归杀掉子进程树（避免 vite/electron 留下孤儿进程）。
 function killTree(proc) {
@@ -58,10 +59,11 @@ async function waitForDevServer(attempts = 80, intervalMs = 500) {
 // 编译一次 main/preload；Electron 需要 dist/main.cjs 才能启动。
 function runBuild() {
   return new Promise((resolvePromise, rejectPromise) => {
-    const proc = spawn("pnpm", ["run", "build"], {
+    const proc = spawn(pnpmCommand, ["run", "build"], {
       cwd: desktopDir,
       stdio: ["ignore", "inherit", "inherit"],
     });
+    proc.on("error", rejectPromise);
     proc.on("exit", (code) => {
       if (code === 0) {
         resolvePromise();
@@ -74,10 +76,9 @@ function runBuild() {
 
 function spawnVite() {
   console.log("[desktop] starting renderer dev server (vite)...");
-  const proc = spawn("pnpm", ["exec", "vite"], {
+  const proc = spawn(pnpmCommand, ["exec", "vite"], {
     cwd: desktopDir,
     stdio: ["ignore", "inherit", "inherit"],
-    shell: true,
   });
   proc.on("exit", (code) => {
     console.log(`[desktop] renderer dev server exited (code=${code})`);
@@ -87,7 +88,7 @@ function spawnVite() {
 
 function spawnElectron() {
   console.log(`[desktop] launching electron -> ${RENDERER_URL}`);
-  const proc = spawn("pnpm", ["run", "dev:electron"], {
+  const proc = spawn(pnpmCommand, ["run", "dev:electron"], {
     cwd: desktopDir,
     env: {
       ...process.env,

@@ -115,6 +115,7 @@ describe("subscription cancellation (Property 23)", () => {
   });
 
   it("P23 recorded cancellation survives a read-back with identical timestamps and status across many runs", async () => {
+    let run = 0;
     const reasonArbitrary = fc.stringMatching(CANCEL_REASON_REGEX);
     const canceledAtArbitrary = fc.date({
       max: new Date("2100-01-01"),
@@ -132,7 +133,7 @@ describe("subscription cancellation (Property 23)", () => {
         canceledEndAtArbitrary,
         fc.boolean(),
         async (reason, canceledAt, canceledEndAt, withReason) => {
-          const subscriptionNo = `sub-${reason.slice(0, 12)}`;
+          const subscriptionNo = `sub-p23-${run++}`;
           await insertSubscription({ subscriptionNo });
 
           const updated = await cancelSubscription({

@@ -10,8 +10,8 @@
   "scripts": {
     "dev": "pnpm with-env turbo run dev",
     "build": "pnpm with-env turbo run build",
-    "test": "pnpm with-env turbo run test",
-    "test:coverage": "pnpm with-env turbo run test:coverage",
+    "test": "pnpm with-env turbo run test --concurrency=4",
+    "test:coverage": "pnpm with-env turbo run test:coverage --concurrency=4",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",

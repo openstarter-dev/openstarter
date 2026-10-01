@@ -59,10 +59,12 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^6.0.1",
+    "fast-check": "4.9.0",
     "jsdom": "^29.0.2",
     "nitro": "3.0.260603-beta",
     "typescript": "catalog:",
     "vite": "^8.0.8",
+    "vitest": "4.1.10",
     "wrangler": "^4.98.0"
   }
 }

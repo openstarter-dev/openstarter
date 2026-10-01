@@ -26,8 +26,10 @@
     "@testing-library/react": "^16.3.2",
     "@types/react": "catalog:",
     "@vitejs/plugin-react": "^6.0.3",
+    "fast-check": "4.9.0",
     "jsdom": "^29.1.1",
     "react": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "4.1.10"
   }
 }

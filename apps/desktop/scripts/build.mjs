@@ -13,11 +13,12 @@ const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf8"));
 
 async function runViteBuild() {
   return new Promise((resolvePromise, rejectPromise) => {
-    const proc = spawn("pnpm", ["exec", "vite", "build"], {
+    const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+    const proc = spawn(pnpmCommand, ["exec", "vite", "build"], {
       cwd: desktopDir,
       stdio: ["ignore", "inherit", "inherit"],
-      shell: true,
     });
+    proc.on("error", rejectPromise);
     proc.on("exit", (code) => {
       if (code === 0) resolvePromise();
       else rejectPromise(new Error(`vite build exited with code ${code}`));
