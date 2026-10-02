@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 
 import { paraglideVitePlugin } from "@inlang/paraglide-js";
 import mdx from "@mdx-js/rollup";
@@ -8,6 +8,16 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
+import { config as loadDotenv } from "dotenv";
+
+// Direct web dev also loads shared root settings; existing shell values win.
+loadDotenv({
+  path: ["../../.env.local", "../../.env"].map((path) =>
+    fileURLToPath(new URL(path, import.meta.url)),
+  ),
+  override: false,
+  quiet: true,
+});
 
 // Paraglide compiles the shared en/zh message catalog (defined in
 // packages/i18n/web) into the locale runtime consumed here in apps/web. The
@@ -36,6 +46,15 @@ const driverStub = fileURLToPath(new URL("./src/db-driver-stub.ts", import.meta.
 // (pulled in by @peculiar/x509 via @simplewebauthn/server ← @better-auth/passkey):
 // "Cannot destructure property '__extends'". Force the ESM build everywhere.
 const tslibEsm = "tslib/tslib.es6.js";
+// Optional 3D preview must never prevent the independent 2D canvas from loading.
+const modelViewer = fileURLToPath(
+  new URL(
+    existsSync(fileURLToPath(new URL("./node_modules/three/package.json", import.meta.url)))
+      ? "./src/components/model-3d/model-viewer.tsx"
+      : "./src/components/model-3d/model-viewer-unavailable.tsx",
+    import.meta.url,
+  ),
+);
 
 // Prefer wrangler.jsonc over the build-time env, which can be polluted by
 // .env.local (e.g. DATABASE_PROVIDER=sqlite for local dev).
@@ -61,6 +80,7 @@ const keepPostgres = workersDb === "postgresql" || workersDb === "postgres";
 export default defineConfig({
   server: {
     port: 3000,
+    proxy: { "/canvas-sync": { target: "http://127.0.0.1:3102", ws: true } },
   },
   resolve: {
     tsconfigPaths: true,
@@ -69,9 +89,11 @@ export default defineConfig({
           mysql2: driverStub,
           ...(keepPostgres ? {} : { postgres: driverStub }),
           tslib: tslibEsm,
+          "virtual:greenplan-model-viewer": modelViewer,
         }
       : {
           tslib: tslibEsm,
+          "virtual:greenplan-model-viewer": modelViewer,
         },
   },
   plugins: [

@@ -1,3 +1,4 @@
+import { model3dRouter } from "./modules/model-3d/router";
 // packages/api/src/index —— 应用组合根。
 //
 // 架构：Hono app + basePath("/api") + 模块化路由分组（modules/）。
@@ -72,6 +73,7 @@ const routes = api
   .route("/", demoRouter) // GET /api/private-data, /api/notes*
   .route("/", billingRouter) // POST /api/checkout, POST /api/payment/webhook/:provider
   .route("/", storageRouter) // POST /api/storage/upload-image
+  .route("/", model3dRouter)
   .route("/", aiRouter) // POST/GET /api/ai-tasks, GET /api/ai-tasks/:id
   .route("/", llmRouter) // POST/GET /api/llm/chats, /api/llm/chats/:id/messages
   .route("/", aiModelsRouter) // GET /api/ai/models

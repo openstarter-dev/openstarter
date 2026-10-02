@@ -65,7 +65,7 @@ function RootDocument() {
           <Toaster richColors />
         </ThemeProvider>
         {/* DEV 门控：生产构建时 vite 以 false 替换并摇树掉 devtools，不再进客户端包。 */}
-        {import.meta.env.DEV && (
+        {import.meta.env.DEV && import.meta.env.VITE_SHOW_DEVTOOLS === "true" && (
           <>
             <TanStackRouterDevtools position="bottom-left" />
             <ReactQueryDevtools buttonPosition="bottom-right" position="bottom" />

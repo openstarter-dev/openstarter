@@ -1,0 +1,649 @@
+.design-canvas {
+  position: fixed;
+  inset: 0;
+  background: #303030;
+  color: #eee;
+  font-family: Inter, "Segoe UI", sans-serif;
+  isolation: isolate;
+}
+.design-canvas .tl-container {
+  --color-background: #303030;
+}
+.canvas-loading {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: #303030;
+  color: #eee;
+  font:
+    14px "Segoe UI",
+    sans-serif;
+  text-align: center;
+  padding: 24px;
+}
+.canvas-loading strong {
+  font-size: 24px;
+}
+.canvas-loading button,
+.canvas-loading a {
+  padding: 10px 18px;
+  border: 1px solid #666;
+  border-radius: 8px;
+  color: #fff;
+  background: #424242;
+}
+.board-header {
+  position: absolute;
+  z-index: 300;
+  left: 20px;
+  right: 20px;
+  top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  pointer-events: none;
+  font-size: 12px;
+}
+.board-header > * {
+  pointer-events: auto;
+}
+.board-header button,
+.board-home {
+  background: #292929;
+  border: 1px solid #505050;
+  border-radius: 8px;
+  padding: 10px 13px;
+  color: #eee;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.board-title {
+  background: #292929dd;
+  border: 1px solid #484848;
+  padding: 11px 15px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.board-title span {
+  color: #888;
+  margin: 0 8px;
+}
+.board-save {
+  margin-left: auto;
+  color: #b3bbb5;
+  font-size: 11px;
+  background: #303030dd;
+  padding: 8px;
+}
+.board-header .board-share {
+  background: #2e7d32;
+  border-color: #49984d;
+}
+.board-hint {
+  position: absolute;
+  z-index: 250;
+  top: 74px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #b3b3b3;
+  font-size: 11px;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.board-toolbar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #252525f5;
+  border: 1px solid #505050;
+  border-radius: 17px;
+  padding: 9px 12px;
+  margin: 0 12px 18px;
+  box-shadow: 0 8px 28px #0005;
+  color: #eee;
+  position: relative;
+}
+.board-toolbar > button {
+  border: 0;
+  background: transparent;
+  color: #dedede;
+  min-width: 39px;
+  height: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font:
+    600 13px "Segoe UI",
+    sans-serif;
+  padding: 0 10px;
+}
+.board-toolbar > button:hover {
+  background: #3a3a3a;
+}
+.board-toolbar > button.active {
+  background: #5e5062;
+  color: #e9bfe8;
+}
+.board-toolbar > button:focus-visible,
+.board-header button:focus-visible {
+  outline: 2px solid #a5d6a7;
+  outline-offset: 2px;
+}
+.board-toolbar .board-upload {
+  padding: 0 12px;
+}
+.board-divider {
+  width: 1px;
+  height: 31px;
+  background: #505050;
+  margin: 0 7px;
+}
+.board-toolbar .board-zoom {
+  min-width: 60px;
+}
+.board-upload-error {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  padding: 14px;
+  background: #452c2c;
+  border: 1px solid #ad6262;
+  border-radius: 8px;
+  font-size: 12px;
+  display: flex;
+  gap: 10px;
+}
+.board-share-panel {
+  position: absolute;
+  z-index: 400;
+  right: 20px;
+  top: 72px;
+  width: 300px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #555;
+  background: #262626;
+  box-shadow: 0 12px 30px #0005;
+  font-size: 13px;
+}
+.board-share-panel h2 {
+  font-size: 16px;
+  margin: 0 0 12px;
+}
+.board-share-panel p {
+  line-height: 1.6;
+  color: #bbb;
+}
+.board-share-panel button {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  margin: 14px 7px 0 0;
+  background: #3c3c3c;
+  border: 1px solid #666;
+  color: #eee;
+  padding: 9px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.design-canvas .tlui-layout__top {
+  padding-top: 75px;
+}
+.design-canvas .tlui-menu-zone {
+  margin-top: 0;
+}
+@media (max-width: 800px) {
+  .board-toolbar {
+    max-width: calc(100vw - 12px);
+    gap: 0;
+    padding: 5px;
+    margin: 0 6px 12px;
+    overflow-x: auto;
+    border-radius: 12px;
+  }
+  .board-toolbar > button {
+    min-width: 35px;
+    padding: 0 7px;
+  }
+  .board-toolbar .board-upload span {
+    display: none;
+  }
+  .board-divider {
+    margin: 0 3px;
+    flex-shrink: 0;
+  }
+  .board-header {
+    left: 10px;
+    right: 10px;
+    gap: 7px;
+    top: 10px;
+  }
+  .board-title {
+    font-size: 11px;
+    padding: 10px;
+  }
+  .board-save {
+    display: none;
+  }
+  .board-header > button:first-of-type {
+    margin-left: auto;
+  }
+  .board-hint {
+    top: 62px;
+    font-size: 9px;
+  }
+  .board-share-panel {
+    right: 10px;
+  }
+  .board-toolbar .board-zoom {
+    min-width: 48px;
+    font-size: 11px;
+  }
+}
+.board-elements {
+  position: absolute;
+  z-index: 290;
+  left: 18px;
+  top: 110px;
+  bottom: 125px;
+  width: 230px;
+  max-height: 650px;
+  overflow: auto;
+  background: #272b28ed;
+  border: 1px solid #4d594f;
+  border-radius: 12px;
+  padding: 14px;
+  color: #e6eee7;
+  font:
+    12px "Segoe UI",
+    sans-serif;
+  box-shadow: 0 8px 25px #0002;
+}
+.board-elements header,
+.board-elements strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.board-elements button,
+.board-elements-toggle {
+  cursor: pointer;
+  border: 0;
+  color: inherit;
+  background: none;
+}
+.board-elements strong {
+  font-size: 13px;
+}
+.board-element-search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #546057;
+  border-radius: 6px;
+  padding: 8px;
+  margin: 16px 0 10px;
+}
+.board-element-search input {
+  background: none;
+  border: 0;
+  outline: none;
+  width: 100%;
+  font-size: 11px;
+  color: #eee;
+}
+.board-element-tabs {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 15px;
+}
+.board-element-tabs button {
+  padding: 5px 8px;
+  font-size: 10px;
+  border: 1px solid #4b574e;
+  border-radius: 14px;
+}
+.board-element-tabs .active {
+  background: #36573c;
+  color: #cbe8cd;
+  border-color: #83a687;
+}
+.board-element-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.board-element-grid button {
+  padding: 0;
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+.board-element-grid img {
+  width: 100%;
+  aspect-ratio: 1;
+  background: #eff2e9;
+  border: 1px solid #dae2d7;
+  border-radius: 7px;
+}
+.board-element-grid button:hover img {
+  background: #d6e5ce;
+}
+.board-element-grid button[draggable="true"] {
+  cursor: grab;
+}
+.board-element-grid button[draggable="true"]:active {
+  cursor: grabbing;
+}
+.board-element-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+.board-element-3d {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  font-style: normal;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 5px;
+  background: #2f6b46;
+  color: #eaf7ee;
+}
+.board-elements p {
+  color: #a4b4a7;
+  font-size: 10px;
+  line-height: 1.6;
+  margin-top: 17px;
+}
+.board-elements-toggle {
+  position: absolute;
+  top: 110px;
+  left: 18px;
+  z-index: 290;
+  border: 1px solid #546057;
+  background: #272b28;
+  padding: 10px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #eee;
+}
+.board-elements button:focus-visible {
+  outline: 2px solid #a5d6a7;
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .board-elements {
+    top: 100px;
+    left: 10px;
+    bottom: 125px;
+    width: 190px;
+    padding: 10px;
+  }
+  .board-elements-toggle {
+    top: 100px;
+    left: 10px;
+  }
+}
+
+/* Match the editor surface during client initialization, without an interstitial. */
+.canvas-starting {
+  position: fixed;
+  inset: 0;
+  background-color: #303030;
+  background-image: radial-gradient(#ffffff18 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.canvas-chair-shape {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #242826;
+  box-shadow: 0 8px 24px #0003;
+}
+.canvas-chair-shape .model-viewer {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+.canvas-chair-shape .model-viewer > span {
+  display: none;
+}
+.canvas-chair-orbit {
+  position: absolute;
+  bottom: 9px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 7px 12px;
+  border: 1px solid #819887;
+  border-radius: 7px;
+  background: #253e2f;
+  color: white;
+  white-space: nowrap;
+  font-size: 11px;
+  cursor: pointer;
+}
+.board-imported-models {
+  margin-top: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #526157;
+}
+.board-imported-models h3 {
+  font-size: 12px;
+  color: #bee3bb;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 10px;
+}
+.board-imported-models h3 span {
+  font-size: 10px;
+  border-radius: 10px;
+  background: #3a523e;
+  padding: 1px 7px;
+}
+.board-imported-models > button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: #364439;
+  border: 1px solid #61785f;
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 8px;
+}
+.board-imported-models > button:hover {
+  background: #475d49;
+}
+.board-imported-models img {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  background: #edf3e6;
+  border-radius: 5px;
+}
+.board-imported-models strong {
+  display: block;
+  font-size: 12px;
+  color: #fff;
+}
+.board-imported-models small {
+  display: block;
+  font-size: 9px;
+  color: #bbcfbe;
+  margin-top: 5px;
+}
+.board-imported-models b {
+  margin-left: auto;
+  font-size: 20px;
+  color: #c4e7b8;
+}
+.unified-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 250;
+  background: #303633;
+}
+.unified-scene-webgl {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+}
+.unified-scene-webgl canvas {
+  display: block;
+}
+.scene-mode-toggle {
+  position: absolute;
+  z-index: 310;
+  left: 270px;
+  top: 76px;
+  background: #26362c;
+  border: 1px solid #738378;
+  color: #e7efe7;
+  border-radius: 7px;
+  padding: 9px 13px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.scene-tools {
+  position: absolute;
+  bottom: 22px;
+  left: 270px;
+  right: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  background: #252b27ed;
+  color: #e6eee8;
+  border: 1px solid #56655b;
+  padding: 12px;
+  border-radius: 12px;
+  font:
+    12px "Segoe UI",
+    sans-serif;
+}
+.scene-tools > span {
+  width: 100%;
+  text-align: center;
+  color: #b9cabb;
+  font-size: 11px;
+}
+.scene-tools button {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background: #3b4c40;
+  border: 0;
+  border-radius: 6px;
+  padding: 8px;
+  color: inherit;
+  cursor: pointer;
+}
+.scene-tools button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.scene-tools label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.scene-tools input {
+  width: 85px;
+  accent-color: #a5d6a7;
+}
+.scene-empty {
+  position: absolute;
+  left: 270px;
+  right: 20px;
+  top: 46%;
+  text-align: center;
+  color: #b9cabb;
+  pointer-events: none;
+  font-size: 14px;
+}
+.scene-status {
+  position: absolute;
+  top: 78px;
+  right: 20px;
+  border: 1px solid #647568;
+  background: #283e2e;
+  color: #d6e7d8;
+  padding: 9px 13px;
+  border-radius: 7px;
+  font-size: 12px;
+}
+.scene-hint {
+  position: absolute;
+  z-index: 300;
+  top: 78px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: min(560px, calc(100% - 320px));
+  border: 1px solid #83a687;
+  background: #26362cee;
+  color: #dceedd;
+  padding: 9px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+  pointer-events: none;
+}
+.design-canvas:has(.unified-scene) .board-toolbar,
+.design-canvas:has(.unified-scene) .board-hint {
+  display: none;
+}
+@media (max-width: 760px) {
+  .scene-mode-toggle {
+    left: auto;
+    right: 10px;
+    top: 66px;
+    font-size: 10px;
+  }
+  .scene-tools {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    gap: 6px;
+  }
+  .scene-empty {
+    left: 205px;
+    font-size: 12px;
+  }
+  .scene-status {
+    top: 105px;
+    right: 10px;
+    max-width: 150px;
+  }
+  .scene-hint {
+    top: 100px;
+    max-width: calc(100% - 24px);
+    font-size: 11px;
+  }
+  .scene-tools > span {
+    font-size: 9px;
+  }
+}

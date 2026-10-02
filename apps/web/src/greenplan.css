@@ -1,0 +1,570 @@
+.gp {
+  background: #f7f7f4;
+  color: #1f2937;
+  font-family: Inter, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.gp * {
+  box-sizing: border-box;
+}
+.gp a {
+  text-decoration: none;
+  color: inherit;
+}
+.gp-container {
+  width: min(1280px, calc(100% - 80px));
+  margin-inline: auto;
+}
+.gp-header {
+  height: 82px;
+  display: flex;
+  align-items: center;
+  gap: 64px;
+}
+.gp-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font:
+    bold 25px Georgia,
+    serif;
+  letter-spacing: -0.7px;
+  white-space: nowrap;
+}
+.gp-brand svg {
+  color: #2e7d32;
+}
+.gp-header nav {
+  display: flex;
+  gap: 32px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.gp-header nav a:hover,
+.gp-footer a:hover {
+  color: #2e7d32;
+}
+.gp .gp-button {
+  background: #2e7d32;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 13px 22px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+.gp .gp-button:hover {
+  background: #236127;
+  transform: translateY(-1px);
+}
+.gp-header-cta {
+  margin-left: auto;
+}
+.gp-hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 45% 55%;
+  align-items: center;
+  min-height: 490px;
+  padding-block: 24px 32px;
+}
+.gp-hero-copy {
+  position: relative;
+  z-index: 1;
+  padding: 15px 0;
+}
+.gp-badge {
+  display: inline-block;
+  background: #e4ede2;
+  color: #215829;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 24px;
+}
+.gp h1 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(36px, 3.7vw, 55px);
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  line-height: 1.12;
+  margin: 15px 0 18px;
+  color: #102e36;
+}
+.gp-hero-copy > p {
+  font-size: 16px;
+  line-height: 1.55;
+  color: #55707a;
+  max-width: 365px;
+  margin: 0 0 24px;
+}
+.gp .gp-upload {
+  padding: 16px 25px;
+  font-size: 16px;
+  border-radius: 28px;
+}
+.gp-hero-copy > small {
+  display: block;
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 12px;
+}
+.gp-hero-copy > small span {
+  padding: 0 9px;
+}
+.gp-benefits {
+  display: flex;
+  gap: 16px;
+  margin-top: 34px;
+}
+.gp-benefits > div {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding-right: 15px;
+  border-right: 1px solid #e0e7e0;
+}
+.gp-benefits > div:last-child {
+  border: 0;
+  padding: 0;
+}
+.gp-benefits svg {
+  color: #2e7d32;
+  width: 23px;
+  flex-shrink: 0;
+}
+.gp-benefits p {
+  margin: 0;
+  font-size: 11px;
+}
+.gp-benefits strong {
+  display: block;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.gp-benefits p span {
+  display: block;
+  font-size: 10px;
+  color: #6b7280;
+  margin-top: 5px;
+  white-space: nowrap;
+}
+.gp-hero-art {
+  aspect-ratio: 740/415;
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px 24px 60px 24px;
+  box-shadow: 0 14px 40px #23452b12;
+  align-self: stretch;
+  margin-block: 0 10px;
+}
+.gp-photo-crop {
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/greenplan-reference.png");
+  background-size: 207.57% 246.75%;
+  background-position: 79.4% 8.87%;
+  background-repeat: no-repeat;
+}
+.gp-concept {
+  position: absolute;
+  bottom: 10px;
+  left: 15px;
+  font-size: 9px;
+  color: #fff;
+  background: #153b28aa;
+  border-radius: 4px;
+  padding: 4px 7px;
+}
+.gp-how,
+.gp-examples {
+  background: white;
+}
+.gp-how {
+  padding: 28px 0 18px;
+}
+.gp-section-heading {
+  text-align: center;
+}
+.gp h2 {
+  font:
+    bold 28px/1.2 Georgia,
+    serif;
+  letter-spacing: -0.5px;
+  color: #12323a;
+  margin: 0 0 8px;
+}
+.gp-section-heading > p {
+  color: #55707a;
+  font-size: 13px;
+  margin: 0;
+}
+.gp-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 20px auto 0;
+  max-width: 1050px;
+}
+.gp-step {
+  text-align: center;
+  position: relative;
+  padding: 0 36px;
+}
+.gp-step-icon {
+  position: relative;
+  background: #edf3eb;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 10px;
+  color: #236535;
+}
+.gp-step-icon span {
+  position: absolute;
+  left: -40px;
+  top: 17px;
+  background: #2e7d32;
+  color: white;
+  border-radius: 50%;
+  height: 24px;
+  width: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+}
+.gp-step h3 {
+  font:
+    700 16px Georgia,
+    serif;
+  margin: 0 0 7px;
+}
+.gp-step p {
+  font-size: 12px;
+  color: #607783;
+  line-height: 1.6;
+  max-width: 205px;
+  margin: auto;
+}
+.gp-step-arrow {
+  position: absolute;
+  right: -12px;
+  top: 32px;
+  color: #95abb0;
+}
+.gp-examples {
+  padding: 24px 0 28px;
+}
+.gp-ideas {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 13px;
+  margin-top: 20px;
+}
+.gp-idea {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 196/136;
+  border-radius: 9px;
+  background: #315938;
+  isolation: isolate;
+  transition: transform 0.2s;
+}
+.gp-idea:hover {
+  transform: translateY(-4px);
+}
+.gp-idea-image {
+  position: absolute;
+  inset: 0;
+  background-image: url("/images/greenplan-reference.png");
+  background-size: 783.67% 752.94%;
+  background-position-y: 85.25%;
+  transition: scale 0.3s;
+}
+.gp-idea:hover .gp-idea-image {
+  scale: 1.04;
+}
+.gp-idea-0 {
+  background-position-x: 10.9%;
+}
+.gp-idea-1 {
+  background-position-x: 26.6%;
+}
+.gp-idea-2 {
+  background-position-x: 42.2%;
+}
+.gp-idea-3 {
+  background-position-x: 57.9%;
+}
+.gp-idea-4 {
+  background-position-x: 73.5%;
+}
+.gp-idea-5 {
+  background-position-x: 89.2%;
+}
+.gp-idea-caption {
+  position: absolute;
+  inset: auto 0 0;
+  background: linear-gradient(transparent, #09271ef5 35%);
+  padding: 25px 11px 12px;
+  color: #fff;
+  min-height: 65px;
+}
+.gp-idea-caption h3 {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+.gp-idea-caption p {
+  font-size: 9px;
+  margin: 0;
+  padding-right: 20px;
+}
+.gp-idea-caption svg {
+  position: absolute;
+  right: 9px;
+  bottom: 12px;
+  border-radius: 50%;
+  background: #f4f7ef;
+  color: #27672b;
+  padding: 2px;
+}
+.gp-value {
+  background: #edf3eb;
+  padding: 28px 0;
+}
+.gp-value-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.gp-value-copy h2 {
+  font-size: 25px;
+}
+.gp-value-copy > p {
+  color: #607783;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0;
+}
+.gp-value-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.gp-value-item > svg {
+  color: #246331;
+  border-radius: 50%;
+  background: #dfeadd;
+  padding: 10px;
+  width: 43px;
+  height: 43px;
+}
+.gp-value-item p {
+  margin: 3px 0;
+  font-size: 11px;
+}
+.gp-value-item strong {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+.gp-value-item span {
+  color: #607783;
+  line-height: 1.5;
+}
+.gp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 25px;
+  color: #6b7280;
+  font-size: 11px;
+}
+.gp-footer .gp-brand {
+  font-size: 18px;
+  color: #12323a;
+}
+.gp a:focus-visible {
+  outline: 3px solid #a5d6a7;
+  outline-offset: 4px;
+}
+.gp:has(.gp-how) {
+  background: linear-gradient(#f7f7f4 570px, #fff 570px);
+}
+@media (min-width: 1500px) {
+  .gp-hero {
+    min-height: 520px;
+  }
+}
+@media (max-width: 1050px) {
+  .gp-container {
+    width: calc(100% - 40px);
+  }
+  .gp-header {
+    gap: 30px;
+  }
+  .gp-hero {
+    grid-template-columns: 48% 52%;
+  }
+  .gp-benefits {
+    gap: 8px;
+  }
+  .gp-benefits > div {
+    padding-right: 8px;
+  }
+  .gp-benefits p span {
+    white-space: normal;
+  }
+  .gp-ideas {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .gp-value-inner {
+    flex-wrap: wrap;
+  }
+  .gp-value-copy {
+    width: 100%;
+  }
+  .gp-hero-art {
+    align-self: center;
+    width: 100%;
+  }
+}
+@media (max-width: 680px) {
+  .gp-container {
+    width: calc(100% - 32px);
+  }
+  .gp-header {
+    height: 70px;
+    gap: 10px;
+  }
+  .gp-header nav {
+    display: none;
+  }
+  .gp-brand {
+    font-size: 22px;
+  }
+  .gp .gp-header-cta {
+    padding: 10px 13px;
+    font-size: 11px;
+  }
+  .gp-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+    padding-top: 10px;
+  }
+  .gp h1 {
+    font-size: 39px;
+  }
+  .gp-hero-copy > p {
+    font-size: 15px;
+  }
+  .gp-benefits {
+    justify-content: space-between;
+    margin-top: 24px;
+  }
+  .gp-hero-art {
+    width: 100%;
+    flex-shrink: 0;
+  }
+  .gp-steps {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .gp-step-arrow {
+    display: none;
+  }
+  .gp h2 {
+    font-size: 25px;
+  }
+  .gp-section-heading > p {
+    line-height: 1.6;
+  }
+  .gp-ideas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .gp-value-inner {
+    gap: 20px;
+  }
+  .gp-value-item {
+    width: 100%;
+  }
+  .gp-footer {
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .gp-footer > span:nth-child(2) {
+    display: none;
+  }
+}
+/* Latest supplied design: immersive garden hero and inset before / after artwork. */
+.gp-hero {
+  grid-template-columns: 43% 57%;
+  min-height: 525px;
+}
+.gp-hero-art {
+  aspect-ratio: 535/400;
+  border-radius: 0 0 12px 0;
+  box-shadow: none;
+  margin-right: -18px;
+  align-self: stretch;
+}
+.gp-photo-crop {
+  background-image: url("/images/greenplan-system.png");
+  background-size: 287.1% 256%;
+  background-position: 42.5% 8.15%;
+}
+.gp-hero-art:after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #f7f7f4, transparent 20%);
+  pointer-events: none;
+}
+.gp-badge {
+  display: none;
+}
+.gp h1 {
+  font-size: clamp(36px, 3.5vw, 53px);
+  line-height: 1.12;
+}
+.gp .gp-upload {
+  border-radius: 10px;
+}
+.gp-benefits {
+  margin-top: 65px;
+}
+.gp-hero-copy {
+  padding-bottom: 0;
+}
+.gp-header {
+  height: 72px;
+}
+.gp-concept {
+  z-index: 1;
+}
+@media (max-width: 680px) {
+  .gp-hero {
+    min-height: 0;
+  }
+  .gp-hero-art {
+    aspect-ratio: 535/400;
+    margin: 0;
+  }
+  .gp-benefits {
+    margin-top: 28px;
+  }
+  .gp-hero-art:after {
+    display: none;
+  }
+}

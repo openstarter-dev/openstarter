@@ -58,3 +58,6 @@ dev-dist
 .dev.vars*
 
 .open-next
+
+# Local collaborative canvas snapshots
+.canvas-data/
