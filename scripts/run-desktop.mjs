@@ -1,5 +1,5 @@
 // scripts/run-desktop.mjs —— 编排 apps/desktop 的 dev 流程：
-//   1. 先用 esbuild 编译一次 main/preload（否则 dist/main.cjs 不存在，Electron 无法启动）
+//   1. 先用 esbuild 编译一次 main/preload（否则 dist/main/main.cjs 不存在，Electron 无法启动）
 //   2. 启动 renderer 的 Vite dev server（端口 5173）
 //   3. 等 Vite 就绪后，spawn Electron 主进程加载 http://localhost:5173
 //   4. Ctrl-C 时优雅地把子进程都杀掉

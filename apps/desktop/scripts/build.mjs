@@ -1,6 +1,7 @@
 // apps/desktop/scripts/build.mjs —— 更新版：vite build + esbuild 两步构建
 // 1. vite build → dist/renderer/（HTML + JS + CSS 产物）
-// 2. esbuild → dist/main.cjs + dist/preload.cjs
+// 2. esbuild → dist/main/main.cjs + dist/preload.cjs（嵌套布局，与 package.json main
+//    的 dist/main/main.cjs、window.ts 里 __dirname=dist/main 的路径假设保持一致）
 import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -27,9 +28,22 @@ async function runViteBuild() {
 }
 
 async function runEsbuild() {
+  // main 与 preload 分开编译：main 进 dist/main/（package.json main 指向
+  // dist/main/main.cjs，window.ts 按 __dirname=dist/main 解析 preload 与 offline 页），
+  // preload 保持在 dist/ 根下。合在一起用同一个 outdir 会产出扁平布局导致加载错位。
   await build({
     bundle: true,
-    entryPoints: [resolve(desktopDir, "src/main/main.ts"), resolve(desktopDir, "src/preload.ts")],
+    entryPoints: [resolve(desktopDir, "src/main/main.ts")],
+    external: ["electron"],
+    format: "cjs",
+    outdir: resolve(desktopDir, "dist/main"),
+    outExtension: { ".js": ".cjs" },
+    platform: "node",
+    target: "node20",
+  });
+  await build({
+    bundle: true,
+    entryPoints: [resolve(desktopDir, "src/preload.ts")],
     external: ["electron"],
     format: "cjs",
     outdir: resolve(desktopDir, "dist"),
