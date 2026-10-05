@@ -1,4 +1,4 @@
-import { ApiRequest, ApiResponse } from "./api-proxy";
+import { ApiRequest, ApiResponse, getRequestOrigin } from "./api-proxy";
 import { TokenStore } from "./token-store";
 
 export interface AuthUser {
@@ -32,7 +32,12 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
     async signInWithEmail(email: string, password: string): Promise<AuthResult> {
       const response = await fetchFn(`${baseUrl}/api/auth/sign-in/email`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          // 与 api-proxy 同理：Node fetch 无默认 Origin，不带会被 better-auth
+          // 以 "Missing or null Origin" 拒绝（见 api-proxy.getRequestOrigin）。
+          Origin: getRequestOrigin(baseUrl),
+        },
         body: JSON.stringify({ email, password }),
       });
 

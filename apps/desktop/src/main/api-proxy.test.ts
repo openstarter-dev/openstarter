@@ -100,4 +100,31 @@ describe("ApiProxy", () => {
     expect(result.code).toBe(-1);
     expect(result.message).toBe("network_error");
   });
+
+  it("should send Origin header so better-auth origin check passes", async () => {
+    const proxy = createApiProxy({
+      baseUrl: "http://localhost:3000",
+      getToken: () => null,
+      fetchFn: mockFetch,
+    });
+
+    mockFetch.mockResolvedValue(
+      new Response(JSON.stringify({ code: 200, message: "ok", data: {} }), {
+        status: 200,
+      }),
+    );
+
+    await proxy({ method: "GET", path: "/api/user/profile" });
+
+    // Node fetch has no default Origin (unlike browsers); without it better-auth
+    // rejects with "Missing or null Origin".
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://localhost:3000/api/user/profile",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Origin: "http://localhost:3000",
+        }),
+      }),
+    );
+  });
 });

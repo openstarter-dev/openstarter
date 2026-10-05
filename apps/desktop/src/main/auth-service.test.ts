@@ -39,6 +39,9 @@ describe("AuthService", () => {
         "http://localhost:3000/api/auth/sign-in/email",
         expect.objectContaining({
           method: "POST",
+          headers: expect.objectContaining({
+            Origin: "http://localhost:3000",
+          }),
           body: JSON.stringify({ email: "test@test.com", password: "password123" }),
         }),
       );
