@@ -9,7 +9,6 @@ import "../../global.css";
 
 import { ConfigError } from "@/components/config-error";
 import { getEnv } from "@/lib/env";
-import { initAnalyticsFromEnv } from "@/lib/analytics";
 import { BillingProvider } from "@/lib/use-billing";
 import { useAppLocale } from "@/lib/i18n";
 import { useThemePreference } from "@/lib/theme";
@@ -24,11 +23,7 @@ export default function RootLayout() {
   useThemePreference();
   const { locale } = useAppLocale();
 
-  // 分析初始化：供应商由构建期 env（EXPO_PUBLIC_ANALYTICS_*）决定，随包固化；
-  // 解析层永不抛错，未配置等价于 noop（fire-and-forget）。
-  useEffect(() => {
-    void initAnalyticsFromEnv();
-  }, []);
+  // 分析初始化已暂时停用（Firebase/OpenPanel 均不初始化，恢复时加回 initAnalyticsFromEnv 调用即可）。
 
   // Deep link ?ref= 归因捕获：仅在首次挂载时读取初始 URL 的 ref 参数。
   useEffect(() => {
