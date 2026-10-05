@@ -25,10 +25,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Restore session on mount
-    window.electronAPI
-      ?.authGetSession()
-      ?.then((session) => {
+    // Restore session on mount. NOTE: optional chaining alone is NOT enough here —
+    // if window.electronAPI is missing (preload failed), `a?.b()?.then()` short-circuits
+    // to undefined and `finally` never runs, leaving isLoading stuck on true forever
+    // (RequireAuth then shows a text-less skeleton on the dark window = "black screen").
+    // Guard explicitly so loading always resolves.
+    const api = window.electronAPI;
+    if (!api) {
+      setIsLoading(false);
+      return;
+    }
+    api
+      .authGetSession()
+      .then((session) => {
         if (session?.data?.user) {
           setUser(session.data.user);
         }
@@ -39,16 +48,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     const result = await window.electronAPI.authSignInEmail({ email, password });
-    if (result.data?.user) {
-      setUser(result.data.user);
+    // NOTE: previously a non-200 result (e.g. wrong password) resolved silently —
+    // LoginForm only shows errors on throw, so the user saw "nothing happens".
+    // Always throw here so the failure reason reaches the UI.
+    if (result.code !== 200 || !result.data?.user) {
+      throw new Error(result.message || "Sign-in failed");
     }
+    setUser(result.data.user);
   }, []);
 
   const signInOAuth = useCallback(async (provider: "google" | "github") => {
     const result = await window.electronAPI.authSignInOAuth({ provider });
-    if (result.data?.user) {
-      setUser(result.data.user);
+    if (result.code !== 200 || !result.data?.user) {
+      throw new Error(result.message || "OAuth sign-in failed");
     }
+    setUser(result.data.user);
   }, []);
 
   const logout = useCallback(async () => {
