@@ -52,4 +52,18 @@ describe("buildMenuTemplate", () => {
     expect(macRoles).toContain("quit");
     expect(otherRoles).toContain("quit");
   });
+
+  it("exposes toggleDevTools only in dev mode", () => {
+    const devRoles = collectRoles(buildMenuTemplate(false, true));
+    const prodRoles = collectRoles(buildMenuTemplate(false, false));
+
+    expect(devRoles).toContain("toggleDevTools");
+    expect(prodRoles).not.toContain("toggleDevTools");
+  });
+
+  it("keeps toggleDevTools out of the default (prod) template", () => {
+    const defaultRoles = collectRoles(buildMenuTemplate(true));
+
+    expect(defaultRoles).not.toContain("toggleDevTools");
+  });
 });

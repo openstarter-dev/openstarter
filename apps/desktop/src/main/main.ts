@@ -33,7 +33,9 @@ async function main(): Promise<void> {
 
   applyGlobalWebContentsPolicy();
 
-  Menu.setApplicationMenu(Menu.buildFromTemplate(buildMenuTemplate(process.platform === "darwin")));
+  Menu.setApplicationMenu(
+    Menu.buildFromTemplate(buildMenuTemplate(process.platform === "darwin", mode === "dev")),
+  );
 
   await app.whenReady();
 
