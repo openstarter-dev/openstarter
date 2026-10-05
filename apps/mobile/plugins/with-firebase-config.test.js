@@ -8,6 +8,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import fs from "node:fs";
 import withFirebaseConfig from "./with-firebase-config";
 
+const { setPodfileDisableSPM, setPodfileStaticFramework } = withFirebaseConfig;
+
 const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
 const existsSync = vi.spyOn(fs, "existsSync");
 
@@ -55,5 +57,67 @@ describe("with-firebase-config", () => {
     expect(result.android.googleServicesFile).toBe("google-services.json");
     expect(result.ios.googleServicesFile).toBe("GoogleService-Info.plist");
     expect(warn).not.toHaveBeenCalled();
+  });
+});
+
+describe("setPodfileDisableSPM", () => {
+  const podfile = [
+    "platform :ios, '16.4'",
+    "",
+    "prepare_react_native_project!",
+    "",
+    "target 'OpenStarter' do",
+    "end",
+    "",
+  ].join("\n");
+
+  it("inserts $RNFirebaseDisableSPM right after prepare_react_native_project (before any target)", () => {
+    const result = setPodfileDisableSPM(podfile);
+
+    expect(result).toContain("$RNFirebaseDisableSPM = true");
+    expect(result.indexOf("$RNFirebaseDisableSPM = true")).toBeGreaterThan(
+      result.indexOf("prepare_react_native_project!"),
+    );
+    expect(result.indexOf("$RNFirebaseDisableSPM = true")).toBeLessThan(
+      result.indexOf("target 'OpenStarter'"),
+    );
+  });
+
+  it("is idempotent: repeated prebuilds do not duplicate the flag", () => {
+    const once = setPodfileDisableSPM(podfile);
+    const twice = setPodfileDisableSPM(once);
+
+    expect(twice.match(/\$RNFirebaseDisableSPM = true/g)).toHaveLength(1);
+  });
+});
+
+describe("setPodfileStaticFramework", () => {
+  const podfile = [
+    "target 'OpenStarter' do",
+    "  use_expo_modules!",
+    "",
+    "  use_react_native!(",
+    "  )",
+    "end",
+    "",
+  ].join("\n");
+
+  it("inserts $RNFirebaseAsStaticFramework inside target before use_react_native!", () => {
+    const result = setPodfileStaticFramework(podfile);
+
+    expect(result).toContain("$RNFirebaseAsStaticFramework = true");
+    expect(result.indexOf("$RNFirebaseAsStaticFramework = true")).toBeGreaterThan(
+      result.indexOf("use_expo_modules!"),
+    );
+    expect(result.indexOf("$RNFirebaseAsStaticFramework = true")).toBeLessThan(
+      result.indexOf("use_react_native!"),
+    );
+  });
+
+  it("is idempotent: repeated prebuilds do not duplicate the flag", () => {
+    const once = setPodfileStaticFramework(podfile);
+    const twice = setPodfileStaticFramework(once);
+
+    expect(twice.match(/\$RNFirebaseAsStaticFramework = true/g)).toHaveLength(1);
   });
 });

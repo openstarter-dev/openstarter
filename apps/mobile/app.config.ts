@@ -22,11 +22,20 @@ const config: ExpoConfig = {
   },
   name: "OpenStarter",
   orientation: "portrait",
+  // expo-updates 已安装时必须声明 runtimeVersion，否则 dev client 启动会报
+  // "Invalid updates configuration ... must include a valid runtime version"。
+  // 本地开发用 appVersion 策略即可；正式 OTA 时再切 fingerprint 策略。
+  runtimeVersion: {
+    policy: "appVersion",
+  },
   // expo-secure-store 的 config plugin 是 requireAuthentication 等原生能力的前提；
   // expo-router 插件启用文件式路由。
   // RevenueCat（react-native-purchases）无需 config plugin，仅要求 dev client/prebuild
   // （StoreKit / In-App Purchase 能力在 Xcode 侧启用）。
-  // with-firebase-config 在两个 Firebase 配置文件都缺失时 no-op。
+  // with-firebase-config 已暂时停用（react-native-firebase 依赖已移除，原生
+  // autolinking 不再包含 RNFB，故不再需要 SPM/static 兼容补丁）。
+  // 恢复 Firebase 时：加回 @react-native-firebase/app/analytics 依赖，
+  // 并在此注册 "./plugins/with-firebase-config"（两个配置文件都缺失时 no-op）。
   // expo-image 的 plugin 由 expo install 提示补入（Android 端图片能力接线）。
   // expo-haptics 自动注入 Android VIBRATE 权限，无需 plugin。
   // expo-video / expo-sharing 的 plugin 同样由 expo install 提示补入。
@@ -38,7 +47,9 @@ const config: ExpoConfig = {
     "expo-image",
     "expo-video",
     "expo-sharing",
-    "./plugins/with-firebase-config",
+    // Firebase 已暂时停用：@react-native-firebase/* 依赖已移除，不注册
+    // ./plugins/with-firebase-config（恢复时加回；它负责注入
+    // $RNFirebaseDisableSPM / $RNFirebaseAsStaticFramework 以兼容静态链接）。
   ],
   scheme: "openstarter",
   slug: "openstarter",
