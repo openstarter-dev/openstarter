@@ -5,9 +5,9 @@
  * admin CRUD 子路由不可达。子路由测试直连 `adminAiModelsRouter` 发请求，绕过了聚合器，
  * 故未能捕获。本文件专门针对**组合根挂载**：经完整 `adminRouter` 断言
  * `/admin/ai-models` 上 POST/PATCH/DELETE 可达 CRUD 处理器（非 404、信封语义正确）。
- * CRUD 自身语义由 ai-catalog/router.test.ts 覆盖，此处不重复。
+ * CRUD 自身语义由 ai/catalog/router.test.ts 覆盖，此处不重复。
  *
- * 沿用 ai-catalog/router.test.ts 的 harness：x-test-user-id requireAuth mock、
+ * 沿用 ai/catalog/router.test.ts 的 harness：x-test-user-id requireAuth mock、
  * plan-gate/rbac 透传、临时 SQLite + ai_model DDL。
  */
 

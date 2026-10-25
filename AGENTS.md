@@ -57,13 +57,15 @@ src/
 ├── middleware/            # Auth, RBAC, plan gating middleware
 ├── schema/                # Shared Zod validation schemas (pagination, id param)
 └── modules/               # Domain modules (routers + services colocated)
-    ├── ai/                # AI generation (Replicate / Fal / OpenAI / New API providers)
-    ├── ai-tasks/          # AI task lifecycle + credit deduction
+    ├── ai/                # AI domain (media generation + LLM chat + model catalog + tasks)
+    │   ├── media/         # Image/video providers (Replicate / Fal / OpenAI / New API)
+    │   ├── llm/           # LLM chat (conversations + SSE streaming; providers via @tanstack/ai-*)
+    │   ├── catalog/       # Model catalog (CRUD + availability by media type)
+    │   └── tasks/         # Generation task lifecycle + credit deduction
     ├── auth/              # Better-Auth passthrough + custom unlink-account
     ├── billing/           # Checkout, payment webhooks
     ├── config/            # Public config endpoint
     ├── storage/           # Image upload (S3/R2)
-    ├── llm/               # LLM chat (conversations + SSE streaming; providers via @tanstack/ai-*)
     ├── mcp/               # MCP server mounted at /api/mcp (read-only + ticket writes)
     ├── status/            # Health/status endpoint
     ├── user/              # Profile, subscriptions, credits, orders
