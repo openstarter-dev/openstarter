@@ -23,7 +23,6 @@ catalog:
   "@tanstack/ai-anthropic": 0.19.1
   "@tanstack/ai-gemini": 0.33.1
   "@tanstack/ai-openai": 0.24.1
-  "@tanstack/ai-react": 0.29.1
   "@types/mdx": 2.0.13
   "@types/node": ^22.13.14
   "@types/react": 19.2.17
