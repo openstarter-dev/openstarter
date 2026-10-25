@@ -52,7 +52,7 @@ vi.mock("@tanstack/ai", async (importOriginal) => {
   return { ...actual, chat: mocks.chat };
 });
 
-import { InsufficientCreditsError } from "../ai-tasks/service";
+import { InsufficientCreditsError } from "../ai/tasks/service";
 import { llmRouter } from "./router";
 
 const AGUI_BODY = {

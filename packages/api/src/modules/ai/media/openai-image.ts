@@ -1,4 +1,4 @@
-// packages/api/src/ai/openai-image —— OpenAI 生图供应商（Task 11）。
+// packages/api/src/modules/ai/media/openai-image —— OpenAI 生图供应商（Task 11）。
 //
 // 与 replicate.ts 的差异：OpenAI Images API 为**同步型**（无远端任务句柄，不实现 query），
 // 且 gpt-image-1 恒返回 base64（`data:[{ b64_json }]`）而非远程 URL。故本 provider：

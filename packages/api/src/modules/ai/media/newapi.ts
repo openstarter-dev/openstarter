@@ -1,4 +1,4 @@
-// packages/api/src/ai/newapi —— New API 中转网关供应商。
+// packages/api/src/modules/ai/media/newapi —— New API 中转网关供应商。
 //
 // New API（https://github.com/QuantumNous/new-api）是自托管的中转站：一个 base URL + key
 // 后面可以挂多个上游（OpenAI / Gemini / 可灵 / 即梦 / Vidu 等）。媒体侧使用两套端点：

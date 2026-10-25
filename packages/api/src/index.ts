@@ -15,11 +15,11 @@ import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 
-import { registerAiSaveFiles } from "./modules/ai-tasks";
+import { registerAiSaveFiles } from "./modules/ai/tasks";
 import { adminRouter } from "./modules/admin/router";
 import { referralRouter } from "./modules/referral";
 import { aiModelsRouter } from "./modules/ai-catalog/router";
-import { aiRouter } from "./modules/ai/router";
+import { aiRouter } from "./modules/ai/media/router";
 import { llmRouter } from "./modules/llm";
 import { authRouter } from "./modules/auth/router";
 import { billingRouter } from "./modules/billing/router";

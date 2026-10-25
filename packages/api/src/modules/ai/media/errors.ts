@@ -1,4 +1,4 @@
-// packages/api/src/ai/errors —— AI 域可识别错误与结构化错误信息（R19.3/R19.4）。
+// packages/api/src/modules/ai/media/errors —— AI 域可识别错误与结构化错误信息（R19.3/R19.4）。
 //
 // 明确区分「配置态不可用」与「运行态供应商错误」两类，分别对应两条需求：
 //

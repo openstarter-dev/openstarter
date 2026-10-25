@@ -1,4 +1,4 @@
-// packages/api/src/ai/service —— 供应商路由分派与错误处理（R19.2/R19.3/R19.4）。
+// packages/api/src/modules/ai/media/service —— 供应商路由分派与错误处理（R19.2/R19.3/R19.4）。
 //
 // 依指定供应商/模型转发生成/查询请求并返回结果或任务句柄（R19.2）。两类错误严格区分：
 //

@@ -16,11 +16,11 @@ import {
   dispatchQuery,
   getAIManager,
 } from "./index";
-import { createTask, findTask, getTasks, InsufficientCreditsError, updateTask } from "../ai-tasks";
-import { findModelByProviderAndId } from "../ai-catalog/service";
-import { requireAuth } from "../../middleware/auth";
-import { requirePlan } from "../../middleware/plan-gate";
-import { paginationSchema } from "../../schema";
+import { createTask, findTask, getTasks, InsufficientCreditsError, updateTask } from "../tasks";
+import { findModelByProviderAndId } from "../../ai-catalog/service";
+import { requireAuth } from "../../../middleware/auth";
+import { requirePlan } from "../../../middleware/plan-gate";
+import { paginationSchema } from "../../../schema";
 
 const PROVIDER_UNAVAILABLE_MESSAGE = "AI provider is not enabled or its credentials are missing";
 

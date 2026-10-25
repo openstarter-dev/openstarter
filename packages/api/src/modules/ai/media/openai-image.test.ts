@@ -1,4 +1,4 @@
-// packages/api/src/ai/openai-image —— OpenAI 生图供应商测试（Task 11）。
+// packages/api/src/modules/ai/media/openai-image —— OpenAI 生图供应商测试（Task 11）。
 //
 // 同步型供应商（无 query）：POST {baseUrl}/images/generations，响应 data:[{b64_json}]
 // → data URL → persistMediaFiles（注入 saveFiles 时转存回写，未注入时原样返回 data URL）。

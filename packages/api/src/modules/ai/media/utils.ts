@@ -1,4 +1,4 @@
-// packages/api/src/ai/utils —— AI 域内共享的纯工具（供各 provider 的入参构建复用）。
+// packages/api/src/modules/ai/media/utils —— AI 域内共享的纯工具（供各 provider 的入参构建复用）。
 
 /** 返回不含指定键的浅拷贝（替代 `delete`，遵循 ultracite 的「禁用 delete」）。 */
 export function omitKeys(

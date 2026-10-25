@@ -14,13 +14,13 @@ import { type Database, db } from "@openstarter/db/server";
 import { sql } from "drizzle-orm";
 import fc from "fast-check";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { AITaskStatus } from "../ai";
+import { AITaskStatus } from "../media";
 import {
   closeApiTestDatabase,
   createApiTestDatabase,
   insertUser,
   resetApiTestDatabase,
-} from "../../test/api-test-database";
+} from "../../../test/api-test-database";
 import { createTask, getTasks, InsufficientCreditsError, updateTask } from "./service";
 
 const state = vi.hoisted(() => ({

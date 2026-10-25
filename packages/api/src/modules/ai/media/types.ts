@@ -1,4 +1,4 @@
-// packages/api/src/ai/types —— AI 供应商域抽象与归一化类型（对齐 ShipAny `core/ai/types.ts`，R19.1/R19.2）。
+// packages/api/src/modules/ai/media/types —— AI 供应商域抽象与归一化类型（对齐 ShipAny `core/ai/types.ts`，R19.1/R19.2）。
 //
 // 定义统一的供应商抽象 `AIProvider` 与生成入参 / 任务结果等归一化结构。Replicate（主）与其他
 // 受配置启用的供应商（如 Fal）均实现此接口；管理器（manager）与路由分派（service）只依赖此抽象，

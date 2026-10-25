@@ -2,7 +2,7 @@
  * AI router tests — catalog-first credit pricing (Task 7).
  *
  * `resolveCostCredits` 是模块私有函数，目录优先计价经 POST `/ai-tasks` 间接验证：
- * 断言 `createTask` spy 收到的 `costCredits` 入参。沿用 ai-catalog/router.test.ts
+ * 断言 `createTask` spy 收到的 `costCredits` 入参。沿用 ai/catalog/router.test.ts
  * 的 harness：requireAuth 走 x-test-user-id header mock，plan-gate 透传；
  * `../ai-tasks`（createTask/findTask/updateTask）、`./service`（dispatchGenerate）、
  * `./manager`（getAIManager 哨兵）与目录查询（findModelByProviderAndId）全部 mock
@@ -27,14 +27,14 @@ vi.mock("@openstarter/shared/config", async (importOriginal) => ({
 }));
 
 // 目录价查询（Task 3 service）：命中 / 未命中 / 0 价 / 查询失败四种分支由用例驱动。
-vi.mock("../ai-catalog/service", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../ai-catalog/service")>()),
+vi.mock("../../ai-catalog/service", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../ai-catalog/service")>()),
   findModelByProviderAndId: state.findModelByProviderAndId,
 }));
 
 // 任务生命周期 + 原子扣减：仅 spy 断言入参（计费语义由 ai-tasks 自身测试覆盖）。
-vi.mock("../ai-tasks", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../ai-tasks")>()),
+vi.mock("../tasks", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../tasks")>()),
   createTask: state.createTask,
   findTask: state.findTask,
   updateTask: state.updateTask,
@@ -53,7 +53,7 @@ vi.mock("./manager", async (importOriginal) => ({
 }));
 
 // requireAuth：从 x-test-user-id header 注入 userId，不做真实鉴权（notes.test.ts 同款）。
-vi.mock("../../middleware/auth", async () => {
+vi.mock("../../../middleware/auth", async () => {
   const { createMiddleware } = await import("hono/factory");
   const requireAuth = createMiddleware<{
     Variables: { userId: string; session: null };
@@ -66,7 +66,7 @@ vi.mock("../../middleware/auth", async () => {
 });
 
 // requirePlan：透传中间件（拒绝语义由中间件自身测试覆盖）。
-vi.mock("../../middleware/plan-gate", async () => {
+vi.mock("../../../middleware/plan-gate", async () => {
   const { createMiddleware } = await import("hono/factory");
   const passthrough = createMiddleware(async (_c, next) => {
     await next();
@@ -74,7 +74,7 @@ vi.mock("../../middleware/plan-gate", async () => {
   return { requirePlan: () => passthrough };
 });
 
-import { InsufficientCreditsError } from "../ai-tasks";
+import { InsufficientCreditsError } from "../tasks";
 import { computeConfigHash } from "./manager";
 import { aiRouter } from "./router";
 

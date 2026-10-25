@@ -1,7 +1,7 @@
-// packages/api/src/ai-tasks/service —— AI 任务与积分事务联动（AITask_Service，R20）。
+// packages/api/src/modules/ai/tasks/service —— AI 任务与积分事务联动（AITask_Service，R20）。
 //
-// 对齐 ShipAny `modules/ai-tasks/service.ts`，落位于 `packages/api/ai-tasks`（design：
-// modules/ai-tasks → packages/api/ai-tasks）。复用同包 AI 域（`../ai`）的归一化任务状态词汇，
+// 对齐 ShipAny `modules/ai-tasks/service.ts`，落位于 `packages/api/src/modules/ai/tasks`（design：
+// modules/ai-tasks → packages/api/src/modules/ai/tasks）。复用同包 AI 域（`../media`）的归一化任务状态词汇，
 // 以及积分域（`@openstarter/billing`）的 `consume`/`revoke`，把「任务生命周期」与「按量扣费」
 // 在**单事务**内原子联动：
 //
@@ -23,7 +23,7 @@ import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
 import { and, count, desc, eq, isNull, type SQL } from "drizzle-orm";
 
-import { type AITaskInfo, AITaskStatus } from "../ai";
+import { type AITaskInfo, AITaskStatus } from "../media";
 
 // 默认交易场景标签，用于积分流水区分来源（对齐 ShipAny 的 `ai_task`）。
 const AI_TASK_SCENE = "ai_task";

@@ -106,7 +106,7 @@ vi.mock("@tanstack/ai", async (importOriginal) => {
 
 import { createChat, createMessage } from "../service";
 import { llmRouter } from "../router";
-import { InsufficientCreditsError } from "../../ai-tasks/service";
+import { InsufficientCreditsError } from "../../ai/tasks/service";
 
 type AnyMiddleware = {
   onFinish?: (ctx: unknown, info: unknown) => unknown;

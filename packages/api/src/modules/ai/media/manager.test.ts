@@ -1,4 +1,4 @@
-// packages/api/src/ai/manager —— 按 Config 装配供应商的回归测试。
+// packages/api/src/modules/ai/media/manager —— 按 Config 装配供应商的回归测试。
 //
 // 重点覆盖 New API 中转站：base_url + api_key 齐备才注册；`newapi_enabled=false` 可关闭；
 // `default_ai_provider=newapi` 时作为默认渠道。setSaveFiles 同时用于清空模块级缓存。

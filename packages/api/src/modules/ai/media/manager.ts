@@ -1,4 +1,4 @@
-// packages/api/src/ai/manager —— AI 供应商管理器与「按 Config 动态装配」
+// packages/api/src/modules/ai/media/manager —— AI 供应商管理器与「按 Config 动态装配」
 // （对齐 ShipAny `core/ai/index.ts` 的 AIManager，R19.1）。
 //
 // - `AIManager`：登记/按名取用已装配 provider 的容器；默认渠道取显式设定或首个登记者。

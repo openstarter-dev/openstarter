@@ -1,4 +1,4 @@
-// packages/api/src/ai/replicate —— Replicate 供应商（主，对齐 ShipAny `core/ai/replicate.ts`，R19.1/R19.2）。
+// packages/api/src/modules/ai/media/replicate —— Replicate 供应商（主，对齐 ShipAny `core/ai/replicate.ts`，R19.1/R19.2）。
 //
 // 与参照实现的差异：改用 `fetch` 直连 Replicate REST API（对齐 ShipAny 其余供应商 fal/kie/gemini
 // 的 fetch 风格、避免过重 SDK 依赖），保留其 generate/query/formatInput/mapStatus 的行为语义。

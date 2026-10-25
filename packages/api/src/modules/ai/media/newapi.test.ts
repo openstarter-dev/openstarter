@@ -1,4 +1,4 @@
-// packages/api/src/ai/newapi —— New API 中转站供应商测试。
+// packages/api/src/modules/ai/media/newapi —— New API 中转站供应商测试。
 //
 // 覆盖：
 //   - 图片（OpenAI 兼容）：url / b64_json 两种响应、base URL 归一化、saveFiles 转存；

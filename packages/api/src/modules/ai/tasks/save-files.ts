@@ -1,6 +1,6 @@
-// packages/api/src/ai-tasks/save-files —— 生成文件转存对象存储的桥接与注入（R19.1 收尾）。
+// packages/api/src/modules/ai/tasks/save-files —— 生成文件转存对象存储的桥接与注入（R19.1 收尾）。
 //
-// AI 域（`../ai`）刻意**不直接依赖** storage，而是持有一个可注入的 `saveFiles` 回调
+// AI 域（`../media`）刻意**不直接依赖** storage，而是持有一个可注入的 `saveFiles` 回调
 // （`SaveFilesFunction`）。本模块作为同包内的**组合点**，把该回调用 `../storage` 的上传能力实现
 // 并经 `setSaveFiles` 注入 AI 管理器：使各供应商产出的临时文件被转存到对象存储、回写可访问 URL。
 //
@@ -14,8 +14,8 @@
 
 import { Buffer } from "node:buffer";
 import { logger } from "@openstarter/shared/logger";
-import { type AIFile, type SaveFilesFunction, setSaveFiles } from "../ai";
-import { getStorage, type StorageManager } from "../storage/manager";
+import { type AIFile, type SaveFilesFunction, setSaveFiles } from "../media";
+import { getStorage, type StorageManager } from "../../storage/manager";
 
 /** 拉取远端 URL 的字节内容（用于无存储渠道时的 base64 兜底）。 */
 async function fetchAsBytes(url: string): Promise<Uint8Array> {

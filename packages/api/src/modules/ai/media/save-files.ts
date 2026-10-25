@@ -1,4 +1,4 @@
-// packages/api/src/ai/save-files —— 生成文件转存的共享助手（供各 provider 复用）。
+// packages/api/src/modules/ai/media/save-files —— 生成文件转存的共享助手（供各 provider 复用）。
 //
 // 把「构建待转存文件 → 调用注入的 saveFiles 回调 → 按 index 回写可访问 URL」的通用流程集中于此，
 // 使各供应商（replicate/fal/...）无需各自重复该逻辑。回调失败经 logger 记录且不抛出——

@@ -12,7 +12,7 @@
  *
  * 积分原语（`consume`/`revoke`，FIFO 批次）复用 `@openstarter/billing-web`；
  * 目录定价复用 `../ai-catalog/service` 的 `findModelByProviderAndId`。
- * `InsufficientCreditsError` 从 `../ai-tasks/service` re-export，全包共用同一错误类型。
+ * `InsufficientCreditsError` 从 `../ai/tasks/service` re-export，全包共用同一错误类型。
  */
 
 import { consume, revoke } from "@openstarter/billing-web";
@@ -22,7 +22,7 @@ import { logger } from "@openstarter/shared/logger";
 import { eq } from "drizzle-orm";
 
 import { findModelByProviderAndId } from "../ai-catalog/service";
-import { InsufficientCreditsError } from "../ai-tasks/service";
+import { InsufficientCreditsError } from "../ai/tasks/service";
 
 export { InsufficientCreditsError };
 

@@ -1,4 +1,4 @@
-// packages/api/src/ai/fal —— Fal 供应商（对齐 ShipAny `core/ai/fal.ts`，R19.1/R19.2）。
+// packages/api/src/modules/ai/media/fal —— Fal 供应商（对齐 ShipAny `core/ai/fal.ts`，R19.1/R19.2）。
 //
 // 与参照实现一致以 `fetch` 直连 Fal 队列 API：
 //   - 创建任务：POST {baseUrl}/{model}（可选 ?fal_webhook=）→ 返回 request_id 作为任务句柄。

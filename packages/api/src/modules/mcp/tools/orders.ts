@@ -3,7 +3,7 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
-import { getTasks } from "../../ai-tasks/service";
+import { getTasks } from "../../ai/tasks/service";
 import { listUserOrders } from "../../user/service";
 import {
   jsonContent,

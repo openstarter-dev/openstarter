@@ -21,7 +21,7 @@ import {
   resetApiTestDatabase,
 } from "../../test/api-test-database";
 import { createModel, findModelByProviderAndId } from "../ai-catalog/service";
-import { InsufficientCreditsError } from "../ai-tasks/service";
+import { InsufficientCreditsError } from "../ai/tasks/service";
 import { preloadChatCredits, settleChatCredits } from "./credits";
 
 const state = vi.hoisted(() => ({

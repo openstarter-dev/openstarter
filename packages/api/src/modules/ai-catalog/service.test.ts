@@ -44,7 +44,7 @@ vi.mock("../llm/provider", () => ({
   getAvailableProviders: () => Promise.resolve(["openai"]),
 }));
 
-vi.mock("../ai/manager", () => ({
+vi.mock("../ai/media/manager", () => ({
   getAIManager: () => Promise.resolve({ getProviderNames: () => ["replicate"] }),
 }));
 
