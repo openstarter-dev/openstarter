@@ -7,7 +7,6 @@ import { QueryClient } from "@tanstack/react-query";
 import type { AnyRoute } from "@tanstack/react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { Route as ChatRoute } from "./(workbench)/chat";
 import { Route as DashboardRoute } from "./_app/dashboard";
 import { Route as AccountsRoute } from "./_app/settings/accounts";
 import { Route as ApiKeysRoute } from "./_app/settings/apikeys";
@@ -16,7 +15,6 @@ import { Route as CreditsRoute } from "./_app/settings/credits";
 import { Route as PaymentsRoute } from "./_app/settings/payments";
 import { Route as SessionsRoute } from "./_app/settings/sessions";
 import { Route as TicketsRoute } from "./_app/settings/tickets";
-import { Route as StudioRoute } from "./(workbench)/studio";
 import { Route as AdminIndexRoute } from "./admin/index";
 import { Route as AdminAiModelsRoute } from "./admin/ai-models";
 import { Route as AdminCreditsRoute } from "./admin/credits";
@@ -26,8 +24,7 @@ import { Route as AdminSettingsRoute } from "./admin/settings";
 import { Route as AdminSubscriptionsRoute } from "./admin/subscriptions";
 import { Route as AdminUsersRoute } from "./admin/users";
 
-// 组件挂载时消费的同款 key（分页页对齐 page=1 / 无搜索的初始 state；
-// studio 对齐首个 tab STUDIO_MEDIA_TYPES[0]="image"）。
+// 组件挂载时消费的同款 key（分页页对齐 page=1 / 无搜索的初始 state）。
 const ROUTE_QUERY_KEYS: Record<string, { keys: unknown[][]; route: AnyRoute }> = {
   "/_app/dashboard": {
     keys: [
@@ -35,20 +32,6 @@ const ROUTE_QUERY_KEYS: Record<string, { keys: unknown[][]; route: AnyRoute }> =
       ["user", "orders", 1],
     ],
     route: DashboardRoute,
-  },
-  "/chat": {
-    keys: [
-      ["ai", "models"],
-      ["ai", "chats", 1],
-    ],
-    route: ChatRoute,
-  },
-  "/studio": {
-    keys: [
-      ["ai", "models"],
-      ["ai", "tasks", "image", 1],
-    ],
-    route: StudioRoute,
   },
   "/_app/settings/apikeys": { keys: [["user", "apikeys"]], route: ApiKeysRoute },
   "/_app/settings/billing": {
@@ -80,7 +63,7 @@ const ROUTE_QUERY_KEYS: Record<string, { keys: unknown[][]; route: AnyRoute }> =
 };
 
 // 全局 fetch 打桩：所有 RPC / better-auth 请求一律 500，loader 取数必然失败。
-// 覆盖 @/lib/api 的 hc 单例与 @openstarter/ai-web 自建的客户端（两者都走 fetch）。
+// 覆盖 @/lib/api 的 hc 单例与 better-auth 客户端（两者都走 fetch）。
 beforeEach(() => {
   vi.stubGlobal(
     "fetch",
