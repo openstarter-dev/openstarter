@@ -15,7 +15,7 @@ import { aiModel, type AiModel, type NewAiModel } from "@openstarter/db/schema";
 import { getUuid } from "@openstarter/shared/id";
 import { and, asc, eq } from "drizzle-orm";
 
-import { getAIManager } from "../ai/media/manager";
+import { getAIManager } from "../media/manager";
 import { getAvailableProviders } from "../llm/provider";
 
 /** AI 生成的媒体类型清单（目录分组键）。 */

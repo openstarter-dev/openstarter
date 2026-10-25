@@ -34,12 +34,12 @@ vi.mock("../llm/provider", () => ({
   getAvailableProviders: () => Promise.resolve(["openai"]),
 }));
 
-vi.mock("../ai/media/manager", () => ({
+vi.mock("../media/manager", () => ({
   getAIManager: () => Promise.resolve({ getProviderNames: () => ["replicate"] }),
 }));
 
 // requireAuth：从 x-test-user-id header 注入 userId，不做真实鉴权（notes.test.ts 同款）。
-vi.mock("../../middleware/auth", async () => {
+vi.mock("../../../middleware/auth", async () => {
   const { createMiddleware } = await import("hono/factory");
   const requireAuth = createMiddleware<{
     Variables: { userId: string; session: null };
@@ -52,7 +52,7 @@ vi.mock("../../middleware/auth", async () => {
 });
 
 // requirePlan / requirePermission：透传中间件（拒绝语义由中间件自身测试覆盖）。
-vi.mock("../../middleware/plan-gate", async () => {
+vi.mock("../../../middleware/plan-gate", async () => {
   const { createMiddleware } = await import("hono/factory");
   const passthrough = createMiddleware(async (_c, next) => {
     await next();
@@ -60,7 +60,7 @@ vi.mock("../../middleware/plan-gate", async () => {
   return { requirePlan: () => passthrough };
 });
 
-vi.mock("../../middleware/rbac", async () => {
+vi.mock("../../../middleware/rbac", async () => {
   const { createMiddleware } = await import("hono/factory");
   const passthrough = createMiddleware(async (_c, next) => {
     await next();

@@ -11,8 +11,8 @@
  *      实际 >= 预扣 → 保留预扣（封顶保护，多出的由平台承担）。
  *
  * 积分原语（`consume`/`revoke`，FIFO 批次）复用 `@openstarter/billing-web`；
- * 目录定价复用 `../ai-catalog/service` 的 `findModelByProviderAndId`。
- * `InsufficientCreditsError` 从 `../ai/tasks/service` re-export，全包共用同一错误类型。
+ * 目录定价复用 `../catalog/service` 的 `findModelByProviderAndId`。
+ * `InsufficientCreditsError` 从 `../tasks/service` re-export，全包共用同一错误类型。
  */
 
 import { consume, revoke } from "@openstarter/billing-web";
@@ -21,8 +21,8 @@ import { db } from "@openstarter/db/server";
 import { logger } from "@openstarter/shared/logger";
 import { eq } from "drizzle-orm";
 
-import { findModelByProviderAndId } from "../ai-catalog/service";
-import { InsufficientCreditsError } from "../ai/tasks/service";
+import { findModelByProviderAndId } from "../catalog/service";
+import { InsufficientCreditsError } from "../tasks/service";
 
 export { InsufficientCreditsError };
 

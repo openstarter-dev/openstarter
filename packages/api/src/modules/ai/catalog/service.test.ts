@@ -2,7 +2,7 @@
  * AI model catalog service tests — in-memory SQLite with the local DDL pattern.
  *
  * Reuses the `vi.mock("@openstarter/db/server")` + in-file `CREATE TABLE`
- * harness from `modules/llm/__tests__/llm.test.ts`. The `ai_model` DDL mirrors
+ * harness from `modules/ai/llm/__tests__/llm.test.ts`. The `ai_model` DDL mirrors
  * the Task 2 sqlite schema (snake_case columns + the
  * `uq_ai_model_provider_model` unique index). Provider availability is mocked
  * at both seams: `../llm/provider` (LLM side) and `../ai/manager` (media side).
@@ -44,7 +44,7 @@ vi.mock("../llm/provider", () => ({
   getAvailableProviders: () => Promise.resolve(["openai"]),
 }));
 
-vi.mock("../ai/media/manager", () => ({
+vi.mock("../media/manager", () => ({
   getAIManager: () => Promise.resolve({ getProviderNames: () => ["replicate"] }),
 }));
 

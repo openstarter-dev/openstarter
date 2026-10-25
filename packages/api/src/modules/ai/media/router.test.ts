@@ -27,8 +27,8 @@ vi.mock("@openstarter/shared/config", async (importOriginal) => ({
 }));
 
 // 目录价查询（Task 3 service）：命中 / 未命中 / 0 价 / 查询失败四种分支由用例驱动。
-vi.mock("../../ai-catalog/service", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../../ai-catalog/service")>()),
+vi.mock("../catalog/service", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../catalog/service")>()),
   findModelByProviderAndId: state.findModelByProviderAndId,
 }));
 

@@ -18,10 +18,10 @@ import { respData, respErr, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 import { z } from "zod";
 
-import { requireAuth } from "../../middleware/auth";
-import { requirePlan } from "../../middleware/plan-gate";
-import { requirePermission } from "../../middleware/rbac";
-import { idParam, paginationSchema } from "../../schema";
+import { requireAuth } from "../../../middleware/auth";
+import { requirePlan } from "../../../middleware/plan-gate";
+import { requirePermission } from "../../../middleware/rbac";
+import { idParam, paginationSchema } from "../../../schema";
 import {
   AI_MEDIA_TYPES,
   createModel,

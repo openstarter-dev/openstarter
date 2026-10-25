@@ -2,8 +2,8 @@
  * LLM chat credit metering service tests (Task 5) — real SQLite credit ledger.
  *
  * Follows the established `vi.mock("@openstarter/db/server")` + in-file
- * snake_case `CREATE TABLE` DDL pattern (see `ai-tasks/service.property.test.ts`
- * and `ai-catalog/service.test.ts`): tables `user`, `credit` (billing ledger)
+ * snake_case `CREATE TABLE` DDL pattern (see `ai/tasks/service.property.test.ts`
+ * and `ai/catalog/service.test.ts`): tables `user`, `credit` (billing ledger)
  * and `ai_model` (Task 2 catalog) are created in a per-suite temp file DB.
  * Balance is seeded via `grant` + `insertUser`.
  */
@@ -19,9 +19,9 @@ import {
   createApiTestDatabase,
   insertUser,
   resetApiTestDatabase,
-} from "../../test/api-test-database";
-import { createModel, findModelByProviderAndId } from "../ai-catalog/service";
-import { InsufficientCreditsError } from "../ai/tasks/service";
+} from "../../../test/api-test-database";
+import { createModel, findModelByProviderAndId } from "../catalog/service";
+import { InsufficientCreditsError } from "../tasks/service";
 import { preloadChatCredits, settleChatCredits } from "./credits";
 
 const state = vi.hoisted(() => ({

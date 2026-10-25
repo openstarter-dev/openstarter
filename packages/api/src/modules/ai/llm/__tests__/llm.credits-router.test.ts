@@ -1,7 +1,7 @@
 /**
  * LLM credits router tests — chat message streaming with credit preload/settle.
  *
- * 沿用 ai-catalog/router.test.ts 的 harness：requireAuth 走 x-test-user-id header
+ * 沿用 ai/catalog/router.test.ts 的 harness：requireAuth 走 x-test-user-id header
  * mock，plan-gate 透传；`./credits` 的 preload/settle mock 为 vi.fn（计费语义由
  * credits.test.ts 覆盖，此处聚焦路由接线：预扣 402 短路、成功路径参数透传）。
  * `./provider` 的 getAdapter mock 返回装配哨兵，`@tanstack/ai` 的 chat mock 产出
@@ -56,9 +56,9 @@ vi.mock("@openstarter/auth/apikeys/service", () => ({
   validateApiKey: vi.fn(async () => null),
 }));
 
-// ../../middleware/auth：从 x-test-user-id header 注入 userId，不做真实鉴权
+// ../../../../middleware/auth：从 x-test-user-id header 注入 userId，不做真实鉴权
 // （notes.test.ts 同款；导出形状与真实 auth.ts 一致：apiKeyAuth/authMiddleware/requireAuth）。
-vi.mock("../../../middleware/auth", async () => {
+vi.mock("../../../../middleware/auth", async () => {
   const { createMiddleware } = await import("hono/factory");
   const passthrough = createMiddleware<{ Variables: { session: null } }>(async (_c, next) => {
     await next();
@@ -73,7 +73,7 @@ vi.mock("../../../middleware/auth", async () => {
   return { apiKeyAuth: requireAuth, authMiddleware: passthrough, requireAuth };
 });
 
-vi.mock("../../../middleware/plan-gate", async () => {
+vi.mock("../../../../middleware/plan-gate", async () => {
   const { createMiddleware } = await import("hono/factory");
   const passthrough = createMiddleware(async (_c, next) => {
     await next();
@@ -106,7 +106,7 @@ vi.mock("@tanstack/ai", async (importOriginal) => {
 
 import { createChat, createMessage } from "../service";
 import { llmRouter } from "../router";
-import { InsufficientCreditsError } from "../../ai/tasks/service";
+import { InsufficientCreditsError } from "../../tasks/service";
 
 type AnyMiddleware = {
   onFinish?: (ctx: unknown, info: unknown) => unknown;

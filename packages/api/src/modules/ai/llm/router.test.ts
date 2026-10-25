@@ -18,13 +18,13 @@ const mocks = vi.hoisted(() => ({
   chat: vi.fn(),
 }));
 
-vi.mock("../../middleware/auth", () => ({
+vi.mock("../../../middleware/auth", () => ({
   requireAuth: async (c: { set: (k: string, v: string) => void }, next: () => Promise<void>) => {
     c.set("userId", "u1");
     await next();
   },
 }));
-vi.mock("../../middleware/plan-gate", () => ({
+vi.mock("../../../middleware/plan-gate", () => ({
   requirePlan: () => async (_c: unknown, next: () => Promise<void>) => next(),
 }));
 vi.mock("./provider", () => ({
@@ -52,7 +52,7 @@ vi.mock("@tanstack/ai", async (importOriginal) => {
   return { ...actual, chat: mocks.chat };
 });
 
-import { InsufficientCreditsError } from "../ai/tasks/service";
+import { InsufficientCreditsError } from "../tasks/service";
 import { llmRouter } from "./router";
 
 const AGUI_BODY = {

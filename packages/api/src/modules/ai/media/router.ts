@@ -17,7 +17,7 @@ import {
   getAIManager,
 } from "./index";
 import { createTask, findTask, getTasks, InsufficientCreditsError, updateTask } from "../tasks";
-import { findModelByProviderAndId } from "../../ai-catalog/service";
+import { findModelByProviderAndId } from "../catalog/service";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
 import { paginationSchema } from "../../../schema";

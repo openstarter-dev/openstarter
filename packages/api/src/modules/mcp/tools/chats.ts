@@ -3,7 +3,7 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 import { z } from "zod";
 
-import { getChat, getChatMessages, getUserChats } from "../../llm/service";
+import { getChat, getChatMessages, getUserChats } from "../../ai/llm/service";
 import {
   jsonContent,
   paginationSchema,

@@ -17,12 +17,12 @@ import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";
 import { z } from "zod";
 
-import { requireAuth } from "../../middleware/auth";
-import { requirePlan } from "../../middleware/plan-gate";
-import { paginationSchema } from "../../schema";
+import { requireAuth } from "../../../middleware/auth";
+import { requirePlan } from "../../../middleware/plan-gate";
+import { paginationSchema } from "../../../schema";
 
 import { revoke } from "@openstarter/billing-web";
-import { InsufficientCreditsError } from "../ai/tasks/service";
+import { InsufficientCreditsError } from "../tasks/service";
 import { extractLatestUserText, sendMessageBody } from "./agui-body";
 import { createBillingMiddleware } from "./billing-middleware";
 import { preloadChatCredits, settleChatCredits } from "./credits";
