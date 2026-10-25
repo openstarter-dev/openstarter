@@ -124,6 +124,43 @@ same origin under `/api/*`. Product branding starts in
 apps/web/src/lib/branding.ts; each app README documents its platform-specific
 commands.
 
+## Deploy to Cloudflare Workers
+
+`apps/web` builds a Workers bundle via Nitro (`NITRO_PRESET=cloudflare_module`).
+`wrangler.jsonc` is git-ignored because it carries production bindings, so start
+from the committed template:
+
+```bash
+cd apps/web
+cp wrangler.example.jsonc wrangler.jsonc
+```
+
+Fill in the placeholders:
+
+| Placeholder                                               | Value                                                       |
+| --------------------------------------------------------- | ----------------------------------------------------------- |
+| `routes[].pattern`                                        | production hostname (apex or www — pick one, 301 the other) |
+| `compatibility_date`                                      | any date your wrangler version supports                     |
+| `vars.VITE_APP_URL` / `vars.BETTER_AUTH_URL` / `vars.URL` | the same `https://…` URL                                    |
+| `d1_databases[].database_id`                              | output of `wrangler d1 create openstarter-db`               |
+
+Then deploy and finish the one-time setup:
+
+```bash
+pnpm --filter web cf:deploy   # build + wrangler deploy
+cd apps/web && wrangler secret put BETTER_AUTH_SECRET
+cd apps/web && wrangler secret put CONFIG_ENCRYPTION_KEY
+cd apps/web && wrangler d1 migrations apply openstarter-db --remote
+```
+
+- The custom-domain zone must be active in the same Cloudflare account. Wrangler
+  creates the proxied DNS record and certificate itself — don't pre-create one.
+- `cf:build` emits `.output/server/wrangler.json` (entry + assets) and wrangler
+  loads it through `.wrangler/deploy/config.json`. Both are generated — don't edit.
+- `wrangler d1 migrations apply` without `--remote` only touches local D1.
+- Only the template is committed. For CI, generate `wrangler.jsonc` from
+  environment variables instead of committing the working copy.
+
 ## Contact
 
 - **GitHub**: [openstarter-dev/openstarter](https://github.com/openstarter-dev/openstarter) — issues and PRs welcome

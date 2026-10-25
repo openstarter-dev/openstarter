@@ -63,7 +63,7 @@ src/
     ├── billing/           # Checkout, payment webhooks
     ├── config/            # Public config endpoint
     ├── storage/           # Image upload (S3/R2)
-    ├── llm/               # LLM chat (conversations + SSE streaming; providers in packages/ai)
+    ├── llm/               # LLM chat (conversations + SSE streaming; providers via @tanstack/ai-*)
     ├── mcp/               # MCP server mounted at /api/mcp (read-only + ticket writes)
     ├── status/            # Health/status endpoint
     ├── user/              # Profile, subscriptions, credits, orders
