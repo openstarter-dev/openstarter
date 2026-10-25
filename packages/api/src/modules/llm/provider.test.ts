@@ -14,7 +14,7 @@ vi.mock("@openstarter/shared/config", () => ({
   getAllConfigs: async () => state.configs,
 }));
 
-import { getAdapter, resolveAdapterSpec } from "./provider";
+import { getAdapter, getAvailableProviders, resolveAdapterSpec } from "./provider";
 
 type Configs = Awaited<ReturnType<typeof import("@openstarter/shared/config").getAllConfigs>>;
 
@@ -92,8 +92,52 @@ describe("resolveAdapterSpec", () => {
     );
   });
 
+  it("newapi → compat：自托管 baseURL + 配置密钥", () => {
+    const spec = resolveAdapterSpec(
+      "newapi",
+      "gpt-4o",
+      cfg({
+        newapi_base_url: "https://newapi.example.com/v1",
+        newapi_api_key: "sk-newapi",
+      }),
+    );
+    expect(spec).toMatchObject({
+      kind: "compat",
+      name: "newapi",
+      baseURL: "https://newapi.example.com/v1",
+      apiKey: "sk-newapi",
+      maxTokensKey: "max_tokens",
+    });
+  });
+
+  it("newapi 缺 baseURL 或密钥分别抛错", () => {
+    expect(() =>
+      resolveAdapterSpec("newapi", "gpt-4o", cfg({ newapi_api_key: "sk-newapi" })),
+    ).toThrow(/base URL not configured/);
+    expect(() =>
+      resolveAdapterSpec(
+        "newapi",
+        "gpt-4o",
+        cfg({ newapi_base_url: "https://newapi.example.com/v1" }),
+      ),
+    ).toThrow(/not configured/);
+  });
+
   it("未知 provider 抛 Unknown LLM provider", () => {
     expect(() => resolveAdapterSpec("nope", "m", cfg())).toThrow(/Unknown LLM provider/);
+  });
+});
+
+describe("getAvailableProviders", () => {
+  it("newapi 需要 base_url + api_key 同时存在", async () => {
+    state.configs = { newapi_base_url: "https://newapi.example.com/v1" };
+    expect(await getAvailableProviders()).not.toContain("newapi");
+
+    state.configs = {
+      newapi_base_url: "https://newapi.example.com/v1",
+      newapi_api_key: "sk-newapi",
+    };
+    expect(await getAvailableProviders()).toContain("newapi");
   });
 });
 

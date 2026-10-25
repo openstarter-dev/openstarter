@@ -17,6 +17,7 @@
 
 import { getAllConfigs } from "@openstarter/shared/config";
 import { FalProvider } from "./fal";
+import { NewAPIProvider } from "./newapi";
 import { OpenAIImageProvider } from "./openai-image";
 import { ReplicateProvider } from "./replicate";
 import { AIMediaType, type AIProvider, type SaveFilesFunction } from "./types";
@@ -169,6 +170,27 @@ function assembleFal(
   );
 }
 
+/** New API 中转站装配：自托管地址 + key 均必填（一个网关后面的上游由模型目录决定）。 */
+function assembleNewAPI(
+  manager: AIManager,
+  configs: Record<string, string>,
+  saveFiles: SaveFilesFunction | undefined,
+  defaultProvider: string,
+): void {
+  if (!isAvailable(configs, "newapi", ["newapi_base_url", "newapi_api_key"])) {
+    return;
+  }
+  manager.addProvider(
+    new NewAPIProvider({
+      apiKey: configs.newapi_api_key || "",
+      baseUrl: configs.newapi_base_url || "",
+      saveFiles,
+      customStorage: Boolean(saveFiles),
+    }),
+    defaultProvider === "newapi",
+  );
+}
+
 /** 相关 Config 的指纹：任一 AI 相关键变化即触发管理器重建（含 LLM 共用的 openai_api_key）。 */
 export function computeConfigHash(configs: Record<string, string>): string {
   return JSON.stringify([
@@ -180,6 +202,9 @@ export function computeConfigHash(configs: Record<string, string>): string {
     configs.fal_api_key || "",
     configs.openai_api_key || "",
     configs.openai_base_url || "",
+    configs.newapi_enabled || "",
+    configs.newapi_base_url || "",
+    configs.newapi_api_key || "",
   ]);
 }
 
@@ -205,6 +230,7 @@ export async function getAIManager(): Promise<AIManager> {
   assembleReplicate(manager, configs, registeredSaveFiles, defaultProvider);
   assembleOpenAIImage(manager, configs, registeredSaveFiles, defaultProvider);
   assembleFal(manager, configs, registeredSaveFiles, defaultProvider);
+  assembleNewAPI(manager, configs, registeredSaveFiles, defaultProvider);
 
   cachedManager = manager;
   cachedHash = hash;

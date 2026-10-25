@@ -28,9 +28,16 @@ const OPENAI_COMPATIBLE_PROVIDERS = {
     defaultBaseURL: "https://api.deepseek.com/v1",
     maxTokensKey: "max_tokens",
   },
+  // Ollama / New API 为自托管地址，必须显式配置（不提供默认域名）。
   ollama: {
     baseURLKey: "ollama_base_url",
-    defaultBaseURL: "http://localhost:11434/v1",
+    defaultBaseURL: "",
+    maxTokensKey: "max_tokens",
+  },
+  // New API 中转站：自托管地址必须显式配置（无默认域名），一个 key 可路由多个上游模型。
+  newapi: {
+    baseURLKey: "newapi_base_url",
+    defaultBaseURL: "",
     maxTokensKey: "max_tokens",
   },
 } as const;
@@ -92,8 +99,9 @@ export function resolveAdapterSpec(
     throw new Error(`Unknown LLM provider: ${providerName}`);
   }
   const { baseURLKey, defaultBaseURL, maxTokensKey } = OPENAI_COMPATIBLE_PROVIDERS[providerName];
-  if (providerName === "ollama" && !configs[baseURLKey]) {
-    throw new Error("Ollama base URL not configured (ollama_base_url)");
+  const baseURL = configs[baseURLKey] || defaultBaseURL;
+  if (!baseURL) {
+    throw new Error(`${providerName} base URL not configured (${baseURLKey})`);
   }
   const apiKey =
     providerName === "ollama" ? OLLAMA_PLACEHOLDER_KEY : configs[`${providerName}_api_key`] || "";
@@ -104,7 +112,7 @@ export function resolveAdapterSpec(
     kind: "compat",
     name: providerName,
     model,
-    baseURL: configs[baseURLKey] || defaultBaseURL,
+    baseURL,
     apiKey,
     maxTokensKey,
   };
@@ -165,6 +173,7 @@ export async function getAvailableProviders(): Promise<string[]> {
   if (configs.openrouter_api_key) providers.push("openrouter");
   if (configs.deepseek_api_key) providers.push("deepseek");
   if (configs.ollama_base_url) providers.push("ollama");
+  if (configs.newapi_base_url && configs.newapi_api_key) providers.push("newapi");
 
   return providers;
 }

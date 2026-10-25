@@ -55,6 +55,7 @@ const SECRET_NAMES = [
   "github_client_secret",
   "r2_secret_key",
   "openai_api_key",
+  "newapi_api_key",
   "fal_api_key",
   "anthropic_api_key",
   "replicate_api_token",

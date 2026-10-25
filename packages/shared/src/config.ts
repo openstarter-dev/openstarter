@@ -203,6 +203,13 @@ export function getSettingGroups(): SettingGroup[] {
       title: "OpenAI",
     },
     {
+      description:
+        "New API relay gateway (OpenAI-compatible: text LLM, image and video generation)",
+      name: "newapi",
+      tab: "ai",
+      title: "New API",
+    },
+    {
       description: "Anthropic Claude API",
       name: "anthropic",
       tab: "ai",
@@ -925,6 +932,25 @@ export function getSettings(): Setting[] {
       type: "password",
     },
 
+    // AI / New API（自托管中转站：文本 / 图片 / 视频共用同一组凭证）
+    {
+      group: "newapi",
+      name: "newapi_base_url",
+      placeholder: "https://your-newapi-host/v1",
+      tab: "ai",
+      title: "Base URL",
+      tip: "Include the /v1 prefix, e.g. https://newapi.example.com/v1",
+      type: "text",
+    },
+    {
+      group: "newapi",
+      name: "newapi_api_key",
+      placeholder: "sk-xxx",
+      tab: "ai",
+      title: "API Key",
+      type: "password",
+    },
+
     // AI / Anthropic
     {
       group: "anthropic",
@@ -1228,6 +1254,10 @@ export const envConfigs: ConfigMap = {
   deepseek_api_key: readEnv("DEEPSEEK_API_KEY") ?? "",
   deepseek_base_url: readEnv("DEEPSEEK_BASE_URL") ?? "",
   ollama_base_url: readEnv("OLLAMA_BASE_URL") ?? "",
+
+  // AI - New API 中转站（文本 / 图片 / 视频共用；地址仍需带 /v1）
+  newapi_api_key: readEnv("NEWAPI_API_KEY") ?? "",
+  newapi_base_url: readEnv("NEWAPI_BASE_URL") ?? "",
 
   // 邮件 - Resend
   resend_api_key: readEnv("RESEND_API_KEY") ?? "",

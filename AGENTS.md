@@ -57,7 +57,7 @@ src/
 ├── middleware/            # Auth, RBAC, plan gating middleware
 ├── schema/                # Shared Zod validation schemas (pagination, id param)
 └── modules/               # Domain modules (routers + services colocated)
-    ├── ai/                # AI generation (Replicate/Fal providers)
+    ├── ai/                # AI generation (Replicate / Fal / OpenAI / New API providers)
     ├── ai-tasks/          # AI task lifecycle + credit deduction
     ├── auth/              # Better-Auth passthrough + custom unlink-account
     ├── billing/           # Checkout, payment webhooks
