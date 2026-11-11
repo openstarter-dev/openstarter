@@ -24,8 +24,9 @@ pnpm dev:desktop
 pnpm build:desktop
 ```
 
-用 esbuild 把 `src/main.ts` 和 `src/preload.ts` 编译成 `dist/*.cjs`。站点 URL 的
-默认值在这一步通过 `OPENSTARTER_API_URL` 环境变量注入，例如：
+用 esbuild 把 `src/main.ts` 和 `src/preload.ts` 编译成 `dist/*.cjs`。站点 URL 取自
+构建时的进程环境（未设置时回退 `http://localhost:3000`），指向别的环境时用
+`OPENSTARTER_API_URL` 显式指定，例如：
 
 ```bash
 OPENSTARTER_API_URL=https://app.yourdomain.com pnpm build:desktop
@@ -64,7 +65,7 @@ GH_TOKEN=<your-token> pnpm release:desktop
 | `electron-builder.yml`     | `publish.owner` / `publish.repo` | 你的 GitHub 仓库，自动更新依赖这个                     |
 | `build-resources/icon.png` | —                                | 换成你自己的 1024×1024 图标，当前是占位图              |
 | `package.json`             | `version`                        | 每次发版前手动递增                                     |
-| `.env`                     | `OPENSTARTER_API_URL`            | 你部署好的站点地址（构建时注入，见上方"构建"一节）     |
+| `apps/web/.env`            | `URL`（或 `OPENSTARTER_API_URL`）| 你部署好的站点地址（构建时注入，见上方"构建"一节）     |
 
 ## 已知限制
 

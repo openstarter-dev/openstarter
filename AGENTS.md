@@ -136,19 +136,38 @@ const listQuery = paginationSchema.extend({
 | **Test (all/specific)**   | `pnpm test` / `pnpm --filter @openstarter/api test`        |
 | **Test coverage**         | `pnpm test:coverage`                                       |
 | **Type check**            | `pnpm check-types`                                         |
-| **Database**              | `pnpm with-env pnpm -F @openstarter/db db:migrate`         |
+| **Database**              | `pnpm -F @openstarter/db db:migrate`                       |
 | **Services**              | `pnpm services:setup` / `services:start` / `services:stop` |
 
 ## Environment
 
-Create `.env` at the repo root with required variables:
+`apps/web/.env` is the single environment source for the whole monorepo
+(copy `apps/web/.env.example`; there is no root `.env`). Every entry point loads
+it itself — there is no global env wrapper:
+
+- `apps/web` — Vite for the client + `dotenv/config` in `packages/db` (cwd =
+  `apps/web`) for the server runtime
+- `packages/db` — `drizzle.shared.ts` (`loadWebEnv`) for drizzle-kit, and
+  `scripts/setup-schema.mjs` for the active schema dialect
+- `packages/auth` — `scripts/seed-admin.ts`
+- extension / mobile / mini-app — their build entries (`wxt.config.ts`,
+  `scripts/env.mjs`, `config/index.ts`)
+- `pnpm with-env <cmd>` — optional manual injection for ad-hoc commands; no
+  script depends on it. The CLI is a standalone package: pass
+  `OPENSTARTER_API_URL=http://localhost:3000` when running `dev:cli` locally.
+
+Required variables:
 
 - `DATABASE_URL` — Postgres connection string (ignored by the Cloudflare D1 binding path)
+- `DATABASE_PROVIDER` — `postgres` | `d1`
+- `URL` — web app origin (also the API origin; other apps derive their base URL from it)
 - `PRODUCT_NAME` — Used in emails, marketing site
-- `URL` — Deployment base URL
 - `DEFAULT_LOCALE` — Default i18n locale (e.g., `en-US`)
 
-See apps/web and packages/auth for app-specific env vars.
+Extension / mobile / mini-app / cli / desktop read the web app address from
+`apps/web/.env` (or the injected `URL`) at build time; `OPENSTARTER_API_URL`
+stays available as an explicit override for CI/deployments. See apps/web and
+packages/auth for app-specific env vars.
 
 ## Code Conventions
 
@@ -235,7 +254,7 @@ Database migrations run via drizzle-kit: `db:migrate` (local, dispatches on `DAT
 
 | Issue                   | Fix                                                                                   |
 | ----------------------- | ------------------------------------------------------------------------------------- |
-| Env vars not loaded     | Create `.env` at repo root; use `pnpm with-env` for migrations                        |
+| Env vars not loaded     | Create `apps/web/.env`; each entry point reads it (see Environment above)             |
 | Module resolution fails | `pnpm clean && pnpm install`                                                          |
 | Type errors in IDE      | `pnpm check-types`; restart TS server                                                 |
 | Tests fail on import    | Verify workspace alias in `tsconfig.json` (check `@openstarter/*` → `packages/*/src`) |

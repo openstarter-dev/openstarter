@@ -5,7 +5,7 @@ Taro v4 (React) 微信小程序模板，集成 openstarter 全栈基础设施。
 ## 快速开始
 
 ```bash
-# 确认根目录 .env 中已配置 OPENSTARTER_API_URL
+# 确认 apps/web/.env 的 URL 已配置（构建期据此派生 API 地址）
 pnpm install
 
 # 开发（监听文件变化）

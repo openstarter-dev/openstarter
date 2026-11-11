@@ -50,8 +50,8 @@ boring 80% that every SaaS needs but nobody wants to build:
   sharing auth and API.
 - **Batteries included, swappable** — SQLite/Turso/Postgres/MySQL via a dialect
   adapter, pluggable analytics and email providers. Start cheap, scale later.
-- **Indie-hacker friendly** — One `.env` for the shared API URL, one command to
-  run everything, deploy anywhere Node runs.
+- **Indie-hacker friendly** — One `.env` (`apps/web/.env`) for the shared API URL,
+  one command to run everything, deploy anywhere Node runs.
 
 ## Tech Stack
 
@@ -111,13 +111,18 @@ openstarter/
 
 ```bash
 pnpm install
-cp .env.example .env
 cp apps/web/.env.example apps/web/.env
 # Set a strong BETTER_AUTH_SECRET in apps/web/.env:
 #   openssl rand -hex 32
 pnpm db:push
 pnpm dev
 ```
+
+`apps/web/.env` is the single environment source for the whole monorepo.
+Every entry point reads it directly — Vite and `dotenv` for the web app,
+`packages/db` for migrations, each app's own build entry for the rest — so no
+global env wrapper is needed. `pnpm with-env <cmd>` is available for manual
+injection, and every app derives its API base URL from `URL`.
 
 Open [http://localhost:3000](http://localhost:3000). The API is served from the
 same origin under `/api/*`. Product branding starts in
