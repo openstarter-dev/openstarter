@@ -7,6 +7,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import "../../global.css";
 
+import { initAnalyticsFromEnv } from "@/lib/analytics";
 import { ConfigError } from "@/components/config-error";
 import { getEnv } from "@/lib/env";
 import { BillingProvider } from "@/lib/use-billing";
@@ -23,7 +24,11 @@ export default function RootLayout() {
   useThemePreference();
   const { locale } = useAppLocale();
 
-  // 分析初始化已暂时停用（Firebase/OpenPanel 均不初始化，恢复时加回 initAnalyticsFromEnv 调用即可）。
+  // 分析初始化：按构建期 env 选择供应商（都没配时门面返回 noop，无副作用）。
+  // 放在 effect 里而非模块顶层：init 内部动态 import 可选 SDK，只能在运行时执行。
+  useEffect(() => {
+    void initAnalyticsFromEnv();
+  }, []);
 
   // Deep link ?ref= 归因捕获：仅在首次挂载时读取初始 URL 的 ref 参数。
   useEffect(() => {

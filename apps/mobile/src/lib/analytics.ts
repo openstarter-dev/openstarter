@@ -8,12 +8,21 @@
 // 上报错误全部由门面消化；这里不再包一层 try/catch（解析层永不抛错）。
 
 import {
+  configureAnalyticsErrors,
   initAnalytics,
   resolveMobileAnalyticsConfig as resolveConfig,
   setScreenName,
 } from "@openstarter/analytics-mobile";
 import { usePathname } from "expo-router";
 import { useEffect } from "react";
+
+// 开发期把上报失败打到控制台（生产保持静默；接入监控时改传 onError）。
+// 用 globalThis 读取 __DEV__：该常量由 RN/Metro 注入，Node（测试）里不存在，
+// 直接引用未声明全局会在测试环境抛 ReferenceError。
+const isDevBuild = (globalThis as { __DEV__?: boolean }).__DEV__ === true;
+if (isDevBuild) {
+  configureAnalyticsErrors({ debug: true });
+}
 
 /** 供测试注入的构建期 env 原始形态（process.env 的快照语义）。 */
 function readAnalyticsEnv(): Record<string, string | undefined> {

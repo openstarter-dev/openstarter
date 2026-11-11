@@ -10,6 +10,7 @@ vi.mock("expo-router", () => ({
 }));
 
 vi.mock("@openstarter/analytics-mobile", () => ({
+  configureAnalyticsErrors: vi.fn(),
   initAnalytics: vi.fn(async () => ({
     identify: async () => undefined,
     init: async () => undefined,
