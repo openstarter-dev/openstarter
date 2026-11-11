@@ -2,7 +2,6 @@
 // 不缓存：每次调用都现读 cookie jar（见 spec §3.2 "不缓存 token"）。
 // cookie 名解析顺序：先试 HTTPS 下的 __Secure- 前缀变体，再回退到无前缀名
 // （advanced.cookiePrefix: "openstarter" → packages/auth/src/server.ts）。
-// 注意 cookiePrefix 已从 turbostarter 改为 openstarter（commit 1308d88），因此 cookie 名
 // 对应变更。见 docs/superpowers/specs/2026-08-01-browser-extension-app-design.md §3.2。
 import { browser } from "wxt/browser";
 

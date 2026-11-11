@@ -2,7 +2,6 @@
 //
 // 本任务（1.3）仅落位 **团队作用域** 的 organization 访问控制 `ac` / `roles`，
 // 供 `server.ts` 中 `organization({ ac, roles })` 装配（better-auth organization 插件）。
-// 直接沿用 better-auth 组织插件的默认语句与默认角色，以恢复 TurboStarter 既有的
 // 组织/团队/成员许可语义（不裁剪）。
 //
 // 说明（作用域边界，R7.7 / R7.8，见 design.md「RBAC 与 organization 插件的作用域边界」）：
