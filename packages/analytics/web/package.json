@@ -2,11 +2,17 @@
   "name": "@openstarter/analytics-web",
   "type": "module",
   "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
     "./scripts": {
       "default": "./src/scripts.ts"
     },
     "./server": {
       "default": "./src/server.ts"
+    },
+    "./server-track": {
+      "default": "./src/server-track.ts"
     }
   },
   "scripts": {
@@ -15,6 +21,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@openstarter/analytics": "workspace:*",
     "@openstarter/api": "workspace:*",
     "@tanstack/react-start": "^1.167.41",
     "hono": "catalog:"
