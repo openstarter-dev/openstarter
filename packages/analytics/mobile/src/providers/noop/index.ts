@@ -1,17 +1,16 @@
 // noop provider —— 未配置任何供应商时的空实现。
 //
-// 门面在「无配置」与「全部门 provider 降级失败」两种情况下返回它，
-// 使消费方无需判空：拿到 provider 即可无脑调用。
+// 复用 @openstarter/analytics/runtime 的 noop（三端同一份），只补移动端契约扩展
+// setUserId —— 这样「永不抛错」的空实现只有一处来源，不会三端各写一版。
 
-import type { AnalyticsProvider, EventProperties, UserTraits } from "./types";
+import { createNoopProvider as createBaseNoopProvider } from "@openstarter/analytics/runtime";
 
-export function createNoopProvider(): AnalyticsProvider {
+import type { MobileAnalyticsProvider } from "../../internal/types";
+
+export function createNoopProvider(): MobileAnalyticsProvider {
   return {
-    async identify(_profileId: string, _traits?: UserTraits): Promise<void> {},
+    ...createBaseNoopProvider(),
     async init(): Promise<void> {},
-    name: "noop",
-    async setScreenName(_name: string, _params?: EventProperties): Promise<void> {},
-    async setUserId(_userId: string | null): Promise<void> {},
-    async track(_event: string, _properties?: EventProperties): Promise<void> {},
+    async setUserId(): Promise<void> {},
   };
 }

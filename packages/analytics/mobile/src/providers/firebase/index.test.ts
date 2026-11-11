@@ -14,7 +14,7 @@ vi.mock("@react-native-firebase/analytics", () => ({
   getAnalytics: vi.fn(() => mockAnalyticsInstance),
 }));
 
-import { createFirebaseProvider, sanitizeGaEventName } from "./firebase";
+import { createFirebaseProvider, sanitizeGaEventName } from "./index";
 
 describe("sanitizeGaEventName", () => {
   it("keeps valid names untouched", () => {

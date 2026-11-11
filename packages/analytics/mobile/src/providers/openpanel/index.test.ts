@@ -16,7 +16,7 @@ vi.mock("@openpanel/react-native", () => ({
   }),
 }));
 
-import { createOpenPanelProvider } from "./openpanel";
+import { createOpenPanelProvider } from "./index";
 
 describe("createOpenPanelProvider", () => {
   beforeEach(() => {
@@ -104,7 +104,7 @@ describe("createOpenPanelProvider", () => {
       throw new Error("module not installed");
     });
     // 动态 import 失败路径：重新取被 doMock 影响的工厂
-    const { createOpenPanelProvider: createWithBrokenSdk } = await import("./openpanel");
+    const { createOpenPanelProvider: createWithBrokenSdk } = await import("./index");
     const provider = await createWithBrokenSdk({
       clientId: "op-client",
       clientSecret: "op-secret",

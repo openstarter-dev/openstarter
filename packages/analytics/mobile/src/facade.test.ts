@@ -3,13 +3,14 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { AnalyticsProvider } from "./providers/types";
+import type { MobileAnalyticsProvider } from "./internal/types";
 
 // —— mock provider 工厂 ——
-const makeFakeProvider = (name: AnalyticsProvider["name"]): AnalyticsProvider => ({
+const makeFakeProvider = (name: MobileAnalyticsProvider["name"]): MobileAnalyticsProvider => ({
   identify: vi.fn(),
   init: vi.fn(),
   name,
+  reset: vi.fn(),
   setScreenName: vi.fn(),
   setUserId: vi.fn(),
   track: vi.fn(),
@@ -28,6 +29,7 @@ vi.mock("./providers/firebase", () => ({
 import {
   identify,
   initAnalytics,
+  reset,
   resetAnalyticsForTests,
   setScreenName,
   setUserId,
@@ -116,6 +118,7 @@ describe("initAnalytics", () => {
   it("convenience forwarders are safe no-ops before init", async () => {
     await expect(track("e")).resolves.toBeUndefined();
     await expect(identify("u")).resolves.toBeUndefined();
+    await expect(reset()).resolves.toBeUndefined();
     await expect(setUserId("u")).resolves.toBeUndefined();
     await expect(setScreenName("/")).resolves.toBeUndefined();
     // 未 init：任何工厂都不该被创建
@@ -130,6 +133,7 @@ describe("initAnalytics", () => {
     await identify("user-1", { plan: "pro" });
     await setUserId("user-1");
     await setScreenName("/home");
+    await reset();
 
     expect(mockOpenPanelProvider.track).toHaveBeenCalledWith("event", { a: 1 });
     expect(mockOpenPanelProvider.identify).toHaveBeenCalledWith("user-1", {
@@ -137,6 +141,8 @@ describe("initAnalytics", () => {
     });
     expect(mockOpenPanelProvider.setUserId).toHaveBeenCalledWith("user-1");
     expect(mockOpenPanelProvider.setScreenName).toHaveBeenCalledWith("/home", undefined);
+    expect(mockOpenPanelProvider.reset).toHaveBeenCalledTimes(1);
+    expect(mockFirebaseProvider.reset).toHaveBeenCalledTimes(1);
     // composite 双写同步落到 firebase
     expect(mockFirebaseProvider.track).toHaveBeenCalledWith("event", { a: 1 });
   });

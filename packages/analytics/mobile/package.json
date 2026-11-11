@@ -16,7 +16,9 @@
     "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@openstarter/analytics": "workspace:*"
+  },
   "devDependencies": {
     "fast-check": "4.9.0",
     "typescript": "catalog:",

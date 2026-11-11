@@ -7,10 +7,19 @@
 // 后续调用静默 no-op，绝不向业务层抛错（fork 者没配 Firebase 但开着
 // ga_mobile_enabled 时，应用其余功能不受影响）。
 //
+// 错误可观测：除了一次性 console.warn，失败还会交给调用方传入的 report
+//（facade 会把上层配置的 onError/debug 传下来），便于接到 Sentry 或打开调试日志。
+//
 // GA 事件名约束：/^[A-Za-z0-9_]+$/ 且 ≤40 字符。违规事件名 sanitize
 // 后照发（改名不丢弃），保证事件不静默消失。
 
-import type { AnalyticsProvider, EventProperties, UserTraits } from "./types";
+import { ANALYTICS_EVENTS } from "@openstarter/analytics";
+import { errorContext, sanitizeProperties } from "@openstarter/analytics/runtime";
+
+import type { AnalyticsMethod, EventProperties, UserTraits } from "@openstarter/analytics";
+import type { ReportError } from "@openstarter/analytics/runtime";
+
+import type { MobileAnalyticsProvider } from "../../internal/types";
 
 // GA 硬限制：事件名 ≤40 字符、仅字母数字下划线。
 const GA_EVENT_NAME_MAX_LENGTH = 40;
@@ -31,7 +40,17 @@ function warnOnce(message: string): void {
   console.warn(`[analytics-mobile] ${message}`);
 }
 
-export async function createFirebaseProvider(): Promise<AnalyticsProvider> {
+export async function createFirebaseProvider(report?: ReportError): Promise<MobileAnalyticsProvider> {
+  /** 统一失败出口：上报给上层 + 一次性 warn，绝不向上抛。 */
+  const fail = (method: AnalyticsMethod, error: unknown): void => {
+    report?.(error, errorContext("firebase", method));
+    warnOnce(
+      `Firebase analytics unavailable (missing plist?), provider disabled: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  };
+
   try {
     const mod = await import("@react-native-firebase/analytics");
     // 模块化 API（v23+）：实例取值器是具名导出 getAnalytics(app?)，等同
@@ -51,17 +70,22 @@ export async function createFirebaseProvider(): Promise<AnalyticsProvider> {
           );
           await getAnalytics().setUserProperties(properties);
         } catch (error) {
-          warnOnce(
-            `Firebase analytics unavailable (missing plist?), provider disabled: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
+          fail("identify", error);
         }
       },
       async init(): Promise<void> {
         // RNFirebase 自动启动；显式初始化不存在，保持零副作用。
       },
       name: "firebase",
+      async reset(): Promise<void> {
+        try {
+          // GA 无 reset：清空 user id 与 user properties 即解除身份绑定。
+          await getAnalytics().setUserId(null);
+          await getAnalytics().setUserProperties({});
+        } catch (error) {
+          fail("reset", error);
+        }
+      },
       async setScreenName(name: string, params?: EventProperties): Promise<void> {
         try {
           // 映射为 screen_view 自定义事件而非 logScreenView：__DEV__ 下
@@ -69,43 +93,35 @@ export async function createFirebaseProvider(): Promise<AnalyticsProvider> {
           // screen_class/screen_name），附加 params 会抛错、事件被静默
           // 丢弃；logEvent 仅校验事件名与 params 的对象性，附加字段
           // 全平台透传。
-          await getAnalytics().logEvent("screen_view", {
+          await getAnalytics().logEvent(ANALYTICS_EVENTS.SCREEN_VIEW, {
             screen_name: name,
-            ...params,
+            ...sanitizeProperties(params),
           });
         } catch (error) {
-          warnOnce(
-            `Firebase analytics unavailable (missing plist?), provider disabled: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
+          fail("setScreenName", error);
         }
       },
       async setUserId(userId: string | null): Promise<void> {
         try {
           await getAnalytics().setUserId(userId);
         } catch (error) {
-          warnOnce(
-            `Firebase analytics unavailable (missing plist?), provider disabled: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
+          fail("identify", error);
         }
       },
       async track(event: string, properties?: EventProperties): Promise<void> {
         try {
-          await getAnalytics().logEvent(sanitizeGaEventName(event), properties);
-        } catch (error) {
-          warnOnce(
-            `Firebase analytics unavailable (missing plist?), provider disabled: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
+          await getAnalytics().logEvent(
+            sanitizeGaEventName(event),
+            sanitizeProperties(properties),
           );
+        } catch (error) {
+          fail("track", error);
         }
       },
     };
   } catch (error) {
     // 模块本身缺失（未装 optional peer）。
+    report?.(error, errorContext("firebase", "init"));
     warnOnce(
       `Firebase analytics SDK unavailable, provider skipped: ${
         error instanceof Error ? error.message : String(error)
@@ -115,6 +131,7 @@ export async function createFirebaseProvider(): Promise<AnalyticsProvider> {
       async identify(): Promise<void> {},
       async init(): Promise<void> {},
       name: "firebase",
+      async reset(): Promise<void> {},
       async setScreenName(): Promise<void> {},
       async setUserId(): Promise<void> {},
       async track(): Promise<void> {},

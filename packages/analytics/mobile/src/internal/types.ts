@@ -1,22 +1,32 @@
-// @openstarter/analytics-mobile —— 分析 provider 统一接口。
+// @openstarter/analytics-mobile/internal —— 平台内 provider 类型（包内模块，对外经 ../index.ts 转出）。
 //
-// 门面（../facade）依据配置选择一个或多个 provider 实例；所有方法都必须
-// 自行消化错误（分析上报永不向业务层抛错），接口约定即错误边界。
+// 跨平台契约（AnalyticsProvider / EventProperties / UserTraits）在 @openstarter/analytics，
+// 本文件不重新定义语义，只做两件事：
+//   1. 原样转发契约类型，让移动端消费方无需再 import 契约包；
+//   2. 声明移动端扩展能力 setUserId。
+//
+// 为什么 setUserId 不进跨平台契约：GA 与 OpenPanel 都把「已登录用户 ID」与「用户画像」
+// 分开建模（setUserId 不带 traits，null 即清除），而 web 的脚本型供应商（Plausible）根本没有
+// 这个概念。把它塞进契约会逼 web 端实现空方法，属于为一致性牺牲准确性；反之作为移动端
+// 扩展能力保留，跨平台消费方仍只依赖契约。
 
-/** 事件属性：值必须可 JSON 序列化（由各 SDK 自行校验，接口层不复制约束）。 */
-export type EventProperties = Record<string, unknown>;
+export type {
+  AnalyticsProvider,
+  AnalyticsProviderName,
+  AnalyticsStrategyName,
+  EventProperties,
+  UserTraits,
+} from "@openstarter/analytics";
 
-/** 用户 traits：identify 附带的画像字段（firstName/email/plan 等）。 */
-export type UserTraits = Record<string, unknown>;
+import type { AnalyticsProvider } from "@openstarter/analytics";
 
-export interface AnalyticsProvider {
-  /** provider 标识，供消费方打日志与测试断言。 */
-  readonly name: "openpanel" | "firebase" | "noop";
-  /** 初始化；幂等，重复调用无副作用。 */
+/** 移动端 provider：契约 + 身份绑定能力。 */
+export interface MobileAnalyticsProvider extends AnalyticsProvider {
+  /**
+   * 初始化。跨平台契约里 init 是可选的（web/extension 无 SDK 初始化），
+   * 但移动端 SDK（OpenPanel / Firebase）需要显式生命周期钩子，因此在这里收窄为必需。
+   */
   init(): Promise<void>;
-  track(event: string, properties?: EventProperties): Promise<void>;
-  identify(profileId: string, traits?: UserTraits): Promise<void>;
-  /** null 表示清除（登出场景）。 */
+  /** 设置/清除当前用户 ID（null 清除）。identify 负责画像，本方法只负责身份绑定。 */
   setUserId(userId: string | null): Promise<void>;
-  setScreenName(name: string, params?: EventProperties): Promise<void>;
 }

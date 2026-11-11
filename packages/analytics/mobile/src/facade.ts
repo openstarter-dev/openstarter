@@ -6,32 +6,52 @@
 //   - init 幂等：模块级缓存槽整体替换（不就地修改），二次调用直返。
 //   - 预 init 调用便捷函数是安全 no-op（移动端启动流程 init 必然先行，
 //     不引入队列复杂度）。
-//   - 门面所有方法自身 try/catch：分析上报永不向业务层抛错。
+//   - 所有转发经 shared runtime 的 runSafely：上报永不向业务层抛错。
+//
+// 错误可观测：默认静默，但 `configureAnalyticsErrors({ onError, debug })` 可把错误
+// 接到 Sentry 或打开调试日志；provider 内部的降级（SDK 缺失/缺 plist）也会走同一出口。
+//
+// provider 统一实现 @openstarter/analytics 的跨平台契约（AnalyticsProvider），
+// 移动端在此之上多 setUserId（见 ./internal/types.ts）。
 
-import type { MobileAnalyticsConfig } from "./config";
+import { createCompositeProvider, createErrorReporter, errorContext, runSafely } from "@openstarter/analytics/runtime";
+
 import { createFirebaseProvider } from "./providers/firebase";
 import { createNoopProvider } from "./providers/noop";
 import { createOpenPanelProvider } from "./providers/openpanel";
-import type { AnalyticsProvider, EventProperties, UserTraits } from "./providers/types";
+
+import type { AnalyticsMethod, EventProperties, UserTraits } from "@openstarter/analytics";
+import type { ErrorReporterOptions, ReportError } from "@openstarter/analytics/runtime";
+
+import type { MobileAnalyticsConfig } from "./config";
+import type { MobileAnalyticsProvider } from "./internal/types";
 
 // 模块级缓存槽（单例；仅整体替换，不就地修改——对齐 analytics-web 的 configCache 模式）。
-let activeProvider: AnalyticsProvider | undefined;
+let activeProvider: MobileAnalyticsProvider | undefined;
 
-/** composite provider：把同一次调用遍历转发给全部子 provider。 */
-function compositeProvider(providers: AnalyticsProvider[]): AnalyticsProvider {
-  const forward = async (action: (provider: AnalyticsProvider) => Promise<void>): Promise<void> => {
-    for (const provider of providers) {
-      await action(provider);
-    }
-  };
+// 错误出口：默认静默（契约要求），可由 configureAnalyticsErrors 替换。
+let report: ReportError = createErrorReporter();
 
+/** 配置错误出口（onError 接 Sentry / debug 打开 console.warn）；应在 initAnalytics 之前调用。 */
+export function configureAnalyticsErrors(options: ErrorReporterOptions): void {
+  report = createErrorReporter(options);
+}
+
+/** composite provider：契约方法复用 shared 实现，只补移动端必需项（init / setUserId）。 */
+function compositeProvider(providers: MobileAnalyticsProvider[]): MobileAnalyticsProvider {
   return {
-    identify: (profileId, traits) => forward((p) => p.identify(profileId, traits)),
-    init: () => forward((p) => p.init()),
-    name: "noop", // composite 无独立标识；对外沿用 noop（仅供日志，不影响行为）
-    setScreenName: (name, params) => forward((p) => p.setScreenName(name, params)),
-    setUserId: (userId) => forward((p) => p.setUserId(userId)),
-    track: (event, properties) => forward((p) => p.track(event, properties)),
+    ...createCompositeProvider(providers),
+    // 移动端把 init 收窄为必需，这里显式转发（shared composite 的 init 在类型上是可选的）
+    async init(): Promise<void> {
+      for (const provider of providers) {
+        await provider.init();
+      }
+    },
+    async setUserId(userId: string | null): Promise<void> {
+      for (const provider of providers) {
+        await provider.setUserId(userId);
+      }
+    },
   };
 }
 
@@ -56,45 +76,57 @@ function warnFactoryOnce(key: string, error: unknown): void {
  * 配置来源为构建期 env（见 config.ts）—— 供应商开关随构建固化，不再由
  * web 管理端经 /api/analytics/config 控制。
  */
-export async function initAnalytics(config: MobileAnalyticsConfig): Promise<AnalyticsProvider> {
+export async function initAnalytics(
+  config: MobileAnalyticsConfig,
+): Promise<MobileAnalyticsProvider> {
   if (activeProvider) {
     return activeProvider;
   }
 
-  const providers: AnalyticsProvider[] = [];
+  const providers: MobileAnalyticsProvider[] = [];
 
   if (config.openpanelClientId && config.openpanelClientSecret) {
     try {
       providers.push(
-        await createOpenPanelProvider({
-          clientId: config.openpanelClientId,
-          clientSecret: config.openpanelClientSecret,
-        }),
+        await createOpenPanelProvider(
+          {
+            clientId: config.openpanelClientId,
+            clientSecret: config.openpanelClientSecret,
+          },
+          report,
+        ),
       );
     } catch (error) {
       warnFactoryOnce("openpanel", error);
+      report(error, errorContext("openpanel", "init"));
     }
   }
 
   if (config.gaMobileEnabled) {
     try {
-      providers.push(await createFirebaseProvider());
+      providers.push(await createFirebaseProvider(report));
     } catch (error) {
       warnFactoryOnce("firebase", error);
+      report(error, errorContext("firebase", "init"));
     }
   }
 
   // 解构而非下标取值：noUncheckedIndexedAccess 下 providers[0] 带宽泛 undefined，
   // 解构 + 显式判断可让 TS 精确收窄（等效于 brief 的三段 ternary）。
   const [firstProvider] = providers;
-  activeProvider =
+  const provider =
     firstProvider === undefined
       ? createNoopProvider()
       : providers.length === 1
         ? firstProvider
         : compositeProvider(providers);
 
-  return activeProvider;
+  activeProvider = provider;
+
+  const providerName = provider.name;
+  await runSafely(async () => provider.init?.(), report, errorContext(providerName, "init"));
+
+  return provider;
 }
 
 /** 仅测试用：清空模块级缓存槽与 warn 去重集合。 */
@@ -103,36 +135,38 @@ export function resetAnalyticsForTests(): void {
   warnedFactories.clear();
 }
 
+/** 统一转发：未 init 时安全 no-op，失败交给错误出口。 */
+async function forward(
+  method: AnalyticsMethod,
+  action: (provider: MobileAnalyticsProvider) => Promise<void>,
+): Promise<void> {
+  const provider = activeProvider;
+
+  if (!provider) {
+    return;
+  }
+
+  await runSafely(() => action(provider), report, errorContext(provider.name, method));
+}
+
 // —— 便捷转发（预 init 是安全 no-op） ——
 
 export async function track(event: string, properties?: EventProperties): Promise<void> {
-  try {
-    await activeProvider?.track(event, properties);
-  } catch {
-    // 上报永不抛错
-  }
+  await forward("track", (provider) => provider.track(event, properties));
 }
 
 export async function identify(profileId: string, traits?: UserTraits): Promise<void> {
-  try {
-    await activeProvider?.identify(profileId, traits);
-  } catch {
-    // 上报永不抛错
-  }
+  await forward("identify", (provider) => provider.identify(profileId, traits));
+}
+
+export async function reset(): Promise<void> {
+  await forward("reset", (provider) => provider.reset());
 }
 
 export async function setUserId(userId: string | null): Promise<void> {
-  try {
-    await activeProvider?.setUserId(userId);
-  } catch {
-    // 上报永不抛错
-  }
+  await forward("identify", (provider) => provider.setUserId(userId));
 }
 
 export async function setScreenName(name: string, params?: EventProperties): Promise<void> {
-  try {
-    await activeProvider?.setScreenName(name, params);
-  } catch {
-    // 上报永不抛错
-  }
+  await forward("setScreenName", (provider) => provider.setScreenName(name, params));
 }
