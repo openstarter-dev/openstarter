@@ -8,8 +8,10 @@
  * the running app always land on the same database file.
  */
 
+import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { config as loadDotenv } from "dotenv";
 import { defineConfig, type Config } from "drizzle-kit";
 
 import { resolveFileUrl } from "./resolve-file-url";
@@ -50,6 +52,23 @@ export function resolveDialect(provider: string | undefined): DrizzleDialect {
 
 /** Absolute path of the monorepo root, computed from this module's location. */
 export const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
+
+/**
+ * `apps/web/.env` — the single environment source of truth for the monorepo.
+ *
+ * drizzle-kit runs with `packages/db` as its cwd, so dotenv's implicit
+ * `./.env` lookup would miss the web app's file. Loading this path explicitly
+ * keeps `pnpm -F @openstarter/db db:*` (and the turbo `db:*` tasks) working
+ * without any env wrapper.
+ */
+export const webEnvFile = resolve(repoRoot, "apps/web/.env");
+
+/** Load `apps/web/.env` when it exists (missing file = rely on process env). */
+export function loadWebEnv(): void {
+  if (existsSync(webEnvFile)) {
+    loadDotenv({ path: webEnvFile, quiet: true });
+  }
+}
 
 /**
  * Normalize a raw `DATABASE_URL` for drizzle-kit: relative `file:` URLs are

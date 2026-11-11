@@ -64,12 +64,14 @@
       "cache": false
     }
   },
+  "globalDependencies": ["apps/web/.env*"],
   "globalEnv": [
     "DATABASE_URL",
     "DATABASE_PROVIDER",
     "DATABASE_AUTH_TOKEN",
     "PRODUCT_NAME",
     "URL",
+    "BETTER_AUTH_URL",
     "DEFAULT_LOCALE",
     "OPENSTARTER_API_URL"
   ],

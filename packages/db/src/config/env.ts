@@ -1,3 +1,10 @@
+// `dotenv/config` resolves `./.env` from the current working directory:
+//   · the web app (dev server / built server) runs with `apps/web` as cwd, so
+//     dotenv picks up `apps/web/.env` directly;
+//   · drizzle-kit and the db scripts load the same file explicitly (see
+//     `drizzle.shared.ts` / `scripts/setup-schema.mjs`);
+//   · scripts can still inject values manually (`pnpm with-env`, CI env vars).
+// That keeps `apps/web/.env` the single env source for the monorepo.
 import "dotenv/config";
 import { defineEnv } from "envin";
 import * as z from "zod";

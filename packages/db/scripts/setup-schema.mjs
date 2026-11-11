@@ -12,9 +12,19 @@
  *          d1 | unset (default) -> schema.sqlite
  */
 
-import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { config as loadEnv } from "dotenv";
+
+// apps/web/.env 是全仓库唯一 env 事实源。本脚本可能在 turbo 任务里直接运行
+// （不再经 `pnpm with-env` 包装），因此显式加载同一个文件，保证这里选出的
+// 方言与 drizzle-kit 配置读到的 DATABASE_PROVIDER 一致。
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const webEnvFile = resolve(scriptDir, "..", "..", "..", "apps", "web", ".env");
+if (existsSync(webEnvFile)) {
+  loadEnv({ path: webEnvFile, quiet: true });
+}
 
 const DIALECT_BY_PROVIDER = {
   postgres: "schema.postgres",
@@ -37,8 +47,7 @@ const resolveDialect = (provider) => {
 };
 
 const main = () => {
-  const here = dirname(fileURLToPath(import.meta.url));
-  const barrelPath = join(here, "..", "src", "schema", "index.ts");
+  const barrelPath = join(scriptDir, "..", "src", "schema", "index.ts");
   const dialect = resolveDialect(process.env.DATABASE_PROVIDER);
 
   const source = readFileSync(barrelPath, "utf8");
