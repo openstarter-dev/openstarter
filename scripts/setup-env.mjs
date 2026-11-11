@@ -1,13 +1,14 @@
 // scripts/setup-env.mjs —— 一键初始化环境变量文件（新用户快速启动第一步）。
 //
 // 用法：
-//   pnpm setup             # 扫描根目录与 apps/* 下的 .env.example，缺失则复制为 .env
+//   pnpm setup             # 扫描 apps/* 下的 .env.example，缺失则复制为 .env
 //   pnpm setup --force     # 覆盖已存在的 .env（默认跳过，绝不覆盖用户已有配置）
 //
 // 行为：
-//   - 根 .env.example   → .env   （跨端共享变量唯一事实源）
-//   - apps/*/.env.example → apps/*/.env（app 级变量，如 BETTER_AUTH_SECRET）
-//   - 复制 apps/web/.env 时自动生成随机 BETTER_AUTH_SECRET，替换文件中的占位符
+//   - apps/*/.env.example → apps/*/.env（app 级变量）
+//   - apps/web/.env 是全仓库唯一 env 事实源：DATABASE_*、URL、PRODUCT_NAME、
+//     DEFAULT_LOCALE 以及 BETTER_AUTH_SECRET 等都在这里维护，不再有根 .env
+//   - 复制带占位符的 .env.example 时自动生成随机 BETTER_AUTH_SECRET
 //   - 已存在的 .env 默认跳过并提示，保证重复执行是幂等安全的
 //   - 结束后打印后续步骤（db:migrate / dev）
 //
@@ -107,10 +108,10 @@ export function renderNextSteps(result) {
     "",
     "后续步骤：",
     "  1. pnpm install",
-    '  2. 按需编辑各 .env 填写密钥（留空的功能以"不启用"姿态运行）',
+    '  2. 编辑 apps/web/.env 填写密钥（留空的功能以"不启用"姿态运行）',
   ];
-  if (result.created.some((p) => p === ".env")) {
-    lines.push("  3. pnpm db:migrate    # 将迁移应用到本地 SQLite（file:local.db）");
+  if (result.created.some((p) => p === join("apps", "web", ".env"))) {
+    lines.push("  3. pnpm db:migrate    # 将迁移应用到本地数据库");
     lines.push("  4. pnpm dev           # 启动开发服务");
   } else {
     lines.push("  3. pnpm dev");

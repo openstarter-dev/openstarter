@@ -11,8 +11,10 @@ build
 # Generated files
 apps/web/src/routeTree.gen.ts
 
-# Environment variables
+# Environment variables（.env.example 是模板，需要入库）
 .env
+.env.*
+!.env.example
 
 # IDEs and editors
 .vscode/*
