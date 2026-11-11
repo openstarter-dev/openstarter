@@ -14,10 +14,11 @@ import type { Preset } from "envin/types";
 export const preset = {
   id: "db",
   server: {
-    // Postgres connection string; required for DATABASE_PROVIDER=postgres and
-    // ignored by the Cloudflare D1 binding path.
+    // Postgres connection string; only used when DATABASE_PROVIDER=postgres.
+    // d1 is the default: on Workers it comes from the DB binding, locally it
+    // falls back to the sqlite file at DATABASE_URL (default `file:local.db`).
     DATABASE_URL: z.string().default(""),
-    DATABASE_PROVIDER: z.string().default("postgres"),
+    DATABASE_PROVIDER: z.string().default("d1"),
     DB_SCHEMA: z.string().default("public"),
     DB_SINGLETON_ENABLED: z.string().default("false"),
     DB_MAX_CONNECTIONS: z.string().default("1"),

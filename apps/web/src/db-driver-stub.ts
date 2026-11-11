@@ -34,7 +34,11 @@ const anyStub = stub as any;
 
 export default anyStub;
 // Named exports the real drivers expose (mysql2's createPool/createConnection
-// are referenced by drizzle-orm at import). Delegating to the proxy keeps
-// imports cheap while any actual call surfaces the clear error above.
+// are referenced by drizzle-orm at import; @libsql/client's createClient and
+// drizzle-orm/libsql's drizzle back the Node-only local D1 fallback).
+// Delegating to the proxy keeps imports cheap while any actual call surfaces
+// the clear error above.
 export const createPool = anyStub;
 export const createConnection = anyStub;
+export const createClient = anyStub;
+export const drizzle = anyStub;

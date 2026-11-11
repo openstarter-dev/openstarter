@@ -67,6 +67,10 @@ export default defineConfig({
     alias: isCloudflareBuild
       ? {
           mysql2: driverStub,
+          // D1's local sqlite fallback (libsql file) only exists in Node —
+          // on Workers the DB binding is used, so the driver is dead weight.
+          "@libsql/client": driverStub,
+          "drizzle-orm/libsql": driverStub,
           ...(keepPostgres ? {} : { postgres: driverStub }),
           tslib: tslibEsm,
         }

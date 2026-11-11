@@ -1220,7 +1220,7 @@ export const envConfigs: ConfigMap = {
   creem_api_key: readEnv("CREEM_API_KEY") ?? "",
   creem_environment: readEnv("CREEM_ENVIRONMENT") ?? "sandbox",
   creem_signing_secret: readEnv("CREEM_SIGNING_SECRET") ?? "",
-  database_provider: readEnv("DATABASE_PROVIDER") ?? "postgres",
+  database_provider: readEnv("DATABASE_PROVIDER") ?? "d1",
 
   // 数据库
   database_url: readEnv("DATABASE_URL") ?? "",

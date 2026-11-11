@@ -21,8 +21,9 @@ import { paraglideMiddleware } from "@/paraglide/server.js";
 //
 // The module specifier is deliberately kept non-literal so bundlers leave the
 // import to runtime. Outside workerd the import rejects and we move on —
-// `readCloudflareEnv()` returns undefined and Node falls back to the
-// `DATABASE_URL`-backed drivers. Mirrors ShipAny's src/server.ts approach.
+// `readCloudflareEnv()` returns undefined, so with the default
+// `DATABASE_PROVIDER=d1` the Node process uses the local sqlite file
+// (`DATABASE_URL`, default `file:local.db`). Mirrors ShipAny's approach.
 const CF_WORKERS_MODULE = "cloudflare:workers";
 let cfEnvPromise: Promise<void> | null = null;
 

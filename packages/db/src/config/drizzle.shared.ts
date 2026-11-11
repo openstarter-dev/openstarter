@@ -9,12 +9,13 @@
  */
 
 import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 import { defineConfig, type Config } from "drizzle-kit";
 
-import { resolveFileUrl } from "./resolve-file-url";
+import { repoRoot, resolveFileUrl } from "./resolve-file-url";
+
+export { repoRoot };
 
 /**
  * drizzle-kit dialects supported by this workspace, resolved from
@@ -49,9 +50,6 @@ export function resolveDialect(provider: string | undefined): DrizzleDialect {
       );
   }
 }
-
-/** Absolute path of the monorepo root, computed from this module's location. */
-export const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
 
 /**
  * `apps/web/.env` — the single environment source of truth for the monorepo.

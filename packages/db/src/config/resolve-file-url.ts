@@ -7,8 +7,16 @@
  * `file:` URLs) pass through untouched.
  */
 
-import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+/**
+ * Absolute path of the monorepo root, computed from this module's location.
+ *
+ * Shared so runtime drivers and drizzle-kit configs resolve the same
+ * `file:` database (e.g. `local.db`) to the same absolute path.
+ */
+export const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../../..");
 
 /**
  * Resolve a relative `file:` URL against `baseDir`. Absolute-path `file:` URLs

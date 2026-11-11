@@ -35,8 +35,9 @@ export type DbConfig = {
    */
   provider: string;
   /**
-   * Postgres connection URL. Required for `postgres`; ignored by the D1
-   * binding path.
+   * Connection URL. Required for `postgres`; for `d1` it is only meaningful
+   * outside Cloudflare Workers, where it points at the local sqlite file
+   * (default `file:local.db`). On Workers the `DB` binding is used instead.
    */
   url: string;
   /** Postgres `search_path` schema name. */

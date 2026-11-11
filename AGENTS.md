@@ -158,8 +158,11 @@ it itself — there is no global env wrapper:
 
 Required variables:
 
-- `DATABASE_URL` — Postgres connection string (ignored by the Cloudflare D1 binding path)
-- `DATABASE_PROVIDER` — `postgres` | `d1`
+- `DATABASE_PROVIDER` — `d1` (default) | `postgres`
+- `DATABASE_URL` — only used by `DATABASE_PROVIDER=postgres`. With the default
+  `d1`, Workers reads the `DB` binding and local dev falls back to the sqlite
+  file at this URL (`file:local.db` at the repo root, created by `pnpm db:push`
+  / `pnpm db:migrate`)
 - `URL` — web app origin (also the API origin; other apps derive their base URL from it)
 - `PRODUCT_NAME` — Used in emails, marketing site
 - `DEFAULT_LOCALE` — Default i18n locale (e.g., `en-US`)

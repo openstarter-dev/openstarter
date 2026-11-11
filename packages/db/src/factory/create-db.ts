@@ -13,7 +13,7 @@ import { withSqliteCompat } from "./compat/sqlite";
 export function createDb(config: DbConfig): Database {
   switch (config.provider) {
     case "d1":
-      return withSqliteCompat(createD1Db(), "d1");
+      return withSqliteCompat(createD1Db(config), "d1");
     case "postgres":
       return createPostgresDb(config);
     default:

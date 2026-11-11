@@ -14,8 +14,9 @@ const buildConfig = (provider: string): DbConfig => ({
   provider,
   // postgres elaborates a real driver constructor on the bench against a
   // non-functional URL (postgres.js connects lazily, so nothing dials out);
-  // d1 fails fast on the missing "DB" binding. Neither leaves stray files.
-  url: "postgres://localhost:65535/null",
+  // d1 outside Workers falls back to a local sqlite database — `:memory:` keeps
+  // the property test from leaving a file behind.
+  url: provider === "d1" ? ":memory:" : "postgres://localhost:65535/null",
 });
 
 const UNSUPPORTED_PROVIDER_REGEX = /Unsupported DATABASE_PROVIDER/;
