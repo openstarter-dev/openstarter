@@ -9,15 +9,11 @@ import {
   twoFactor,
   user,
 } from "@openstarter/db/schema";
-import { createDb } from "@openstarter/db/server";
+import { createSqliteTestDb } from "@openstarter/db/testing";
 import { and, eq, sql } from "drizzle-orm";
 import { beforeAll, describe, expect, it } from "vitest";
 
-const database = createDb({
-  provider: "sqlite",
-  singleton: false,
-  url: ":memory:",
-});
+const database = createSqliteTestDb(":memory:");
 
 beforeAll(async () => {
   await database.run(sql`

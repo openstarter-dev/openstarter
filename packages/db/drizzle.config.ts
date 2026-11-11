@@ -5,18 +5,41 @@ import { config as loadEnv } from "dotenv";
 import { buildConfigFor, repoRoot, resolveDbUrl } from "./src/config/drizzle.shared";
 
 /**
- * drizzle-kit config for LOCAL DEVELOPMENT.
+ * drizzle-kit config for LOCAL DEVELOPMENT / migration authoring.
  *
- * Local dev runs on a SQLite database resolved against the repo root (the
- * same rule the runtime driver applies), so drizzle-kit commands and the
- * running app always land on the same file. A `file:` URL from the repo-root
- * `.env` (or the environment) is honored; anything else (postgres://, libsql://
- * …) is ignored here — cloud targets are managed by `drizzle.config.prod.ts`.
+ * Dispatches on `DATABASE_PROVIDER` (mirroring `drizzle.config.prod.ts`):
+ *
+ * - `d1` (default): authors the sqlite migrations shared with the cloud D1
+ *   target against a local file database. A `file:` URL from the repo-root
+ *   `.env` is honored; anything else is ignored — the cloud target is managed
+ *   by `drizzle.config.prod.ts` via the d1-http driver.
+ * - `postgres`: uses the root `.env` `DATABASE_URL` directly.
  */
 
 loadEnv({ path: resolve(repoRoot, ".env") });
 
-const envUrl = process.env.DATABASE_URL;
-const localUrl = envUrl?.startsWith("file:") ? envUrl : "file:local.db";
+const provider = process.env.DATABASE_PROVIDER?.trim() || "d1";
 
-export default buildConfigFor("sqlite", resolveDbUrl(localUrl));
+const config = (() => {
+  if (provider === "postgres") {
+    const url = process.env.DATABASE_URL?.trim();
+    if (!url) {
+      throw new Error(
+        "DATABASE_URL is required when DATABASE_PROVIDER=postgres (local drizzle-kit config).",
+      );
+    }
+    return buildConfigFor("postgresql", resolveDbUrl(url));
+  }
+
+  if (provider === "d1") {
+    const envUrl = process.env.DATABASE_URL;
+    const localUrl = envUrl?.startsWith("file:") ? envUrl : "file:local.db";
+    return buildConfigFor("sqlite", resolveDbUrl(localUrl));
+  }
+
+  throw new Error(
+    `Unsupported DATABASE_PROVIDER for local drizzle-kit: ${provider}. Expected one of: postgres, d1.`,
+  );
+})();
+
+export default config;

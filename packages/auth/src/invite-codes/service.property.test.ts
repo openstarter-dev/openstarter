@@ -34,7 +34,7 @@ const state = vi.hoisted(() => ({
   codeByte: 0,
   database: undefined as Database | undefined,
   idSequence: 0,
-  provider: "sqlite" as string,
+  provider: "d1" as string,
   uniformCodeBytes: false,
 }));
 
@@ -118,7 +118,7 @@ beforeEach(async () => {
   state.caseSequence = 0;
   state.codeByte = 0;
   state.idSequence = 0;
-  state.provider = "sqlite";
+  state.provider = "d1";
   state.uniformCodeBytes = false;
   if (state.database) {
     await resetAuthTestDatabase(state.database);

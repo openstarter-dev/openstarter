@@ -1,4 +1,4 @@
-import type { createDb } from "@openstarter/db";
+import type { createSqliteTestDb } from "@openstarter/db/testing";
 import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -9,7 +9,7 @@ import {
   resetApiTestDatabase,
 } from "./api-test-database";
 
-const state: { database?: ReturnType<typeof createDb> } = {};
+const state: { database?: ReturnType<typeof createSqliteTestDb> } = {};
 
 vi.mock("@openstarter/db/server", () => ({
   // The mocked db() returns the per-suite handle; tests overwrite state.database.

@@ -2,9 +2,9 @@
  * Cloudflare Workers (workerd) runtime detection and binding access.
  *
  * workerd sets `navigator.userAgent` to "Cloudflare-Workers" (the documented
- * runtime detection) and also exposes a `Cloudflare` global. TCP-backed
- * drivers (postgres/mysql) must not reuse sockets across requests there, so
- * the `db()` singleton avoids caching them on Workers (see `server.ts`).
+ * runtime detection) and also exposes a `Cloudflare` global. The TCP-backed
+ * postgres driver must not reuse sockets across requests there, so the `db()`
+ * singleton avoids caching it on Workers (see `server.ts`).
  *
  * `navigator` is read through `globalThis` so this module does not depend on
  * DOM/Workers ambient types (the package's `types` is limited to `node`).

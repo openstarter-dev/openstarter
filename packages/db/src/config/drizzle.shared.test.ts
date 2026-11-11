@@ -7,15 +7,7 @@ describe("resolveDialect", () => {
     expect(resolveDialect("postgres")).toBe("postgresql");
   });
 
-  it("maps mysql to the mysql dialect", () => {
-    expect(resolveDialect("mysql")).toBe("mysql");
-  });
-
-  it("maps turso to the turso dialect", () => {
-    expect(resolveDialect("turso")).toBe("turso");
-  });
-
-  it.each(["sqlite", "d1", "", undefined])("maps %s to the sqlite dialect", (provider) => {
+  it.each(["d1", "", undefined])("maps %s to the sqlite dialect", (provider) => {
     expect(resolveDialect(provider)).toBe("sqlite");
   });
 

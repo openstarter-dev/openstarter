@@ -7,9 +7,10 @@ import type { Preset } from "envin/types";
 export const preset = {
   id: "db",
   server: {
-    DATABASE_URL: z.string().default("file:local.db"),
-    DATABASE_PROVIDER: z.string().default("sqlite"),
-    DATABASE_AUTH_TOKEN: z.string().optional(),
+    // Postgres connection string; required for DATABASE_PROVIDER=postgres and
+    // ignored by the Cloudflare D1 binding path.
+    DATABASE_URL: z.string().default(""),
+    DATABASE_PROVIDER: z.string().default("postgres"),
     DB_SCHEMA: z.string().default("public"),
     DB_SINGLETON_ENABLED: z.string().default("false"),
     DB_MAX_CONNECTIONS: z.string().default("1"),

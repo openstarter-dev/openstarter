@@ -11,11 +11,6 @@ import {
   referral as pgReferral,
   referralRelation as pgReferralRelation,
 } from "./schema.postgres";
-import {
-  commission as mysqlCommission,
-  referral as mysqlReferral,
-  referralRelation as mysqlReferralRelation,
-} from "./schema.mysql";
 
 describe("referral schema 表结构", () => {
   it("referral: userId/code 唯一约束存在", () => {
@@ -116,51 +111,3 @@ describe("referral schema 表结构（postgres）", () => {
   });
 });
 
-describe("referral schema 表结构（mysql）", () => {
-  it("referral: userId/code 唯一约束存在", () => {
-    const sql = columnsOf(mysqlReferral);
-    expect(sql).toBeTruthy();
-    expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining([
-        "id",
-        "userId",
-        "code",
-        "customRate",
-        "note",
-        "createdAt",
-        "updatedAt",
-      ]),
-    );
-  });
-
-  it("referralRelation: 一人一条关系（referredUserId 唯一）", () => {
-    const sql = columnsOf(mysqlReferralRelation);
-    expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining(["id", "referrerId", "referredUserId", "code", "createdAt"]),
-    );
-  });
-
-  it("commission: 幂等键 orderNo 与状态字段存在", () => {
-    const sql = columnsOf(mysqlCommission);
-    expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining([
-        "id",
-        "orderNo",
-        "referrerId",
-        "referredUserId",
-        "baseAmount",
-        "baseCurrency",
-        "rate",
-        "commissionCredits",
-        "cashAmount",
-        "status",
-        "settledAt",
-        "settledBy",
-        "transactionNo",
-        "note",
-        "createdAt",
-        "updatedAt",
-      ]),
-    );
-  });
-});

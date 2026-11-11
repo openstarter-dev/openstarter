@@ -149,7 +149,7 @@ export interface RedeemResult {
 }
 
 /**
- * SQLite / Turso / D1 的单批原子兑换。
+ * D1（sqlite 方言）的单批原子兑换。
  *
  * 第一条条件写仅在邀请码仍有效、有余量且用户尚未兑换时插入本次 attempt；第二条只为
  * 该 attempt 递增计数。D1 的 `batch` 由绑定原生实现为单个原子事务，不依赖交互事务。
@@ -288,7 +288,7 @@ async function redeemWithLockedTransaction(params: {
 /**
  * 原子兑换邀请码。R9.3/R9.4/R9.5
  *
- * `user_invite.user_id` 唯一约束提供最终幂等保证；SQLite/Turso/D1 使用原生单批原子路径，
+ * `user_invite.user_id` 唯一约束提供最终幂等保证；D1 使用原生单批原子路径，
  * PostgreSQL/MySQL 使用行锁事务与 `used_count < max_uses` 条件更新，防止最后名额超卖。
  */
 export async function redeemInviteCode(params: {
@@ -322,7 +322,7 @@ export async function redeemInviteCode(params: {
   }
 
   const provider = databaseEnv.DATABASE_PROVIDER;
-  if (provider === "d1" || provider === "sqlite" || provider === "turso") {
+  if (provider === "d1") {
     return redeemWithSqliteBatch({ ...params, now, row });
   }
   return redeemWithLockedTransaction({ ...params, now });

@@ -9,7 +9,7 @@ openstarter is a production-ready full-stack SaaS starter built with:
 - **Monorepo**: Turborepo + pnpm workspaces
 - **Framework**: TanStack Start + TanStack Router (web)
 - **Backend**: Hono RPC API mounted at `/api/*`
-- **Database**: Drizzle ORM (SQLite/Turso/Postgres/MySQL)
+- **Database**: Drizzle ORM (Postgres / Cloudflare D1; sqlite dialect kept for D1 and the test harness)
 - **Multi-platform**: Web, Desktop (Electron), Mobile (Expo), Browser Extension (WXT), CLI, Mini-App (Taro)
 - **Auth**: Better-Auth with OAuth, passkey, 2FA, organizations
 - **Billing**: Stripe/PayPal/Alipay/WeChat Pay with credit system
@@ -136,14 +136,14 @@ const listQuery = paginationSchema.extend({
 | **Test (all/specific)**   | `pnpm test` / `pnpm --filter @openstarter/api test`        |
 | **Test coverage**         | `pnpm test:coverage`                                       |
 | **Type check**            | `pnpm check-types`                                         |
-| **Database**              | `pnpm with-env pnpm -F @workspace/db db:migrate`           |
+| **Database**              | `pnpm with-env pnpm -F @openstarter/db db:migrate`         |
 | **Services**              | `pnpm services:setup` / `services:start` / `services:stop` |
 
 ## Environment
 
 Create `.env` at the repo root with required variables:
 
-- `DATABASE_URL` — SQLite/Postgres/MySQL connection string
+- `DATABASE_URL` — Postgres connection string (ignored by the Cloudflare D1 binding path)
 - `PRODUCT_NAME` — Used in emails, marketing site
 - `URL` — Deployment base URL
 - `DEFAULT_LOCALE` — Default i18n locale (e.g., `en-US`)
@@ -229,7 +229,7 @@ Apps share one Hono backend at `/api/*`. Deploy patterns:
 - **CLI**: npm registry or scoped binary
 - **Mini-App**: WeChat MP
 
-Database migrations run on startup via `@openstarter/db/src/scripts/migrate.ts`.
+Database migrations run via drizzle-kit: `db:migrate` (local, dispatches on `DATABASE_PROVIDER`) and `db:migrate:prod` (cloud, d1-http for D1 / DATABASE_URL for postgres) in `packages/db`.
 
 ## Troubleshooting
 

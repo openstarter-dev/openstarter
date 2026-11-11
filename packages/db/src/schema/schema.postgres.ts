@@ -3,8 +3,8 @@
  *
  * Active when DATABASE_PROVIDER is `postgres`.
  * Exports the same symbol names and `$inferSelect` / `$inferInsert` types as
- * the `schema.sqlite` and `schema.mysql` dialects so callers and drizzle-kit
- * remain dialect-agnostic.
+ * the `schema.sqlite` dialect (D1) so callers and drizzle-kit remain
+ * dialect-agnostic.
  *
  * Composite / secondary performance indexes (e.g. the credit FIFO index
  * `idx_credit_consume_fifo`) are declared per table via the table callback and

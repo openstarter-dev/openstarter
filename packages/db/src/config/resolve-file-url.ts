@@ -1,11 +1,10 @@
 /**
  * Resolve a relative `file:` URL against a base directory.
  *
- * Shared by the runtime sqlite driver (`drivers/sqlite.ts`) and the drizzle-kit
- * configs so a relative `DATABASE_URL=file:local.db` always lands on the same
- * database file regardless of which working directory triggers the resolution.
- * Non-file URLs (postgres://, mysql://, libsql://, absolute file: URLs) pass
- * through untouched.
+ * Shared by the drizzle-kit configs so a relative `DATABASE_URL=file:local.db`
+ * always lands on the same database file regardless of which working directory
+ * triggers the resolution. Non-file URLs (postgres://, libsql://, absolute
+ * `file:` URLs) pass through untouched.
  */
 
 import { resolve } from "node:path";

@@ -6,16 +6,15 @@ import { buildConfigFor, resolveDbUrl, resolveDialect } from "./src/config/drizz
  * drizzle-kit config for the CLOUD PRODUCTION database.
  *
  * The default target is Cloudflare D1 (credentials via the d1-http driver);
- * setting `DATABASE_PROVIDER` switches to postgres / mysql / turso. The
- * production target is intentionally independent of local dev — point it at a
- * different database or provider than `.env`'s `DATABASE_URL` by exporting the
- * desired variables in the environment before invoking the `db:*:prod`
- * scripts.
+ * setting `DATABASE_PROVIDER=postgres` switches to postgres. The production
+ * target is intentionally independent of local dev — point it at a different
+ * database or provider than `.env`'s `DATABASE_URL` by exporting the desired
+ * variables in the environment before invoking the `db:*:prod` scripts.
  *
  * D1 (default):
  *   CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_API_TOKEN
- * Postgres / MySQL / Turso:
- *   DATABASE_PROVIDER=<provider>, DATABASE_URL, DATABASE_AUTH_TOKEN (Turso)
+ * Postgres:
+ *   DATABASE_PROVIDER=postgres, DATABASE_URL
  *
  * Credentials are only read from the environment — nothing is stored in this
  * file, so it is safe to commit. Required variables are validated explicitly

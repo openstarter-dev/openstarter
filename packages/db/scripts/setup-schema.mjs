@@ -8,8 +8,8 @@
  *
  *   DATABASE_PROVIDER=postgres node scripts/setup-schema.mjs
  *
- * Mapping: postgres -> schema.postgres, mysql -> schema.mysql,
- *          sqlite | turso | d1 (default) -> schema.sqlite
+ * Mapping: postgres -> schema.postgres,
+ *          d1 | unset (default) -> schema.sqlite
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
@@ -18,9 +18,6 @@ import { fileURLToPath } from "node:url";
 
 const DIALECT_BY_PROVIDER = {
   postgres: "schema.postgres",
-  mysql: "schema.mysql",
-  sqlite: "schema.sqlite",
-  turso: "schema.sqlite",
   d1: "schema.sqlite",
 };
 

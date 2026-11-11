@@ -1,10 +1,11 @@
 /**
- * SQLite / Turso / D1 compatibility proxy.
+ * D1 / test-harness sqlite compatibility proxy.
  *
- * - `.for('update')` (row locking) is polyfilled as a no-op — SQLite
- *   serializes writes so an explicit lock clause is unnecessary.
+ * - `.for('update')` (row locking) is polyfilled as a no-op — sqlite-flavored
+ *   stores serialize writes so an explicit lock clause is unnecessary.
  * - D1 has no interactive transactions, so `.transaction(cb)` runs the callback
- *   directly against the (proxied) database.
+ *   directly against the (proxied) database; the `sqlite` provider used by the
+ *   test harness keeps native transactions.
  */
 
 type UnknownFunction = (...args: unknown[]) => unknown;

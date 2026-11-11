@@ -3,13 +3,10 @@ import { describe, expect, it } from "vitest";
 
 import { getAuthAdapterProvider } from "./adapter";
 
-const VALID_PROVIDERS = ["sqlite", "turso", "d1", "postgres", "mysql"] as const;
+const VALID_PROVIDERS = ["d1", "postgres"] as const;
 const PROVIDER_TO_ADAPTER = {
   d1: "sqlite",
-  mysql: "mysql",
   postgres: "pg",
-  sqlite: "sqlite",
-  turso: "sqlite",
 } as const;
 
 const validProviderArbitrary = fc.constantFrom(...VALID_PROVIDERS);

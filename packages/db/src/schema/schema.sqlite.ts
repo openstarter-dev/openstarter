@@ -1,15 +1,16 @@
 /**
  * SQLite dialect schema definitions.
  *
- * Active when DATABASE_PROVIDER is `sqlite`, `turso` or `d1`.
+ * Active when DATABASE_PROVIDER is `d1` (Cloudflare D1 is sqlite-flavored)
+ * and for the test-only sqlite harness (`@openstarter/db/testing`).
  * Exports the same symbol names and `$inferSelect` / `$inferInsert` types as
- * the `schema.postgres` and `schema.mysql` dialects so callers and drizzle-kit
- * remain dialect-agnostic.
+ * the `schema.postgres` dialect so callers and drizzle-kit remain
+ * dialect-agnostic.
  *
  * Composite / secondary performance indexes (e.g. the credit FIFO index
  * `idx_credit_consume_fifo`) are declared per table via the table callback and
- * kept equivalent across all three dialects (same index names, same column
- * order). Column-level `.unique()` constraints are part of the data model.
+ * kept equivalent across dialects (same index names, same column order).
+ * Column-level `.unique()` constraints are part of the data model.
  */
 
 import { sql } from "drizzle-orm";

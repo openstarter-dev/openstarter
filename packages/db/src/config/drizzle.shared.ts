@@ -18,7 +18,7 @@ import { resolveFileUrl } from "./resolve-file-url";
  * drizzle-kit dialects supported by this workspace, resolved from
  * `DATABASE_PROVIDER`.
  */
-export type DrizzleDialect = "sqlite" | "postgresql" | "mysql" | "turso";
+export type DrizzleDialect = "sqlite" | "postgresql";
 
 /**
  * Map `DATABASE_PROVIDER` to the matching drizzle-kit dialect.
@@ -28,9 +28,7 @@ export type DrizzleDialect = "sqlite" | "postgresql" | "mysql" | "turso";
  * `db:migrate` always target the same dialect the app runs on:
  *
  *   postgres            -> postgresql
- *   mysql               -> mysql
- *   turso               -> turso (libsql)
- *   sqlite | d1 | unset -> sqlite
+ *   d1 | unset          -> sqlite (D1 is sqlite-flavored; migrations shared)
  *
  * Any other value throws immediately, mirroring the connection factory's
  * config-error contract (R1.4).
@@ -39,18 +37,13 @@ export function resolveDialect(provider: string | undefined): DrizzleDialect {
   switch (provider) {
     case "postgres":
       return "postgresql";
-    case "mysql":
-      return "mysql";
-    case "turso":
-      return "turso";
     case undefined:
     case "":
-    case "sqlite":
     case "d1":
       return "sqlite";
     default:
       throw new Error(
-        `Unsupported DATABASE_PROVIDER: ${provider}. Expected one of: sqlite, turso, postgres, mysql (or d1).`,
+        `Unsupported DATABASE_PROVIDER: ${provider}. Expected one of: postgres, d1.`,
       );
   }
 }
@@ -72,27 +65,18 @@ export function migrationsOut(dialect: DrizzleDialect): string {
 }
 
 /**
- * Build the drizzle-kit config for the given dialect from a resolved URL (and
- * optional Turso auth token). Each branch passes a literal `dialect`,
- * satisfying drizzle-kit's discriminated `Config` union (and its per-dialect
- * `dbCredentials` shape) without casts.
+ * Build the drizzle-kit config for the given dialect from a resolved URL.
+ * Each branch passes a literal `dialect`, satisfying drizzle-kit's
+ * discriminated `Config` union (and its per-dialect `dbCredentials` shape)
+ * without casts.
  */
-export function buildConfigFor(dialect: DrizzleDialect, url: string, authToken?: string): Config {
+export function buildConfigFor(dialect: DrizzleDialect, url: string): Config {
   const schema = "./src/schema/index.ts";
   const out = migrationsOut(dialect);
 
   switch (dialect) {
     case "postgresql":
       return defineConfig({ schema, out, dialect: "postgresql", dbCredentials: { url } });
-    case "mysql":
-      return defineConfig({ schema, out, dialect: "mysql", dbCredentials: { url } });
-    case "turso":
-      return defineConfig({
-        schema,
-        out,
-        dialect: "turso",
-        dbCredentials: { url, authToken },
-      });
     default:
       return defineConfig({ schema, out, dialect: "sqlite", dbCredentials: { url } });
   }

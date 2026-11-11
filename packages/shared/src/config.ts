@@ -1220,8 +1220,7 @@ export const envConfigs: ConfigMap = {
   creem_api_key: readEnv("CREEM_API_KEY") ?? "",
   creem_environment: readEnv("CREEM_ENVIRONMENT") ?? "sandbox",
   creem_signing_secret: readEnv("CREEM_SIGNING_SECRET") ?? "",
-  database_auth_token: readEnv("DATABASE_AUTH_TOKEN") ?? "",
-  database_provider: readEnv("DATABASE_PROVIDER") ?? "sqlite",
+  database_provider: readEnv("DATABASE_PROVIDER") ?? "postgres",
 
   // 数据库
   database_url: readEnv("DATABASE_URL") ?? "",
@@ -1369,7 +1368,6 @@ export async function getConfig(name: string): Promise<string | undefined> {
 export const PROTECTED_CONFIG_KEYS: ReadonlySet<string> = new Set([
   "auth_secret",
   "database_url",
-  "database_auth_token",
   "database_provider",
   "db_schema",
   "db_singleton_enabled",

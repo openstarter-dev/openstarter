@@ -8,7 +8,7 @@ import { rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { Database } from "@openstarter/db";
-import { createDb } from "@openstarter/db";
+import { createSqliteTestDb } from "@openstarter/db/testing";
 import { sql } from "drizzle-orm";
 
 const NOW_EXPR = "(cast((julianday('now') - 2440587.5)*86400000 as integer))";
@@ -192,10 +192,7 @@ const removeDatabaseFiles = (path: string) => {
 export const createBillingTestDatabase = async (suiteName: string) => {
   const databasePath = join(tmpdir(), `openstarter-billing-${process.pid}-${suiteName}.sqlite`);
   removeDatabaseFiles(databasePath);
-  const database = createDb({
-    provider: "sqlite",
-    url: `file:${databasePath}`,
-  });
+  const database = createSqliteTestDb(`file:${databasePath}`);
   databasePaths.set(database, databasePath);
   await CREATE_TABLE_STATEMENTS.reduce(async (previous, statement) => {
     await previous;

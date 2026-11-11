@@ -18,8 +18,8 @@ export type AuthAdapterProvider = "pg" | "mysql" | "sqlite";
  * Map `DATABASE_PROVIDER` to the better-auth adapter provider identifier.
  *
  * - `postgres` maps to `pg`
- * - `mysql` maps to `mysql`
- * - `sqlite` / `turso` / `d1` map to `sqlite` (the sqlite family)
+ * - `d1` maps to `sqlite` (D1 is sqlite-flavored; the schema barrel exports
+ *   the sqlite dialect for it)
  *
  * An unsupported value throws immediately (R1.4/R1.7) so the auth adapter can
  * never be mismatched against the active dialect.
@@ -28,10 +28,6 @@ export function getAuthAdapterProvider(provider = env.DATABASE_PROVIDER): AuthAd
   switch (provider) {
     case "postgres":
       return "pg";
-    case "mysql":
-      return "mysql";
-    case "sqlite":
-    case "turso":
     case "d1":
       return "sqlite";
     default:

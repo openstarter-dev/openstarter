@@ -12,7 +12,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { sql } from "drizzle-orm";
 import type { Database } from "@openstarter/db";
-import { createDb } from "@openstarter/db";
+import { createSqliteTestDb } from "@openstarter/db/testing";
 import {
   createModel,
   deleteModel,
@@ -78,11 +78,7 @@ beforeAll(async () => {
   const { join } = await import("node:path");
   dbPath = join(tmpDir, `ai-catalog-test-${Date.now()}.db`);
 
-  const database = createDb({
-    provider: "sqlite",
-    url: `file://${dbPath}`,
-    singleton: false,
-  });
+  const database = createSqliteTestDb(`file://${dbPath}`);
 
   await database.run(sql.raw(CREATE_AI_MODEL));
   for (const statement of CREATE_AI_MODEL_INDEXES) {

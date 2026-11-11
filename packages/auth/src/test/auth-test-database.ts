@@ -2,7 +2,7 @@ import { rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { createDb } from "@openstarter/db";
+import { createSqliteTestDb } from "@openstarter/db/testing";
 import { sql } from "drizzle-orm";
 
 const CREATE_TABLE_STATEMENTS = [
@@ -126,7 +126,10 @@ const DATA_TABLES = [
   "user",
 ] as const;
 
-const runStatements = (database: ReturnType<typeof createDb>, statements: readonly string[]) =>
+const runStatements = (
+  database: ReturnType<typeof createSqliteTestDb>,
+  statements: readonly string[],
+) =>
   statements.reduce<Promise<void>>(
     (pending, statement) =>
       pending.then(async () => {
@@ -146,10 +149,7 @@ const removeDatabaseFiles = (databasePath: string) => {
 export const createAuthTestDatabase = async (suiteName: string) => {
   const databasePath = join(tmpdir(), `openstarter-auth-${process.pid}-${suiteName}.sqlite`);
   removeDatabaseFiles(databasePath);
-  const database = createDb({
-    provider: "sqlite",
-    url: `file:${databasePath}`,
-  });
+  const database = createSqliteTestDb(`file:${databasePath}`);
   databasePaths.set(database, databasePath);
   await runStatements(database, CREATE_TABLE_STATEMENTS);
   return database;

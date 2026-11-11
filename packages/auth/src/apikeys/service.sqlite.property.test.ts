@@ -1,16 +1,12 @@
 import { apikey } from "@openstarter/db/schema";
-import { createDb } from "@openstarter/db/server";
+import { createSqliteTestDb } from "@openstarter/db/testing";
 import { sql } from "drizzle-orm";
 import fc from "fast-check";
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { createDatabaseApiKeyRepository } from "./service";
 
-const database = createDb({
-  provider: "sqlite",
-  singleton: false,
-  url: ":memory:",
-});
+const database = createSqliteTestDb(":memory:");
 
 beforeAll(async () => {
   await database.run(sql`
