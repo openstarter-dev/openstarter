@@ -8,20 +8,21 @@ import { defineConfig } from "wxt";
 
 import { EXTENSION_DEFAULT_LOCALE } from "@openstarter/i18n-extension";
 
-// 加载根 .env，把跨端共享的 OPENSTARTER_API_URL 派生为 VITE_APP_URL。
+// 加载 apps/web/.env（全仓库唯一 env 事实源），把 web 应用地址派生为 VITE_APP_URL。
 // host_permissions 与 API base URL 都由 VITE_APP_URL 派生，二者不会漂移
 // （见 docs/superpowers/specs/2026-08-01-browser-extension-app-design.md §5）。
 // manifest 支持函数形式（(env) => manifest），故可在构建期读取 process.env。
 //
 // 优先级（高 → 低）：显式 process.env.VITE_APP_URL（CI/shell 覆盖）>
-// 根 .env 的 OPENSTARTER_API_URL（与 web/cli/desktop/mobile 同源）>
-// localhost 兜底。Wxt 只在 Node 构建期读本文件，不向上遍历 monorepo，故需手动加载根 .env。
+// OPENSTARTER_API_URL（显式覆盖）> apps/web/.env 的 URL（web 应用地址，也是 API 源）>
+// BETTER_AUTH_URL > localhost 兜底。Wxt 只在 Node 构建期读本文件，不向上遍历
+// monorepo，故需手动加载 apps/web/.env。
 const extensionDir = resolve(fileURLToPath(import.meta.url), "..");
-const monorepoRoot = resolve(extensionDir, "..", "..");
+const webEnvFile = resolve(extensionDir, "..", "web", ".env");
 const require = createRequire(import.meta.url);
 const dotenvPath = require.resolve("dotenv", { paths: [extensionDir] });
 const { config: loadDotenv } = await import(dotenvPath);
-loadDotenv({ path: resolve(monorepoRoot, ".env"), quiet: true });
+loadDotenv({ path: webEnvFile, quiet: true });
 
 const APP_URL_FALLBACK = "http://localhost:3000";
 
@@ -68,6 +69,12 @@ function resolveAppUrl(): string {
   }
   if (process.env.OPENSTARTER_API_URL) {
     return process.env.OPENSTARTER_API_URL;
+  }
+  if (process.env.URL) {
+    return process.env.URL;
+  }
+  if (process.env.BETTER_AUTH_URL) {
+    return process.env.BETTER_AUTH_URL;
   }
   return APP_URL_FALLBACK;
 }

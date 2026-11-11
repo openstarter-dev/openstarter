@@ -43,7 +43,10 @@ async function main(): Promise<void> {
   registerIpcHandlers(app.getPath("userData"));
 
   // 初始化认证服务
-  const API_BASE_URL = process.env.OPENSTARTER_API_URL || "http://localhost:3000";
+  // apps/web/.env 是唯一 env 事实源：优先 OPENSTARTER_API_URL（显式覆盖），
+  // 其次 web 应用的 URL，最后 localhost 兜底。
+  const API_BASE_URL =
+    process.env.OPENSTARTER_API_URL || process.env.URL || "http://localhost:3000";
   const tokenStore = createTokenStore(join(app.getPath("userData"), "auth-token.enc"));
   const apiProxy = createApiProxy({
     baseUrl: API_BASE_URL,
