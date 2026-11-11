@@ -1,0 +1,26 @@
+{
+  "name": "@openstarter/analytics-extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openstarter/analytics": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vitest": "4.1.10"
+  }
+}
