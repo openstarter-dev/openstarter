@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
 import { DataTable, type DataColumn } from "@/components/admin/data-table";
+import { UserActions } from "@/components/admin/user-actions";
 import {
   countTotalPages,
   type ListUsersSearch,
@@ -96,6 +97,12 @@ function AdminUsersPage() {
             {new Date(info.getValue()).toLocaleDateString()}
           </span>
         ),
+      }),
+      // 用户级操作（角色/封禁/会话/冒充/删除）全部委托 better-auth admin 插件。
+      columnHelper.display({
+        cell: (info) => <UserActions user={info.row.original} />,
+        header: () => m["admin.users.actions"](),
+        id: "actions",
       }),
     ],
     [],

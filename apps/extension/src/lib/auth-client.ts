@@ -1,5 +1,4 @@
 import {
-  adminClient,
   anonymousClient,
   createAuthClient,
   emailOTPClient,
@@ -28,7 +27,6 @@ export function createExtensionAuthClient(origin: string, cookieReader: CookieRe
       emailOTPClient(),
       twoFactorClient(),
       anonymousClient(),
-      adminClient(),
       organizationClient(),
       lastLoginMethodClient(),
     ],
