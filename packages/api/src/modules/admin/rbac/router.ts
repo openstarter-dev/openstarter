@@ -17,57 +17,23 @@ import type { Permission, Role } from "@openstarter/db/schema";
 import { respData, respErr, respOk } from "@openstarter/shared";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
 import { idParam } from "../../../schema";
+import {
+  assignUserRoleBody,
+  createPermissionBody,
+  createRoleBody,
+  rolePermissionsBody,
+  updatePermissionBody,
+  updateRoleBody,
+  userRoleParam,
+} from "../../../schema/admin/rbac";
 
 const BAD_REQUEST_STATUS = 400;
 const NOT_FOUND_STATUS = 404;
 const PERMISSION_ADMIN = "admin.*";
-
-// ─── 入参校验 schema（zValidator） ───────────────────────────────────────────
-
-const createRoleBody = z.object({
-  name: z.string().min(1),
-  title: z.string().min(1),
-  description: z.string().optional(),
-});
-
-const updateRoleBody = z.object({
-  name: z.string().min(1).optional(),
-  title: z.string().min(1).optional(),
-  description: z.string().optional(),
-});
-
-const rolePermissionsBody = z.object({
-  permissionIds: z.array(z.string().min(1)),
-});
-
-const createPermissionBody = z.object({
-  code: z.string().min(1),
-  resource: z.string().min(1),
-  action: z.string().min(1),
-  title: z.string().min(1),
-});
-
-const updatePermissionBody = z.object({
-  code: z.string().min(1).optional(),
-  resource: z.string().min(1).optional(),
-  action: z.string().min(1).optional(),
-  title: z.string().min(1).optional(),
-});
-
-const assignUserRoleBody = z.object({
-  roleId: z.string().min(1),
-  expiresAt: z.string().datetime().optional(),
-});
-
-const userRoleParam = z.object({
-  id: z.string().min(1),
-  roleId: z.string().min(1),
-});
 
 export const rbacRouter = new Hono()
   .use(requireAuth)

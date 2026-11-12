@@ -1,7 +1,7 @@
 // 分销管理端服务：结算/作废/补记/代理比例/列表/配置读写。
 
 import { and, count, desc, eq } from "drizzle-orm";
-import { z } from "zod";
+import type { z } from "zod";
 
 import {
   CommissionStatus,
@@ -15,6 +15,8 @@ import { logger } from "@openstarter/shared/logger";
 
 import { commission, config, referral, referralRelation } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
+
+import { manualCreateBody } from "../../../schema/admin/referral";
 
 // ─── 结算（Settle） ────────────────────────────────────────────────────────────
 
@@ -92,14 +94,6 @@ export async function voidCommission(params: {
 }
 
 // ─── 手动补记（Manual Create） ────────────────────────────────────────────────
-
-const manualCreateBody = z.object({
-  baseAmount: z.number().int().min(0),
-  orderNo: z.string().min(1).max(64),
-  rate: z.number().int().min(0).max(5000),
-  referredUserId: z.string().min(1),
-  referrerId: z.string().min(1),
-});
 
 export async function manualCreateCommission(
   input: unknown,

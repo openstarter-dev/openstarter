@@ -9,32 +9,17 @@ import {
   saveConfigs,
 } from "@openstarter/shared/config";
 import { Hono } from "hono";
-import { z } from "zod";
 
-import { idParam, paginationSchema } from "../../../schema";
+import { idParam } from "../../../schema";
+import { inviteBatchBody, listQuery, saveConfigBody } from "../../../schema/admin/overview";
 import { listCredits, listOrders, listSubscriptions, listUsers } from "../index";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
 
-const MAX_INVITE_BATCH = 200;
 const DEFAULT_TRIAL_DAYS = 15;
 const DEFAULT_MAX_USES = 1;
 
 const PERMISSION_ADMIN = "admin.*";
-
-const listQuery = paginationSchema.extend({
-  search: z.string().min(1).optional(),
-  status: z.string().min(1).optional(),
-});
-
-const inviteBatchBody = z.object({
-  count: z.number().int().min(1).max(MAX_INVITE_BATCH),
-  maxUses: z.number().int().min(1).optional(),
-  note: z.string().optional(),
-  trialDays: z.number().int().min(0).optional(),
-});
-
-const saveConfigBody = z.record(z.string(), z.string());
 
 export const overviewRouter = new Hono()
   .use(requireAuth)
