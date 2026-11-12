@@ -1,10 +1,16 @@
 import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { requireAuth } from "../../../middleware/auth";
-import { idParam, paginationSchema } from "../../../schema";
+import { idParam } from "../../../schema";
+import {
+  createBody,
+  listQuery,
+  replyBody,
+  TICKET_ROLE,
+  TICKET_STATUS,
+} from "../../../schema/support/tickets";
 import {
   addMessage,
   createTicket,
@@ -12,32 +18,10 @@ import {
   getTicketMessages,
   listUserTickets,
   sanitizeAttachments,
-  TICKET_ROLE,
-  TICKET_STATUS,
-  TICKET_STATUS_VALUES,
 } from "./index";
-
-const MAX_TITLE_LENGTH = 200;
-const MAX_CONTENT_LENGTH = 5000;
 
 const BAD_REQUEST_STATUS = 400;
 const NOT_FOUND_STATUS = 404;
-
-const listQuery = paginationSchema.extend({
-  status: z.enum(TICKET_STATUS_VALUES).optional(),
-  keyword: z.string().min(1).optional(),
-});
-
-const createBody = z.object({
-  title: z.string().min(1).max(MAX_TITLE_LENGTH),
-  content: z.string().min(1).max(MAX_CONTENT_LENGTH),
-  attachments: z.array(z.string()).optional(),
-});
-
-const replyBody = z.object({
-  content: z.string().min(1).max(MAX_CONTENT_LENGTH),
-  attachments: z.array(z.string()).optional(),
-});
 
 export const ticketsRouter = new Hono()
   .post("/", requireAuth, zValidator("json", createBody), async (c) => {

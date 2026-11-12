@@ -2,16 +2,10 @@ import { createApiKey, listApiKeys, revokeApiKey } from "@openstarter/auth";
 import { respData, respOk, respPage } from "@openstarter/shared";
 import { zValidator } from "@hono/zod-validator";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { requireAuth } from "../../../middleware/auth";
-import { idParam, createPaginationSchema } from "../../../schema";
-
-const createBody = z.object({ title: z.string().min(1) });
-
-const listQuery = createPaginationSchema(100, 10).extend({
-  search: z.string().optional(),
-});
+import { idParam } from "../../../schema";
+import { createBody, listQuery } from "../../../schema/support/apikeys";
 
 export const apikeysRouter = new Hono()
   .get("/", requireAuth, zValidator("query", listQuery), async (c) => {

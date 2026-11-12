@@ -1,16 +1,10 @@
 // Chat MCP tools: read-only access to the caller's LLM conversations.
 
 import type { McpServer } from "@modelcontextprotocol/server";
-import { z } from "zod";
 
 import { getChat, getChatMessages, getUserChats } from "../../ai/llm/service";
-import {
-  jsonContent,
-  paginationSchema,
-  resolveUserId,
-  toIsoString,
-  withToolError,
-} from "../shared";
+import { getChatMessagesSchema, mcpPaginationSchema } from "../../../schema/mcp";
+import { jsonContent, resolveUserId, toIsoString, withToolError } from "../shared";
 
 const READ_ONLY = {
   destructiveHint: false,
@@ -19,20 +13,13 @@ const READ_ONLY = {
   readOnlyHint: true,
 } as const;
 
-const getChatMessagesSchema = paginationSchema.extend({
-  chatId: z
-    .string()
-    .min(1)
-    .describe("Id of the chat whose messages to read (from openstarter_list_chats)."),
-});
-
 export function registerChatTools(server: McpServer): void {
   server.registerTool(
     "openstarter_list_chats",
     {
       description:
         "List the authenticated user's LLM chat conversations, most recently updated first, with pagination. Each entry includes id, title, model, and status.",
-      inputSchema: paginationSchema,
+      inputSchema: mcpPaginationSchema,
       annotations: READ_ONLY,
     },
     (args, extra) =>

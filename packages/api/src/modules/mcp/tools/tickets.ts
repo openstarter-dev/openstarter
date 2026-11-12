@@ -6,24 +6,22 @@
 // or append; other users' ticket ids are indistinguishable from unknown ids.
 
 import type { McpServer } from "@modelcontextprotocol/server";
-import { z } from "zod";
 
+import {
+  createTicketSchema,
+  listTicketsSchema,
+  replyTicketSchema,
+  ticketIdSchema,
+} from "../../../schema/mcp";
+import { TICKET_ROLE } from "../../../schema/support/tickets";
 import {
   addMessage,
   createTicket,
   getTicketById,
   getTicketMessages,
   listUserTickets,
-  TICKET_ROLE,
-  TICKET_STATUS_VALUES,
 } from "../../support/tickets/service";
-import {
-  jsonContent,
-  paginationSchema,
-  resolveUserId,
-  toIsoString,
-  withToolError,
-} from "../shared";
+import { jsonContent, resolveUserId, toIsoString, withToolError } from "../shared";
 
 const READ_ONLY = {
   destructiveHint: false,
@@ -34,35 +32,6 @@ const READ_ONLY = {
 
 const NOT_FOUND_MESSAGE =
   "Ticket was not found for this account. Call openstarter_list_tickets to get valid ticket ids.";
-
-const MAX_TITLE_LENGTH = 200;
-const MAX_CONTENT_LENGTH = 5000;
-
-const listTicketsSchema = paginationSchema.extend({
-  status: z.enum(TICKET_STATUS_VALUES).optional().describe("Filter by ticket status."),
-  search: z.string().min(1).max(200).optional().describe("Search within ticket titles."),
-});
-
-const createTicketSchema = z.object({
-  title: z.string().min(1).max(MAX_TITLE_LENGTH).describe("Short summary of the issue."),
-  content: z
-    .string()
-    .min(1)
-    .max(MAX_CONTENT_LENGTH)
-    .describe("Full description of the issue; posted as the first message."),
-});
-
-const ticketIdSchema = z.object({
-  ticketId: z.string().min(1).describe("Id of the ticket (from openstarter_list_tickets)."),
-});
-
-const replyTicketSchema = ticketIdSchema.extend({
-  content: z
-    .string()
-    .min(1)
-    .max(MAX_CONTENT_LENGTH)
-    .describe("Reply content; appended to the ticket thread."),
-});
 
 export function registerTicketTools(server: McpServer): void {
   server.registerTool(

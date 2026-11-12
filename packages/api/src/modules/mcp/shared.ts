@@ -4,24 +4,9 @@
 // (`authInfo.clientId`, injected by the router after API-key validation) —
 // never from tool arguments. This module owns the context plumbing, the
 // JSON result envelope, and the error formatting so individual tools stay
-// focused on their domain call.
+// focused on their domain call. Tool input schemas live in schema/mcp.
 
 import type { AuthInfo, BaseContext } from "@modelcontextprotocol/server";
-import { z } from "zod";
-
-/** Pagination defaults aligned with `createPaginationSchema` semantics. */
-export const MCP_MAX_PAGE_SIZE = 100;
-export const MCP_DEFAULT_PAGE_SIZE = 20;
-
-export const paginationSchema = z.object({
-  page: z.number().int().min(1).default(1),
-  pageSize: z.number().int().min(1).max(MCP_MAX_PAGE_SIZE).default(MCP_DEFAULT_PAGE_SIZE),
-});
-
-export const creditHistoryQuerySchema = z.object({
-  limit: z.number().int().min(1).max(MCP_MAX_PAGE_SIZE).default(MCP_DEFAULT_PAGE_SIZE),
-  offset: z.number().int().min(0).default(0),
-});
 
 /**
  * Extract the authenticated user id from the tool-call extra.

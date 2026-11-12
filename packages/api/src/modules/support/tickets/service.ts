@@ -33,31 +33,12 @@ import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
 import { and, asc, count, desc, eq, inArray, like, or, type SQL } from "drizzle-orm";
 
-// ─── 常量与取值（Constants / enums as const，禁用 TS enum） ───────────────────
-
-/** 工单状态：`open`（待管理员）/ `replied`（待用户）/ `closed`（已关闭）。 */
-export const TICKET_STATUS = {
-  OPEN: "open",
-  REPLIED: "replied",
-  CLOSED: "closed",
-} as const;
-
-export type TicketStatus = (typeof TICKET_STATUS)[keyof typeof TICKET_STATUS];
-
-/** 工单消息发送方角色：`user`（用户）/ `admin`（管理员）。 */
-export const TICKET_ROLE = {
-  USER: "user",
-  ADMIN: "admin",
-} as const;
-
-export type TicketRole = (typeof TICKET_ROLE)[keyof typeof TICKET_ROLE];
-
-/** 状态取值元组（非空 tuple），供路由层 `zValidator` 的 `z.enum` 复用。 */
-export const TICKET_STATUS_VALUES = [
-  TICKET_STATUS.OPEN,
-  TICKET_STATUS.REPLIED,
-  TICKET_STATUS.CLOSED,
-] as const;
+import {
+  TICKET_ROLE,
+  TICKET_STATUS,
+  type TicketRole,
+  type TicketStatus,
+} from "../../../schema/support/tickets";
 
 // 附件校验上限（R21.4）：最多 9 条、每条 URL 最长 2048 字符。
 const MAX_ATTACHMENTS = 9;

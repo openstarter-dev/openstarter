@@ -1,17 +1,11 @@
 // Orders + AI task MCP tools: read-only projections over the caller's records.
 
 import type { McpServer } from "@modelcontextprotocol/server";
-import { z } from "zod";
 
 import { getTasks } from "../../ai/tasks/service";
 import { listUserOrders } from "../../user/service";
-import {
-  jsonContent,
-  paginationSchema,
-  resolveUserId,
-  toIsoString,
-  withToolError,
-} from "../shared";
+import { listAiTasksSchema, mcpPaginationSchema } from "../../../schema/mcp";
+import { jsonContent, resolveUserId, toIsoString, withToolError } from "../shared";
 
 const READ_ONLY = {
   destructiveHint: false,
@@ -20,25 +14,13 @@ const READ_ONLY = {
   readOnlyHint: true,
 } as const;
 
-const AI_TASK_STATUSES = ["pending", "processing", "success", "failed", "canceled"] as const;
-
-const listAiTasksSchema = paginationSchema.extend({
-  mediaType: z
-    .string()
-    .min(1)
-    .max(50)
-    .optional()
-    .describe("Filter by media type, e.g. 'image' or 'music'."),
-  status: z.enum(AI_TASK_STATUSES).optional().describe("Filter by task status."),
-});
-
 export function registerCommerceTools(server: McpServer): void {
   server.registerTool(
     "openstarter_list_orders",
     {
       description:
         "List the authenticated user's orders (payment records), newest first, with page/pageSize pagination. Each entry includes order number, product, amount, currency, and status.",
-      inputSchema: paginationSchema,
+      inputSchema: mcpPaginationSchema,
       annotations: READ_ONLY,
     },
     (args, extra) =>

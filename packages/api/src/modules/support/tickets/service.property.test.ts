@@ -18,13 +18,13 @@ import {
   insertUser,
   resetApiTestDatabase,
 } from "../../../test/api-test-database";
+import type { TicketStatus } from "../../../schema/support/tickets";
 import {
   addMessage,
   createTicket,
   getTicketMessages,
   listAllTickets,
   listUserTickets,
-  type TicketStatus,
   updateTicketStatus,
 } from "./service";
 
