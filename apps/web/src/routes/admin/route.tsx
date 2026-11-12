@@ -1,11 +1,8 @@
-// apps/web/src/routes/admin/route.tsx
-// 管理后台外壳（Admin_Console，R26）：登录 + 平台级 RBAC 守卫、分组侧边导航（按权限过滤）。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { cn } from "@openstarter/ui-web/lib/utils";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 
-import { authClient } from "@/lib/auth-client";
+import { getServerSessionFn } from "@/functions/session";
 import { matchAnyPermission, matchPermission } from "@/lib/permissions";
 import { user } from "@/modules/user/lib/api";
 
@@ -61,12 +58,10 @@ export const ADMIN_NAV: AdminNavGroup[] = [
 const ALL_ADMIN_PERMISSIONS = ADMIN_NAV.flatMap((g) => g.items.map((item) => item.permission));
 
 export const Route = createFileRoute("/admin")({
-  // 同 _app：beforeLoad 默认每次导航重跑（含一次 get-session）。60s 内复用守卫结果；
-  // permissions 由 Query 缓存（5min staleTime）另行兜底。
   staleTime: 60 * 1000,
   beforeLoad: async ({ context: { queryClient }, location }) => {
     const [session, permissions] = await Promise.all([
-      authClient.getSession(),
+      getServerSessionFn(),
       queryClient.ensureQueryData(user.queries.permissions()).catch(() => [] as string[]),
     ]);
 
