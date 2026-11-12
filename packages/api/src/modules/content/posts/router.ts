@@ -2,21 +2,13 @@ import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { z } from "zod";
 
 import { SlugConflictError } from "../errors";
-import {
-  createPost,
-  deletePost,
-  getPostById,
-  listPosts,
-  POST_STATUS_VALUES,
-  POST_TYPE_VALUES,
-  updatePost,
-} from "../posts";
+import { createPost, deletePost, getPostById, listPosts, updatePost } from "../posts";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
-import { idParam, createPaginationSchema } from "../../../schema";
+import { idParam } from "../../../schema";
+import { createBody, listQuery, updateBody } from "../../../schema/content/posts";
 
 const SLUG_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
@@ -26,44 +18,6 @@ const PERMISSION_READ = "post.read";
 const PERMISSION_CREATE = "post.create";
 const PERMISSION_UPDATE = "post.update";
 const PERMISSION_DELETE = "post.delete";
-
-const listQuery = createPaginationSchema(100, 10).extend({
-  type: z.enum(POST_TYPE_VALUES).optional(),
-  status: z.enum(POST_STATUS_VALUES).optional(),
-  search: z.string().min(1).optional(),
-});
-
-const createBody = z.object({
-  slug: z.string().min(1),
-  title: z.string().min(1),
-  type: z.enum(POST_TYPE_VALUES).optional(),
-  description: z.string().optional(),
-  content: z.string().optional(),
-  image: z.string().optional(),
-  categories: z.string().optional(),
-  tags: z.string().optional(),
-  authorName: z.string().optional(),
-  authorImage: z.string().optional(),
-  parentId: z.string().min(1).optional(),
-  status: z.enum(POST_STATUS_VALUES).optional(),
-  sort: z.number().int().optional(),
-});
-
-const updateBody = z.object({
-  slug: z.string().min(1).optional(),
-  title: z.string().min(1).optional(),
-  type: z.enum(POST_TYPE_VALUES).optional(),
-  description: z.string().nullable().optional(),
-  content: z.string().nullable().optional(),
-  image: z.string().nullable().optional(),
-  categories: z.string().nullable().optional(),
-  tags: z.string().nullable().optional(),
-  authorName: z.string().nullable().optional(),
-  authorImage: z.string().nullable().optional(),
-  parentId: z.string().min(1).nullable().optional(),
-  status: z.enum(POST_STATUS_VALUES).optional(),
-  sort: z.number().int().optional(),
-});
 
 /** slug 唯一冲突转 409（交由 app.onError 统一返回结构化 respErr）；其余错误原样上抛。 */
 function rethrowAsHttp(err: unknown): never {

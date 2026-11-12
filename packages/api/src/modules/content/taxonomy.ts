@@ -18,24 +18,7 @@ import { getUuid } from "@openstarter/shared/id";
 import { and, asc, count, eq, isNull, type SQL } from "drizzle-orm";
 
 import { SlugConflictError } from "./errors";
-
-// 分类状态（`as const`，禁用 enum）：`published` 默认可见，`archived` 兼作软删除标记。
-export const TaxonomyStatus = {
-  PUBLISHED: "published",
-  PENDING: "pending",
-  DRAFT: "draft",
-  ARCHIVED: "archived",
-} as const;
-
-export type TaxonomyStatus = (typeof TaxonomyStatus)[keyof typeof TaxonomyStatus];
-
-// 状态取值元组（非空 tuple），供路由层 `zValidator` 的 `z.enum` 复用。
-export const TAXONOMY_STATUS_VALUES = [
-  TaxonomyStatus.PUBLISHED,
-  TaxonomyStatus.PENDING,
-  TaxonomyStatus.DRAFT,
-  TaxonomyStatus.ARCHIVED,
-] as const;
+import { TaxonomyStatus } from "../../schema/content/taxonomy";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 50;

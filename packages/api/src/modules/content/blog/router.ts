@@ -1,19 +1,12 @@
 import { zValidator } from "@hono/zod-validator";
 import { respData, respErr } from "@openstarter/shared";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { listBlogArticles } from "../blog";
 import { findPublishedBySlug } from "../posts";
-import { createPaginationSchema } from "../../../schema";
+import { listQuery, slugParam } from "../../../schema/content/blog";
 
 const NOT_FOUND_STATUS = 404;
-
-const listQuery = createPaginationSchema(100, 12).extend({
-  category: z.string().min(1).optional(),
-});
-
-const slugParam = z.object({ slug: z.string().min(1) });
 
 export const blogRouter = new Hono()
   .get("/", zValidator("query", listQuery), async (c) => {

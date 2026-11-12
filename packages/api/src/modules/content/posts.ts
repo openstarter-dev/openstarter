@@ -24,35 +24,7 @@ import { getUuid } from "@openstarter/shared/id";
 import { and, count, desc, eq, isNull, like, or, type SQL } from "drizzle-orm";
 
 import { SlugConflictError } from "./errors";
-
-// 文章类型（`as const`，禁用 enum）：`article` 为博客文章（默认），`page`/`log` 为其它内容类型。
-export const PostType = {
-  ARTICLE: "article",
-  PAGE: "page",
-  LOG: "log",
-} as const;
-
-export type PostType = (typeof PostType)[keyof typeof PostType];
-
-// 文章状态（`as const`）：`published` 公开可见，`archived` 兼作软删除标记。
-export const PostStatus = {
-  PUBLISHED: "published",
-  PENDING: "pending",
-  DRAFT: "draft",
-  ARCHIVED: "archived",
-} as const;
-
-export type PostStatus = (typeof PostStatus)[keyof typeof PostStatus];
-
-// 取值元组（非空 tuple），供路由层 `zValidator` 的 `z.enum` 复用。
-export const POST_TYPE_VALUES = [PostType.ARTICLE, PostType.PAGE, PostType.LOG] as const;
-
-export const POST_STATUS_VALUES = [
-  PostStatus.PUBLISHED,
-  PostStatus.PENDING,
-  PostStatus.DRAFT,
-  PostStatus.ARCHIVED,
-] as const;
+import { PostStatus, PostType } from "../../schema/content/posts";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;

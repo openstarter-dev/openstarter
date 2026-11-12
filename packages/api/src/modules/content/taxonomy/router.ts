@@ -2,7 +2,6 @@ import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { z } from "zod";
 
 import { SlugConflictError } from "../errors";
 import {
@@ -10,12 +9,12 @@ import {
   deleteTaxonomy,
   getTaxonomyById,
   listTaxonomy,
-  TAXONOMY_STATUS_VALUES,
   updateTaxonomy,
 } from "../taxonomy";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
-import { idParam, createPaginationSchema } from "../../../schema";
+import { idParam } from "../../../schema";
+import { createBody, listQuery, updateBody } from "../../../schema/content/taxonomy";
 
 const SLUG_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
@@ -25,32 +24,6 @@ const PERMISSION_READ = "taxonomy.read";
 const PERMISSION_CREATE = "taxonomy.create";
 const PERMISSION_UPDATE = "taxonomy.update";
 const PERMISSION_DELETE = "taxonomy.delete";
-
-const listQuery = createPaginationSchema(100, 50).extend({
-  type: z.string().min(1).optional(),
-  status: z.enum(TAXONOMY_STATUS_VALUES).optional(),
-  parentId: z.string().min(1).optional(),
-});
-
-const createBody = z.object({
-  slug: z.string().min(1),
-  type: z.string().min(1),
-  title: z.string().min(1),
-  description: z.string().optional(),
-  parentId: z.string().min(1).optional(),
-  sort: z.number().int().optional(),
-  status: z.enum(TAXONOMY_STATUS_VALUES).optional(),
-});
-
-const updateBody = z.object({
-  slug: z.string().min(1).optional(),
-  type: z.string().min(1).optional(),
-  title: z.string().min(1).optional(),
-  description: z.string().nullable().optional(),
-  parentId: z.string().min(1).nullable().optional(),
-  sort: z.number().int().optional(),
-  status: z.enum(TAXONOMY_STATUS_VALUES).optional(),
-});
 
 /** slug 唯一冲突转 409（交由 app.onError 统一返回结构化 respErr）；其余错误原样上抛。 */
 function rethrowAsHttp(err: unknown): never {
