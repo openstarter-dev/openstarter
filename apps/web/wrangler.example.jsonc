@@ -76,8 +76,6 @@
     "VITE_APP_URL": "https://<your-domain.com>",
     "VITE_APP_NAME": "OpenStarter",
     "VITE_DEFAULT_LOCALE": "en",
-    "PRODUCT_NAME": "OpenStarter",
-    "DEFAULT_LOCALE": "en",
     // CONFIG_ENCRYPTION_KEY (AES-256-GCM key for admin-stored secrets) must NOT
     // be a var — set it with `wrangler secret put CONFIG_ENCRYPTION_KEY`.
   },

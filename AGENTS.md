@@ -188,8 +188,6 @@ Required variables:
   `process.env` by better-auth's `baseURL`, SSR canonical URLs, email links and
   every app's derived API base; missing value falls back to
   `http://localhost:3000` locally. There are no aliases — this is the only key
-- `PRODUCT_NAME` — Used in emails, marketing site
-- `DEFAULT_LOCALE` — Default i18n locale (e.g., `en-US`)
 
 Extension / mobile / mini-app / cli / desktop read the web app address from
 `apps/web/.env` at build time; `OPENSTARTER_API_URL`

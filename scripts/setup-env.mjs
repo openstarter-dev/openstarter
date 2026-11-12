@@ -6,8 +6,8 @@
 //
 // 行为：
 //   - apps/*/.env.example → apps/*/.env（app 级变量）
-//   - apps/web/.env 是全仓库唯一 env 事实源：DATABASE_*、VITE_APP_URL、PRODUCT_NAME、
-//     DEFAULT_LOCALE 以及 BETTER_AUTH_SECRET 等都在这里维护，不再有根 .env
+//   - apps/web/.env 是全仓库唯一 env 事实源：DATABASE_*、VITE_APP_URL 以及
+//     BETTER_AUTH_SECRET 等都在这里维护，不再有根 .env
 //     （生产取值见 apps/web/.env.production.example，不被本脚本自动复制）
 //   - 复制带占位符的 .env.example 时自动生成随机 BETTER_AUTH_SECRET
 //   - 已存在的 .env 默认跳过并提示，保证重复执行是幂等安全的
