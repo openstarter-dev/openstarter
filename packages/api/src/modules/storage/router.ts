@@ -1,6 +1,11 @@
+// packages/api/src/modules/storage —— 图片上传路由（POST /storage/upload-image，R18）。
+//
+// 路由只负责：鉴权/方案门禁、按 Content-Type 解析上传载荷（multipart 或 JSON
+// base64）、文件数校验，以及把领域错误映射为结构化响应。大小限额与上传编排
+// 在 ./service（uploadImages / resolveUploadLimitKb），存储渠道细节在 ./manager。
+
 import { Buffer } from "node:buffer";
 import { respData, respErr } from "@openstarter/shared";
-import { getAllConfigs } from "@openstarter/shared/config";
 import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -9,25 +14,10 @@ import { requireAuth } from "../../middleware/auth";
 import { requirePlan } from "../../middleware/plan-gate";
 import { base64Body, MAX_FILES } from "../../schema/storage";
 import { UploadLimitError } from "./errors";
-import { uploadImage } from "./service";
+import { type UploadInput, uploadImages } from "./service";
 
-const DEFAULT_MAX_KB = 2048;
 const BAD_REQUEST_STATUS = 400;
 const DATA_URL_PREFIX = /^data:[^;]+;base64,/;
-
-/** 归一化后的单个上传条目。 */
-interface UploadInput {
-  body: Uint8Array;
-  contentType: string;
-  filename?: string;
-}
-
-/** 从 Config 解析上传大小上限（KB）；非法/缺省回退默认值。 */
-async function resolveMaxKb(): Promise<number> {
-  const configs = await getAllConfigs();
-  const raw = Number(configs.inline_image_max_kb);
-  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_MAX_KB;
-}
 
 /** 解码 base64（可含 `data:` URL 前缀）为字节。 */
 function decodeBase64(input: string): Uint8Array {
@@ -102,29 +92,9 @@ export const storageRouter = new Hono().post(
       return c.json(respErr(`too many files (max ${MAX_FILES})`), BAD_REQUEST_STATUS);
     }
 
-    const maxKb = await resolveMaxKb();
-
     try {
-      const results = await Promise.all(
-        inputs.map((input) =>
-          uploadImage({
-            body: input.body,
-            contentType: input.contentType,
-            maxKb,
-          }),
-        ),
-      );
-
-      return c.json(
-        respData({
-          results: results.map((r, i) => ({
-            filename: inputs[i]?.filename,
-            inline: r.inline,
-            url: r.url,
-          })),
-          urls: results.map((r) => r.url),
-        }),
-      );
+      const { results, urls } = await uploadImages(inputs);
+      return c.json(respData({ results, urls }));
     } catch (err) {
       if (err instanceof UploadLimitError) {
         throw new HTTPException(BAD_REQUEST_STATUS, {

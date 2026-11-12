@@ -10,11 +10,15 @@
 // 对象键为内容寻址（`md5(body).<ext>`，对齐 ShipAny），相同内容天然去重、稳定可复现。
 
 import { Buffer } from "node:buffer";
+import { getAllConfigs } from "@openstarter/shared/config";
 import { md5 } from "@openstarter/shared/hash";
 import { StorageUploadError, UploadLimitError } from "./errors";
 import { getStorage } from "./manager";
 
 const BYTES_PER_KB = 1024;
+
+/** 未配置 `inline_image_max_kb` 时的上传大小上限（KB）。 */
+const DEFAULT_MAX_KB = 2048;
 
 /** 允许上传的图片 MIME 类型白名单（对齐 ShipAny 的扩展名映射）。 */
 const ALLOWED_IMAGE_TYPES: ReadonlySet<string> = new Set([
@@ -111,4 +115,46 @@ export async function uploadImage(params: UploadImageParams): Promise<UploadImag
     throw new StorageUploadError(result.error ?? "upload failed", result.provider);
   }
   return { url: result.url, inline: false };
+}
+
+// ─── 批量上传（Batch upload） ────────────────────────────────────────────────
+
+/** 归一化后的单个上传条目（由路由从 multipart / base64 两种通道解析得到）。 */
+export interface UploadInput {
+  body: Uint8Array;
+  contentType: string;
+  filename?: string;
+}
+
+/** 批量上传结果：逐条 URL/内联标记，并附扁平 URL 列表（响应体形状）。 */
+export interface UploadBatchResult {
+  results: Array<{ filename?: string; inline: boolean; url: string }>;
+  urls: string[];
+}
+
+/** 从 Config 解析上传大小上限（KB）；非法/缺省回退默认值。 */
+export async function resolveUploadLimitKb(): Promise<number> {
+  const configs = await getAllConfigs();
+  const raw = Number(configs.inline_image_max_kb);
+  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_MAX_KB;
+}
+
+/**
+ * 批量上传：统一取一次大小上限后并行执行 {@link uploadImage}。
+ * 任一条目违反类型/大小限制即抛 {@link UploadLimitError}（由路由映射 400）。
+ */
+export async function uploadImages(inputs: UploadInput[]): Promise<UploadBatchResult> {
+  const maxKb = await resolveUploadLimitKb();
+  const uploaded = await Promise.all(
+    inputs.map((input) => uploadImage({ body: input.body, contentType: input.contentType, maxKb })),
+  );
+
+  return {
+    results: uploaded.map((result, index) => ({
+      filename: inputs[index]?.filename,
+      inline: result.inline,
+      url: result.url,
+    })),
+    urls: uploaded.map((result) => result.url),
+  };
 }
