@@ -69,6 +69,11 @@
 
   "vars": {
     "DATABASE_PROVIDER": "d1",
+    // Runtime NODE_ENV. Workers do NOT define it automatically, and both better-auth
+    // (rate limiting is only on when NODE_ENV === "production") and the auth env preset
+    // (falls back to "development") depend on it. Leaving it unset silently disables
+    // production rate limiting and trusts localhost origins.
+    "NODE_ENV": "production",
     // App origin: better-auth baseURL (OAuth callbacks + trustedOrigins), email /
     // payment callbacks and SSR canonical URLs all resolve from this single value
     // (read directly from process.env by better-auth + the web app). VITE_APP_NAME

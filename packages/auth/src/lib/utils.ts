@@ -49,8 +49,28 @@ export const getBaseUrl = (request?: Request): string => {
       return fromRequestUrl;
     }
   }
-  return (process.env.VITE_APP_URL ?? DEFAULT_APP_URL).replace(/\/+$/, "");
+  return (process.env.VITE_APP_URL?.trim() || DEFAULT_APP_URL).replace(/\/+$/, "");
 };
+
+/**
+ * 解析应用基址（origin），不依赖请求上下文。
+ *
+ * 与 `getBaseUrl` 的差别：不读请求头，供 better-auth 的 `baseURL` 与部署面开关
+ * （https 判定、本机来源判定）使用；唯一事实源仍是 `VITE_APP_URL`。
+ */
+export const getAppUrl = (): string =>
+  // 空串按缺失处理：`??` 不拦空串，而 baseURL 为空会让 better-auth 回退到
+  // 「按请求自身推导来源」，等于放开 CSRF 原点校验。
+  (process.env.VITE_APP_URL?.trim() || DEFAULT_APP_URL).replace(/\/+$/, "");
+
+/**
+ * 判断应用基址是否指向本机。
+ *
+ * 只认 `localhost` / `127.0.0.1` / `[::1]`，**不依据 `NODE_ENV`**：auth env 预设把缺省的
+ * `NODE_ENV` 兜底成 `"development"`，Worker 上会恒为真，生产也会放开 localhost 来源。
+ */
+export const isLoopbackAppUrl = (appUrl: string): boolean =>
+  /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(appUrl);
 
 /**
  * 组装验证 / 回调 URL。

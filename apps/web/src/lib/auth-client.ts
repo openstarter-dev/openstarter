@@ -50,9 +50,18 @@ type AuthClientWithOneTap = AuthClient & { oneTap: OneTapAction };
 
 let oneTapClientInstance: AuthClientWithOneTap | null = null;
 
-/** 依据公开配置判定 One Tap 是否可用（开关开启且 clientId 非空）。 */
+/**
+ * 依据公开配置判定 One Tap 是否可用。
+ *
+ * 服务端只有在「Google provider 已注册 + One Tap 开关开启 + 有 clientId」三者同时满足时
+ * 才挂载 oneTap 插件，故这里必须同样要求 `google_auth_enabled`，否则会弹出提示却回调 404。
+ */
 export const isOneTapEnabled = (configs: PublicConfig | undefined): boolean =>
-  Boolean(configs?.google_one_tap_enabled === "true" && configs?.google_client_id);
+  Boolean(
+    configs?.google_auth_enabled === "true" &&
+    configs?.google_one_tap_enabled === "true" &&
+    configs?.google_client_id,
+  );
 
 /**
  * 返回带 One Tap 动作的 auth client（模块级单例缓存）。
