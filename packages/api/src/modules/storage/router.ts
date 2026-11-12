@@ -4,15 +4,14 @@ import { getAllConfigs } from "@openstarter/shared/config";
 import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { z } from "zod";
 
 import { requireAuth } from "../../middleware/auth";
 import { requirePlan } from "../../middleware/plan-gate";
+import { base64Body, MAX_FILES } from "../../schema/storage";
 import { UploadLimitError } from "./errors";
 import { uploadImage } from "./service";
 
 const DEFAULT_MAX_KB = 2048;
-const MAX_FILES = 9;
 const BAD_REQUEST_STATUS = 400;
 const DATA_URL_PREFIX = /^data:[^;]+;base64,/;
 
@@ -22,16 +21,6 @@ interface UploadInput {
   contentType: string;
   filename?: string;
 }
-
-const base64Item = z.object({
-  contentType: z.string().min(1),
-  data: z.string().min(1),
-  filename: z.string().min(1).optional(),
-});
-
-const base64Body = z.object({
-  files: z.array(base64Item).min(1).max(MAX_FILES),
-});
 
 /** 从 Config 解析上传大小上限（KB）；非法/缺省回退默认值。 */
 async function resolveMaxKb(): Promise<number> {

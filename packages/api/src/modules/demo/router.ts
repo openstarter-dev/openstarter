@@ -1,21 +1,9 @@
 import { zValidator } from "@hono/zod-validator";
 import { respData, respErr } from "@openstarter/shared";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { requireAuth } from "../../middleware/auth";
-
-const DEFAULT_LIMIT = 10;
-const MAX_LIMIT = 100;
-
-const createSchema = z.object({
-  description: z.string().optional(),
-  name: z.string().min(1).max(200),
-});
-
-const listQuery = z.object({
-  limit: z.coerce.number().int().min(1).max(MAX_LIMIT).default(DEFAULT_LIMIT),
-});
+import { createSchema, listQuery } from "../../schema/demo";
 
 interface Note {
   createdAt: string;

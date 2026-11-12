@@ -1,10 +1,10 @@
 import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { requireAuth } from "../../middleware/auth";
 import { paginationSchema } from "../../schema";
+import { bindBody } from "../../schema/referral";
 import {
   bindReferral,
   getMyReferralStats,
@@ -12,8 +12,6 @@ import {
   listMyCommissions,
   listMyRelations,
 } from "./service";
-
-const bindBody = z.object({ code: z.string().min(1).max(64) });
 
 export const referralRouter = new Hono()
   .get("/referral/me", requireAuth, async (c) => {

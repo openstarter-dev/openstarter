@@ -6,14 +6,8 @@
 import { createAuth } from "@openstarter/auth";
 import { AccountUnlinkError, unlinkAccountSafely } from "@openstarter/auth/accounts/unlink";
 import { Hono } from "hono";
-import { z } from "zod";
 
-const unlinkAccountSchema = z
-  .object({
-    accountId: z.string().min(1).optional(),
-    providerId: z.string().min(1),
-  })
-  .strict();
+import { unlinkAccountSchema } from "../../schema/auth";
 
 const UNLINK_ACCOUNT_PATHS = [
   "/auth/unlink-account",

@@ -18,9 +18,9 @@ import { respData, respErr } from "@openstarter/shared";
 import { logger } from "@openstarter/shared/logger";
 import { Hono, type Context } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { z } from "zod";
 
 import { requireAuth } from "../../middleware/auth";
+import { checkoutBody } from "../../schema/billing";
 import { resolveProduct, resolveProductByIapId } from "./products";
 
 const PROVIDER_UNAVAILABLE_STATUS = 400;
@@ -46,14 +46,6 @@ configureRevenueCatProducts((iapProductId) => {
     productId: entry.productId,
     productName: entry.productName,
   };
-});
-
-// 结账入参：只接受产品引用与支付渠道。价格/货币/积分/订阅周期一律由服务端
-// 产品目录（./products）按 productId 解析 —— 客户端传金额一律忽略，
-// 杜绝「客户端改价」漏洞。
-const checkoutBody = z.object({
-  productId: z.string().min(1),
-  provider: z.string().min(1).optional(),
 });
 
 export const billingRouter = new Hono()
