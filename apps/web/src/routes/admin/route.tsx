@@ -3,6 +3,7 @@ import { cn } from "@openstarter/ui-web/lib/utils";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 
 import { getServerSessionFn } from "@/functions/session";
+import { buildPageTitle } from "@/lib/page-head";
 import { matchAnyPermission, matchPermission } from "@/lib/permissions";
 import { user } from "@/modules/user/lib/api";
 
@@ -59,10 +60,18 @@ const ALL_ADMIN_PERMISSIONS = ADMIN_NAV.flatMap((g) => g.items.map((item) => ite
 
 export const Route = createFileRoute("/admin")({
   staleTime: 60 * 1000,
+  head: () => ({
+    meta: [
+      { content: "noindex, nofollow", name: "robots" },
+      ...buildPageTitle(m["common.systems.admin"]()).meta,
+    ],
+  }),
   beforeLoad: async ({ context: { queryClient }, location }) => {
+    // 权限查询失败不再静默降级成空数组：抛给 errorComponent，用户能看到"重试"，
+    // 而不是莫名跳回 dashboard。
     const [session, permissions] = await Promise.all([
       getServerSessionFn(),
-      queryClient.ensureQueryData(user.queries.permissions()).catch(() => [] as string[]),
+      queryClient.ensureQueryData(user.queries.permissions()),
     ]);
 
     if (!session.data) {
