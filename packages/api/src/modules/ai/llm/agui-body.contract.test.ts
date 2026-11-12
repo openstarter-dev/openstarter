@@ -12,7 +12,8 @@
 import { uiMessagesToWire, type UIMessage } from "@tanstack/ai";
 import { describe, expect, it } from "vitest";
 
-import { extractLatestUserText, sendMessageBody } from "./agui-body";
+import { sendMessageBody } from "../../../schema/ai/llm";
+import { extractLatestUserText } from "./agui-body";
 
 /** 复刻 @tanstack/ai-client buildRunAgentInputBody 的顶层信封（仅 messages 参与校验）。 */
 const toSendBody = (messages: UIMessage[]) => ({

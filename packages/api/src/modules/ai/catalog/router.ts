@@ -16,14 +16,13 @@
 import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
 import { requirePermission } from "../../../middleware/rbac";
-import { idParam, paginationSchema } from "../../../schema";
+import { idParam } from "../../../schema";
+import { createBody, listQuery, updateBody } from "../../../schema/ai/catalog";
 import {
-  AI_MEDIA_TYPES,
   createModel,
   deleteModel,
   DuplicateModelError,
@@ -36,39 +35,6 @@ const DUPLICATE_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 
 const PERMISSION_ADMIN = "admin.*";
-
-const createBody = z.object({
-  provider: z.string().min(1),
-  modelId: z.string().min(1),
-  displayName: z.string().min(1),
-  mediaType: z.enum(AI_MEDIA_TYPES),
-  creditPrice: z.number().int().min(0).default(0),
-  maxOutputTokens: z.number().int().min(1).nullable().optional(),
-  optionsSchema: z.string().nullable().optional(),
-  enabled: z.boolean().default(true),
-  sortOrder: z.number().int().default(0),
-  metadata: z.string().nullable().optional(),
-});
-
-// update schema 不能复用 createBody.partial()：partial 会保留字段的 .default()，
-// 解析时把未提交的字段重置为默认值。这里逐字段 optional（无 default），未提交的
-// 键不会出现在解析结果中，updateModel 只更新实际提交的字段。
-const updateBody = createBody.extend({
-  provider: z.string().min(1).optional(),
-  modelId: z.string().min(1).optional(),
-  displayName: z.string().min(1).optional(),
-  mediaType: z.enum(AI_MEDIA_TYPES).optional(),
-  creditPrice: z.number().int().min(0).optional(),
-  maxOutputTokens: z.number().int().min(1).nullable().optional(),
-  optionsSchema: z.string().nullable().optional(),
-  enabled: z.boolean().optional(),
-  sortOrder: z.number().int().optional(),
-  metadata: z.string().nullable().optional(),
-});
-
-const listQuery = paginationSchema.extend({
-  mediaType: z.enum(AI_MEDIA_TYPES).optional(),
-});
 
 /** 前台门面：按媒体类型分组的可用模型目录。 */
 export const aiModelsRouter = new Hono().get(

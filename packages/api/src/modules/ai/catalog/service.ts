@@ -17,12 +17,7 @@ import { and, asc, eq } from "drizzle-orm";
 
 import { getAIManager } from "../media/manager";
 import { getAvailableProviders } from "../llm/provider";
-
-/** AI 生成的媒体类型清单（目录分组键）。 */
-export const AI_MEDIA_TYPES = ["text", "image", "video", "music", "speech"] as const;
-
-/** 模型目录的媒体类型。 */
-export type AIModelMediaType = (typeof AI_MEDIA_TYPES)[number];
+import { AI_MEDIA_TYPES, type AIModelMediaType } from "../../../schema/ai/catalog";
 
 /** 模型重复错误：`(provider, modelId)` 唯一约束冲突时抛出。 */
 export class DuplicateModelError extends Error {

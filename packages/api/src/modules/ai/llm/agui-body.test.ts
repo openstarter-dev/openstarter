@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { extractLatestUserText, sendMessageBody } from "./agui-body";
+import { sendMessageBody } from "../../../schema/ai/llm";
+import { extractLatestUserText } from "./agui-body";
 
 const userMsg = (parts: unknown[]) => ({ id: "m1", role: "user" as const, parts });
 

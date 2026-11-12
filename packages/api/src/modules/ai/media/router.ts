@@ -3,7 +3,6 @@ import type { AiTask } from "@openstarter/db/schema";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { getAllConfigs } from "@openstarter/shared/config";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import {
   type AIDispatchResult,
@@ -20,7 +19,7 @@ import { createTask, findTask, getTasks, InsufficientCreditsError, updateTask } 
 import { findModelByProviderAndId } from "../catalog/service";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
-import { paginationSchema } from "../../../schema";
+import { createBody, listQuery } from "../../../schema/ai/media";
 
 const PROVIDER_UNAVAILABLE_MESSAGE = "AI provider is not enabled or its credentials are missing";
 
@@ -28,35 +27,6 @@ const STATUS_NOT_FOUND = 404;
 const STATUS_INSUFFICIENT_CREDITS = 402;
 const STATUS_PROVIDER_RUNTIME_ERROR = 502;
 const STATUS_PROVIDER_UNAVAILABLE = 503;
-
-const MEDIA_TYPE_VALUES = [
-  AIMediaType.MUSIC,
-  AIMediaType.IMAGE,
-  AIMediaType.VIDEO,
-  AIMediaType.TEXT,
-  AIMediaType.SPEECH,
-] as const;
-
-const STATUS_VALUES = [
-  AITaskStatus.PENDING,
-  AITaskStatus.PROCESSING,
-  AITaskStatus.SUCCESS,
-  AITaskStatus.FAILED,
-  AITaskStatus.CANCELED,
-] as const;
-
-const createBody = z.object({
-  mediaType: z.enum(MEDIA_TYPE_VALUES),
-  provider: z.string().min(1).optional(),
-  model: z.string().min(1),
-  prompt: z.string().min(1),
-  options: z.record(z.string(), z.unknown()).optional(),
-});
-
-const listQuery = paginationSchema.extend({
-  mediaType: z.enum(MEDIA_TYPE_VALUES).optional(),
-  status: z.enum(STATUS_VALUES).optional(),
-});
 
 const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   AITaskStatus.SUCCESS,

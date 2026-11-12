@@ -15,15 +15,15 @@ import { chat, toServerSentEventsResponse } from "@tanstack/ai";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
 import { paginationSchema } from "../../../schema";
+import { createChatBody, sendMessageBody } from "../../../schema/ai/llm";
 
 import { revoke } from "@openstarter/billing-web";
 import { InsufficientCreditsError } from "../tasks/service";
-import { extractLatestUserText, sendMessageBody } from "./agui-body";
+import { extractLatestUserText } from "./agui-body";
 import { createBillingMiddleware } from "./billing-middleware";
 import { preloadChatCredits, settleChatCredits } from "./credits";
 import { getAdapter, isLLMEnabled } from "./provider";
@@ -43,16 +43,6 @@ const STATUS_BAD_REQUEST = 400;
 const STATUS_PROVIDER_ERROR = 502;
 const STATUS_INSUFFICIENT_CREDITS = 402;
 
-// ─── Validation Schemas ──────────────────────────────────────────────────
-
-const createChatBody = z.object({
-  title: z.string().optional(),
-  provider: z.string().optional(),
-  model: z.string().optional(),
-});
-
-const listQuery = paginationSchema;
-
 // ─── Router Setup ────────────────────────────────────────────────────────
 
 export const llmRouter = new Hono()
@@ -61,7 +51,7 @@ export const llmRouter = new Hono()
     "/llm/chats",
     requireAuth,
     requirePlan("member"),
-    zValidator("query", listQuery),
+    zValidator("query", paginationSchema),
     async (c) => {
       const { page, pageSize } = c.req.valid("query");
       const userId = c.get("userId") as string;
@@ -139,7 +129,7 @@ export const llmRouter = new Hono()
     "/llm/chats/:id/messages",
     requireAuth,
     requirePlan("member"),
-    zValidator("query", listQuery),
+    zValidator("query", paginationSchema),
     async (c) => {
       const userId = c.get("userId") as string;
       const chatId = c.req.param("id");
