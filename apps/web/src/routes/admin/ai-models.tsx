@@ -34,7 +34,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
-import { countTotalPages, listSearchParams, LIST_PAGE_SIZE } from "@/lib/list-search";
+import {
+  countTotalPages,
+  type ListSearch,
+  listSearchParams,
+  LIST_PAGE_SIZE,
+} from "@/lib/list-search";
 import { preloadQueries } from "@/lib/preload";
 import {
   admin,
@@ -48,7 +53,7 @@ import {
 export const Route = createFileRoute("/admin/ai-models")({
   validateSearch: listSearchParams,
   loaderDeps: ({ search }) => search,
-  loader: preloadQueries((deps) => [admin.queries.aiModels(Number(deps.page) || 1)]),
+  loader: preloadQueries((deps: ListSearch) => [admin.queries.aiModels(deps.page)]),
   component: AdminAiModelsPage,
 });
 
@@ -94,15 +99,10 @@ const parseIntOrNull = (value: string): number | null | undefined => {
 
 function AdminAiModelsPage() {
   const { page } = Route.useSearch();
-  const navigate = Route.useNavigate();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<ModelForm | null>(null);
 
   const modelsQuery = useQuery(admin.queries.aiModels(page));
-
-  const handlePageChange = (next: number) => {
-    void navigate({ search: (prev) => ({ ...prev, page: next }), replace: true });
-  };
 
   const saveMutation = useMutation({
     ...admin.mutations.saveAiModel(),
@@ -270,7 +270,7 @@ function AdminAiModelsPage() {
         </div>
       ) : null}
 
-      <Pagination onPageChange={handlePageChange} page={page} totalPages={totalPages} />
+      <Pagination page={page} to="/admin/ai-models" totalPages={totalPages} />
 
       <Dialog
         onOpenChange={(open) => {

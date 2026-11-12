@@ -7,14 +7,19 @@ import { useMemo } from "react";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
 import { DataTable, type DataColumn } from "@/components/admin/data-table";
-import { countTotalPages, listSearchParams, LIST_PAGE_SIZE } from "@/lib/list-search";
+import {
+  countTotalPages,
+  type ListSearch,
+  listSearchParams,
+  LIST_PAGE_SIZE,
+} from "@/lib/list-search";
 import { preloadQueries } from "@/lib/preload";
 import { admin, type AdminCreditRow } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/credits")({
   validateSearch: listSearchParams,
   loaderDeps: ({ search }) => search,
-  loader: preloadQueries((deps) => [admin.queries.credits(Number(deps.page) || 1)]),
+  loader: preloadQueries((deps: ListSearch) => [admin.queries.credits(deps.page)]),
   component: AdminCreditsPage,
 });
 
@@ -26,7 +31,6 @@ function formatDate(value: string | null | undefined): string {
 
 function AdminCreditsPage() {
   const { page } = Route.useSearch();
-  const navigate = Route.useNavigate();
 
   const query = useQuery(admin.queries.credits(page));
 
@@ -75,10 +79,6 @@ function AdminCreditsPage() {
     [],
   );
 
-  const handlePageChange = (next: number) => {
-    void navigate({ search: (prev) => ({ ...prev, page: next }), replace: true });
-  };
-
   return (
     <div>
       <AdminHeader
@@ -102,7 +102,7 @@ function AdminCreditsPage() {
         />
       ) : null}
 
-      <Pagination onPageChange={handlePageChange} page={page} totalPages={totalPages} />
+      <Pagination page={page} to="/admin/credits" totalPages={totalPages} />
     </div>
   );
 }

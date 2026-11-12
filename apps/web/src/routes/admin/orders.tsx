@@ -7,14 +7,19 @@ import { useMemo } from "react";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
 import { DataTable, type DataColumn } from "@/components/admin/data-table";
-import { countTotalPages, listSearchParams, LIST_PAGE_SIZE } from "@/lib/list-search";
+import {
+  countTotalPages,
+  type ListSearch,
+  listSearchParams,
+  LIST_PAGE_SIZE,
+} from "@/lib/list-search";
 import { preloadQueries } from "@/lib/preload";
 import { admin, type AdminOrderRow } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/orders")({
   validateSearch: listSearchParams,
   loaderDeps: ({ search }) => search,
-  loader: preloadQueries((deps) => [admin.queries.orders(Number(deps.page) || 1)]),
+  loader: preloadQueries((deps: ListSearch) => [admin.queries.orders(deps.page)]),
   component: AdminOrdersPage,
 });
 
@@ -22,7 +27,6 @@ const columnHelper = legacyCreateColumnHelper<AdminOrderRow>();
 
 function AdminOrdersPage() {
   const { page } = Route.useSearch();
-  const navigate = Route.useNavigate();
 
   const ordersQuery = useQuery(admin.queries.orders(page));
 
@@ -80,10 +84,6 @@ function AdminOrdersPage() {
     [],
   );
 
-  const handlePageChange = (next: number) => {
-    void navigate({ search: (prev) => ({ ...prev, page: next }), replace: true });
-  };
-
   return (
     <div>
       <AdminHeader
@@ -108,7 +108,7 @@ function AdminOrdersPage() {
         />
       ) : null}
 
-      <Pagination onPageChange={handlePageChange} page={page} totalPages={totalPages} />
+      <Pagination page={page} to="/admin/orders" totalPages={totalPages} />
     </div>
   );
 }

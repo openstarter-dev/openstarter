@@ -17,6 +17,7 @@ import {
 } from "@openstarter/ui-web/components/table";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { Pagination, type PaginationTo } from "@/components/admin/list";
 import { countTotalPages, LIST_PAGE_SIZE } from "@/lib/list-search";
 import { user } from "@/modules/user/lib/api";
 import { m } from "@openstarter/i18n-web/messages";
@@ -38,19 +39,18 @@ function statusVariant(status: string): "secondary" | "outline" {
 }
 
 /**
- * 支付记录列表。分页状态可注入（路由页把 page 提升进 URL）；
- * 未注入时退化为本地 useState（ManageAccountDialog 弹窗内复用，无独立 URL）。
+ * 支付记录列表。路由页传 `page` + `to`，分页渲染为可预取、可后退的链接；
+ * 不传 `to` 时退化为本地 useState（ManageAccountDialog 弹窗内复用，无独立 URL）。
  */
 export function PaymentsPage({
-  onPageChange,
   page: pageProp,
+  to,
 }: {
-  onPageChange?: (page: number) => void;
   page?: number;
+  to?: PaginationTo;
 } = {}) {
   const [localPage, setLocalPage] = useState(1);
   const page = pageProp ?? localPage;
-  const goToPage = onPageChange ?? setLocalPage;
 
   const ordersQuery = useQuery(user.queries.orders(page));
 
@@ -112,7 +112,9 @@ export function PaymentsPage({
           <p className="text-muted-foreground text-sm">{m["settings.payments.no_payments"]()}</p>
         ) : null}
 
-        {totalPages > 1 ? (
+        {to ? (
+          <Pagination page={page} to={to} totalPages={totalPages} />
+        ) : totalPages > 1 ? (
           <div className="flex items-center justify-between">
             <span className="text-muted-foreground text-sm">
               {m["common.table.page_info"]({ current: String(page), total: String(totalPages) })}
@@ -120,7 +122,7 @@ export function PaymentsPage({
             <div className="flex gap-2">
               <Button
                 disabled={page <= 1}
-                onClick={() => goToPage(Math.max(1, page - 1))}
+                onClick={() => setLocalPage(Math.max(1, page - 1))}
                 size="sm"
                 type="button"
                 variant="outline"
@@ -129,7 +131,7 @@ export function PaymentsPage({
               </Button>
               <Button
                 disabled={page >= totalPages}
-                onClick={() => goToPage(Math.min(totalPages, page + 1))}
+                onClick={() => setLocalPage(Math.min(totalPages, page + 1))}
                 size="sm"
                 type="button"
                 variant="outline"

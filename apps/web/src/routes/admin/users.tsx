@@ -9,16 +9,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AdminHeader, Pagination, StatusText } from "@/components/admin/list";
 import { DataTable, type DataColumn } from "@/components/admin/data-table";
-import { countTotalPages, listUsersSearchParams, LIST_PAGE_SIZE } from "@/lib/list-search";
+import {
+  countTotalPages,
+  type ListUsersSearch,
+  listUsersSearchParams,
+  LIST_PAGE_SIZE,
+} from "@/lib/list-search";
 import { preloadQueries } from "@/lib/preload";
 import { admin, type AdminUserRow } from "@/modules/admin/lib/api";
 
 export const Route = createFileRoute("/admin/users")({
   validateSearch: listUsersSearchParams,
   loaderDeps: ({ search }) => search,
-  loader: preloadQueries((deps) => [
-    admin.queries.users(Number(deps.page) || 1, String(deps.q ?? "")),
-  ]),
+  loader: preloadQueries((deps: ListUsersSearch) => [admin.queries.users(deps.page, deps.q)]),
   component: AdminUsersPage,
 });
 
@@ -98,10 +101,6 @@ function AdminUsersPage() {
     [],
   );
 
-  const handlePageChange = (next: number) => {
-    void navigate({ search: (prev) => ({ ...prev, page: next }), replace: true });
-  };
-
   return (
     <div>
       <AdminHeader
@@ -134,7 +133,7 @@ function AdminUsersPage() {
         />
       ) : null}
 
-      <Pagination onPageChange={handlePageChange} page={page} totalPages={totalPages} />
+      <Pagination page={page} to="/admin/users" totalPages={totalPages} />
     </div>
   );
 }

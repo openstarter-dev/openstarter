@@ -19,7 +19,11 @@ import { Route as AdminSettingsRoute } from "./admin/settings";
 import { Route as AdminSubscriptionsRoute } from "./admin/subscriptions";
 import { Route as AdminUsersRoute } from "./admin/users";
 
-const ROUTE_QUERY_KEYS: Record<string, { keys: unknown[][]; route: AnyRoute }> = {
+/** `deps` 与真实 loaderDeps 一致（分页页由 search 校验给出 page，缺省 1）。 */
+const ROUTE_QUERY_KEYS: Record<
+  string,
+  { deps?: Record<string, unknown>; keys: unknown[][]; route: AnyRoute }
+> = {
   "/_app/dashboard": {
     keys: [
       ["dashboard", "stats"],
@@ -36,12 +40,20 @@ const ROUTE_QUERY_KEYS: Record<string, { keys: unknown[][]; route: AnyRoute }> =
     route: BillingRoute,
   },
   "/_app/settings/credits": { keys: [["user", "credits"]], route: CreditsRoute },
-  "/_app/settings/payments": { keys: [["user", "orders", 1]], route: PaymentsRoute },
+  "/_app/settings/payments": {
+    deps: { page: 1 },
+    keys: [["user", "orders", 1]],
+    route: PaymentsRoute,
+  },
   "/_app/settings/tickets": { keys: [["user", "tickets"]], route: TicketsRoute },
   "/_app/settings/sessions": { keys: [["auth", "sessions"]], route: SessionsRoute },
   "/_app/settings/accounts": { keys: [["auth", "accounts"]], route: AccountsRoute },
   "/admin": { keys: [["admin", "metrics"]], route: AdminIndexRoute },
-  "/admin/users": { keys: [["admin", "users", 1, ""]], route: AdminUsersRoute },
+  "/admin/users": {
+    deps: { page: 1, q: "" },
+    keys: [["admin", "users", 1, ""]],
+    route: AdminUsersRoute,
+  },
   "/admin/roles": {
     keys: [
       ["admin", "roles"],
@@ -49,11 +61,23 @@ const ROUTE_QUERY_KEYS: Record<string, { keys: unknown[][]; route: AnyRoute }> =
     ],
     route: AdminRolesRoute,
   },
-  "/admin/orders": { keys: [["admin", "orders", 1]], route: AdminOrdersRoute },
-  "/admin/subscriptions": { keys: [["admin", "subscriptions", 1]], route: AdminSubscriptionsRoute },
-  "/admin/credits": { keys: [["admin", "credits", 1]], route: AdminCreditsRoute },
+  "/admin/orders": { deps: { page: 1 }, keys: [["admin", "orders", 1]], route: AdminOrdersRoute },
+  "/admin/subscriptions": {
+    deps: { page: 1 },
+    keys: [["admin", "subscriptions", 1]],
+    route: AdminSubscriptionsRoute,
+  },
+  "/admin/credits": {
+    deps: { page: 1 },
+    keys: [["admin", "credits", 1]],
+    route: AdminCreditsRoute,
+  },
   "/admin/settings": { keys: [["admin", "config"]], route: AdminSettingsRoute },
-  "/admin/ai-models": { keys: [["admin", "ai-models", 1]], route: AdminAiModelsRoute },
+  "/admin/ai-models": {
+    deps: { page: 1 },
+    keys: [["admin", "ai-models", 1]],
+    route: AdminAiModelsRoute,
+  },
 };
 
 beforeEach(() => {
@@ -73,7 +97,11 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const runLoader = async (route: AnyRoute, queryClient: QueryClient) => {
+const runLoader = async (
+  route: AnyRoute,
+  queryClient: QueryClient,
+  deps?: Record<string, unknown>,
+) => {
   const loader = route.options.loader;
   if (!loader) {
     throw new Error(`${route.fullPath}: missing loader — intent preloading fetches JS only`);
@@ -82,7 +110,7 @@ const runLoader = async (route: AnyRoute, queryClient: QueryClient) => {
     await loader({
       abortController: new AbortController(),
       context: { queryClient },
-      deps: undefined,
+      deps,
       location: {} as never,
       params: {},
       path: route.fullPath,
@@ -97,11 +125,11 @@ const runLoader = async (route: AnyRoute, queryClient: QueryClient) => {
 describe("route loaders (defaultPreload: intent)", () => {
   it.each(Object.entries(ROUTE_QUERY_KEYS))(
     "%s: loader swallows fetch errors and seeds the cache keys the page reads",
-    async (_path, { keys, route }) => {
+    async (_path, { deps, keys, route }) => {
       const queryClient = new QueryClient({
         defaultOptions: { queries: { retry: false, staleTime: 60 * 1000 } },
       });
-      await expect(runLoader(route, queryClient)).resolves.not.toThrow();
+      await expect(runLoader(route, queryClient, deps)).resolves.not.toThrow();
       for (const key of keys) {
         expect(queryClient.getQueryCache().find({ queryKey: key })).toBeDefined();
       }
