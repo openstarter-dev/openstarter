@@ -17,9 +17,25 @@ import {
   passkeyClient,
   twoFactorClient,
 } from "@openstarter/auth/client/web";
+import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
+
 import type { PublicConfig } from "@/modules/public-config/lib/api";
 
+// better-auth 客户端在浏览器里默认同源（baseURL = 当前 origin），无需配置；
+// 只有 SSR 会因相对 URL 无法解析（"Failed to parse URL"）而整页 500，故仅在服务端显式给出地址：
+//  - 读 process.env.VITE_APP_URL（唯一事实源 apps/web/.env）。不能换成 import.meta.env：
+//    那是构建期静态内联，Cloudflare Workers 的 wrangler vars 在运行时才注入，两者会漂移；
+//  - 浏览器端不读该变量：配置值在局域网 IP / 预览域名访问时会指向别的域名（跨域失败），
+//    同源 origin 天然正确。
+// 注：受保护路由的 SSR 会话已改走 functions/session.ts（转发 Cookie 直连 better-auth），
+// 这里的 baseURL 只是防止服务端误用本客户端时的兜底——SSR 下 getSession() 仍拿不到 cookie。
+const serverBaseURL =
+  typeof window === "undefined"
+    ? (process.env.VITE_APP_URL?.trim() || DEFAULT_APP_URL).replace(/\/+$/, "")
+    : undefined;
+
 export const authClient = createAuthClient({
+  ...(serverBaseURL ? { baseURL: serverBaseURL } : {}),
   plugins: [
     passkeyClient(),
     magicLinkClient(),
@@ -62,6 +78,7 @@ export const getOneTapAuthClient = (
   const clientId: string = configs.google_client_id;
   if (!oneTapClientInstance) {
     oneTapClientInstance = createAuthClient({
+      ...(serverBaseURL ? { baseURL: serverBaseURL } : {}),
       plugins: [
         passkeyClient(),
         magicLinkClient(),

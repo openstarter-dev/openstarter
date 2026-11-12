@@ -7,6 +7,11 @@
 // 避免在 SSR 期解析部署 origin/端口；`app` 仅在服务端 handler 内**动态导入**，不进入客户端产物。
 // locale 由 localeMiddleware 依请求解析注入，供组件按当前语言渲染文案（R16.5）。
 //
+// 缓存（进程内 60s TTL，lib/ttl-cache.ts）：已发布文章是低频变更内容，此前每个文档
+// 请求都回源打 DB。CDN 层的 s-maxage（lib/page-cache.ts）过期回源后仍有本层兜底；
+// 新发布/下架文章最迟 TTL 后可见。locale 不入缓存 key——数据载荷与 locale 无关
+// （文案渲染在组件层），locale 由请求上下文即时拼回，中英请求共享同一份数据缓存。
+//
 // 错误语义（sf-error-handling / sf-input-validation）：
 // - 输入经 zod 校验（GET server fn 的数据以字符串形态过 wire，故数值用 coerce）；
 // - 真实故障（5xx / 网络失败 / 信封缺 data）抛出，由路由 error boundary 呈现——
@@ -18,12 +23,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { hc } from "hono/client";
 import { z } from "zod";
 
+import { createTtlCache } from "@/lib/ttl-cache";
 import { localeMiddleware } from "@/middleware/locale";
 
 // 内存 RPC 基址：主机名仅用于构造合法 URL，Hono 依 pathname 路由；请求经 `app.fetch` 就地分派。
 const INTERNAL_RPC_BASE = "http://blog.internal";
 
 const NOT_FOUND_STATUS = 404;
+const BLOG_CACHE_TTL_MS = 60_000;
 
 // 与后端 listQuery（createPaginationSchema(100, 12).extend({category})）对齐的入参约束。
 const blogListInput = z.object({
@@ -62,21 +69,56 @@ function buildListQuery(input: z.infer<typeof blogListInput>): {
   return query;
 }
 
+/** 回源拉取已发布文章列表（不含 locale——locale 由 handler 拼回，不进缓存）。 */
+async function fetchBlogList(input: z.infer<typeof blogListInput>) {
+  const rpc = await createRpc();
+  const res = await rpc.api.blog.$get({ query: buildListQuery(input) });
+  if (!res.ok) {
+    throw new Error(`Blog list request failed (HTTP ${res.status})`);
+  }
+  const json = await res.json();
+  const payload = json.data;
+  if (!payload) {
+    throw new Error("Blog list response missing data");
+  }
+  return { items: payload.items, total: payload.total };
+}
+
+/** 回源拉取单篇文章；不存在/未发布返回 null（404 业务语义）。 */
+async function fetchBlogPost(slug: string) {
+  const rpc = await createRpc();
+  const res = await rpc.api.blog[":slug"].$get({ param: { slug } });
+  if (res.status === NOT_FOUND_STATUS) {
+    return null;
+  }
+  if (!res.ok) {
+    throw new Error(`Blog post request failed (HTTP ${res.status})`);
+  }
+  const json = await res.json();
+  if (!json.data) {
+    throw new Error("Blog post response missing data");
+  }
+  return json.data;
+}
+
+// 404（null）同样缓存：slug 扫描与不存在文章的重复回源都应被挡住。容量上限防穷举撑爆内存。
+const blogListCache = createTtlCache<Awaited<ReturnType<typeof fetchBlogList>>>({
+  maxEntries: 64,
+  ttlMs: BLOG_CACHE_TTL_MS,
+});
+const blogPostCache = createTtlCache<Awaited<ReturnType<typeof fetchBlogPost>>>({
+  maxEntries: 128,
+  ttlMs: BLOG_CACHE_TTL_MS,
+});
+
 /** 已发布博客列表：可选按分类精确筛选、分页；随响应回传当前 locale 与激活分类。 */
 export const getBlogPostsFn = createServerFn({ method: "GET" })
   .middleware([localeMiddleware])
   .validator((input: unknown) => blogListInput.parse(input))
   .handler(async ({ data, context }) => {
-    const rpc = await createRpc();
-    const res = await rpc.api.blog.$get({ query: buildListQuery(data) });
-    if (!res.ok) {
-      throw new Error(`Blog list request failed (HTTP ${res.status})`);
-    }
-    const json = await res.json();
-    const payload = json.data;
-    if (!payload) {
-      throw new Error("Blog list response missing data");
-    }
+    // key 与后端 listQuery 默认值（page=1 / pageSize=12）对齐，避免同一数据多 key。
+    const cacheKey = JSON.stringify([data.category ?? null, data.page ?? 1, data.pageSize ?? 12]);
+    const payload = await blogListCache.wrap(cacheKey, () => fetchBlogList(data));
     return {
       locale: context.locale,
       activeCategory: data.category ?? null,
@@ -90,18 +132,6 @@ export const getBlogPostFn = createServerFn({ method: "GET" })
   .middleware([localeMiddleware])
   .validator((input: unknown) => blogSlugInput.parse(input))
   .handler(async ({ data, context }) => {
-    const rpc = await createRpc();
-    const res = await rpc.api.blog[":slug"].$get({ param: { slug: data.slug } });
-    // 404 是该端点的业务语义（不存在/未发布）→ null 交给路由 notFound()；其余非 2xx 是故障 → 抛。
-    if (res.status === NOT_FOUND_STATUS) {
-      return { locale: context.locale, post: null };
-    }
-    if (!res.ok) {
-      throw new Error(`Blog post request failed (HTTP ${res.status})`);
-    }
-    const json = await res.json();
-    if (!json.data) {
-      throw new Error("Blog post response missing data");
-    }
-    return { locale: context.locale, post: json.data };
+    const post = await blogPostCache.wrap(data.slug, () => fetchBlogPost(data.slug));
+    return { locale: context.locale, post };
   });

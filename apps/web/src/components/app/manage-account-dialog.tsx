@@ -63,7 +63,7 @@ export function ManageAccountDialog({
 
         <div className="flex max-h-[70vh] flex-col gap-6 overflow-hidden md:flex-row">
           <nav
-            aria-label="Account sections"
+            aria-label={m["common.a11y.account_sections"]()}
             className="flex shrink-0 flex-row gap-1 overflow-x-auto md:w-48 md:flex-col md:overflow-y-auto md:overflow-x-visible"
           >
             {SECTIONS.map((section) => {

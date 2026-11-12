@@ -9,6 +9,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { getAnalyticsConfigFn } from "@/functions/analytics";
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
 import { buildPageHead } from "@/lib/page-head";
+import { m } from "@/paraglide/messages.js";
 import { getLocale } from "@/paraglide/runtime.js";
 
 import appCss from "../index.css?url";
@@ -41,7 +42,12 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
     };
   },
   // 读取分析供应商配置（SSR），供 head() 依据其条件注入采集脚本（R25.1/R25.2）。
+  //
+  // staleTime：路由 loader 默认 staleTime=0 —— 父级 match 在每次站内导航时都会被判定为
+  // 过期并后台重跑，等于每次点击都多打一次 server fn。分析配置在服务端另有 30s TTL，
+  // 60s 的新鲜窗口与缓存语义一致；管理员改配置最多延迟 60s 生效。
   loader: () => getAnalyticsConfigFn(),
+  staleTime: 60 * 1000,
 });
 
 function RootDocument() {
@@ -58,7 +64,7 @@ function RootDocument() {
           className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-background focus:px-4 focus:py-2"
           href="#main"
         >
-          Skip to content
+          {m["common.a11y.skip_to_content"]()}
         </a>
         <ThemeProvider>
           <Outlet />

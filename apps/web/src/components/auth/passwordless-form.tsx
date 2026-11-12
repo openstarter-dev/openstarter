@@ -13,16 +13,20 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
+import { m } from "@/paraglide/messages.js";
 
 export type PasswordlessMode = "magic-link" | "email-otp";
 
 interface PasswordlessFormProps {
+  /** 登录成功后的回跳地址（默认 /dashboard）。 */
+  callbackURL?: string;
   emailOtpEnabled: boolean;
   magicLinkEnabled: boolean;
   mode?: PasswordlessMode;
 }
 
 export function PasswordlessForm({
+  callbackURL = "/dashboard",
   magicLinkEnabled,
   emailOtpEnabled,
   mode: selectedMode,
@@ -49,25 +53,25 @@ export function PasswordlessForm({
 
   const handleMagicLink = async () => {
     if (!email) {
-      toast.error("Please enter your email");
+      toast.error(m["common.sign.enter_email"]());
       return;
     }
     setSubmitting(true);
     const { error } = await authClient.signIn.magicLink({
-      callbackURL: "/dashboard",
+      callbackURL,
       email,
     });
     setSubmitting(false);
     if (error) {
-      toast.error(error.message ?? "Magic link failed");
+      toast.error(error.message ?? m["common.sign.magic_link_failed"]());
       return;
     }
-    toast.success("Check your email for the sign-in link");
+    toast.success(m["common.sign.magic_link_sent"]());
   };
 
   const handleEmailOtpRequest = async () => {
     if (!email) {
-      toast.error("Please enter your email");
+      toast.error(m["common.sign.enter_email"]());
       return;
     }
     setSubmitting(true);
@@ -77,37 +81,39 @@ export function PasswordlessForm({
     });
     setSubmitting(false);
     if (error) {
-      toast.error(error.message ?? "OTP request failed");
+      toast.error(error.message ?? m["common.sign.otp_request_failed"]());
       return;
     }
     setOtpInputMode(true);
-    toast.success("A verification code was sent to your email");
+    toast.success(m["common.sign.otp_sent"]());
   };
 
   const handleEmailOtpVerify = async () => {
     if (!otp) {
-      toast.error("Please enter the code");
+      toast.error(m["common.sign.otp_required"]());
       return;
     }
     setSubmitting(true);
     const { error } = await authClient.signIn.emailOtp({
-      callbackURL: "/dashboard",
+      callbackURL,
       email,
       otp,
     });
     setSubmitting(false);
     if (error) {
-      toast.error(error.message ?? "Verification failed");
+      toast.error(error.message ?? m["common.sign.otp_verify_failed"]());
       return;
     }
-    toast.success("Signed in successfully");
+    toast.success(m["common.sign.signed_in"]());
   };
 
   const submitActionLabel = (() => {
     if (submitting) {
-      return "Sending...";
+      return m["common.sign.sending"]();
     }
-    return mode === "magic-link" ? "Send magic link" : "Send code";
+    return mode === "magic-link"
+      ? m["common.sign.send_magic_link"]()
+      : m["common.sign.send_code"]();
   })();
 
   return (
@@ -123,7 +129,9 @@ export function PasswordlessForm({
               type="button"
               variant={mode === modeItem ? "default" : "outline"}
             >
-              {modeItem === "magic-link" ? "Magic link" : "Email code"}
+              {modeItem === "magic-link"
+                ? m["common.sign.magic_link"]()
+                : m["common.sign.email_code"]()}
             </Button>
           ))}
         </div>
@@ -131,7 +139,7 @@ export function PasswordlessForm({
 
       {otpInputMode ? (
         <div className="space-y-2">
-          <Label htmlFor="passwordless-otp">Enter the code sent to {email}</Label>
+          <Label htmlFor="passwordless-otp">{m["common.sign.otp_code_label"]({ email })}</Label>
           <Input
             id="passwordless-otp"
             inputMode="numeric"
@@ -145,7 +153,7 @@ export function PasswordlessForm({
             onClick={handleEmailOtpVerify}
             type="button"
           >
-            {submitting ? "Verifying..." : "Verify"}
+            {submitting ? m["common.sign.verifying"]() : m["common.sign.verify"]()}
           </Button>
           <Button
             className="w-full"
@@ -154,12 +162,12 @@ export function PasswordlessForm({
             type="button"
             variant="link"
           >
-            Back
+            {m["common.sign.back"]()}
           </Button>
         </div>
       ) : (
         <div className="space-y-2">
-          <Label htmlFor="passwordless-email">Email</Label>
+          <Label htmlFor="passwordless-email">{m["common.sign.email_title"]()}</Label>
           <Input
             autoComplete="email"
             id="passwordless-email"

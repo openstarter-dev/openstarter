@@ -43,7 +43,7 @@ function VerifyEmailPage() {
 
   const handleResend = async () => {
     if (!email) {
-      toast.error("Missing email address");
+      toast.error(m["common.sign.verify_email_email_required"]());
       return;
     }
     setSending(true);
@@ -53,10 +53,10 @@ function VerifyEmailPage() {
         email,
       });
       if (result.error) {
-        toast.error(result.error.message || "Failed to send verification email");
+        toast.error(result.error.message || m["common.sign.verify_email_send_failed"]());
         return;
       }
-      toast.success("Verification email sent");
+      toast.success(m["common.sign.verification_email_sent"]());
     } finally {
       setSending(false);
     }
@@ -70,7 +70,7 @@ function VerifyEmailPage() {
         navigate({ to: "/dashboard" });
         return;
       }
-      toast.error("Email not verified yet. Check your inbox.");
+      toast.error(m["common.sign.verify_email_not_verified_yet"]());
     } finally {
       setChecking(false);
     }
@@ -79,10 +79,11 @@ function VerifyEmailPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Verify your email</CardTitle>
+        <CardTitle>{m["common.sign.verify_email_page_title"]()}</CardTitle>
         <CardDescription>
-          We sent a verification link{email ? ` to ${email}` : ""}. Click it to activate your
-          account.
+          {email
+            ? m["common.sign.verify_email_sent_to"]({ email })
+            : m["common.sign.verify_email_sent_generic"]()}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -92,25 +93,25 @@ function VerifyEmailPage() {
             disabled={sending}
             onClick={() => {
               handleResend().catch(() => {
-                toast.error("Failed to send verification email");
+                toast.error(m["common.sign.verify_email_send_failed"]());
               });
             }}
             type="button"
             variant="outline"
           >
-            {sending ? "Sending..." : "Resend verification email"}
+            {sending ? m["common.sign.sending"]() : m["common.sign.resend_verification"]()}
           </Button>
           <Button
             className="w-full"
             disabled={checking}
             onClick={() => {
               handleContinue().catch(() => {
-                toast.error("Failed to check verification status");
+                toast.error(m["common.sign.verify_email_check_failed"]());
               });
             }}
             type="button"
           >
-            {checking ? "Checking..." : "I've verified, continue"}
+            {checking ? m["common.sign.checking"]() : m["common.sign.verify_email_continue"]()}
           </Button>
         </div>
       </CardContent>
@@ -119,7 +120,7 @@ function VerifyEmailPage() {
           className="w-full text-center text-muted-foreground text-xs underline underline-offset-4"
           to="/login"
         >
-          Back to sign in
+          {m["common.sign.back_to_sign_in"]()}
         </Link>
       </CardFooter>
     </Card>

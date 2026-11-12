@@ -61,14 +61,17 @@ export const ADMIN_NAV: AdminNavGroup[] = [
 const ALL_ADMIN_PERMISSIONS = ADMIN_NAV.flatMap((g) => g.items.map((item) => item.permission));
 
 export const Route = createFileRoute("/admin")({
-  beforeLoad: async ({ context: { queryClient } }) => {
+  // 同 _app：beforeLoad 默认每次导航重跑（含一次 get-session）。60s 内复用守卫结果；
+  // permissions 由 Query 缓存（5min staleTime）另行兜底。
+  staleTime: 60 * 1000,
+  beforeLoad: async ({ context: { queryClient }, location }) => {
     const [session, permissions] = await Promise.all([
       authClient.getSession(),
       queryClient.ensureQueryData(user.queries.permissions()).catch(() => [] as string[]),
     ]);
 
     if (!session.data) {
-      throw redirect({ to: "/login" });
+      throw redirect({ search: { redirect: location.href }, to: "/login" });
     }
 
     if (!matchAnyPermission(ALL_ADMIN_PERMISSIONS, permissions)) {

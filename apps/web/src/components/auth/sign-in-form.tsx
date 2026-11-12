@@ -21,7 +21,14 @@ import { PasswordlessForm, type PasswordlessMode } from "./passwordless-form";
 
 type SignInMode = "password" | PasswordlessMode;
 
-export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => void }) {
+export default function SignInForm({
+  onSwitchToSignUp,
+  redirectTo = "/dashboard",
+}: {
+  onSwitchToSignUp: () => void;
+  /** 登录成功后的目标地址（由 /login?redirect= 校验后下发）。 */
+  redirectTo?: string;
+}) {
   const navigate = useNavigate({ from: "/" });
   const { isPending } = authClient.useSession();
 
@@ -66,8 +73,8 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
             toast.error(error.error.message || error.error.statusText);
           },
           onSuccess: () => {
-            navigate({ to: "/dashboard" });
-            toast.success("Sign in successful");
+            // 整页跳转：目标可能是任意站内路径（含查询串），同时让 auth store 以新会话重载。
+            window.location.assign(redirectTo);
           },
         },
       );
@@ -92,6 +99,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         <div className="mb-4">
           <OAuthButtons
             appleEnabled={appleEnabled}
+            callbackURL={redirectTo}
             githubEnabled={githubEnabled}
             googleEnabled={googleEnabled}
           />
@@ -99,7 +107,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
       )}
 
       <div className="mb-4">
-        <PasskeyButton />
+        <PasskeyButton callbackURL={redirectTo} />
       </div>
 
       {hasSocial && signInModes.length > 0 ? (
@@ -207,6 +215,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
 
           <TabsContent className="mt-4" value="magic-link">
             <PasswordlessForm
+              callbackURL={redirectTo}
               emailOtpEnabled={emailOtpEnabled}
               magicLinkEnabled={magicLinkEnabled}
               mode="magic-link"
@@ -215,6 +224,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
 
           <TabsContent className="mt-4" value="email-otp">
             <PasswordlessForm
+              callbackURL={redirectTo}
               emailOtpEnabled={emailOtpEnabled}
               magicLinkEnabled={magicLinkEnabled}
               mode="email-otp"

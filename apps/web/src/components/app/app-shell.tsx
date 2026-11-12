@@ -4,7 +4,7 @@
 // sidebar_state cookie so hydration restores the last choice.
 
 import { SidebarInset, SidebarProvider } from "@openstarter/ui-web/components/sidebar";
-import { Outlet } from "@tanstack/react-router";
+import { Outlet, useRouteContext } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { AppHeader } from "@/components/app/app-header";
@@ -23,6 +23,8 @@ function readSidebarCookie(): boolean {
 
 export function AppShell({ children }: { children?: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  // `_app` 守卫已校验并把会话放进路由上下文：作为侧栏首帧数据，避免 SSR 出骨架。
+  const { session } = useRouteContext({ from: "/_app" });
 
   useEffect(() => {
     setSidebarOpen(readSidebarCookie());
@@ -30,7 +32,7 @@ export function AppShell({ children }: { children?: ReactNode }) {
 
   return (
     <SidebarProvider defaultOpen={sidebarOpen}>
-      <AppSidebar />
+      <AppSidebar initialSession={session?.data ?? null} />
       <SidebarInset>
         <AppHeader>{children}</AppHeader>
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden p-6">

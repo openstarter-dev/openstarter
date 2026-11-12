@@ -20,7 +20,14 @@ import { PasswordlessForm, type PasswordlessMode } from "./passwordless-form";
 
 type SignUpMode = "password" | PasswordlessMode;
 
-export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) {
+export default function SignUpForm({
+  onSwitchToSignIn,
+  redirectTo = "/dashboard",
+}: {
+  onSwitchToSignIn: () => void;
+  /** 注册成功后的目标地址（由 /login?redirect= 校验后下发）。 */
+  redirectTo?: string;
+}) {
   const navigate = useNavigate({ from: "/" });
   const { isPending } = authClient.useSession();
 
@@ -66,9 +73,9 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
               toast.success("Check your email to verify your account");
               return;
             }
-            navigate({ to: "/dashboard" });
-            toast.success("Sign up successful");
             void bindReferralAfterSignup();
+            // 整页跳转：目标可能是任意站内路径（含查询串）。
+            window.location.assign(redirectTo);
           },
         },
       );
@@ -94,6 +101,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         <div className="mb-4">
           <OAuthButtons
             appleEnabled={appleEnabled}
+            callbackURL={redirectTo}
             githubEnabled={githubEnabled}
             googleEnabled={googleEnabled}
           />
@@ -214,6 +222,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
 
           <TabsContent className="mt-4" value="magic-link">
             <PasswordlessForm
+              callbackURL={redirectTo}
               emailOtpEnabled={emailOtpEnabled}
               magicLinkEnabled={magicLinkEnabled}
               mode="magic-link"
@@ -222,6 +231,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
 
           <TabsContent className="mt-4" value="email-otp">
             <PasswordlessForm
+              callbackURL={redirectTo}
               emailOtpEnabled={emailOtpEnabled}
               magicLinkEnabled={magicLinkEnabled}
               mode="email-otp"

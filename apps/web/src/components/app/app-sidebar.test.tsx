@@ -38,6 +38,8 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
   Outlet: () => <div data-testid="outlet" />,
+  // AppShell 从 _app 守卫的路由上下文取会话作为侧栏首帧数据；测试里交给 useSession 桩。
+  useRouteContext: () => ({ session: null }),
   useNavigate: () => vi.fn(),
   useRouterState: (opts?: { select?: (s: unknown) => unknown }) => {
     const state = { location: { pathname: routerState.pathname } };

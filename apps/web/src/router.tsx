@@ -39,7 +39,22 @@ function createQueryClient() {
     }),
     // staleTime: 窗口聚焦仅重拉已过期数据（staleTime 内命中缓存）。refetchOnWindowFocus
     // 显式关闭:避免切回标签页时对已展示数据的无谓重拉,结合 staleTime 行为更可预期。
-    defaultOptions: { queries: { staleTime: 60 * 1000, refetchOnWindowFocus: false } },
+    defaultOptions: {
+      queries: {
+        // 默认 3 次指数退避（1s/2s/4s，≈7s）期间页面一直转圈，且 4xx 也被无意义重试。
+        // 携带 status 的 4xx 直接失败；其余（网络错误 / 5xx）最多重试 1 次。
+        retry: (failureCount, error) => {
+          const status = (error as { status?: unknown }).status;
+          if (typeof status === "number" && status >= 400 && status < 500) {
+            return false;
+          }
+          return failureCount < 1;
+        },
+        retryDelay: 500,
+        staleTime: 60 * 1000,
+        refetchOnWindowFocus: false,
+      },
+    },
   });
 }
 
@@ -64,6 +79,10 @@ export const getRouter = () => {
       output: ({ url }) => localizeUrl(url),
     },
     defaultPendingComponent: () => <Loader />,
+    // 默认 1000ms 才显示 pending：客户端专属路由（admin、settings 等）在慢网络下
+    // 会白屏近 1 秒。200ms 起步 + 至少停留 300ms，兼顾「早反馈」与「不闪一下」。
+    defaultPendingMs: 200,
+    defaultPendingMinMs: 300,
     defaultNotFoundComponent: () => <NotFound />,
     defaultErrorComponent: ({ error }) => <ErrorPage error={error} />,
     Wrap: ({ children }) => (

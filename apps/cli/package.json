@@ -17,8 +17,7 @@
   },
   "dependencies": {
     "commander": "^12.0.0",
-    "conf": "^13.0.0",
-    "hono": "catalog:"
+    "conf": "^13.0.0"
   },
   "devDependencies": {
     "@types/node": "catalog:",

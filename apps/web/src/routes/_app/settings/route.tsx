@@ -29,7 +29,7 @@ function SettingsLayout() {
 
       <div className="flex flex-col gap-6 md:flex-row">
         <nav
-          aria-label="Settings sections"
+          aria-label={m["common.a11y.settings_sections"]()}
           className="flex shrink-0 flex-row gap-1 overflow-x-auto md:w-48 md:flex-col md:overflow-visible"
         >
           {NAV_ITEMS.map((item) => (

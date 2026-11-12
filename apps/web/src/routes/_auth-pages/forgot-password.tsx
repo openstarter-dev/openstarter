@@ -42,7 +42,7 @@ function ForgotPasswordPage() {
         redirectTo,
       });
       if (result.error) {
-        setError(result.error.message || "Request failed");
+        setError(result.error.message || m["common.sign.password_reset_request_failed"]());
         return;
       }
       // 账户枚举防护（R6.6）：无论邮箱是否存在均展示一致的通用结果。
@@ -53,22 +53,26 @@ function ForgotPasswordPage() {
     },
   });
 
+  const submittedEmail = form.state.values.email;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{sent ? "Check your email" : "Forgot password"}</CardTitle>
-        {!sent && (
-          <CardDescription>Enter your email and we'll send you a reset link.</CardDescription>
-        )}
+        <CardTitle>
+          {sent
+            ? m["common.sign.reset_link_sent_title"]()
+            : m["common.sign.forgot_password_title"]()}
+        </CardTitle>
+        {!sent && <CardDescription>{m["common.sign.forgot_password_description"]()}</CardDescription>}
       </CardHeader>
       <CardContent>
         {sent ? (
           <div className="space-y-4">
             <p className="text-muted-foreground text-sm">
-              If an account exists for that email, a password reset link is on its way.
+              {m["common.sign.reset_link_sent_description"]({ email: submittedEmail })}
             </p>
             <Link className="block text-center text-sm underline underline-offset-4" to="/login">
-              Back to sign in
+              {m["common.sign.back_to_sign_in"]()}
             </Link>
           </div>
         ) : (
@@ -88,7 +92,7 @@ function ForgotPasswordPage() {
             <form.Field name="email">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name}>Email</Label>
+                  <Label htmlFor={field.name}>{m["common.sign.email_title"]()}</Label>
                   <Input
                     id={field.name}
                     name={field.name}
@@ -108,12 +112,12 @@ function ForgotPasswordPage() {
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
                 <Button className="w-full" disabled={isSubmitting} type="submit">
-                  {isSubmitting ? "Sending..." : "Send reset link"}
+                  {isSubmitting ? m["common.sign.sending"]() : m["common.sign.send_reset_link"]()}
                 </Button>
               )}
             </form.Subscribe>
             <Link className="block text-center text-sm underline underline-offset-4" to="/login">
-              Back to sign in
+              {m["common.sign.back_to_sign_in"]()}
             </Link>
           </form>
         )}

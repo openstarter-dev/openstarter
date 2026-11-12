@@ -33,6 +33,7 @@ export const Route = createFileRoute("/_auth-pages/reset-password")({
   }),
 });
 
+// 校验消息在模块作用域求值（locale 在请求期内固定），故保持字面量。
 const resetSchema = z
   .object({
     confirmPassword: z.string().min(8),
@@ -53,7 +54,7 @@ function ResetPasswordPage() {
     onSubmit: async ({ value }) => {
       setError("");
       if (!token) {
-        setError("Missing or invalid reset token");
+        setError(m["common.sign.reset_password_missing_token"]());
         return;
       }
       const result = await authClient.resetPassword({
@@ -61,10 +62,10 @@ function ResetPasswordPage() {
         token,
       });
       if (result.error) {
-        setError(result.error.message || "Reset failed");
+        setError(result.error.message || m["common.sign.reset_password_failed"]());
         return;
       }
-      toast.success("Password updated. Please sign in.");
+      toast.success(m["common.sign.reset_password_success"]());
       navigate({ to: "/login" });
     },
     validators: { onSubmit: resetSchema },
@@ -76,20 +77,22 @@ function ResetPasswordPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reset password</CardTitle>
-        {!tokenInvalid && <CardDescription>Choose a new password.</CardDescription>}
+        <CardTitle>{m["common.sign.reset_password_title"]()}</CardTitle>
+        {!tokenInvalid && (
+          <CardDescription>{m["common.sign.reset_password_description"]()}</CardDescription>
+        )}
       </CardHeader>
       <CardContent>
         {tokenInvalid ? (
           <div className="space-y-4">
             <div className="rounded-md bg-destructive/10 p-3 text-center text-destructive text-sm">
-              This reset link is invalid or has expired.
+              {m["common.sign.reset_password_invalid_token"]()}
             </div>
             <Link
               className="block text-center text-sm underline underline-offset-4"
               to="/forgot-password"
             >
-              Request a new link
+              {m["common.sign.request_new_link"]()}
             </Link>
           </div>
         ) : (
@@ -109,7 +112,7 @@ function ResetPasswordPage() {
             <form.Field name="password">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name}>New password</Label>
+                  <Label htmlFor={field.name}>{m["common.sign.new_password_title"]()}</Label>
                   <Input
                     id={field.name}
                     name={field.name}
@@ -129,7 +132,9 @@ function ResetPasswordPage() {
             <form.Field name="confirmPassword">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name}>Confirm new password</Label>
+                  <Label htmlFor={field.name}>
+                    {m["common.sign.confirm_new_password_title"]()}
+                  </Label>
                   <Input
                     id={field.name}
                     name={field.name}
@@ -149,7 +154,9 @@ function ResetPasswordPage() {
             <form.Subscribe selector={(state) => state.isSubmitting}>
               {(isSubmitting) => (
                 <Button className="w-full" disabled={isSubmitting} type="submit">
-                  {isSubmitting ? "Updating..." : "Update password"}
+                  {isSubmitting
+                    ? m["common.sign.updating"]()
+                    : m["common.sign.reset_password_submit"]()}
                 </Button>
               )}
             </form.Subscribe>

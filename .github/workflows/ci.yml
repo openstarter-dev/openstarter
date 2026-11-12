@@ -32,6 +32,8 @@ jobs:
         run: |
           pnpm format:check
           pnpm lint
+      - name: Check package boundaries
+        run: pnpm turbo boundaries
 
   test:
     runs-on: ubuntu-latest
@@ -40,8 +42,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # --affected needs the base commit for comparison
-          fetch-depth: 2
+          # --affected diffs against the base branch and needs the merge base,
+          # which a shallow clone usually lacks.
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -58,7 +61,7 @@ jobs:
       # Coverage in a single pass — test and test:coverage run the same suites,
       # so running both would execute every test twice.
       - name: Run tests with coverage
-        run: pnpm with-env turbo run test:coverage ${{ github.event_name == 'pull_request' && '--affected' || '' }}
+        run: pnpm turbo run test:coverage ${{ github.event_name == 'pull_request' && '--affected' || '' }}
 
   typecheck:
     runs-on: ubuntu-latest
@@ -67,7 +70,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          # --affected diffs against the base branch and needs the merge base,
+          # which a shallow clone usually lacks.
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -82,7 +87,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Check types
-        run: pnpm with-env turbo run check-types ${{ github.event_name == 'pull_request' && '--affected' || '' }}
+        run: pnpm turbo run check-types ${{ github.event_name == 'pull_request' && '--affected' || '' }}
 
   build:
     runs-on: ubuntu-latest
@@ -91,7 +96,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          # --affected diffs against the base branch and needs the merge base,
+          # which a shallow clone usually lacks.
+          fetch-depth: 0
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -106,7 +113,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build Node target
-        run: pnpm with-env turbo run build ${{ github.event_name == 'pull_request' && '--affected' || '' }}
+        run: pnpm turbo run build ${{ github.event_name == 'pull_request' && '--affected' || '' }}
       - name: Build Cloudflare target
         if: github.event_name == 'push'
-        run: pnpm --filter web cf:build
+        run: pnpm turbo run cf:build --filter=web

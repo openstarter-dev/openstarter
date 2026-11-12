@@ -1,14 +1,42 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "ui": "tui",
+  // Local cache hygiene: evict at the start of a run instead of growing forever.
+  "cacheMaxAge": "7d",
+  "cacheMaxSize": "10GB",
   "tasks": {
     "transit": {
       "dependsOn": ["^transit"]
     },
     "build": {
       "dependsOn": ["^build", "transit"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": ["dist/**", "src/routeTree.gen.ts", ".output/**"]
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": ["dist/**", "src/routeTree.gen.ts", ".output/**", "**/*.tsbuildinfo"]
+    },
+    "cf:build": {
+      "dependsOn": ["^build", "transit"],
+      // wrangler.jsonc is git-ignored, so it is not part of $TURBO_DEFAULT$.
+      "inputs": ["$TURBO_DEFAULT$", "wrangler.jsonc"],
+      "outputs": [".output/**"]
+    },
+    "cf:deploy": {
+      // The script already runs `cf:build` itself, so no dependsOn here.
+      "cache": false
+    },
+    "zip": {
+      "dependsOn": ["build"],
+      "outputs": [".output/**"]
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "serve": {
+      "cache": false,
+      "persistent": true
+    },
+    "generate:routes": {
+      "cache": false
     },
     "check-types": {
       "dependsOn": ["transit"]
@@ -36,6 +64,9 @@
       "cache": false,
       "persistent": true
     },
+    "db:setup": {
+      "cache": false
+    },
     "db:push": {
       "cache": false
     },
@@ -52,6 +83,19 @@
     "db:local": {
       "cache": false
     },
+    "db:generate:prod": {
+      "cache": false
+    },
+    "db:push:prod": {
+      "cache": false
+    },
+    "db:migrate:prod": {
+      "cache": false
+    },
+    "db:studio:prod": {
+      "cache": false,
+      "persistent": true
+    },
     "seed:admin": {
       "cache": false
     },
@@ -64,6 +108,9 @@
       "cache": false
     }
   },
+  // apps/web/.env is the single env source. Hashing it into every task means a
+  // local .env never shares a cache key with CI (which only has the tracked
+  // examples) — acceptable while caching is local + GitHub Actions only.
   "globalDependencies": ["apps/web/.env*"],
   "globalEnv": [
     "DATABASE_URL",
@@ -71,8 +118,12 @@
     "DATABASE_AUTH_TOKEN",
     "PRODUCT_NAME",
     "VITE_APP_URL",
+    "VITE_GOOGLE_CLIENT_ID",
+    "VITE_GITHUB_ENABLED",
+    "VITE_APPLE_ENABLED",
     "DEFAULT_LOCALE",
-    "OPENSTARTER_API_URL"
+    "OPENSTARTER_API_URL",
+    "NITRO_PRESET"
   ],
   "boundaries": {
     "tags": {

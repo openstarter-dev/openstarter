@@ -20,13 +20,13 @@
     /* Linting */
     "skipLibCheck": true,
     "strict": true,
+    "verbatimModuleSyntax": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "@openstarter/ui-web/*": ["../../packages/ui/ui-web/src/*"]
+      "@/*": ["./src/*"]
     }
   }
 }

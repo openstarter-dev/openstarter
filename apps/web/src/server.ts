@@ -10,7 +10,9 @@
 
 import handler from "@tanstack/react-start/server-entry";
 
+import { applyPageCacheHeaders } from "@/lib/page-cache";
 import { paraglideMiddleware } from "@/paraglide/server.js";
+import { deLocalizeUrl } from "@/paraglide/runtime.js";
 
 // Cloudflare Workers binding injection — `@openstarter/db/server` reads the D1
 // (and optional Hyperdrive) binding from `globalThis.__CF_ENV__` (see
@@ -43,6 +45,11 @@ function ensureCloudflareEnv(): Promise<void> {
 export default {
   async fetch(request: Request): Promise<Response> {
     await ensureCloudflareEnv();
-    return paraglideMiddleware(request, () => handler.fetch(request));
+    const response = await paraglideMiddleware(request, () => handler.fetch(request));
+    // 静态内容页（营销/博客，含 /zh 前缀变体）的 SSR HTML 无用户态，补共享缓存头
+    // （s-maxage + SWR，见 lib/page-cache.ts）；其余路由守卫不满足、响应原样透传。
+    // pathname 先经 deLocalizeUrl 归一化（剥 locale 前缀）再匹配策略。
+    const canonicalPath = deLocalizeUrl(new URL(request.url)).pathname;
+    return applyPageCacheHeaders(canonicalPath, request.method, response);
   },
 };

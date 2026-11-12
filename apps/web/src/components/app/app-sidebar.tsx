@@ -123,10 +123,18 @@ function LanguageMenuItem() {
   );
 }
 
-export function AppSidebar() {
+interface SessionUserSummary {
+  user: { email: string; name: string };
+}
+
+export function AppSidebar({ initialSession }: { initialSession?: SessionUserSummary | null }) {
   const navigate = useNavigate();
   const [manageOpen, setManageOpen] = useState(false);
   const { data: session, isPending } = authClient.useSession();
+  // `_app` 的 beforeLoad 在 SSR 阶段已拿到会话，但 better-auth 的 useSession store 首帧
+  // 恒为 pending（且挂载后会自行再拉一次），直接渲染会先出骨架再跳成用户名。
+  // 用路由上下文兜首帧；store 解析后自动接管，保留改资料 / 登出的响应性。
+  const activeSession = session ?? initialSession ?? null;
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -168,9 +176,7 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            {isPending ? (
-              <Skeleton className="h-10 w-full" />
-            ) : session ? (
+            {activeSession ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton size="lg">
@@ -178,9 +184,9 @@ export function AppSidebar() {
                       <User aria-hidden="true" className="size-4" />
                     </span>
                     <span className="flex min-w-0 flex-col items-start">
-                      <span className="truncate font-medium text-sm">{session.user.name}</span>
+                      <span className="truncate font-medium text-sm">{activeSession.user.name}</span>
                       <span className="truncate text-muted-foreground text-xs">
-                        {session.user.email}
+                        {activeSession.user.email}
                       </span>
                     </span>
                   </SidebarMenuButton>
@@ -212,6 +218,8 @@ export function AppSidebar() {
                 </DropdownMenuContent>
                 <ManageAccountDialog onOpenChange={setManageOpen} open={manageOpen} />
               </DropdownMenu>
+            ) : isPending ? (
+              <Skeleton className="h-10 w-full" />
             ) : null}
           </SidebarMenuItem>
         </SidebarMenu>
