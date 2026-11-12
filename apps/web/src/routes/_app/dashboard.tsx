@@ -4,6 +4,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle } from "lucide-react";
 
+import { buildPageTitle } from "@/lib/page-head";
 import { CreditActivityChart } from "@/modules/dashboard/components/credit-activity-chart";
 import { RecentOrdersCard } from "@/modules/dashboard/components/recent-orders-card";
 import { StatsCards } from "@/modules/dashboard/components/stats-cards";
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/_app/dashboard")({
       queryClient.prefetchQuery(dashboard.queries.stats()),
       queryClient.prefetchQuery(user.queries.orders(1)),
     ]),
+  head: () => buildPageTitle(m["dashboard.title"]()),
   component: DashboardPage,
 });
 

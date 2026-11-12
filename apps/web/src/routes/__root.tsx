@@ -9,8 +9,7 @@ import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { getAnalyticsConfigFn } from "@/functions/analytics";
-import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
-import { buildPageHead } from "@/lib/page-head";
+import { BRAND_NAME } from "@/lib/branding";
 
 import appCss from "../index.css?url";
 
@@ -22,22 +21,17 @@ const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var m=
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootDocument,
-  head: ({ loaderData }) => {
-    const pageHead = buildPageHead({
-      title: BRAND_NAME,
-      description: BRAND_DESCRIPTION,
-      path: "/",
-    });
-    return {
-      meta: [
-        { charSet: "utf-8" },
-        { content: "width=device-width, initial-scale=1", name: "viewport" },
-        ...pageHead.meta,
-      ],
-      links: [{ href: appCss, rel: "stylesheet" }, ...pageHead.links],
-      scripts: buildAnalyticsHeadScripts(loaderData),
-    };
-  },
+  // 只保留全站必需项与兜底标题：canonical / hreflang / og:url 由各页面自己的 head 声明，
+  // 避免 root 的链接与页面链接同时输出（重复 canonical 会让整组失效）。
+  head: ({ loaderData }) => ({
+    meta: [
+      { charSet: "utf-8" },
+      { content: "width=device-width, initial-scale=1", name: "viewport" },
+      { title: BRAND_NAME },
+    ],
+    links: [{ href: appCss, rel: "stylesheet" }],
+    scripts: buildAnalyticsHeadScripts(loaderData),
+  }),
   loader: () => getAnalyticsConfigFn(),
   staleTime: 60 * 1000,
 });

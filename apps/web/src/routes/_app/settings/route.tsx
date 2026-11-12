@@ -2,7 +2,10 @@ import { m } from "@openstarter/i18n-web/messages";
 import { cn } from "@openstarter/ui-web/lib/utils";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 
+import { buildPageTitle } from "@/lib/page-head";
+
 export const Route = createFileRoute("/_app/settings")({
+  head: () => buildPageTitle(m["settings.title"]()),
   component: SettingsLayout,
 });
 

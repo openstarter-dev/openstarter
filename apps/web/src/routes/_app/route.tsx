@@ -13,6 +13,8 @@ export const Route = createFileRoute("/_app")({
     return { session };
   },
   headers: () => ({ "Cache-Control": "private, no-store" }),
+  // 登录后页面不参与索引（含未单独声明 head 的子页）。
+  head: () => ({ meta: [{ content: "noindex, nofollow", name: "robots" }] }),
   component: AppLayout,
 });
 

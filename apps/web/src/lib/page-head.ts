@@ -52,9 +52,22 @@ function ogLocaleTag(locale: SupportedLocale): string {
   return OG_LOCALE_TAGS[locale] ?? locale.replace("-", "_");
 }
 
+function formatTitle(title: string): string {
+  return title === BRAND_NAME ? BRAND_NAME : `${title} | ${BRAND_NAME}`;
+}
+
+/**
+ * 仅标题的 head（登录后私有页用）。
+ * 私有页不声明 canonical/hreflang（这些只属于可索引的公开页），
+ * noindex 由 `_app` / `admin` 布局统一注入。
+ */
+export function buildPageTitle(title: string): Pick<PageHead, "meta"> {
+  return { meta: [{ title: formatTitle(title) }] };
+}
+
 export function buildPageHead(input: PageHeadInput): PageHead {
   const locale = input.locale ?? getLocale();
-  const fullTitle = input.title === BRAND_NAME ? BRAND_NAME : `${input.title} | ${BRAND_NAME}`;
+  const fullTitle = formatTitle(input.title);
   const description = input.description ?? BRAND_DESCRIPTION;
   const url = urlForLocale(input.path, locale);
   const image = input.image ? absolutizeUrl(input.image) : undefined;
