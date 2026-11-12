@@ -1,15 +1,12 @@
 import { zValidator } from "@hono/zod-validator";
 import { getUserPermissionCodes, getUserPlan } from "@openstarter/auth";
-import { user as userTable } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
 import { respData, respErr, respPage } from "@openstarter/shared";
-import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 
 import { requireAuth } from "../../middleware/auth";
 import { paginationSchema } from "../../schema";
 import { creditsQuery, updateProfileSchema } from "../../schema/user";
-import { listUserOrders, getDashboardStats } from "./index";
+import { getDashboardStats, getUserProfile, listUserOrders, updateUserProfile } from "./index";
 import {
   getBalance,
   getCurrentSubscription,
@@ -18,34 +15,8 @@ import {
 } from "@openstarter/billing-web";
 import { getPaymentManager } from "@openstarter/billing-web/payment";
 
-/** 客户端可见的用户资料投影：仅暴露非敏感字段。 */
-interface ProfileView {
-  createdAt: Date | null;
-  email: string;
-  id: string;
-  name: string;
-}
-
-const selectFields = {
-  createdAt: userTable.createdAt,
-  email: userTable.email,
-  id: userTable.id,
-  name: userTable.name,
-} as const;
-
-function toView(row: {
-  createdAt: Date | null;
-  email: string;
-  id: string;
-  name: string | null;
-}): ProfileView {
-  return {
-    createdAt: row.createdAt,
-    email: row.email,
-    id: row.id,
-    name: row.name ?? "",
-  };
-}
+const NOT_FOUND_STATUS = 404;
+const UNPROCESSABLE_STATUS = 422;
 
 export const userRouter = new Hono()
   // 当前用户的平台级权限码集合
@@ -91,38 +62,24 @@ export const userRouter = new Hono()
   })
   // 获取当前用户资料
   .get("/profile", requireAuth, async (c) => {
-    const userId = c.get("userId");
-    const row = await db()
-      .select(selectFields)
-      .from(userTable)
-      .where(eq(userTable.id, userId))
-      .limit(1)
-      .then((rows) => rows[0]);
-
-    if (!row) {
-      return c.json(respErr("user not found"), 404);
+    const profile = await getUserProfile(c.get("userId"));
+    if (!profile) {
+      return c.json(respErr("user not found"), NOT_FOUND_STATUS);
     }
-    return c.json(respData(toView(row)));
+    return c.json(respData(profile));
   })
   // 更新当前用户资料
   .patch("/profile", requireAuth, zValidator("json", updateProfileSchema), async (c) => {
     const { name } = c.req.valid("json");
     if (name === undefined) {
-      return c.json(respErr("no updatable fields provided"), 422);
+      return c.json(respErr("no updatable fields provided"), UNPROCESSABLE_STATUS);
     }
-    const userId = c.get("userId");
 
-    const updated = await db()
-      .update(userTable)
-      .set({ name })
-      .where(eq(userTable.id, userId))
-      .returning(selectFields)
-      .then((rows) => rows[0]);
-
-    if (!updated) {
-      return c.json(respErr("user not found"), 404);
+    const profile = await updateUserProfile(c.get("userId"), { name });
+    if (!profile) {
+      return c.json(respErr("user not found"), NOT_FOUND_STATUS);
     }
-    return c.json(respData(toView(updated)));
+    return c.json(respData(profile));
   })
   // 获取计费 portal URL
   .post("/user/billing-portal", requireAuth, async (c) => {

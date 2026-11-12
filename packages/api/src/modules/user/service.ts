@@ -11,11 +11,67 @@
 // `userId` 为范围，天然隔离他人数据（R27：仅本人自助数据）。
 
 import { CreditStatus, CreditTransactionType } from "@openstarter/billing-web/credits";
-import { apikey, credit, order } from "@openstarter/db/schema";
+import { apikey, credit, order, user as userTable } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { and, count, desc, eq, gte, isNull, sql } from "drizzle-orm";
 
 export type UserOrder = typeof order.$inferSelect;
+
+// ─── 用户资料（Profile） ──────────────────────────────────────────────────────
+
+/** 客户端可见的用户资料投影：仅暴露非敏感字段。 */
+export interface UserProfile {
+  createdAt: Date | null;
+  email: string;
+  id: string;
+  name: string;
+}
+
+const profileSelect = {
+  createdAt: userTable.createdAt,
+  email: userTable.email,
+  id: userTable.id,
+  name: userTable.name,
+} as const;
+
+function toProfileView(row: {
+  createdAt: Date | null;
+  email: string;
+  id: string;
+  name: string | null;
+}): UserProfile {
+  return {
+    createdAt: row.createdAt,
+    email: row.email,
+    id: row.id,
+    name: row.name ?? "",
+  };
+}
+
+/** 读取当前用户资料；用户不存在返回 null（由路由映射 404）。 */
+export async function getUserProfile(userId: string): Promise<UserProfile | null> {
+  const row = await db()
+    .select(profileSelect)
+    .from(userTable)
+    .where(eq(userTable.id, userId))
+    .limit(1)
+    .then((rows) => rows[0]);
+  return row ? toProfileView(row) : null;
+}
+
+/** 更新当前用户资料；用户不存在返回 null（由路由映射 404）。 */
+export async function updateUserProfile(
+  userId: string,
+  input: { name: string },
+): Promise<UserProfile | null> {
+  const updated = await db()
+    .update(userTable)
+    .set({ name: input.name })
+    .where(eq(userTable.id, userId))
+    .returning(profileSelect)
+    .then((rows) => rows[0]);
+  return updated ? toProfileView(updated) : null;
+}
 
 /** 仪表盘趋势桶：某一天的授予 / 消耗积分合计。 */
 export interface DashboardTrendPoint {
