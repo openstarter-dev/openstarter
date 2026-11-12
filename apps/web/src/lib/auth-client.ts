@@ -10,6 +10,7 @@ import {
   passkeyClient,
   twoFactorClient,
 } from "@openstarter/auth/client/web";
+import { localizeUrl } from "@openstarter/i18n-web/runtime";
 import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 
 import type { PublicConfig } from "@/modules/public-config/lib/api";
@@ -19,17 +20,21 @@ const serverBaseURL =
     ? (process.env.VITE_APP_URL?.trim() || DEFAULT_APP_URL).replace(/\/+$/, "")
     : undefined;
 
+/**
+ * 二步验证页跳转。必须走 i18n 的 URL 策略：硬编码 `/two-factor` 会让以
+ * `/zh` 开头的用户落到无前缀 URL，locale 回退到 baseLocale（en）。
+ */
+function goToTwoFactor() {
+  window.location.href = localizeUrl(`${window.location.origin}/two-factor`).href;
+}
+
 export const authClient = createAuthClient({
   ...(serverBaseURL ? { baseURL: serverBaseURL } : {}),
   plugins: [
     passkeyClient(),
     magicLinkClient(),
     emailOTPClient(),
-    twoFactorClient({
-      onTwoFactorRedirect: () => {
-        window.location.href = "/two-factor";
-      },
-    }),
+    twoFactorClient({ onTwoFactorRedirect: goToTwoFactor }),
     anonymousClient(),
     adminClient(),
     organizationClient(),
@@ -67,11 +72,7 @@ export const getOneTapAuthClient = (
         passkeyClient(),
         magicLinkClient(),
         emailOTPClient(),
-        twoFactorClient({
-          onTwoFactorRedirect: () => {
-            window.location.href = "/two-factor";
-          },
-        }),
+        twoFactorClient({ onTwoFactorRedirect: goToTwoFactor }),
         anonymousClient(),
         adminClient(),
         organizationClient(),
