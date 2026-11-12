@@ -10,7 +10,6 @@ import { user } from "@/modules/user/lib/api";
 type AdminPath =
   | "/admin"
   | "/admin/users"
-  | "/admin/roles"
   | "/admin/ai-models"
   | "/admin/orders"
   | "/admin/subscriptions"
@@ -37,7 +36,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     group: () => m["admin.nav.access_control"](),
     items: [
       { label: () => m["admin.nav.users"](), permission: "admin.*", to: "/admin/users" },
-      { label: () => m["admin.nav.roles"](), permission: "admin.*", to: "/admin/roles" },
       { label: () => m["admin.nav.ai_models"](), permission: "admin.*", to: "/admin/ai-models" },
       { label: () => m["admin.nav.settings"](), permission: "admin.*", to: "/admin/settings" },
     ],

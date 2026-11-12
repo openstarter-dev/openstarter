@@ -325,6 +325,7 @@ export function getSettings(): Setting[] {
       name: "initial_role_name",
       placeholder: "viewer",
       tab: "general",
+      tip: "admin | user (roles are defined in code; unknown names are ignored)",
       title: "Default role name",
       type: "text",
     },

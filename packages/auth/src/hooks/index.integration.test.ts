@@ -1,5 +1,6 @@
-import { credit, role, user, userRole } from "@openstarter/db/schema";
+import { credit, user } from "@openstarter/db/schema";
 import type { Database } from "@openstarter/db/server";
+import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -11,6 +12,7 @@ import { hooks } from "./index";
 
 const FIXED_NOW = new Date("2026-07-24T00:00:00.000Z");
 const INITIAL_CREDITS = 120;
+const INITIAL_ROLE = "admin";
 
 const state = vi.hoisted(() => ({
   configs: {} as Record<string, string>,
@@ -57,19 +59,23 @@ const createdUser = {
   updatedAt: FIXED_NOW,
 };
 
-const seedCreatedUserAndRole = async () => {
+const seedCreatedUser = async () => {
   if (!state.database) {
     throw new Error("Test database is not initialized");
   }
   await state.database.insert(user).values(createdUser);
-  await state.database.insert(role).values({
-    createdAt: FIXED_NOW,
-    id: "member-role",
-    name: "member",
-    status: "active",
-    title: "Member",
-    updatedAt: FIXED_NOW,
-  });
+};
+
+const readRole = async (): Promise<string | null | undefined> => {
+  if (!state.database) {
+    throw new Error("Test database is not initialized");
+  }
+  const [row] = await state.database
+    .select({ role: user.role })
+    .from(user)
+    .where(eq(user.id, createdUser.id))
+    .limit(1);
+  return row?.role;
 };
 
 const invokeCreateAfterHook = async () => {
@@ -89,7 +95,7 @@ beforeEach(async () => {
   if (state.database) {
     await resetAuthTestDatabase(state.database);
   }
-  await seedCreatedUserAndRole();
+  await seedCreatedUser();
 });
 
 afterAll(() => {
@@ -107,7 +113,7 @@ describe("Task 15.2 new user initialization hook", () => {
       initial_credits_enabled: "true",
       initial_credits_valid_days: "30",
       initial_role_enabled: "true",
-      initial_role_name: "member",
+      initial_role_name: INITIAL_ROLE,
     };
 
     await invokeCreateAfterHook();
@@ -115,9 +121,8 @@ describe("Task 15.2 new user initialization hook", () => {
     if (!state.database) {
       throw new Error("Test database is not initialized");
     }
-    const assignedRoles = await state.database.select().from(userRole);
     const grantedCredits = await state.database.select().from(credit);
-    expect(assignedRoles).toMatchObject([{ roleId: "member-role", userId: createdUser.id }]);
+    expect(await readRole()).toBe(INITIAL_ROLE);
     expect(grantedCredits).toMatchObject([
       {
         credits: INITIAL_CREDITS,
@@ -131,13 +136,24 @@ describe("Task 15.2 new user initialization hook", () => {
     expect(grantedCredits.at(0)?.expiresAt).toEqual(new Date("2026-08-23T00:00:00.000Z"));
   });
 
+  it("ignores role names that are not defined in code", async () => {
+    state.configs = {
+      initial_role_enabled: "true",
+      initial_role_name: "member",
+    };
+
+    await invokeCreateAfterHook();
+
+    expect(await readRole()).toBeNull();
+  });
+
   it("keeps role and credit grants idempotent when the hook repeats", async () => {
     state.configs = {
       initial_credits_amount: String(INITIAL_CREDITS),
       initial_credits_enabled: "true",
       initial_credits_valid_days: "0",
       initial_role_enabled: "true",
-      initial_role_name: "member",
+      initial_role_name: INITIAL_ROLE,
     };
 
     await invokeCreateAfterHook();
@@ -146,17 +162,17 @@ describe("Task 15.2 new user initialization hook", () => {
     if (!state.database) {
       throw new Error("Test database is not initialized");
     }
-    expect(await state.database.select().from(userRole)).toHaveLength(1);
+    expect(await readRole()).toBe(INITIAL_ROLE);
     expect(await state.database.select().from(credit)).toHaveLength(1);
   });
 
-  it("grants exactly one role and one welcome credit under concurrent hooks", async () => {
+  it("grants exactly one welcome credit under concurrent hooks", async () => {
     state.configs = {
       initial_credits_amount: String(INITIAL_CREDITS),
       initial_credits_enabled: "true",
       initial_credits_valid_days: "0",
       initial_role_enabled: "true",
-      initial_role_name: "member",
+      initial_role_name: INITIAL_ROLE,
     };
 
     await Promise.all(Array.from({ length: 8 }, () => invokeCreateAfterHook()));
@@ -164,9 +180,8 @@ describe("Task 15.2 new user initialization hook", () => {
     if (!state.database) {
       throw new Error("Test database is not initialized");
     }
-    const assignedRoles = await state.database.select().from(userRole);
     const grantedCredits = await state.database.select().from(credit);
-    expect(assignedRoles).toHaveLength(1);
+    expect(await readRole()).toBe(INITIAL_ROLE);
     expect(grantedCredits).toHaveLength(1);
     expect(grantedCredits.at(0)?.transactionNo).toBe(`welcome-credit:${createdUser.id}`);
   });
@@ -176,7 +191,7 @@ describe("Task 15.2 new user initialization hook", () => {
       initial_credits_amount: String(INITIAL_CREDITS),
       initial_credits_enabled: "false",
       initial_role_enabled: "false",
-      initial_role_name: "member",
+      initial_role_name: INITIAL_ROLE,
     };
 
     await invokeCreateAfterHook();
@@ -184,7 +199,7 @@ describe("Task 15.2 new user initialization hook", () => {
     if (!state.database) {
       throw new Error("Test database is not initialized");
     }
-    expect(await state.database.select().from(userRole)).toHaveLength(0);
+    expect(await readRole()).toBeNull();
     expect(await state.database.select().from(credit)).toHaveLength(0);
   });
 });

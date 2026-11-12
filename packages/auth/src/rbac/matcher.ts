@@ -8,21 +8,6 @@
 // 例如判定 `a.b.c` 时依次检查 `a.b.c`、`a.b.*`、`a.*`、`*`。
 
 /**
- * 平台内置角色名（对齐 ShipAny `core/auth/rbac` 的 `ROLES`）。
- *
- * 作为平台作用域角色的稳定标识，供初始角色授予、种子数据与后台展示复用；
- * 不同于 better-auth organization 插件的团队角色（owner/admin/member）。
- */
-export const ROLES = {
-  SUPER_ADMIN: "super_admin",
-  ADMIN: "admin",
-  EDITOR: "editor",
-  VIEWER: "viewer",
-} as const;
-
-export type RoleName = (typeof ROLES)[keyof typeof ROLES];
-
-/**
  * 判定 `code` 是否被 `granted` 权限码集合授予（含通配符）。
  *
  * @param code 待判定的具体权限码，如 `post.update`。

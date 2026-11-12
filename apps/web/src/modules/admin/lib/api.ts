@@ -21,11 +21,6 @@ export const adminKeys = {
   credits: (page: number) => ["admin", "credits", page] as const,
   metrics: () => ["admin", "metrics"] as const,
   orders: (page: number) => ["admin", "orders", page] as const,
-  permissions: () => ["admin", "permissions"] as const,
-  roles: {
-    all: ["admin", "roles"] as const,
-    permissions: (roleId: string | null) => ["admin", "roles", roleId, "permissions"] as const,
-  },
   subscriptions: (page: number) => ["admin", "subscriptions", page] as const,
   users: (page: number, search: string) => ["admin", "users", page, search] as const,
 } as const;
@@ -41,9 +36,6 @@ const getAdminConfig = client.api.admin.config.$get;
 const getCredits = client.api.admin.credits.$get;
 const getMetrics = client.api.admin.analytics.metrics.$get;
 const getOrders = client.api.admin.orders.$get;
-const getPermissions = client.api.admin.permissions.$get;
-const getRolePermissions = client.api.admin.roles[":id"].permissions.$get;
-const getRoles = client.api.admin.roles.$get;
 const getSubscriptions = client.api.admin.subscriptions.$get;
 const getUsers = client.api.admin.users.$get;
 
@@ -57,11 +49,6 @@ type AdminConfigData = NonNullable<InferResponseType<typeof getAdminConfig, 200>
 type CreditListData = NonNullable<InferResponseType<typeof getCredits, 200>["data"]>;
 type MetricsData = NonNullable<InferResponseType<typeof getMetrics, 200>["data"]>;
 type OrderListData = NonNullable<InferResponseType<typeof getOrders, 200>["data"]>;
-type PermissionListData = NonNullable<InferResponseType<typeof getPermissions, 200>["data"]>;
-type RolePermissionListData = NonNullable<
-  InferResponseType<typeof getRolePermissions, 200>["data"]
->;
-type RoleListData = NonNullable<InferResponseType<typeof getRoles, 200>["data"]>;
 type SubscriptionListData = NonNullable<InferResponseType<typeof getSubscriptions, 200>["data"]>;
 type UserListData = NonNullable<InferResponseType<typeof getUsers, 200>["data"]>;
 
@@ -127,33 +114,6 @@ const queries = {
       queryKey: adminKeys.orders(page),
       placeholderData: keepPreviousData,
     }),
-  permissions: () =>
-    queryOptions({
-      queryFn: async ({ signal }) => {
-        const res = await getPermissions(undefined, withAbort(signal));
-        return (await unwrapQuery<PermissionListData>(res, "Failed to load permissions")) ?? [];
-      },
-      queryKey: adminKeys.permissions(),
-      staleTime: 5 * 60 * 1000,
-    }),
-  rolePermissions: (roleId: string | null) =>
-    queryOptions({
-      queryFn: async ({ signal }) => {
-        const res = await getRolePermissions({ param: { id: roleId ?? "" } }, withAbort(signal));
-        return (
-          (await unwrapQuery<RolePermissionListData>(res, "Failed to load role permissions")) ?? []
-        );
-      },
-      queryKey: adminKeys.roles.permissions(roleId),
-    }),
-  roles: () =>
-    queryOptions({
-      queryFn: async ({ signal }) => {
-        const res = await getRoles(undefined, withAbort(signal));
-        return (await unwrapQuery<RoleListData>(res, "Failed to load roles")) ?? [];
-      },
-      queryKey: adminKeys.roles.all,
-    }),
   subscriptions: (page: number) =>
     queryOptions({
       queryFn: async ({ signal }) => {
@@ -193,14 +153,6 @@ const mutations = {
       mutationFn: async (id: string) => {
         const res = await client.api.admin["ai-models"][":id"].$delete({ param: { id } });
         await assertOk(res, "Failed to delete AI model");
-      },
-    }),
-  deleteRole: () =>
-    mutationOptions({
-      meta: { invalidates: [adminKeys.roles.all] },
-      mutationFn: async (id: string) => {
-        const res = await client.api.admin.roles[":id"].$delete({ param: { id } });
-        await assertOk(res, "Failed to delete role");
       },
     }),
   saveAiModel: () =>
@@ -253,38 +205,6 @@ const mutations = {
       mutationFn: async (payload: Record<string, string>) => {
         const res = await client.api.admin.config.$post({ json: payload });
         await assertOk(res, "Failed to save");
-      },
-    }),
-  saveRole: () =>
-    mutationOptions({
-      meta: { invalidates: [adminKeys.roles.all] },
-      mutationFn: async (input: { id: string | null; name: string; title: string }) => {
-        if (input.id) {
-          const res = await client.api.admin.roles[":id"].$put({
-            json: { name: input.name, title: input.title },
-            param: { id: input.id },
-          });
-          await assertOk(res, "Failed to update role");
-          return;
-        }
-        const res = await client.api.admin.roles.$post({
-          json: { name: input.name, title: input.title },
-        });
-        await assertOk(res, "Failed to create role");
-      },
-    }),
-  saveRolePermissions: () =>
-    mutationOptions({
-      meta: {
-        invalidates: (input: { id: string; permissionIds: string[] }) =>
-          [adminKeys.roles.permissions(input.id)] as const,
-      },
-      mutationFn: async (input: { id: string; permissionIds: string[] }) => {
-        const res = await client.api.admin.roles[":id"].permissions.$put({
-          json: { permissionIds: input.permissionIds },
-          param: { id: input.id },
-        });
-        await assertOk(res, "Failed to save permissions");
       },
     }),
 };

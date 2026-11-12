@@ -7,13 +7,14 @@ import { referralAdminRouter } from "./referral/router";
 import { analyticsRouter } from "./analytics/router";
 import { adminTicketsRouter } from "./tickets/router";
 import { overviewRouter } from "./overview/router";
-import { rbacRouter } from "./rbac/router";
 
-// 平台级管理路由聚合器。子路由自身携带各自的鉴权与通配符 RBAC 权限守卫
-// （rbac/overview → admin.*，analytics → analytics.read，tickets → ticket.*），
+// 平台级管理路由聚合器。子路由自身携带各自的鉴权与权限守卫
+// （overview → admin.*，analytics → analytics.read，tickets → ticket.*），
 // 此处不再重复施加，保持子路由自包含、可独立测试。
+//
+// 角色/权限 CRUD 已移除：角色由代码内 ROLE_PERMISSIONS 定义，用户角色经
+// better-auth admin 插件（/api/auth/admin/set-role）写入 `user.role`。
 export const adminRouter = new Hono()
-  .route("/", rbacRouter)
   .route("/", overviewRouter)
   .route("/analytics", analyticsRouter)
   .route("/tickets", adminTicketsRouter)

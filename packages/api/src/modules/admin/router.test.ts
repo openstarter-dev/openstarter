@@ -64,11 +64,10 @@ vi.mock("../../middleware/rbac", async () => {
 
 import { Hono } from "hono";
 
-// analytics/overview/tickets/rbac 子路由在本文件的作用域外（各自有守卫与依赖）；
+// analytics/overview/tickets 子路由在本文件的作用域外（各自有守卫与依赖）；
 // 挂载断言只针对 ai-models 组合缝，其余子路由 mock 为空路由避免拉入无关依赖。
 vi.mock("./analytics/router", () => ({ analyticsRouter: new Hono() }));
 vi.mock("./overview/router", () => ({ overviewRouter: new Hono() }));
-vi.mock("./rbac/router", () => ({ rbacRouter: new Hono() }));
 vi.mock("./tickets/router", () => ({ adminTicketsRouter: new Hono() }));
 
 import { adminRouter } from "./router";

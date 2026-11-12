@@ -14,7 +14,6 @@ import { Route as AdminIndexRoute } from "./admin/index";
 import { Route as AdminAiModelsRoute } from "./admin/ai-models";
 import { Route as AdminCreditsRoute } from "./admin/credits";
 import { Route as AdminOrdersRoute } from "./admin/orders";
-import { Route as AdminRolesRoute } from "./admin/roles";
 import { Route as AdminSettingsRoute } from "./admin/settings";
 import { Route as AdminSubscriptionsRoute } from "./admin/subscriptions";
 import { Route as AdminUsersRoute } from "./admin/users";
@@ -53,13 +52,6 @@ const ROUTE_QUERY_KEYS: Record<
     deps: { page: 1, q: "" },
     keys: [["admin", "users", 1, ""]],
     route: AdminUsersRoute,
-  },
-  "/admin/roles": {
-    keys: [
-      ["admin", "roles"],
-      ["admin", "permissions"],
-    ],
-    route: AdminRolesRoute,
   },
   "/admin/orders": { deps: { page: 1 }, keys: [["admin", "orders", 1]], route: AdminOrdersRoute },
   "/admin/subscriptions": {

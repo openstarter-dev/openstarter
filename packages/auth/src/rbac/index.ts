@@ -39,10 +39,11 @@ export const roles = {
   member: memberAc,
 } as const;
 
-// ─── 平台作用域通配符 RBAC（阶段 1 任务 9）──────────────────────────────────────
+// ─── 平台作用域授权（代码内角色表 + 通配符匹配）──────────────────────────────────
 //
-// 在同一 `./rbac` 子路径下补齐平台级授权：纯函数通配符匹配器（matcher）与
-// DB 支撑的角色/权限 CRUD 及权限判定（service）。作为平台授权的唯一依据，
-// 与上方团队作用域的 `ac`/`roles` 数据面独立、互不覆盖（R7.7/R7.8）。
+// 平台授权的唯一依据：`user.role`（better-auth admin 插件写入）→ `permissions.ts`
+// 里的角色-权限映射 → `matcher.ts` 的通配符判定。与上方团队作用域的 `ac`/`roles`
+// 数据面独立、互不覆盖（R7.7/R7.8）。
 export * from "./matcher";
+export * from "./permissions";
 export * from "./service";

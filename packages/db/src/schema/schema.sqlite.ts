@@ -509,87 +509,6 @@ export const apikey = table(
   ],
 );
 
-// ─── RBAC ────────────────────────────────────────────────────────────────────
-
-export const role = table(
-  "role",
-  {
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
-    description: text("description"),
-    id: text("id").primaryKey(),
-    name: text("name").notNull().unique(),
-    sort: integer("sort").default(0).notNull(),
-    status: text("status").notNull(),
-    title: text("title").notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-  },
-  (t) => [index("idx_role_status").on(t.status)],
-);
-
-export const permission = table(
-  "permission",
-  {
-    action: text("action").notNull(),
-    code: text("code").notNull().unique(),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
-    description: text("description"),
-    id: text("id").primaryKey(),
-    resource: text("resource").notNull(),
-    title: text("title").notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-  },
-  (t) => [index("idx_permission_resource_action").on(t.resource, t.action)],
-);
-
-export const rolePermission = table(
-  "role_permission",
-  {
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    id: text("id").primaryKey(),
-    permissionId: text("permission_id")
-      .notNull()
-      .references(() => permission.id, { onDelete: "cascade" }),
-    roleId: text("role_id")
-      .notNull()
-      .references(() => role.id, { onDelete: "cascade" }),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-  },
-  (t) => [index("idx_role_permission_role_permission").on(t.roleId, t.permissionId)],
-);
-
-export const userRole = table(
-  "user_role",
-  {
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
-    expiresAt: integer("expires_at", { mode: "timestamp_ms" }),
-    id: text("id").primaryKey(),
-    roleId: text("role_id")
-      .notNull()
-      .references(() => role.id, { onDelete: "cascade" }),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-  },
-  (t) => [
-    index("idx_user_role_user_expires").on(t.userId, t.expiresAt),
-    uniqueIndex("uq_user_role_user_role").on(t.userId, t.roleId),
-  ],
-);
-
 // ─── AI ──────────────────────────────────────────────────────────────────────
 
 export const aiModel = table(
@@ -875,11 +794,6 @@ export type Credit = typeof credit.$inferSelect;
 export type NewCredit = typeof credit.$inferInsert;
 export type Apikey = typeof apikey.$inferSelect;
 export type NewApikey = typeof apikey.$inferInsert;
-export type Role = typeof role.$inferSelect;
-export type NewRole = typeof role.$inferInsert;
-export type Permission = typeof permission.$inferSelect;
-export type RolePermission = typeof rolePermission.$inferSelect;
-export type UserRole = typeof userRole.$inferSelect;
 export type AiModel = typeof aiModel.$inferSelect;
 export type NewAiModel = typeof aiModel.$inferInsert;
 export type AiTask = typeof aiTask.$inferSelect;
