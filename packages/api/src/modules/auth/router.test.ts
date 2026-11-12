@@ -9,28 +9,15 @@ const authMocks = vi.hoisted(() => ({
 vi.mock("@openstarter/auth", () => {
   const unusedService = vi.fn();
   return {
-    assignPermissionsToRole: unusedService,
-    assignRoleToUser: unusedService,
     createApiKey: unusedService,
     createAuth: () => ({
       api: { getSession: authMocks.getSession },
       handler: authMocks.authHandler,
     }),
-    createPermission: unusedService,
-    createRole: unusedService,
-    deletePermission: unusedService,
-    deleteRole: unusedService,
-    getPermissions: unusedService,
-    getRolePermissions: unusedService,
-    getRoles: unusedService,
     getUserPermissionCodes: unusedService,
-    getUserRoles: unusedService,
     listApiKeys: unusedService,
     matchPermission: unusedService,
-    removeRoleFromUser: unusedService,
     revokeApiKey: unusedService,
-    updatePermission: unusedService,
-    updateRole: unusedService,
     validateApiKey: unusedService,
   };
 });
