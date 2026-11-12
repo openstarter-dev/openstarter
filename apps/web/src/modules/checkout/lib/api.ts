@@ -1,28 +1,20 @@
-// Mutation 工厂：checkout 模块（R10）
-// 经类型化 Hono RPC 客户端发起结账。
-
 import { mutationOptions } from "@tanstack/react-query";
+import type { InferResponseType } from "hono/client";
 
-import { client } from "@/lib/api";
+import { client, unwrapMutation } from "@/lib/api";
 
 import type { PricingCheckout } from "@/lib/marketing/pricing";
+
+type CheckoutData = NonNullable<InferResponseType<typeof client.api.checkout.$post, 200>["data"]>;
 
 const mutations = {
   create: () =>
     mutationOptions({
-      // 只上送 productId：价格/货币/积分由服务端产品目录决定（server-side pricing），
-      // 客户端不传任何金额字段。PricingCheckout 里的其余字段仅用于本地展示。
       mutationFn: async (input: Pick<PricingCheckout, "productId">) => {
         const res = await client.api.checkout.$post({
           json: { productId: input.productId },
         });
-        const json = await res.json();
-        if (res.ok && json.data) {
-          return json.data;
-        }
-        const message =
-          "message" in json && typeof json.message === "string" ? json.message : "Checkout failed";
-        throw new Error(message);
+        return unwrapMutation<CheckoutData>(res, "Checkout failed");
       },
     }),
 };

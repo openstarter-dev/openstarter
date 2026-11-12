@@ -1,27 +1,27 @@
-// Query 工厂：public-config 模块
-// 拉取 /api/config/public，供登录/注册/重置页使用。
-
 import { queryOptions } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 
-import { client } from "@/lib/api";
+import { client, unwrapQuery, withAbort } from "@/lib/api";
 
 export type PublicConfig = NonNullable<
   InferResponseType<typeof client.api.config.public.$get, 200>["data"]
 >;
 
+/** 公共配置 query key（登录前页面共用，长期缓存）。 */
+export const publicConfigKeys = {
+  get: () => ["public-config"] as const,
+};
+
+const getPublicConfig = client.api.config.public.$get;
+
 const queries = {
   get: () =>
     queryOptions({
-      queryFn: async () => {
-        const res = await client.api.config.public.$get();
-        if (!res.ok) {
-          throw new Error("Failed to load public config");
-        }
-        const json = await res.json();
-        return json.data ?? {};
+      queryFn: async ({ signal }) => {
+        const res = await getPublicConfig(undefined, withAbort(signal));
+        return (await unwrapQuery<PublicConfig>(res, "Failed to load public config")) ?? {};
       },
-      queryKey: ["public-config"] as const,
+      queryKey: publicConfigKeys.get(),
       staleTime: 5 * 60 * 1000,
     }),
 };

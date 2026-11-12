@@ -1,9 +1,13 @@
-// Query 工厂：auth 模块（sessions、accounts）
-// 使用 better-auth SDK（authClient）而非 Hono RPC。
-
 import { queryOptions } from "@tanstack/react-query";
 
 import { authClient } from "@/lib/auth-client";
+
+/** auth 域 query key 工厂。 */
+export const authKeys = {
+  all: ["auth"] as const,
+  accounts: () => ["auth", "accounts"] as const,
+  sessions: () => ["auth", "sessions"] as const,
+};
 
 const queries = {
   accounts: () =>
@@ -15,7 +19,7 @@ const queries = {
         }
         return result.data ?? [];
       },
-      queryKey: ["auth", "accounts"] as const,
+      queryKey: authKeys.accounts(),
     }),
   sessions: () =>
     queryOptions({
@@ -26,7 +30,7 @@ const queries = {
         }
         return result.data ?? [];
       },
-      queryKey: ["auth", "sessions"] as const,
+      queryKey: authKeys.sessions(),
     }),
 };
 

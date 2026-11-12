@@ -1,8 +1,7 @@
-// Query 工厂：referral 模块。key 所有权归本文件（referralKeys 前缀约定）。
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 
-import { client } from "@/lib/api";
+import { client, unwrapQuery, withAbort } from "@/lib/api";
 
 export const referralKeys = {
   all: ["referral"] as const,
@@ -12,7 +11,13 @@ export const referralKeys = {
 };
 
 const getMe = client.api.referral.me.$get;
+const getCommissions = client.api.referral.commissions.$get;
+const getRelations = client.api.referral.relations.$get;
+
 type MeData = NonNullable<InferResponseType<typeof getMe, 200>["data"]>;
+type CommissionsData = NonNullable<InferResponseType<typeof getCommissions, 200>["data"]>;
+type RelationsData = NonNullable<InferResponseType<typeof getRelations, 200>["data"]>;
+
 export type ReferralMe = MeData;
 
 export const referral = {
@@ -20,39 +25,32 @@ export const referral = {
     commissions: (page: number) =>
       queryOptions({
         placeholderData: keepPreviousData,
-        queryFn: async () => {
-          const res = await client.api.referral.commissions.$get({
-            query: { page: String(page), pageSize: "20" },
-          });
-          if (!res.ok) {
-            throw new Error("Failed to load commissions");
-          }
-          return (await res.json()).data;
+        queryFn: async ({ signal }) => {
+          const res = await getCommissions(
+            { query: { page: String(page), pageSize: "20" } },
+            withAbort(signal),
+          );
+          return unwrapQuery<CommissionsData>(res, "Failed to load commissions");
         },
         queryKey: referralKeys.commissions(page),
       }),
     me: () =>
       queryOptions({
-        queryFn: async () => {
-          const res = await client.api.referral.me.$get();
-          if (!res.ok) {
-            throw new Error("Failed to load referral info");
-          }
-          return (await res.json()).data;
+        queryFn: async ({ signal }) => {
+          const res = await getMe(undefined, withAbort(signal));
+          return unwrapQuery<MeData>(res, "Failed to load referral info");
         },
         queryKey: referralKeys.me(),
       }),
     relations: (page: number) =>
       queryOptions({
         placeholderData: keepPreviousData,
-        queryFn: async () => {
-          const res = await client.api.referral.relations.$get({
-            query: { page: String(page), pageSize: "20" },
-          });
-          if (!res.ok) {
-            throw new Error("Failed to load relations");
-          }
-          return (await res.json()).data;
+        queryFn: async ({ signal }) => {
+          const res = await getRelations(
+            { query: { page: String(page), pageSize: "20" } },
+            withAbort(signal),
+          );
+          return unwrapQuery<RelationsData>(res, "Failed to load relations");
         },
         queryKey: referralKeys.relations(page),
       }),
