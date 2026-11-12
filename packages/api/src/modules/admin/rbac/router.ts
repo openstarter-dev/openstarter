@@ -1,22 +1,11 @@
-import {
-  assignPermissionsToRole,
-  assignRoleToUser,
-  createPermission,
-  createRole,
-  deletePermission,
-  deleteRole,
-  getPermissions,
-  getRolePermissions,
-  getRoles,
-  getUserRoles,
-  removeRoleFromUser,
-  updatePermission,
-  updateRole,
-} from "@openstarter/auth";
-import type { Permission, Role } from "@openstarter/db/schema";
-import { respData, respErr, respOk } from "@openstarter/shared";
+// packages/api/src/modules/admin/rbac —— RBAC 管理路由（角色 / 权限 / 用户-角色映射）。
+//
+// 路由只做三件事：挂载鉴权中间件、入参校验（zValidator）、把领域结果映射为
+// HTTP 响应。鉴权与 RBAC 领域操作均在 ./service，本文件不直接访问 @openstarter/auth。
+
 import { zValidator } from "@hono/zod-validator";
-import { Hono } from "hono";
+import { respData, respErr, respOk } from "@openstarter/shared";
+import { Hono, type Context } from "hono";
 
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
@@ -30,83 +19,65 @@ import {
   updateRoleBody,
   userRoleParam,
 } from "../../../schema/admin/rbac";
+import {
+  type RbacResult,
+  assignPermissionsToRole,
+  assignRoleToUser,
+  createPermission,
+  createRole,
+  getPermissionsOfRole,
+  getRolesOfUser,
+  listPermissions,
+  listRoles,
+  removePermission,
+  removeRole,
+  removeRoleFromUser,
+  updatePermission,
+  updateRole,
+} from "./service";
 
 const BAD_REQUEST_STATUS = 400;
 const NOT_FOUND_STATUS = 404;
 const PERMISSION_ADMIN = "admin.*";
 
+/** 域结果 → HTTP：目标不存在映射 404，其余失败 400，成功统一包 respData。 */
+function respond<T>(c: Context, result: RbacResult<T>) {
+  if (!result.ok) {
+    return c.json(respErr(result.message), result.notFound ? NOT_FOUND_STATUS : BAD_REQUEST_STATUS);
+  }
+  return c.json(respData(result.data));
+}
+
+/** 无返回值的写操作：成功即 respOk，失败 400。 */
+function respondOk(c: Context, result: RbacResult<unknown>) {
+  return result.ok ? c.json(respOk()) : c.json(respErr(result.message), BAD_REQUEST_STATUS);
+}
+
 export const rbacRouter = new Hono()
   .use(requireAuth)
   .use(requirePermission(PERMISSION_ADMIN))
   // ── 角色 CRUD（Role） ──────────────────────────────────────────────────────
-  .get("/roles", async (c) => {
-    const roles: Role[] = await getRoles();
-    return c.json(respData(roles));
-  })
-  .post("/roles", zValidator("json", createRoleBody), async (c) => {
-    const body = c.req.valid("json");
-    try {
-      const created = await createRole({
-        name: body.name,
-        title: body.title,
-        description: body.description,
-      });
-      if (!created) {
-        return c.json(respErr("role not created"), BAD_REQUEST_STATUS);
-      }
-      return c.json(respData(created));
-    } catch (e) {
-      return c.json(
-        respErr(e instanceof Error ? e.message : "create role failed"),
-        BAD_REQUEST_STATUS,
-      );
-    }
-  })
+  .get("/roles", async (c) => respond(c, await listRoles()))
+  .post("/roles", zValidator("json", createRoleBody), async (c) =>
+    respond(c, await createRole(c.req.valid("json"))),
+  )
   .put(
     "/roles/:id",
     zValidator("param", idParam),
     zValidator("json", updateRoleBody),
     async (c) => {
       const { id } = c.req.valid("param");
-      const body = c.req.valid("json");
-      try {
-        const updated = await updateRole(id, body);
-        if (!updated) {
-          return c.json(respErr("role not found"), NOT_FOUND_STATUS);
-        }
-        return c.json(respData(updated));
-      } catch (e) {
-        return c.json(
-          respErr(e instanceof Error ? e.message : "update role failed"),
-          BAD_REQUEST_STATUS,
-        );
-      }
+      return respond(c, await updateRole(id, c.req.valid("json")));
     },
   )
   .delete("/roles/:id", zValidator("param", idParam), async (c) => {
     const { id } = c.req.valid("param");
-    try {
-      await deleteRole(id);
-      return c.json(respOk());
-    } catch (e) {
-      return c.json(
-        respErr(e instanceof Error ? e.message : "delete role failed"),
-        BAD_REQUEST_STATUS,
-      );
-    }
+    return respondOk(c, await removeRole(id));
   })
   // ── 角色-权限映射（Role ↔ Permission） ───────────────────────────────────────
   .get("/roles/:id/permissions", zValidator("param", idParam), async (c) => {
     const { id } = c.req.valid("param");
-    try {
-      const permissions = await getRolePermissions(id);
-      return c.json(respData(permissions));
-    } catch (e) {
-      return c.json(
-        respErr(e instanceof Error ? e.message : "get role permissions failed"),
-        BAD_REQUEST_STATUS,
-      );
-    }
+    return respond(c, await getPermissionsOfRole(id));
   })
   .put(
     "/roles/:id/permissions",
@@ -115,87 +86,31 @@ export const rbacRouter = new Hono()
     async (c) => {
       const { id } = c.req.valid("param");
       const { permissionIds } = c.req.valid("json");
-      try {
-        await assignPermissionsToRole(id, permissionIds);
-        return c.json(respOk());
-      } catch (e) {
-        return c.json(
-          respErr(e instanceof Error ? e.message : "assign permissions failed"),
-          BAD_REQUEST_STATUS,
-        );
-      }
+      return respondOk(c, await assignPermissionsToRole(id, permissionIds));
     },
   )
   // ── 权限 CRUD（Permission） ──────────────────────────────────────────────────
-  .get("/permissions", async (c) => {
-    const permissions: Permission[] = await getPermissions();
-    return c.json(respData(permissions));
-  })
-  .post("/permissions", zValidator("json", createPermissionBody), async (c) => {
-    const body = c.req.valid("json");
-    try {
-      const created = await createPermission({
-        code: body.code,
-        resource: body.resource,
-        action: body.action,
-        title: body.title,
-      });
-      if (!created) {
-        return c.json(respErr("permission not created"), BAD_REQUEST_STATUS);
-      }
-      return c.json(respData(created));
-    } catch (e) {
-      return c.json(
-        respErr(e instanceof Error ? e.message : "create permission failed"),
-        BAD_REQUEST_STATUS,
-      );
-    }
-  })
+  .get("/permissions", async (c) => respond(c, await listPermissions()))
+  .post("/permissions", zValidator("json", createPermissionBody), async (c) =>
+    respond(c, await createPermission(c.req.valid("json"))),
+  )
   .put(
     "/permissions/:id",
     zValidator("param", idParam),
     zValidator("json", updatePermissionBody),
     async (c) => {
       const { id } = c.req.valid("param");
-      const body = c.req.valid("json");
-      try {
-        const updated = await updatePermission(id, body);
-        if (!updated) {
-          return c.json(respErr("permission not found"), NOT_FOUND_STATUS);
-        }
-        return c.json(respData(updated));
-      } catch (e) {
-        return c.json(
-          respErr(e instanceof Error ? e.message : "update permission failed"),
-          BAD_REQUEST_STATUS,
-        );
-      }
+      return respond(c, await updatePermission(id, c.req.valid("json")));
     },
   )
   .delete("/permissions/:id", zValidator("param", idParam), async (c) => {
     const { id } = c.req.valid("param");
-    try {
-      await deletePermission(id);
-      return c.json(respOk());
-    } catch (e) {
-      return c.json(
-        respErr(e instanceof Error ? e.message : "delete permission failed"),
-        BAD_REQUEST_STATUS,
-      );
-    }
+    return respondOk(c, await removePermission(id));
   })
   // ── 用户-角色映射（User ↔ Role） ──────────────────────────────────────────────
   .get("/users/:id/roles", zValidator("param", idParam), async (c) => {
     const { id } = c.req.valid("param");
-    try {
-      const roles = await getUserRoles(id);
-      return c.json(respData(roles));
-    } catch (e) {
-      return c.json(
-        respErr(e instanceof Error ? e.message : "get user roles failed"),
-        BAD_REQUEST_STATUS,
-      );
-    }
+    return respond(c, await getRolesOfUser(id));
   })
   .post(
     "/users/:id/roles",
@@ -204,26 +119,10 @@ export const rbacRouter = new Hono()
     async (c) => {
       const { id } = c.req.valid("param");
       const { roleId, expiresAt } = c.req.valid("json");
-      try {
-        await assignRoleToUser(id, roleId, expiresAt ? new Date(expiresAt) : undefined);
-        return c.json(respOk());
-      } catch (e) {
-        return c.json(
-          respErr(e instanceof Error ? e.message : "assign role failed"),
-          BAD_REQUEST_STATUS,
-        );
-      }
+      return respondOk(c, await assignRoleToUser(id, roleId, expiresAt));
     },
   )
   .delete("/users/:id/roles/:roleId", zValidator("param", userRoleParam), async (c) => {
     const { id, roleId } = c.req.valid("param");
-    try {
-      await removeRoleFromUser(id, roleId);
-      return c.json(respOk());
-    } catch (e) {
-      return c.json(
-        respErr(e instanceof Error ? e.message : "remove role failed"),
-        BAD_REQUEST_STATUS,
-      );
-    }
+    return respondOk(c, await removeRoleFromUser(id, roleId));
   });
