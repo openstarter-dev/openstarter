@@ -24,7 +24,7 @@ import {
 } from "@openstarter/ui-web/components/sidebar";
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import { Link, useMatchRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { Globe, LogOut, Moon, Sun, User, UserCog } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -129,7 +129,7 @@ export function AppSidebar({ initialSession }: { initialSession?: SessionUserSum
   const [manageOpen, setManageOpen] = useState(false);
   const { data: session, isPending } = authClient.useSession();
   const activeSession = session ?? initialSession ?? null;
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const matchRoute = useMatchRoute();
 
   return (
     <Sidebar collapsible="icon">
@@ -151,13 +151,13 @@ export function AppSidebar({ initialSession }: { initialSession?: SessionUserSum
             <SidebarMenu>
               {APP_NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
-                const active = pathname === item.to || pathname.startsWith(`${item.to}/`);
+                const active = Boolean(matchRoute({ fuzzy: true, to: item.to }));
                 return (
                   <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
+                    <SidebarMenuButton asChild isActive={active} tooltip={item.label()}>
                       <Link to={item.to}>
                         <Icon aria-hidden="true" />
-                        <span>{item.label}</span>
+                        <span>{item.label()}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

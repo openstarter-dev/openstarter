@@ -37,6 +37,12 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
   Outlet: () => <div data-testid="outlet" />,
+  useMatchRoute:
+    () =>
+    (opts: { fuzzy?: boolean; to: string }): boolean => {
+      const { pathname } = routerState;
+      return pathname === opts.to || (opts.fuzzy === true && pathname.startsWith(`${opts.to}/`));
+    },
   useRouteContext: () => ({ session: null }),
   useNavigate: () => vi.fn(() => Promise.resolve()),
   useRouter: () => ({ invalidate: vi.fn(() => Promise.resolve()) }),
