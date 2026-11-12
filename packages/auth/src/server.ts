@@ -5,6 +5,7 @@ import { db, getAuthAdapterProvider } from "@openstarter/db/server";
 import { EmailTemplate } from "@openstarter/email";
 import { sendEmail as deliverEmail, type SendEmailParams } from "@openstarter/email/server";
 import { getLocaleFromRequest } from "@openstarter/i18n-web/server";
+import { resolveAppUrl } from "@openstarter/shared/app-url";
 import { getAllConfigs } from "@openstarter/shared/config";
 import { NodeEnv } from "@openstarter/shared/constants";
 import { logger } from "@openstarter/shared/logger";
@@ -95,6 +96,11 @@ export const auth = betterAuth({
     },
   },
   appName: "OpenStarter",
+  // 显式传入而非依赖 better-auth 内部的 `BETTER_AUTH_URL` 嗅探：该变量已降级为
+  // 兼容 alias，主名是 VITE_APP_URL（见 @openstarter/shared/app-url）。显式设置还能
+  // 把 trustedOrigins 钉在真实域名上——baseURL 为空时 better-auth 会用请求自身推导
+  // 可信来源，CSRF 原点校验形同放开。
+  baseURL: resolveAppUrl(),
   database: drizzleAdapter(db(), {
     provider: getAuthAdapterProvider(),
     schema: authSchema,

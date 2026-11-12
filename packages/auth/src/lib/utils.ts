@@ -7,6 +7,8 @@
 // `url` / `type` 时直接返回该 URL；未给定时返回应用基址（调用方可继续追加 query，
 // 如组织邀请的 invitationId）。这避免把邮件指向应用中不存在的包装路由。
 
+import { resolveAppUrl } from "@openstarter/shared/app-url";
+
 import type { VerificationType } from "../types";
 
 /**
@@ -21,9 +23,6 @@ export interface GetUrlParams {
   url?: string;
 }
 
-// 无请求且无环境变量可用时的开发兜底基址。
-const DEFAULT_BASE_URL = "http://localhost:3000";
-
 // 安全解析来源：非法 URL 返回 null 而非抛出。
 const parseOrigin = (value: string): string | null => {
   try {
@@ -36,8 +35,8 @@ const parseOrigin = (value: string): string | null => {
 /**
  * 解析应用基址（origin）。
  *
- * 优先取请求的 `origin` 头，其次取请求 URL 的 origin；均不可得时回落到环境变量
- * （`VITE_APP_URL` / `APP_URL` / `BETTER_AUTH_URL`），最后回落开发默认地址。
+ * 优先取请求的 `origin` 头，其次取请求 URL 的 origin；均不可得时回落到
+ * {@link resolveAppUrl}（VITE_APP_URL → APP_URL → BETTER_AUTH_URL → URL → 本地默认）。
  */
 export const getBaseUrl = (request?: Request): string => {
   if (request) {
@@ -50,12 +49,7 @@ export const getBaseUrl = (request?: Request): string => {
       return fromRequestUrl;
     }
   }
-  return (
-    process.env.VITE_APP_URL ??
-    process.env.APP_URL ??
-    process.env.BETTER_AUTH_URL ??
-    DEFAULT_BASE_URL
-  );
+  return resolveAppUrl();
 };
 
 /**

@@ -7,11 +7,13 @@
 //  - 每个受支持 locale 以 rel=alternate hreflang 声明，x-default 指向默认 locale
 //    （无前缀）URL —— 否则 /zh/* 页面会因 canonical 指向英文版而被判为重复内容。
 //
-// 站点基址：服务端读 BETTER_AUTH_URL；浏览器端 process.env.* 不会被打包注入
-// （会编译成 undefined），故回退 window.location.origin，避免客户端导航时
-// canonical 指向 http://localhost:3000。
+// 站点基址：显式配置优先（VITE_APP_URL 主名，BETTER_AUTH_URL / URL 为兼容 alias，
+// 见 @openstarter/shared/app-url）；浏览器端 process.env.* 编译为 undefined，回退
+// window.location.origin —— 客户端不读构建期内联的 VITE_*，否则多域名/预览部署下
+// canonical 会指向主域。
 
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type SupportedLocale } from "@openstarter/i18n-web";
+import { DEFAULT_APP_URL, readConfiguredAppUrl } from "@openstarter/shared/app-url";
 
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
 import { getLocale, localizeUrl } from "@/paraglide/runtime.js";
@@ -32,14 +34,16 @@ export interface PageHead {
 }
 
 function getSiteUrl(): string {
-  const fromEnv = process.env.BETTER_AUTH_URL;
-  if (fromEnv) {
-    return fromEnv;
+  // 服务端（SSR）用显式配置的站点地址；浏览器端 process.env.* 编译为 undefined，
+  // 此时回落当前 origin，避免客户端导航时 canonical 指向部署主域。
+  const configured = readConfiguredAppUrl();
+  if (configured) {
+    return configured;
   }
   if (typeof window !== "undefined") {
     return window.location.origin;
   }
-  return "http://localhost:3000";
+  return DEFAULT_APP_URL;
 }
 
 function absolutizeUrl(path: string): string {

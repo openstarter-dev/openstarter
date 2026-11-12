@@ -15,6 +15,7 @@ import {
 import { account, permission, rolePermission, user } from "@openstarter/db/schema";
 
 import { db } from "@openstarter/db/server";
+import { resolveAppUrl } from "@openstarter/shared/app-url";
 import { getUuid } from "@openstarter/shared/id";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
@@ -211,7 +212,7 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
   await assignRoleToUser(userId, adminRole.id);
   console.log("[seed-admin] assigned admin role to user");
 
-  const loginUrl = process.env.BETTER_AUTH_URL ?? "http://localhost:3000";
+  const loginUrl = resolveAppUrl();
   console.log("");
   console.log("================ Admin seed complete ================");
   console.log(`  Login URL : ${loginUrl}/login  (then open ${loginUrl}/admin)`);
