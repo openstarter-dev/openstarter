@@ -1,155 +1,34 @@
+// packages/api/src/modules/ai/media —— AI 生成任务路由。
+//
+// 路由只负责：鉴权/方案门禁、入参校验、把任务编排结果映射为状态码与响应体。
+// 供应商解析、定价、建任务（原子扣费）、派发与状态刷新均在 ../tasks/runner。
+
 import { zValidator } from "@hono/zod-validator";
-import type { AiTask } from "@openstarter/db/schema";
 import { respData, respErr, respPage } from "@openstarter/shared";
-import { getAllConfigs } from "@openstarter/shared/config";
 import { Hono } from "hono";
 
-import {
-  type AIDispatchResult,
-  type AIGenerateParams,
-  AIMediaType,
-  AIProviderUnavailableError,
-  type AITaskResult,
-  AITaskStatus,
-  dispatchGenerate,
-  dispatchQuery,
-  getAIManager,
-} from "./index";
-import { createTask, findTask, getTasks, InsufficientCreditsError, updateTask } from "../tasks";
-import { findModelByProviderAndId } from "../catalog/service";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
 import { createBody, listQuery } from "../../../schema/ai/media";
-
-const PROVIDER_UNAVAILABLE_MESSAGE = "AI provider is not enabled or its credentials are missing";
+import {
+  findTask,
+  getTasks,
+  refreshTask,
+  type StartTaskFailure,
+  startGenerationTask,
+} from "../tasks";
 
 const STATUS_NOT_FOUND = 404;
 const STATUS_INSUFFICIENT_CREDITS = 402;
 const STATUS_PROVIDER_RUNTIME_ERROR = 502;
 const STATUS_PROVIDER_UNAVAILABLE = 503;
 
-const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
-  AITaskStatus.SUCCESS,
-  AITaskStatus.FAILED,
-  AITaskStatus.CANCELED,
-]);
-
-async function resolveProviderName(requested?: string): Promise<string | null> {
-  const manager = await getAIManager();
-  const name = requested ?? manager.getDefaultProvider()?.name;
-  if (!name) {
-    return null;
-  }
-  return manager.getProvider(name) ? name : null;
-}
-
-async function resolveCostCredits(
-  mediaType: string,
-  provider?: string,
-  model?: string,
-): Promise<number> {
-  // 目录优先（Task 7）：已定价条目（creditPrice > 0）覆盖 mediaType 配置价。
-  // 目录键为解析后的 provider；未命中 / 0 价 / 查询失败一律回退配置逻辑。
-  if (provider && model) {
-    try {
-      const catalogModel = await findModelByProviderAndId(provider, model);
-      if (catalogModel && catalogModel.creditPrice > 0) {
-        return catalogModel.creditPrice;
-      }
-    } catch {
-      // 目录不可用时按未定价处理，走配置回退。
-    }
-  }
-
-  const configs = await getAllConfigs();
-  const raw = configs[`ai_credits_cost_${mediaType}`] ?? configs.ai_credits_cost;
-  const parsed = Number.parseInt(raw ?? "", 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-}
-
-function markTaskFailed(id: string, errorMessage: string): Promise<void> {
-  return updateTask({
-    id,
-    status: AITaskStatus.FAILED,
-    taskInfo: { errorMessage },
-  });
-}
-
-function persistDispatchData(id: string, data: AITaskResult): Promise<void> {
-  return updateTask({
-    id,
-    status: data.taskStatus,
-    providerTaskId: data.taskId,
-    taskInfo: data.taskInfo,
-    taskResult: data.taskResult,
-  });
-}
-
-type GenerationOutcome =
-  | { ok: true }
-  | {
-      ok: false;
-      status: typeof STATUS_PROVIDER_RUNTIME_ERROR | typeof STATUS_PROVIDER_UNAVAILABLE;
-      message: string;
-    };
-
-async function runGeneration(
-  taskId: string,
-  providerName: string,
-  params: AIGenerateParams,
-): Promise<GenerationOutcome> {
-  let dispatch: AIDispatchResult;
-  try {
-    dispatch = await dispatchGenerate({ provider: providerName, params });
-  } catch (error) {
-    if (error instanceof AIProviderUnavailableError) {
-      await markTaskFailed(taskId, error.message);
-      return {
-        ok: false,
-        status: STATUS_PROVIDER_UNAVAILABLE,
-        message: error.message,
-      };
-    }
-    throw error;
-  }
-
-  if (!dispatch.success) {
-    await markTaskFailed(taskId, dispatch.error.message);
-    return {
-      ok: false,
-      status: STATUS_PROVIDER_RUNTIME_ERROR,
-      message: dispatch.error.message,
-    };
-  }
-
-  await persistDispatchData(taskId, dispatch.data);
-  return { ok: true };
-}
-
-async function refreshTaskStatus(task: AiTask): Promise<AiTask> {
-  if (!task.taskId || TERMINAL_STATUSES.has(task.status)) {
-    return task;
-  }
-
-  let dispatch: AIDispatchResult;
-  try {
-    dispatch = await dispatchQuery({
-      provider: task.provider,
-      taskId: task.taskId,
-      mediaType: task.mediaType as AIMediaType,
-      model: task.model,
-    });
-  } catch {
-    return task;
-  }
-
-  if (!dispatch.success) {
-    return task;
-  }
-
-  await persistDispatchData(task.id, dispatch.data);
-  return (await findTask(task.id)) ?? task;
-}
+/** 编排失败原因 → HTTP 状态。 */
+const FAILURE_STATUS = {
+  insufficient_credits: STATUS_INSUFFICIENT_CREDITS,
+  provider_runtime_error: STATUS_PROVIDER_RUNTIME_ERROR,
+  provider_unavailable: STATUS_PROVIDER_UNAVAILABLE,
+} as const satisfies Record<StartTaskFailure, number>;
 
 export const aiRouter = new Hono()
   .post(
@@ -159,46 +38,12 @@ export const aiRouter = new Hono()
     zValidator("json", createBody),
     async (c) => {
       const body = c.req.valid("json");
-      const userId = c.get("userId");
+      const outcome = await startGenerationTask({ ...body, userId: c.get("userId") });
 
-      const providerName = await resolveProviderName(body.provider);
-      if (!providerName) {
-        return c.json(respErr(PROVIDER_UNAVAILABLE_MESSAGE), STATUS_PROVIDER_UNAVAILABLE);
-      }
-
-      const costCredits = await resolveCostCredits(body.mediaType, providerName, body.model);
-
-      let task: AiTask;
-      try {
-        task = await createTask({
-          userId,
-          mediaType: body.mediaType,
-          provider: providerName,
-          model: body.model,
-          prompt: body.prompt,
-          options: body.options,
-          costCredits,
-        });
-      } catch (error) {
-        if (error instanceof InsufficientCreditsError) {
-          return c.json(respErr("insufficient credits"), STATUS_INSUFFICIENT_CREDITS);
-        }
-        throw error;
-      }
-
-      const params: AIGenerateParams = {
-        mediaType: body.mediaType,
-        prompt: body.prompt,
-        model: body.model,
-        options: body.options,
-      };
-      const outcome = await runGeneration(task.id, providerName, params);
       if (!outcome.ok) {
-        return c.json(respErr(outcome.message), outcome.status);
+        return c.json(respErr(outcome.message), FAILURE_STATUS[outcome.reason]);
       }
-
-      const updated = await findTask(task.id);
-      return c.json(respData(updated ?? task));
+      return c.json(respData(outcome.task));
     },
   )
   .get(
@@ -227,6 +72,5 @@ export const aiRouter = new Hono()
       return c.json(respErr("not found"), STATUS_NOT_FOUND);
     }
 
-    const refreshed = await refreshTaskStatus(task);
-    return c.json(respData(refreshed));
+    return c.json(respData(await refreshTask(task)));
   });

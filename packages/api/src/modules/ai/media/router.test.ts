@@ -1,10 +1,10 @@
 /**
  * AI router tests — catalog-first credit pricing (Task 7).
  *
- * `resolveCostCredits` 是模块私有函数，目录优先计价经 POST `/ai-tasks` 间接验证：
+ * 目录优先计价经 POST `/ai-tasks` 间接验证（编排在 ../tasks/runner）：
  * 断言 `createTask` spy 收到的 `costCredits` 入参。沿用 ai/catalog/router.test.ts
  * 的 harness：requireAuth 走 x-test-user-id header mock，plan-gate 透传；
- * `../ai-tasks`（createTask/findTask/updateTask）、`./service`（dispatchGenerate）、
+ * `../tasks/service`（createTask/findTask/updateTask）、`./service`（dispatchGenerate）、
  * `./manager`（getAIManager 哨兵）与目录查询（findModelByProviderAndId）全部 mock
  * ——本文件聚焦路由接线与计价分支，不触真实数据库与供应商 I/O。
  */
@@ -33,8 +33,10 @@ vi.mock("../catalog/service", async (importOriginal) => ({
 }));
 
 // 任务生命周期 + 原子扣减：仅 spy 断言入参（计费语义由 ai-tasks 自身测试覆盖）。
-vi.mock("../tasks", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("../tasks")>()),
+// 编排层（../tasks/runner）直接依赖同域的 ./service，故 mock 具体 service 模块；
+// barrel（../tasks）会转发同一模块的绑定，不影响下方 InsufficientCreditsError 导入。
+vi.mock("../tasks/service", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../tasks/service")>()),
   createTask: state.createTask,
   findTask: state.findTask,
   updateTask: state.updateTask,
