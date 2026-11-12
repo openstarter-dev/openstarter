@@ -9,7 +9,7 @@
 // Fill in the four placeholder groups before the first deploy:
 //   1. routes[].pattern                          — production hostname
 //   2. compatibility_date                        — supported by your wrangler
-//   3. vars.VITE_APP_URL / BETTER_AUTH_URL / URL — same production URL
+//   3. vars.VITE_APP_URL                      — production app URL (single origin)
 //   4. d1_databases[].database_id                — from `wrangler d1 create`
 //
 // Build + deploy:
@@ -69,17 +69,14 @@
 
   "vars": {
     "DATABASE_PROVIDER": "d1",
-    // Server-side runtime fallbacks for the build-time VITE_* values — keep in
-    // sync with your production env (better-auth trustedOrigins, payment
-    // callbacks). VITE_APP_URL / VITE_APP_NAME are read by better-auth + the
-    // shared config layer on the server.
+    // App origin: better-auth baseURL (OAuth callbacks + trustedOrigins), email /
+    // payment callbacks and SSR canonical URLs all resolve from this single value
+    // (see packages/shared/src/app-url.ts). VITE_APP_URL / VITE_APP_NAME are read
+    // by better-auth + the shared config layer on the server.
     "VITE_APP_URL": "https://<your-domain.com>",
     "VITE_APP_NAME": "OpenStarter",
     "VITE_DEFAULT_LOCALE": "en",
-    // Better-auth base URL and the app URLs used by emails / payment callbacks.
-    "BETTER_AUTH_URL": "https://<your-domain.com>",
     "PRODUCT_NAME": "OpenStarter",
-    "URL": "https://<your-domain.com>",
     "DEFAULT_LOCALE": "en",
     // CONFIG_ENCRYPTION_KEY (AES-256-GCM key for admin-stored secrets) must NOT
     // be a var — set it with `wrangler secret put CONFIG_ENCRYPTION_KEY`.

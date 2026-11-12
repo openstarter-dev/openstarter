@@ -15,13 +15,16 @@ import type { AuthTokens, CliConfig, StoredAuth } from "../types.js";
 const HARDCODED_FALLBACK_URL = "https://app.openstarter.dev";
 
 /**
- * 解析默认 API URL：优先读进程环境里的 OPENSTARTER_API_URL / URL
+ * 解析默认 API URL：优先读进程环境里的 OPENSTARTER_API_URL / VITE_APP_URL / URL
  * （由调用方 shell 或 CI 注入，仓库内本地开发可显式传），缺失再回落硬编码兜底。
  * CLI 是独立发布物，不读取 monorepo 内的 env 文件。
  * 取值在 ConfigManager 实例化时计算一次，避免每次读取都访问 process.env。
  */
 function resolveDefaultApiUrl(): string {
-  const fromEnv = process.env.OPENSTARTER_API_URL?.trim() || process.env.URL?.trim();
+  const fromEnv =
+    process.env.OPENSTARTER_API_URL?.trim() ||
+    process.env.VITE_APP_URL?.trim() ||
+    process.env.URL?.trim();
   if (fromEnv) {
     return fromEnv;
   }

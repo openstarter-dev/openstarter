@@ -10,7 +10,8 @@
 // 优先级（高 → 低）：
 //   1. 进程已存在的 EXPO_PUBLIC_API_URL（CI 或 shell 显式覆盖）—— 不动；
 //   2. apps/mobile/.env 里的 EXPO_PUBLIC_API_URL（真机局域网 IP 覆盖，见 .env.example）；
-//   3. apps/web/.env 的 URL（web 应用地址，也是 API 源）> OPENSTARTER_API_URL > BETTER_AUTH_URL。
+//   3. apps/web/.env 的应用地址（VITE_APP_URL，也接受 URL / BETTER_AUTH_URL 兼容 alias）
+//      > OPENSTARTER_API_URL（显式覆盖，优先级高于应用地址）。
 // 选中 3 时仅当 mobile 本地未覆盖；真机调试仍应在本机 apps/mobile/.env 填局域网 IP。
 
 import { spawn } from "node:child_process";
@@ -43,10 +44,16 @@ if (args.length === 0) {
   process.exitCode = 2;
 }
 
-// 选定 EXPO_PUBLIC_API_URL（高 → 低）：进程已有 > mobile .env > web .env 的 URL。
+// 选定 EXPO_PUBLIC_API_URL（高 → 低）：进程已有 > mobile .env > web .env 的应用地址。
+// web 侧顺序与 @openstarter/shared/app-url 的 resolveAppUrl 保持一致：
+// VITE_APP_URL → URL → BETTER_AUTH_URL。
 const inherited = process.env.EXPO_PUBLIC_API_URL;
 const fromMobile = mobileParsed.EXPO_PUBLIC_API_URL;
-const fromWeb = webParsed.OPENSTARTER_API_URL ?? webParsed.URL ?? webParsed.BETTER_AUTH_URL;
+const fromWeb =
+  webParsed.OPENSTARTER_API_URL ??
+  webParsed.VITE_APP_URL ??
+  webParsed.URL ??
+  webParsed.BETTER_AUTH_URL;
 
 const resolved = inherited ?? fromMobile ?? fromWeb;
 if (!resolved) {
