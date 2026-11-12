@@ -1,7 +1,9 @@
 import { m } from "@openstarter/i18n-web/messages";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { z } from "zod";
 
+import { buildPageTitle } from "@/lib/page-head";
 import { approveDevice, claimDevice, denyDevice, DeviceFlowError } from "@/modules/device/lib/api";
 
 type Phase = "claiming" | "ready" | "approving" | "approved" | "denied" | "error";
@@ -46,12 +48,13 @@ function flowErrorMessage(
   return fallbacks.requestFailed;
 }
 
+const deviceSearchSchema = z.object({ user_code: z.string().optional() });
+
 export const Route = createFileRoute("/_app/device")({
   component: DeviceAuthPage,
+  head: () => buildPageTitle(m["common.device.page_title"]()),
   ssr: false,
-  validateSearch: (search: Record<string, unknown>): { user_code?: string } => ({
-    user_code: typeof search.user_code === "string" ? search.user_code : undefined,
-  }),
+  validateSearch: deviceSearchSchema,
 });
 
 function DeviceAuthPage() {

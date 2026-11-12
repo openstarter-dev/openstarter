@@ -2,6 +2,7 @@ import { m } from "@openstarter/i18n-web/messages";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import SignInForm from "@/components/auth/sign-in-form";
 import SignUpForm from "@/components/auth/sign-up-form";
@@ -18,11 +19,13 @@ function safeRedirect(value: unknown): string {
   return value;
 }
 
+const loginSearchSchema = z.object({
+  error: z.string().optional(),
+  redirect: z.string().optional(),
+});
+
 export const Route = createFileRoute("/_auth-pages/login")({
-  validateSearch: (search: Record<string, unknown>): { error?: string; redirect?: string } => ({
-    error: typeof search.error === "string" ? search.error : undefined,
-    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
-  }),
+  validateSearch: loginSearchSchema,
   head: () =>
     buildPageHead({
       title: m["common.sign.sign_in_title"](),

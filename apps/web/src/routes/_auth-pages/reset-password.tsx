@@ -18,6 +18,11 @@ import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { buildPageHead } from "@/lib/page-head";
 
+const resetPasswordSearchSchema = z.object({
+  error: z.string().optional(),
+  token: z.string().optional(),
+});
+
 export const Route = createFileRoute("/_auth-pages/reset-password")({
   head: () =>
     buildPageHead({
@@ -26,10 +31,7 @@ export const Route = createFileRoute("/_auth-pages/reset-password")({
       path: "/reset-password",
     }),
   component: ResetPasswordPage,
-  validateSearch: (search: Record<string, unknown>): { token?: string; error?: string } => ({
-    error: typeof search.error === "string" ? search.error : undefined,
-    token: typeof search.token === "string" ? search.token : undefined,
-  }),
+  validateSearch: resetPasswordSearchSchema,
 });
 
 const resetSchema = z

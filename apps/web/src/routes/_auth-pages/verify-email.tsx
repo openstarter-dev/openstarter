@@ -11,9 +11,15 @@ import {
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 
 import { authClient } from "@/lib/auth-client";
 import { buildPageHead } from "@/lib/page-head";
+
+const verifyEmailSearchSchema = z.object({
+  callbackUrl: z.string().startsWith("/").optional().catch(undefined),
+  email: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_auth-pages/verify-email")({
   head: () =>
@@ -23,13 +29,7 @@ export const Route = createFileRoute("/_auth-pages/verify-email")({
       path: "/verify-email",
     }),
   component: VerifyEmailPage,
-  validateSearch: (search: Record<string, unknown>): { email?: string; callbackUrl?: string } => ({
-    callbackUrl:
-      typeof search.callbackUrl === "string" && search.callbackUrl.startsWith("/")
-        ? search.callbackUrl
-        : undefined,
-    email: typeof search.email === "string" ? search.email : undefined,
-  }),
+  validateSearch: verifyEmailSearchSchema,
 });
 
 function VerifyEmailPage() {
