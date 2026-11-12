@@ -16,11 +16,11 @@
   },
   "dependencies": {
     "@openstarter/db": "workspace:*",
-    "simple-flakeid": "catalog:",
-    "uuid": "catalog:"
+    "simple-flakeid": "^0.0.5",
+    "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "fast-check": "4.9.0",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "4.1.10"
   }

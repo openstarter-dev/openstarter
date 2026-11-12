@@ -20,7 +20,7 @@
     "@openstarter/analytics": "workspace:*"
   },
   "devDependencies": {
-    "fast-check": "4.9.0",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "4.1.10"
   },

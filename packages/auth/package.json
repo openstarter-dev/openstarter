@@ -26,12 +26,12 @@
     "@openstarter/shared": "workspace:*",
     "better-auth": "catalog:",
     "dotenv": "catalog:",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "catalog:",
     "envin": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "fast-check": "4.9.0",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "4.1.10"
   }

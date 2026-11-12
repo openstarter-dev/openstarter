@@ -20,12 +20,12 @@
   "dependencies": {
     "@openstarter/db": "workspace:*",
     "@openstarter/shared": "workspace:*",
-    "drizzle-orm": "^0.45.1",
-    "stripe": "catalog:",
+    "drizzle-orm": "catalog:",
+    "stripe": "^18.5.0",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "fast-check": "4.9.0",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "4.1.10"
   }

@@ -38,10 +38,10 @@
     "@rn-primitives/toggle": "^1.5.2",
     "@rn-primitives/toggle-group": "^1.5.2",
     "@rn-primitives/tooltip": "^1.5.2",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
     "lucide-react-native": "^1.37.0",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "catalog:"
   },
   "devDependencies": {
     "@types/react": "catalog:",

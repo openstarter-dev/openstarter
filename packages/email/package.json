@@ -17,7 +17,7 @@
   "dependencies": {
     "@openstarter/i18n-web": "workspace:*",
     "@openstarter/shared": "workspace:*",
-    "@react-email/components": "catalog:",
+    "@react-email/components": "^1.0.0",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

@@ -15,8 +15,8 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "i18next": "catalog:",
-    "react-i18next": "catalog:"
+    "i18next": "26.4.0",
+    "react-i18next": "17.0.12"
   },
   "devDependencies": {
     "typescript": "catalog:",

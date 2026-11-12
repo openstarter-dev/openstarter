@@ -38,14 +38,14 @@
   "dependencies": {
     "@libsql/client": "0.15.15",
     "dotenv": "catalog:",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "catalog:",
     "envin": "catalog:",
-    "postgres": "catalog:",
+    "postgres": "^3.4.7",
     "zod": "catalog:"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.8",
-    "fast-check": "4.9.0",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "4.1.10"
   }

@@ -16,23 +16,23 @@
   },
   "dependencies": {
     "@hono/zod-validator": "^0.8.0",
-    "@modelcontextprotocol/client": "catalog:",
-    "@modelcontextprotocol/server": "catalog:",
+    "@modelcontextprotocol/client": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
     "@openstarter/auth": "workspace:*",
     "@openstarter/billing-web": "workspace:*",
     "@openstarter/db": "workspace:*",
     "@openstarter/shared": "workspace:*",
-    "@tanstack/ai": "catalog:",
-    "@tanstack/ai-anthropic": "catalog:",
-    "@tanstack/ai-gemini": "catalog:",
-    "@tanstack/ai-openai": "catalog:",
-    "aws4fetch": "catalog:",
-    "drizzle-orm": "^0.45.1",
+    "@tanstack/ai": "0.61.0",
+    "@tanstack/ai-anthropic": "0.19.1",
+    "@tanstack/ai-gemini": "0.33.1",
+    "@tanstack/ai-openai": "0.24.1",
+    "aws4fetch": "1.0.20",
+    "drizzle-orm": "catalog:",
     "hono": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
-    "fast-check": "4.9.0",
+    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "4.1.10"
   }

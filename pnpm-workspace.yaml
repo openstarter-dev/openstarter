@@ -9,41 +9,37 @@ allowBuilds:
   sharp: true
   workerd: true
 
+# catalog 只放「跨包必须同版本」的依赖：
+#   - 多个 workspace 包共用（react / typescript / hono / zod ...）
+#   - 单包使用但版本强耦合的家族（@better-auth/* 必须与 better-auth 核心同版本）
+# 只有单一消费方的库直接写在该包 package.json 里，不再经过 catalog。
 catalog:
+  # better-auth 家族：插件与核心必须严格同版本，即使当前只有一个包引用也留在这里
   "@better-auth/drizzle-adapter": 1.6.33
   "@better-auth/expo": 1.6.33
   "@better-auth/passkey": 1.6.33
-  "@inlang/paraglide-js": 2.18.2
-  "@mdx-js/react": 3.1.1
-  "@mdx-js/rollup": 3.1.1
-  "@modelcontextprotocol/client": 2.0.0
-  "@modelcontextprotocol/server": 2.0.0
-  "@react-email/components": ^1.0.0
-  "@tanstack/ai": 0.61.0
-  "@tanstack/ai-anthropic": 0.19.1
-  "@tanstack/ai-gemini": 0.33.1
-  "@tanstack/ai-openai": 0.24.1
-  "@types/mdx": 2.0.13
-  "@types/node": ^22.13.14
+  better-auth: 1.6.33
+
+  # 渲染层：web / desktop / extension / mini-app / email / ui-* 共享同一套版本
   "@types/react": 19.2.17
   "@types/react-dom": ^19.2.3
-  aws4fetch: 1.0.20
-  better-auth: 1.6.33
-  dotenv: ^17.2.2
-  envin: ^1.2.0
-  hono: 4.13.8
-  i18next: 26.4.0
-  lucide-react: 0.546.0
-  mysql2: ^3.14.0
-  next-themes: 0.4.6
-  postgres: ^3.4.7
   react: 19.2.7
   react-dom: 19.2.7
-  react-i18next: 17.0.12
-  simple-flakeid: ^0.0.5
-  stripe: ^18.5.0
+  lucide-react: 0.546.0
+  next-themes: 0.4.6
+
+  # 工具链 / 运行时：全仓统一
+  "@tanstack/react-start": ^1.167.41
+  "@types/node": ^22.13.14
+  class-variance-authority: ^0.7.1
+  clsx: ^2.1.1
+  dotenv: ^17.2.2
+  drizzle-orm: ^0.45.1
+  envin: ^1.2.0
+  fast-check: 4.9.0
+  hono: 4.13.8
+  tailwind-merge: ^3.5.0
   typescript: ^6
-  uuid: ^13.0.0
   zod: ^4.1.13
 
 onlyBuiltDependencies:
