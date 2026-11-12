@@ -15,12 +15,12 @@
     "check-types": "tsr generate && tsc --noEmit"
   },
   "dependencies": {
-    "@better-auth/passkey": "catalog:",
     "@mdx-js/react": "3.1.1",
     "@openstarter/analytics-web": "workspace:*",
     "@openstarter/api": "workspace:*",
     "@openstarter/auth": "workspace:*",
     "@openstarter/i18n-web": "workspace:*",
+    "@openstarter/shared": "workspace:*",
     "@openstarter/ui-web": "workspace:*",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/pacer": "^0.22.0",
@@ -32,8 +32,6 @@
     "@tanstack/react-store": "^0.11.1",
     "@tanstack/react-table": "^9.2.4",
     "@tanstack/react-virtual": "^3.14.12",
-    "better-auth": "catalog:",
-    "dotenv": "catalog:",
     "hono": "catalog:",
     "lucide-react": "catalog:",
     "next-themes": "catalog:",
