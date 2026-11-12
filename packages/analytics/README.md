@@ -20,8 +20,12 @@ packages/analytics/
 
 ```ts
 // 1) 根路由：SSR 注入采集脚本 + 读配置
+//    包只提供框架无关的读取器（RPC + 30s TTL 缓存），服务端函数由 app 层持有
+//    （见 apps/web/src/functions/analytics.ts）
 import { buildAnalyticsHeadScripts } from "@openstarter/analytics-web/scripts";
-import { getAnalyticsConfigFn } from "@openstarter/analytics-web/server";
+import { createAnalyticsConfigLoader } from "@openstarter/analytics-web/server";
+const loadAnalyticsConfig = createAnalyticsConfigLoader(); // 每进程一次，复用同一缓存
+const getAnalyticsConfigFn = createServerFn({ method: "GET" }).handler(() => loadAnalyticsConfig());
 
 // 2) 运行时事件（浏览器侧）
 import { createAnalyticsStrategy } from "@openstarter/analytics-web";

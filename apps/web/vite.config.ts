@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { readFileSync } from "node:fs";
 
-import { paraglideVitePlugin } from "@inlang/paraglide-js";
+import { createParaglidePlugin } from "@openstarter/i18n-web/paraglide";
 import mdx from "@mdx-js/rollup";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
@@ -9,13 +9,10 @@ import viteReact from "@vitejs/plugin-react";
 import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 
-// Paraglide compiles the shared en/zh message catalog (defined in
-// packages/i18n/web) into the locale runtime consumed here in apps/web. The
-// inlang project + messages live in packages/i18n/web; the compiled runtime
-// lands in src/paraglide (git-ignored, regenerated on every dev/build).
-const inlangProject = fileURLToPath(
-  new URL("../../packages/i18n/web/project.inlang", import.meta.url),
-);
+// Paraglide compiles the shared en/zh message catalog into the locale runtime
+// consumed here. The inlang project, messages and the plugin factory all live
+// in packages/i18n/web; the compiled runtime lands in src/paraglide
+// (git-ignored, regenerated on every dev/build).
 
 // Cloudflare Workers build (`pnpm cf:build`, NITRO_PRESET=cloudflare_module):
 // stub out DB drivers that don't match the runtime database. mysql2 crashes
@@ -87,8 +84,7 @@ export default defineConfig({
     // Paraglide sits after tailwind and before tanstackStart: it owns the
     // locale-aware URL rewrite (localizeUrl / deLocalizeUrl) and message
     // compilation, leaving the tanstackStart -> viteReact order untouched.
-    paraglideVitePlugin({
-      project: inlangProject,
+    createParaglidePlugin({
       outdir: "./src/paraglide",
       outputStructure: "message-modules",
       cookieName: "PARAGLIDE_LOCALE",

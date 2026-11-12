@@ -23,7 +23,6 @@
   "dependencies": {
     "@openstarter/analytics": "workspace:*",
     "@openstarter/api": "workspace:*",
-    "@tanstack/react-start": "^1.167.41",
     "hono": "catalog:"
   },
   "devDependencies": {

@@ -14,6 +14,9 @@
     "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
   },
+  "dependencies": {
+    "@inlang/paraglide-js": "2.18.2"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "vitest": "4.1.10"
