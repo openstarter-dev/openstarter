@@ -24,7 +24,6 @@
     "@webext-core/proxy-service": "^3.0.2",
     "@webext-core/storage": "^2.0.0",
     "@wxt-dev/i18n": "^0.2.7",
-    "better-auth": "catalog:",
     "hono": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
