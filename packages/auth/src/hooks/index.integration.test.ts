@@ -144,7 +144,8 @@ describe("Task 15.2 new user initialization hook", () => {
 
     await invokeCreateAfterHook();
 
-    expect(await readRole()).toBeNull();
+    // 列默认值为 user（admin 插件的 defaultRole），未知角色名不会写入。
+    expect(await readRole()).toBe("user");
   });
 
   it("keeps role and credit grants idempotent when the hook repeats", async () => {
@@ -199,7 +200,7 @@ describe("Task 15.2 new user initialization hook", () => {
     if (!state.database) {
       throw new Error("Test database is not initialized");
     }
-    expect(await readRole()).toBeNull();
+    expect(await readRole()).toBe("user");
     expect(await state.database.select().from(credit)).toHaveLength(0);
   });
 });

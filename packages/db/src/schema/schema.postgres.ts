@@ -41,7 +41,8 @@ export const user = table(
     isAnonymous: boolean("is_anonymous").default(false),
     locale: text("locale").notNull().default(""),
     name: text("name").notNull(),
-    role: text("role"),
+    // 平台角色唯一载体（better-auth admin 插件同字段）：默认 user，非空。
+    role: text("role").default("user").notNull(),
     twoFactorEnabled: boolean("two_factor_enabled").default(false),
     updatedAt: timestamp("updated_at")
       .defaultNow()

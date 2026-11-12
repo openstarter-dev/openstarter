@@ -37,7 +37,8 @@ export const user = table(
     isAnonymous: integer("is_anonymous", { mode: "boolean" }).default(false),
     locale: text("locale").notNull().default(""),
     name: text("name").notNull(),
-    role: text("role"),
+    // 平台角色唯一载体（better-auth admin 插件同字段）：默认 user，非空。
+    role: text("role").default("user").notNull(),
     twoFactorEnabled: integer("two_factor_enabled", {
       mode: "boolean",
     }).default(false),
