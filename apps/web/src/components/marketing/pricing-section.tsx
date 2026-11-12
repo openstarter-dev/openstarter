@@ -17,8 +17,6 @@ import { authClient } from "@/lib/auth-client";
 import { PRICING_TIERS, type PricingCheckout, type PricingTier } from "@/lib/marketing/pricing";
 import { checkout } from "@/modules/checkout/lib/api";
 
-// qrcode.react（微信支付二维码渲染）仅在某次结账产生二维码时才需要，惰性加载避免
-// 拖进营销首屏包；type-only 的 WechatQr 在编译期被擦除，不产生运行时依赖。
 import type { WechatQr } from "./wechat-qr-overlay";
 
 const WechatQrOverlay = lazy(() =>
@@ -99,11 +97,7 @@ export function PricingSection() {
 
   const checkoutMutation = useMutation({
     ...checkout.mutations.create(),
-    onError: (err) => {
-      toast.error(err.message);
-    },
     onSuccess: (data) => {
-      // 微信 Native 渠道：渲染二维码扫码支付；其余渠道：跳转结账链接（R10.3）。
       if (data.qrData?.codeUrl) {
         if (!data.orderNo) {
           toast.error("Checkout failed: missing order number");
@@ -125,7 +119,6 @@ export function PricingSection() {
   });
 
   function handleCheckout(input: PricingCheckout) {
-    // 未登录用户发起结账 → 重定向到登录页（R10.2）。
     if (!session?.user) {
       navigate({ to: "/login" });
       return;

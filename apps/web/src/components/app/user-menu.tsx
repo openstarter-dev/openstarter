@@ -10,7 +10,8 @@ import {
   DropdownMenuTrigger,
 } from "@openstarter/ui-web/components/dropdown-menu";
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { LogOut, Settings, User, UserCog } from "lucide-react";
 import { useState } from "react";
 
@@ -20,6 +21,8 @@ import { authClient } from "@/lib/auth-client";
 
 export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [manageOpen, setManageOpen] = useState(false);
   const { data: session, isPending } = authClient.useSession();
 
@@ -66,7 +69,12 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             authClient.signOut({
               fetchOptions: {
                 onSuccess: () => {
-                  navigate({ to: "/" });
+                  // 先离开受保护路由，再清空用户态缓存并强制路由重新校验 session，
+                  // 避免换号后命中上一个账号的 fresh 缓存。
+                  void navigate({ to: "/" }).finally(() => {
+                    queryClient.clear();
+                    void router.invalidate();
+                  });
                 },
               },
             });

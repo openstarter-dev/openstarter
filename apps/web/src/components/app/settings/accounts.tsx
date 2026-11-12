@@ -39,7 +39,7 @@ const getLinkLabel = (
 
 export function AccountsPage() {
   const { data: session } = authClient.useSession();
-  const accountsQuery = useQuery({ ...auth.queries.accounts() });
+  const accountsQuery = useQuery(auth.queries.accounts());
   const accounts = accountsQuery.data ?? [];
 
   const [linking, setLinking] = useState<string | null>(null);

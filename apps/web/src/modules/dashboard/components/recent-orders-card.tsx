@@ -1,5 +1,3 @@
-// 仪表盘最近订单卡片：复用 user.queries.orders（第 1 页），紧凑展示最近 5 条。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Badge } from "@openstarter/ui-web/components/badge";
 import { buttonVariants } from "@openstarter/ui-web/components/button";
@@ -40,7 +38,7 @@ function formatAmount(amount: number, currency: string): string {
 }
 
 export function RecentOrdersCard() {
-  const ordersQuery = useQuery({ ...user.queries.orders(1) });
+  const ordersQuery = useQuery(user.queries.orders(1));
 
   const items = (ordersQuery.data?.items ?? []).slice(0, PREVIEW_COUNT);
 

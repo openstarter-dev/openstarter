@@ -1,8 +1,3 @@
-// apps/web/src/routes/admin/settings.tsx
-// 系统设置（Admin_Console · System Settings,R26/R2）：
-// 通过 GET /api/admin/config 拉取 `{configs, settings, groups, tabs}`,
-// 按 tab 切换、按 group 分卡渲染所有平台级开关与凭证项,本地编辑后批量提交。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Card, CardContent, CardHeader } from "@openstarter/ui-web/components/card";
@@ -17,7 +12,7 @@ import {
 } from "@openstarter/ui-web/components/select";
 import { Textarea } from "@openstarter/ui-web/components/textarea";
 import { cn } from "@openstarter/ui-web/lib/utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -47,11 +42,10 @@ const MASK_PREFIX = "••••••••";
 const isMasked = (value: string): boolean => value.startsWith(MASK_PREFIX);
 
 function AdminSettingsPage() {
-  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<string | null>(null);
   const [pending, setPending] = useState<Record<string, string>>({});
 
-  const configQuery = useQuery({ ...admin.queries.config() });
+  const configQuery = useQuery(admin.queries.config());
 
   const { data } = configQuery;
   const configs = data?.configs ?? {};
@@ -61,9 +55,7 @@ function AdminSettingsPage() {
 
   const saveMutation = useMutation({
     ...admin.mutations.saveConfig(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: admin.queries.config().queryKey });
       toast.success(m["admin.settings.save_success"]());
     },
   });

@@ -1,6 +1,3 @@
-// apps/web/src/routes/admin/ai-models.tsx
-// AI 模型目录管理（Task 10）：列表 + Dialog 表单（create/update）+ 删除。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Badge } from "@openstarter/ui-web/components/badge";
 import { Button } from "@openstarter/ui-web/components/button";
@@ -41,9 +38,10 @@ import { countTotalPages, listSearchParams, LIST_PAGE_SIZE } from "@/lib/list-se
 import { preloadQueries } from "@/lib/preload";
 import {
   admin,
+  adminKeys,
+  type AiModelList,
   type AiModelMediaType,
   type AiModelRow,
-  aiModelsKeys,
   AI_MODEL_MEDIA_TYPES,
 } from "@/modules/admin/lib/api";
 
@@ -95,9 +93,9 @@ const parseIntOrNull = (value: string): number | null | undefined => {
 };
 
 function AdminAiModelsPage() {
-  const queryClient = useQueryClient();
   const { page } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const queryClient = useQueryClient();
   const [form, setForm] = useState<ModelForm | null>(null);
 
   const modelsQuery = useQuery(admin.queries.aiModels(page));
@@ -106,34 +104,45 @@ function AdminAiModelsPage() {
     void navigate({ search: (prev) => ({ ...prev, page: next }), replace: true });
   };
 
-  const invalidate = () => {
-    void queryClient.invalidateQueries({ queryKey: aiModelsKeys.all });
-  };
-
   const saveMutation = useMutation({
     ...admin.mutations.saveAiModel(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setForm(null);
-      invalidate();
       toast.success(m["admin.ai_models.saved"]());
     },
   });
 
   const deleteMutation = useMutation({
     ...admin.mutations.deleteAiModel(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
-      invalidate();
       toast.success(m["admin.ai_models.deleted"]());
     },
   });
 
+  /** 开关是纯可预测变更：先改写缓存，失败按 context 回滚，成功后由 meta.invalidates 取真值。 */
   const toggleMutation = useMutation({
     ...admin.mutations.toggleAiModel(),
-    onError: (error: Error) => toast.error(error.message),
+    onMutate: async ({ id, enabled }) => {
+      await queryClient.cancelQueries({ queryKey: adminKeys.aiModels.all });
+      const previous = queryClient.getQueriesData<AiModelList>({
+        queryKey: adminKeys.aiModels.all,
+      });
+      queryClient.setQueriesData<AiModelList>({ queryKey: adminKeys.aiModels.all }, (old) =>
+        old
+          ? {
+              ...old,
+              items: old.items.map((model) => (model.id === id ? { ...model, enabled } : model)),
+            }
+          : old,
+      );
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      for (const [key, data] of context?.previous ?? []) {
+        queryClient.setQueryData(key, data);
+      }
+    },
     onSuccess: () => {
-      invalidate();
       toast.success(m["admin.ai_models.updated"]());
     },
   });

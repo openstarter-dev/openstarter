@@ -1,6 +1,3 @@
-// apps/web/src/routes/admin/index.tsx
-// 管理后台首页（R25.4 / R26.5）：展示 Analytics_Service 汇总指标概览（用户/订单/订阅/积分消耗）。
-
 import { m } from "@openstarter/i18n-web/messages";
 import {
   Card,
@@ -28,7 +25,7 @@ const METRIC_CARDS = [
 ] as const;
 
 function AdminDashboard() {
-  const metricsQuery = useQuery({ ...admin.queries.metrics() });
+  const metricsQuery = useQuery(admin.queries.metrics());
 
   const metrics = metricsQuery.data;
 

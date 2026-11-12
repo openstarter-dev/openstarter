@@ -1,9 +1,3 @@
-// apps/web/src/components/app/app-sidebar.tsx
-// Primary app sidebar built on the shared shadcn Sidebar primitives
-// (@openstarter/ui-web/components/sidebar): collapsible to icons on desktop
-// (state persisted in the sidebar_state cookie, Cmd/Ctrl+B toggles) and a
-// slide-in Sheet on mobile — replacing the old hand-rolled Sidebar + Drawer.
-
 import { m } from "@openstarter/i18n-web/messages";
 import { getLocale, setLocale } from "@openstarter/i18n-web/runtime";
 import {
@@ -29,7 +23,8 @@ import {
   SidebarMenuItem,
 } from "@openstarter/ui-web/components/sidebar";
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { Globe, LogOut, Moon, Sun, User, UserCog } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
@@ -129,11 +124,10 @@ interface SessionUserSummary {
 
 export function AppSidebar({ initialSession }: { initialSession?: SessionUserSummary | null }) {
   const navigate = useNavigate();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const [manageOpen, setManageOpen] = useState(false);
   const { data: session, isPending } = authClient.useSession();
-  // `_app` 的 beforeLoad 在 SSR 阶段已拿到会话，但 better-auth 的 useSession store 首帧
-  // 恒为 pending（且挂载后会自行再拉一次），直接渲染会先出骨架再跳成用户名。
-  // 用路由上下文兜首帧；store 解析后自动接管，保留改资料 / 登出的响应性。
   const activeSession = session ?? initialSession ?? null;
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -184,7 +178,9 @@ export function AppSidebar({ initialSession }: { initialSession?: SessionUserSum
                       <User aria-hidden="true" className="size-4" />
                     </span>
                     <span className="flex min-w-0 flex-col items-start">
-                      <span className="truncate font-medium text-sm">{activeSession.user.name}</span>
+                      <span className="truncate font-medium text-sm">
+                        {activeSession.user.name}
+                      </span>
                       <span className="truncate text-muted-foreground text-xs">
                         {activeSession.user.email}
                       </span>
@@ -205,7 +201,11 @@ export function AppSidebar({ initialSession }: { initialSession?: SessionUserSum
                       authClient.signOut({
                         fetchOptions: {
                           onSuccess: () => {
-                            navigate({ to: "/" });
+                            // 先离开受保护路由，再清空用户态缓存并强制路由重新校验 session。
+                            void navigate({ to: "/" }).finally(() => {
+                              queryClient.clear();
+                              void router.invalidate();
+                            });
                           },
                         },
                       });

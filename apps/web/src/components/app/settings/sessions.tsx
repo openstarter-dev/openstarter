@@ -15,7 +15,7 @@ import { m } from "@openstarter/i18n-web/messages";
 
 export function SessionsPage() {
   const { data: currentSessionData, isPending: isCurrentSessionPending } = authClient.useSession();
-  const sessionsQuery = useQuery({ ...auth.queries.sessions() });
+  const sessionsQuery = useQuery(auth.queries.sessions());
   const sessions = sessionsQuery.data ?? [];
   const currentSessionToken = currentSessionData?.session.token;
   const canRevokeSession = !isCurrentSessionPending && currentSessionToken !== undefined;

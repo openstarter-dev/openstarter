@@ -24,41 +24,32 @@ import {
   TableHeader,
   TableRow,
 } from "@openstarter/ui-web/components/table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { user } from "@/modules/user/lib/api";
 import { m } from "@openstarter/i18n-web/messages";
 
 export function ApiKeysPage() {
-  const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
-  const keysQuery = useQuery({ ...user.queries.apiKeys() });
+  const keysQuery = useQuery(user.queries.apiKeys());
 
   const createMutation = useMutation({
     ...user.mutations.createApiKey(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: (data) => {
       setRevealedKey(data.key);
       setTitle("");
       setCreateOpen(false);
-      queryClient.invalidateQueries({
-        queryKey: user.queries.apiKeys().queryKey,
-      });
       toast.success(m["settings.apikeys.created"]());
     },
   });
 
   const revokeMutation = useMutation({
     ...user.mutations.revokeApiKey(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: user.queries.apiKeys().queryKey,
-      });
       toast.success(m["settings.apikeys.revoke_success"]());
     },
   });

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
 
@@ -30,17 +31,15 @@ vi.mock("next-themes", () => ({
 }));
 
 vi.mock("@tanstack/react-router", () => ({
-  // Spread props so Slot-merged attributes (e.g. data-active from
-  // SidebarMenuButton) land on the rendered anchor, like the real Link does.
   Link: (props: { children?: ReactNode; to: string }) => (
     <a href={props.to} {...props}>
       {props.children}
     </a>
   ),
   Outlet: () => <div data-testid="outlet" />,
-  // AppShell 从 _app 守卫的路由上下文取会话作为侧栏首帧数据；测试里交给 useSession 桩。
   useRouteContext: () => ({ session: null }),
-  useNavigate: () => vi.fn(),
+  useNavigate: () => vi.fn(() => Promise.resolve()),
+  useRouter: () => ({ invalidate: vi.fn(() => Promise.resolve()) }),
   useRouterState: (opts?: { select?: (s: unknown) => unknown }) => {
     const state = { location: { pathname: routerState.pathname } };
     return opts?.select ? opts.select(state) : state;
@@ -50,8 +49,6 @@ vi.mock("@tanstack/react-router", () => ({
 import { AppShell } from "./app-shell";
 
 beforeAll(() => {
-  // jsdom has no matchMedia; useIsMobile (via SidebarProvider) needs it.
-  // matches: false keeps jsdom on the desktop sidebar path.
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
     value: (query: string) => ({
@@ -80,7 +77,12 @@ beforeEach(() => {
   document.cookie = "sidebar_state=; path=/; max-age=0";
 });
 
-const renderShell = () => render(<AppShell />);
+const renderShell = () =>
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <AppShell />
+    </QueryClientProvider>,
+  );
 
 const getSidebar = () =>
   document.querySelector<HTMLElement>('[data-slot="sidebar"]:not([data-mobile])');
@@ -119,8 +121,6 @@ describe("AppShell", () => {
     routerState.pathname = "/settings/profile";
     renderShell();
 
-    // SidebarMenuButton merges data-active onto the child Link via asChild;
-    // the mocked Link spreads it onto the anchor.
     const active = document.querySelector<HTMLElement>(
       'a[data-sidebar="menu-button"][data-active="true"]',
     );

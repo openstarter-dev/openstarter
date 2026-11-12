@@ -1,6 +1,3 @@
-// apps/web/src/routes/admin/roles.tsx
-// 角色管理（R26.2/R26.3）：列出/创建/编辑/删除角色，并覆盖式设置角色权限集合。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Checkbox } from "@openstarter/ui-web/components/checkbox";
@@ -22,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from "@openstarter/ui-web/components/table";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -48,14 +45,13 @@ interface RoleForm {
 const EMPTY_FORM: RoleForm = { id: null, name: "", title: "" };
 
 function AdminRolesPage() {
-  const queryClient = useQueryClient();
   const [form, setForm] = useState<RoleForm | null>(null);
   const [permRoleId, setPermRoleId] = useState<string | null>(null);
   const [selectedPerms, setSelectedPerms] = useState<Set<string>>(new Set());
 
-  const rolesQuery = useQuery({ ...admin.queries.roles() });
+  const rolesQuery = useQuery(admin.queries.roles());
 
-  const permissionsQuery = useQuery({ ...admin.queries.permissions() });
+  const permissionsQuery = useQuery(admin.queries.permissions());
 
   const rolePermsQuery = useQuery({
     ...admin.queries.rolePermissions(permRoleId),
@@ -70,30 +66,22 @@ function AdminRolesPage() {
 
   const saveMutation = useMutation({
     ...admin.mutations.saveRole(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setForm(null);
-      queryClient.invalidateQueries({ queryKey: admin.queries.roles().queryKey });
       toast.success(m["admin.roles.updated"]());
     },
   });
 
   const deleteMutation = useMutation({
     ...admin.mutations.deleteRole(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: admin.queries.roles().queryKey });
       toast.success(m["admin.roles.deleted"]());
     },
   });
 
   const savePermsMutation = useMutation({
     ...admin.mutations.saveRolePermissions(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: admin.queries.rolePermissions(permRoleId).queryKey,
-      });
       setPermRoleId(null);
       toast.success(m["admin.roles.permissions_saved"]());
     },

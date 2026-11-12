@@ -18,7 +18,7 @@ import {
 import { Input } from "@openstarter/ui-web/components/input";
 import { Label } from "@openstarter/ui-web/components/label";
 import { Textarea } from "@openstarter/ui-web/components/textarea";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { tickets } from "@/modules/tickets/lib/api";
@@ -42,14 +42,13 @@ function formatDateTime(value: string | null | undefined): string {
 }
 
 export function TicketsPage() {
-  const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [reply, setReply] = useState("");
 
-  const listQuery = useQuery({ ...tickets.queries.list() });
+  const listQuery = useQuery(tickets.queries.list());
 
   const detailQuery = useQuery({
     ...tickets.queries.detail(selectedId),
@@ -58,29 +57,18 @@ export function TicketsPage() {
 
   const createMutation = useMutation({
     ...tickets.mutations.create(),
-    onError: (error: Error) => toast.error(error.message),
     onSuccess: () => {
       setTitle("");
       setContent("");
       setCreateOpen(false);
-      queryClient.invalidateQueries({
-        queryKey: tickets.queries.list().queryKey,
-      });
       toast.success(m["settings.tickets.create_success"]());
     },
   });
 
   const replyMutation = useMutation({
     ...tickets.mutations.reply(),
-    onError: (error: Error) => toast.error(error.message),
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       setReply("");
-      queryClient.invalidateQueries({
-        queryKey: tickets.queries.detail(variables.id).queryKey,
-      });
-      queryClient.invalidateQueries({
-        queryKey: tickets.queries.list().queryKey,
-      });
       toast.success(m["settings.tickets.close_success"]());
     },
   });

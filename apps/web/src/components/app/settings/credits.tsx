@@ -24,7 +24,7 @@ function formatDate(value: string | null | undefined): string {
 }
 
 export function CreditsPage() {
-  const creditsQuery = useQuery({ ...user.queries.credits() });
+  const creditsQuery = useQuery(user.queries.credits());
 
   const balance = creditsQuery.data?.balance ?? 0;
   const history = creditsQuery.data?.history ?? [];

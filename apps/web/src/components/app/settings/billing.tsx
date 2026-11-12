@@ -9,7 +9,6 @@ import {
 } from "@openstarter/ui-web/components/card";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { toast } from "sonner";
 import { user } from "@/modules/user/lib/api";
 import { m } from "@openstarter/i18n-web/messages";
 
@@ -28,9 +27,9 @@ function formatDate(value: string | null | undefined): string {
 }
 
 export function BillingPage() {
-  const subscriptionQuery = useQuery({ ...user.queries.subscription() });
+  const subscriptionQuery = useQuery(user.queries.subscription());
 
-  const planQuery = useQuery({ ...user.queries.plan() });
+  const planQuery = useQuery(user.queries.plan());
 
   const subscription = subscriptionQuery.data;
   const plan = planQuery.data;
@@ -38,9 +37,6 @@ export function BillingPage() {
 
   const billingPortalMutation = useMutation({
     ...user.mutations.billingPortal(),
-    onError: (err) => {
-      toast.error(err instanceof Error ? err.message : m["settings.billing.portal_failed"]());
-    },
     onSuccess: (data) => {
       if (data?.billingUrl) {
         window.location.href = data.billingUrl;

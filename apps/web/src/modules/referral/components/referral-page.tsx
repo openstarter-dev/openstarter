@@ -1,4 +1,3 @@
-// 分销面板：推荐码/链接 + 统计卡片 + 佣金流水 + 下线列表。
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Card } from "@openstarter/ui-web/components/card";
@@ -41,7 +40,7 @@ export function ReferralPage() {
     toast.success(m["referral_copy_success"]());
   };
 
-  if (!me) {
+  if (meQuery.isPending) {
     return (
       <div className="flex h-full items-center justify-center">
         <p className="text-muted-foreground">{m["referral_title"]()}</p>
@@ -49,11 +48,22 @@ export function ReferralPage() {
     );
   }
 
+  if (meQuery.error) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <p className="text-destructive text-sm">{meQuery.error.message}</p>
+      </div>
+    );
+  }
+
+  if (!me) {
+    return null;
+  }
+
   return (
     <div className="flex w-full flex-col gap-6">
       <h1 className="text-2xl font-bold">{m["referral_title"]()}</h1>
 
-      {/* 统计卡片 */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="p-4">
           <p className="text-muted-foreground text-sm">{m["referral_stats_referred"]()}</p>
@@ -69,7 +79,6 @@ export function ReferralPage() {
         </Card>
       </div>
 
-      {/* 推荐码 + 链接 + 二维码 */}
       <Card className="p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <div className="flex-1">
@@ -85,7 +94,6 @@ export function ReferralPage() {
         </div>
       </Card>
 
-      {/* 佣金流水 */}
       <Card className="p-6">
         <h2 className="mb-4 text-lg font-semibold">{m["referral_commissions_title"]()}</h2>
         <Table>
@@ -127,7 +135,6 @@ export function ReferralPage() {
         )}
       </Card>
 
-      {/* 我的邀请 */}
       <Card className="p-6">
         <h2 className="mb-4 text-lg font-semibold">{m["referral_relations_title"]()}</h2>
         <Table>

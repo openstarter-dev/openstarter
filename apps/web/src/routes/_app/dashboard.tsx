@@ -1,7 +1,3 @@
-// apps/web/src/routes/_app/dashboard.tsx
-// 仪表盘：标准 SaaS 概览布局 —— 顶部欢迎语 + 六格 KPI 统计卡 + 积分动态图 + 最近订单 + 快速开始。
-// 数据面经类型化 RPC（`client.api.user.dashboard-stats`）→ packages/api（requireAuth）。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Alert, AlertDescription, AlertTitle } from "@openstarter/ui-web/components/alert";
 import { createFileRoute } from "@tanstack/react-router";
@@ -15,8 +11,6 @@ import { dashboard } from "@/modules/dashboard/lib/api";
 import { user } from "@/modules/user/lib/api";
 
 export const Route = createFileRoute("/_app/dashboard")({
-  // intent 预加载：hover 时先跑 loader，把 stats + 最近订单预取进 Query 缓存，
-  // 点击后组件的 useQuery 直接命中缓存 → 无等待渲染。
   loader: ({ context: { queryClient } }) =>
     Promise.all([
       queryClient.prefetchQuery(dashboard.queries.stats()),
@@ -29,7 +23,7 @@ function DashboardPage() {
   const { session } = Route.useRouteContext();
   const name = session.data?.user.name ?? "there";
 
-  const statsQuery = useQuery({ ...dashboard.queries.stats() });
+  const statsQuery = useQuery(dashboard.queries.stats());
 
   return (
     <div className="flex w-full flex-col gap-6">
