@@ -71,8 +71,8 @@
     "DATABASE_PROVIDER": "d1",
     // App origin: better-auth baseURL (OAuth callbacks + trustedOrigins), email /
     // payment callbacks and SSR canonical URLs all resolve from this single value
-    // (see packages/shared/src/app-url.ts). VITE_APP_URL / VITE_APP_NAME are read
-    // by better-auth + the shared config layer on the server.
+    // (read directly from process.env by better-auth + the web app). VITE_APP_NAME
+    // is read by the shared config layer.
     "VITE_APP_URL": "https://<your-domain.com>",
     "VITE_APP_NAME": "OpenStarter",
     "VITE_DEFAULT_LOCALE": "en",

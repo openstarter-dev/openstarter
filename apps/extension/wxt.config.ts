@@ -14,9 +14,8 @@ import { EXTENSION_DEFAULT_LOCALE } from "@openstarter/i18n-extension";
 // manifest 支持函数形式（(env) => manifest），故可在构建期读取 process.env。
 //
 // 优先级（高 → 低）：显式 process.env.VITE_APP_URL（CI/shell 覆盖）>
-// OPENSTARTER_API_URL（显式覆盖）> apps/web/.env 的 URL（web 应用地址，也是 API 源）>
-// BETTER_AUTH_URL > localhost 兜底。Wxt 只在 Node 构建期读本文件，不向上遍历
-// monorepo，故需手动加载 apps/web/.env。
+// OPENSTARTER_API_URL（显式覆盖）> localhost 兜底。Wxt 只在 Node 构建期读本文件，
+// 不向上遍历 monorepo，故需手动加载 apps/web/.env。
 const extensionDir = resolve(fileURLToPath(import.meta.url), "..");
 const webEnvFile = resolve(extensionDir, "..", "web", ".env");
 const require = createRequire(import.meta.url);
@@ -69,12 +68,6 @@ function resolveAppUrl(): string {
   }
   if (process.env.OPENSTARTER_API_URL) {
     return process.env.OPENSTARTER_API_URL;
-  }
-  if (process.env.URL) {
-    return process.env.URL;
-  }
-  if (process.env.BETTER_AUTH_URL) {
-    return process.env.BETTER_AUTH_URL;
   }
   return APP_URL_FALLBACK;
 }

@@ -15,7 +15,7 @@ import {
 import { account, permission, rolePermission, user } from "@openstarter/db/schema";
 
 import { db } from "@openstarter/db/server";
-import { resolveAppUrl } from "@openstarter/shared/app-url";
+import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 import { getUuid } from "@openstarter/shared/id";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
@@ -212,7 +212,7 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
   await assignRoleToUser(userId, adminRole.id);
   console.log("[seed-admin] assigned admin role to user");
 
-  const loginUrl = resolveAppUrl();
+  const loginUrl = (process.env.VITE_APP_URL ?? DEFAULT_APP_URL).replace(/\/+$/, "");
   console.log("");
   console.log("================ Admin seed complete ================");
   console.log(`  Login URL : ${loginUrl}/login  (then open ${loginUrl}/admin)`);

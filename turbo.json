@@ -71,8 +71,6 @@
     "DATABASE_AUTH_TOKEN",
     "PRODUCT_NAME",
     "VITE_APP_URL",
-    "URL",
-    "BETTER_AUTH_URL",
     "DEFAULT_LOCALE",
     "OPENSTARTER_API_URL"
   ],

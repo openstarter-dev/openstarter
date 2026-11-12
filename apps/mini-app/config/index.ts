@@ -5,8 +5,7 @@ import type { IProjectConfig } from "@tarojs/taro/types/compile";
 // apps/web/.env 是全仓库唯一 env 事实源。Taro 配置在 Node 构建期执行，
 // 因此这里直接读取 web 应用地址作为 API base，不再依赖根目录 .env。
 // 优先级（高 → 低）：进程环境（CI / shell 注入）> apps/web/.env 的
-// OPENSTARTER_API_URL > VITE_APP_URL > URL > BETTER_AUTH_URL > localhost 兜底
-// （后三者与 @openstarter/shared/app-url 的 resolveAppUrl 保持一致）。
+// OPENSTARTER_API_URL > VITE_APP_URL > localhost 兜底。
 const WEB_ENV_FILE = path.resolve(__dirname, "../../../apps/web/.env");
 
 function parseWebEnv(): Record<string, string> {
@@ -44,11 +43,8 @@ function resolveApiBaseUrl(): string {
   return (
     process.env.OPENSTARTER_API_URL ||
     process.env.VITE_APP_URL ||
-    process.env.URL ||
     fileEnv.OPENSTARTER_API_URL ||
     fileEnv.VITE_APP_URL ||
-    fileEnv.URL ||
-    fileEnv.BETTER_AUTH_URL ||
     "http://localhost:3000"
   );
 }

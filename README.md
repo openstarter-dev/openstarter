@@ -124,9 +124,9 @@ Every entry point reads it directly — Vite and `dotenv` for the web app,
 `packages/db` for migrations, each app's own build entry for the rest — so no
 global env wrapper is needed. `pnpm with-env <cmd>` is available for manual
 injection, and every app derives its API base URL from `VITE_APP_URL` (falling
-back to `APP_URL` / `BETTER_AUTH_URL` / `URL`, then `http://localhost:3000` — so
-local dev needs none of them). Better-auth's `baseURL`, SSR canonical URLs and
-email links resolve through the same `packages/shared/src/app-url.ts` helper.
+back to `http://localhost:3000`, so local dev needs no value). Better-auth's
+`baseURL`, SSR canonical URLs and email links read that same variable directly
+from `process.env` — there are no aliases.
 
 Two templates are kept in sync key-by-key: `apps/web/.env.example` (local dev)
 and `apps/web/.env.production.example` (production). On Cloudflare Workers the

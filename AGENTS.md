@@ -167,11 +167,10 @@ Required variables:
   `d1`, Workers reads the `DB` binding and local dev falls back to the sqlite
   file at this URL (`file:local.db` at the repo root, created by `pnpm db:push`
   / `pnpm db:migrate`)
-- `VITE_APP_URL` — web app origin (also the API origin). Resolved once by
-  `packages/shared/src/app-url.ts` (`VITE_APP_URL` → `APP_URL` →
-  `BETTER_AUTH_URL` → `URL` → `http://localhost:3000`) and used for better-auth's
-  `baseURL`, SSR canonical URLs, email links and every app's derived API base;
-  `BETTER_AUTH_URL` / `URL` remain supported as aliases
+- `VITE_APP_URL` — web app origin (also the API origin). Read directly from
+  `process.env` by better-auth's `baseURL`, SSR canonical URLs, email links and
+  every app's derived API base; missing value falls back to
+  `http://localhost:3000` locally. There are no aliases — this is the only key
 - `PRODUCT_NAME` — Used in emails, marketing site
 - `DEFAULT_LOCALE` — Default i18n locale (e.g., `en-US`)
 

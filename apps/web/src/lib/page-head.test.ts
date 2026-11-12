@@ -3,7 +3,7 @@ import { buildPageHead } from "./page-head";
 
 describe("buildPageHead", () => {
   beforeEach(() => {
-    process.env.BETTER_AUTH_URL = "https://example.com";
+    process.env.VITE_APP_URL = "https://example.com";
   });
 
   it("generates title with brand suffix", () => {
@@ -191,8 +191,8 @@ describe("buildPageHead", () => {
     });
   });
 
-  it("uses BETTER_AUTH_URL alias for site URL", () => {
-    process.env.BETTER_AUTH_URL = "https://mysite.com";
+  it("strips trailing slash from the configured site URL", () => {
+    process.env.VITE_APP_URL = "https://mysite.com/";
     const result = buildPageHead({ title: "Page", path: "/page" });
     expect(result.links).toContainEqual({
       rel: "canonical",
@@ -200,21 +200,8 @@ describe("buildPageHead", () => {
     });
   });
 
-  it("prefers VITE_APP_URL over BETTER_AUTH_URL", () => {
-    process.env.VITE_APP_URL = "https://app.example.com";
-    const result = buildPageHead({ title: "Page", path: "/page" });
+  it("falls back to localhost when VITE_APP_URL is not set", () => {
     delete process.env.VITE_APP_URL;
-    expect(result.links).toContainEqual({
-      rel: "canonical",
-      href: "https://app.example.com/page",
-    });
-  });
-
-  it("falls back to localhost when no app URL env is set", () => {
-    delete process.env.BETTER_AUTH_URL;
-    delete process.env.VITE_APP_URL;
-    delete process.env.APP_URL;
-    delete process.env.URL;
     const result = buildPageHead({ title: "Page", path: "/page" });
     expect(result.links).toContainEqual({
       rel: "canonical",
