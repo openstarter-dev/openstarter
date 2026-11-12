@@ -1,12 +1,3 @@
-// 管理后台通用数据表（react-table legacy + react-virtual + react-store 组合）。
-//
-// 用 react-table（v9 的 v8 兼容入口 `useLegacyTable`）做无头表格：列定义、列
-// 可见性由 react-table 管理；列可见性偏好经 react-store 跨组件共享并持久化到
-// localStorage（见 column-visibility.ts）；`virtualized` 开启时用 react-virtual
-// 对行做虚拟滚动，适用于长列表（订单/积分流水）。
-//
-// 消费侧只负责「列定义 + 数据」，统一渲染 shadcn Table，消除各列表页重复表格。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Checkbox } from "@openstarter/ui-web/components/checkbox";
@@ -66,7 +57,6 @@ export function DataTable<TData extends RowData>({
   const columnVisibility = useColumnVisibility(tableKey);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // 挂载后从 localStorage 恢复本表偏好（SSR 首渲染保持一致，见 column-visibility.ts）。
   useEffect(() => {
     restoreColumnVisibility(tableKey);
   }, [tableKey]);

@@ -1,8 +1,3 @@
-// 回归测试：intent 预加载的 loader 接线契约（与 router.tsx 的 defaultPreload:"intent" 配套）。
-// 1) 每个数据路由都有 loader，且预取的 queryKey 与组件挂载时 useQuery 的 key 一致（缓存才能命中）。
-// 2) loader 必须吞掉取数错误（prefetchQuery 语义），不得升级为导航失败（ensureQueryData 会抛，
-//    会把组件自带的内联错误 UI 变成整页 ErrorPage）。
-
 import { QueryClient } from "@tanstack/react-query";
 import type { AnyRoute } from "@tanstack/react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -24,7 +19,6 @@ import { Route as AdminSettingsRoute } from "./admin/settings";
 import { Route as AdminSubscriptionsRoute } from "./admin/subscriptions";
 import { Route as AdminUsersRoute } from "./admin/users";
 
-// 组件挂载时消费的同款 key（分页页对齐 page=1 / 无搜索的初始 state）。
 const ROUTE_QUERY_KEYS: Record<string, { keys: unknown[][]; route: AnyRoute }> = {
   "/_app/dashboard": {
     keys: [
@@ -62,8 +56,6 @@ const ROUTE_QUERY_KEYS: Record<string, { keys: unknown[][]; route: AnyRoute }> =
   "/admin/ai-models": { keys: [["admin", "ai-models", 1]], route: AdminAiModelsRoute },
 };
 
-// 全局 fetch 打桩：所有 RPC / better-auth 请求一律 500，loader 取数必然失败。
-// 覆盖 @/lib/api 的 hc 单例与 better-auth 客户端（两者都走 fetch）。
 beforeEach(() => {
   vi.stubGlobal(
     "fetch",
@@ -87,7 +79,6 @@ const runLoader = async (route: AnyRoute, queryClient: QueryClient) => {
     throw new Error(`${route.fullPath}: missing loader — intent preloading fetches JS only`);
   }
   if (typeof loader === "function") {
-    // loader 只依赖 context.queryClient；其余字段以 never 形状占位。
     await loader({
       abortController: new AbortController(),
       context: { queryClient },
@@ -99,7 +90,6 @@ const runLoader = async (route: AnyRoute, queryClient: QueryClient) => {
       remountDeps: undefined,
     } as never);
   } else {
-    // 对象形式（loader: { handler }），本仓库暂未使用；防御性覆盖。
     await loader.handler({ context: { queryClient }, params: {}, preload: false } as never);
   }
 };
@@ -111,9 +101,7 @@ describe("route loaders (defaultPreload: intent)", () => {
       const queryClient = new QueryClient({
         defaultOptions: { queries: { retry: false, staleTime: 60 * 1000 } },
       });
-      // 取数 500 时 loader 必须正常 resolve（导航继续，错误由组件内联呈现）。
       await expect(runLoader(route, queryClient)).resolves.not.toThrow();
-      // 预取后各 key 在缓存中留下 query 记录 —— 证明 loader 预取的正是这些 key。
       for (const key of keys) {
         expect(queryClient.getQueryCache().find({ queryKey: key })).toBeDefined();
       }

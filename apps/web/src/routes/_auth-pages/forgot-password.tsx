@@ -35,7 +35,6 @@ function ForgotPasswordPage() {
     defaultValues: { email: "" },
     onSubmit: async ({ value }) => {
       setError("");
-      // 重置链接指向前端 /reset-password（携带令牌）。
       const redirectTo = `${window.location.origin}/reset-password`;
       const result = await authClient.requestPasswordReset({
         email: value.email,
@@ -45,7 +44,6 @@ function ForgotPasswordPage() {
         setError(result.error.message || m["common.sign.password_reset_request_failed"]());
         return;
       }
-      // 账户枚举防护（R6.6）：无论邮箱是否存在均展示一致的通用结果。
       setSent(true);
     },
     validators: {

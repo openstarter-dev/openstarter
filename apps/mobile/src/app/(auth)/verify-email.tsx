@@ -1,9 +1,3 @@
-// verify-email 屏：提示用户点击邮件里的验证链接。
-//
-// 入口：sign-in/sign-up 捕获 EMAIL_NOT_VERIFIED（或注册后服务端要求验证）→
-// sendVerificationEmail → router.replace("/verify-email?email=…")。
-// 屏内能力：重发（带倒计时）+ 有界轮询 —— autoSignInAfterVerification 打开时
-// 服务端在验证后自动建立会话，getSession 轮询捕捉到会话即完成（门禁接管跳转）。
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "@openstarter/i18n-mobile";
 import { Button, Text } from "@openstarter/ui-mobile";
@@ -31,7 +25,6 @@ export default function VerifyEmailScreen() {
   const [sending, setSending] = useState(false);
   const pollStartRef = useRef<number | null>(null);
 
-  // 缺邮箱无法重发/归属：回登录页重新走一遍。
   useEffect(() => {
     if (!email) {
       router.replace("/sign-in");
@@ -61,7 +54,6 @@ export default function VerifyEmailScreen() {
       }
       void authClient.getSession().then(({ data }) => {
         if (data?.user) {
-          // 会话已建立：门禁（(auth)/_layout）会因会话变化把人送回主界面。
           return;
         }
         setTimeout(pollForSession, POLL_INTERVAL_MS);

@@ -14,7 +14,6 @@ export default function HomeScreen() {
   const planQuery = useUserPlan();
   const result = planQuery.data;
 
-  // 401 = 未登录，而不是错误：清掉会话，门禁随即把人送回登录页（spec §7 第 2 条）。
   useEffect(() => {
     if (result?.status === "unauthorized") {
       authClient.signOut().catch(() => undefined);

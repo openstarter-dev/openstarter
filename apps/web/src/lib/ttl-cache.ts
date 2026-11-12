@@ -1,16 +1,3 @@
-// 进程内 TTL 缓存（服务端专用）。
-//
-// 为博客 SSR server fn 等低频变更数据挡住重复回源查询：TTL 命中期内同一 key 直接
-// 返回缓存副本。语义有意保持精简（勿扩展成通用缓存库）：
-//   - 惰性过期：get 时检查 expiresAt，过期即删并视为未命中；
-//   - 容量上限：超限按插入顺序逐出最旧条目（FIFO 而非 LRU——目的是防无限增长，
-//     不追求最优逐出）；
-//   - loader 异常不缓存：wrap() 让错误自然上抛，失败请求不产生缓存条目；
-//   - 不支持缓存 undefined 值（wrap 视 undefined 为未命中，与「无值」歧义）；
-//   - 无并发去重：同 key 并发未命中各自回源（SSR 场景每请求 key 基本不同，
-//     引入 inflight 表不值得）。
-// Workers 上每个 isolate 各自持有缓存，语义为「最终 TTL 内一致」，非强一致。
-
 export interface TtlCache<V> {
   get(key: string): V | undefined;
   set(key: string, value: V): void;
@@ -42,7 +29,6 @@ export function createTtlCache<V>(options: { ttlMs: number; maxEntries?: number 
   }
 
   function set(key: string, value: V): void {
-    // 已存在的 key 重置为新条目（同时刷新其在 Map 中的插入顺序，FIFO 逐出更公平）。
     if (entries.has(key)) {
       entries.delete(key);
     }

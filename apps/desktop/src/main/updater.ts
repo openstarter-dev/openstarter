@@ -1,9 +1,3 @@
-// apps/desktop/src/updater.ts —— 自动更新策略（纯函数）+ electron-updater 调用封装。
-//
-// shouldCheckForUpdates/hasPublishConfig 是纯函数，可在纯 Node 环境下被 vitest 覆盖。
-// maybeCheckForUpdates 用动态 import 引入 electron-updater，使这个文件的顶层不产生
-// 对 electron-updater 的静态依赖（该依赖只在 main.ts 实际调用时才加载）。
-// 详见 docs/superpowers/specs/2026-08-01-desktop-app-design.md §7。
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
@@ -31,7 +25,7 @@ export function hasPublishConfig(resourcesPath: string): boolean {
 
 /**
  * 在满足 shouldCheckForUpdates 条件时触发一次检查。失败只记日志，不弹框
- * （远程模式下网络本就不稳，见 spec §7）。
+ * （远程模式下网络本就不稳）。
  */
 export async function maybeCheckForUpdates(isPackaged: boolean): Promise<void> {
   const disabled = isUpdaterDisabled(process.env);

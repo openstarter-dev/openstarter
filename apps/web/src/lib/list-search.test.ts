@@ -1,6 +1,3 @@
-// 列表 URL 状态 schema 的边界行为：脏查询参数必须安全回落，不能让手改地址栏
-// （?page=0 / ?page=abc）把 loader 炸成整页错误。
-
 import { describe, expect, it } from "vitest";
 
 import { countTotalPages, listSearchParams, listUsersSearchParams } from "./list-search";
@@ -31,9 +28,7 @@ describe("listUsersSearchParams", () => {
       page: 1,
       q: "user@x.com",
     });
-    // 超长输入截断到 200 字符（仍可搜索前缀），而非整段丢弃。
     expect(listUsersSearchParams.parse({ q: "x".repeat(500) }).q).toHaveLength(200);
-    // 非字符串脏值回落空串。
     expect(listUsersSearchParams.parse({ q: 42 }).q).toBe("");
   });
 

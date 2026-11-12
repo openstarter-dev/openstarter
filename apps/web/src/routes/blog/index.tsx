@@ -1,8 +1,3 @@
-// 博客列表页（R16.1 / R16.3 / R16.5）。
-//
-// SSR 经 RPC 调 GET /api/blog 拉取已发布文章，展示标题/摘要/封面/发布信息；支持按分类精确筛选
-// （?category=，仅展示归属该分类的已发布文章）；文案依当前 locale 渲染。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Link, createFileRoute } from "@tanstack/react-router";
 

@@ -34,8 +34,6 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // 与 api-proxy 同理：Node fetch 无默认 Origin，不带会被 better-auth
-          // 以 "Missing or null Origin" 拒绝（见 api-proxy.getRequestOrigin）。
           Origin: getRequestOrigin(baseUrl),
         },
         body: JSON.stringify({ email, password }),
@@ -53,7 +51,6 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
         throw new Error(message);
       }
 
-      // Extract session token from Set-Cookie header
       const cookies: string[] = [];
       if (typeof response.headers.getSetCookie === "function") {
         cookies.push(...response.headers.getSetCookie());
@@ -69,7 +66,6 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
 
       const token = sessionCookie.split(";")[0]!.split("=").slice(1).join("=");
 
-      // Parse body before storing token — if body parse fails, no orphaned token
       const rawBody: unknown = await response.json();
       const body = rawBody as {
         user?: AuthUser;
@@ -101,7 +97,6 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
       try {
         await apiRequest({ method: "POST", path: "/api/auth/sign-out" });
       } finally {
-        // Always clear the local token, even if the API call fails
         tokenStore.clear();
       }
     },

@@ -53,7 +53,6 @@ describe("auth-store", () => {
       data: { user: { id: "1", email: "a@b.com" } },
     });
 
-    // Provide a token in storage
     const Taro = (await import("@tarojs/taro")).default as any;
     Taro.getStorageSync.mockReturnValue("test-token");
 

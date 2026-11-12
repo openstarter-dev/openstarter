@@ -1,5 +1,3 @@
-// apps/desktop/src/renderer/components/OAuthButtons.tsx —— OAuth 登录按钮
-
 import { Button } from "@openstarter/ui-web/components/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -13,7 +11,6 @@ export function OAuthButtons() {
       await signInOAuth(provider);
       navigate("/");
     } catch (err) {
-      // Error is handled by the OAuth window (user cancelled, etc.)
       console.error("OAuth failed:", err);
     }
   };

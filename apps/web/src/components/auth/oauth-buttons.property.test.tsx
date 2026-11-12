@@ -26,8 +26,6 @@ vi.mock("@/lib/auth-client", () => ({
   },
 }));
 
-// 组件直接消费 `useQuery(publicConfig.queries.get())`（见 sign-in/sign-up-form）。
-// 此处拦下 useQuery 返回受控的公开配置，与原有 usePublicConfig mock 语义一致。
 vi.mock("@tanstack/react-query", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/react-query")>();
   return {

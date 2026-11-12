@@ -1,6 +1,3 @@
-// apps/mini-app/src/hooks/use-auth.ts
-// 认证 hook（整合 better-auth client）
-
 import { useCallback } from "react";
 import { useAuthStore, type UserInfo } from "@/stores/auth-store";
 import { authClient } from "@/lib/auth-client";

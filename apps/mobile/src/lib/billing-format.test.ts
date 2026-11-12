@@ -1,5 +1,3 @@
-// billing-format 单测：金额/日期格式化与流水、订单过滤均为纯函数，Node 下可测。
-
 import { describe, expect, it } from "vitest";
 
 import {

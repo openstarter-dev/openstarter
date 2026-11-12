@@ -1,4 +1,3 @@
-// apps/extension/src/components/toast.tsx
 import { Toaster as SonnerToaster } from "sonner";
 
 export function Toaster() {

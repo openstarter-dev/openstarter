@@ -1,11 +1,3 @@
-// 无密码登录入口(Magic Link / Email OTP):依据 Config 启用集合渲染对应 UI。
-//
-// - Magic Link:输入邮箱后下发一次性登录链接到该邮箱;用户点击链接即完成登录。
-// - Email OTP:输入邮箱后下发一次性验证码到该邮箱;用户在下一屏输入验证码完成登录。
-//
-// 由 admin 后台的 System Settings 开关 `magic_link_enabled` / `email_otp_enabled` 控制,
-// 公共配置端点(`/api/config/public)下发到前端;开关关闭时本组件不渲染对应入口。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Input } from "@openstarter/ui-web/components/input";

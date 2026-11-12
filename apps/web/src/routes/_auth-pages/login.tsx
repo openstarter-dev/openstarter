@@ -19,8 +19,6 @@ function safeRedirect(value: unknown): string {
 }
 
 export const Route = createFileRoute("/_auth-pages/login")({
-  // OAuth 失败/取消经 errorCallbackURL 回退至 `/login?error=oauth`（R5.4）。
-  // `redirect` 由受保护路由的守卫写入（登录后回跳到原目标）。
   validateSearch: (search: Record<string, unknown>): { error?: string; redirect?: string } => ({
     error: typeof search.error === "string" ? search.error : undefined,
     redirect: typeof search.redirect === "string" ? search.redirect : undefined,
@@ -47,7 +45,6 @@ function LoginPage() {
 
   return (
     <>
-      {/* Google One Tap：依公开配置渲染（未开启时为 no-op）。 */}
       <OneTapPrompt callbackURL={redirectTo} />
       {showSignIn ? (
         <SignInForm onSwitchToSignUp={() => setShowSignIn(false)} redirectTo={redirectTo} />

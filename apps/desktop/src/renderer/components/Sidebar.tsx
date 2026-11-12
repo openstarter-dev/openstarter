@@ -1,5 +1,3 @@
-// apps/desktop/src/renderer/components/Sidebar.tsx —— 侧边栏导航
-
 import { NavLink, useNavigate } from "react-router-dom";
 import { Button } from "@openstarter/ui-web/components/button";
 import { useAuth } from "../contexts/AuthContext";

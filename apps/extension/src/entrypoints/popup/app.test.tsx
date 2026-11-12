@@ -9,7 +9,6 @@ import { AuthStateProvider, useSetSignedOut } from "../../lib/auth-state";
 import type { AppDeps } from "./app";
 import { App } from "./app";
 
-// Mock the browser tabs API
 vi.mock("wxt/browser", () => ({
   browser: {
     tabs: {
@@ -179,7 +178,6 @@ describe("App", () => {
 
   it("shows loading state while queries are pending", async () => {
     const mockApi = createMockApi();
-    // Make the API calls never resolve to simulate pending state
     mockApi.api.user.credits.$get.mockReturnValue(new Promise(() => {}));
     mockApi.api.user.plan.$get.mockReturnValue(new Promise(() => {}));
     mockApi.api.user.subscription.$get.mockReturnValue(new Promise(() => {}));
@@ -198,7 +196,6 @@ describe("App", () => {
 
   it("shows error state when a query fails", async () => {
     const mockApi = createMockApi();
-    // Make credits query fail
     mockApi.api.user.credits.$get.mockResolvedValue({
       ok: false,
       status: 500,

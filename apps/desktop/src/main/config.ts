@@ -1,6 +1,3 @@
-// apps/desktop/src/main/config.ts —— 简化版，只保留运行模式判断和更新开关。
-// 桌面端不再加载远程 URL，改为加载本地构建产物或 Vite dev server。
-
 export type DesktopMode = "dev" | "prod";
 
 /** 依据 app.isPackaged 判断运行模式。 */

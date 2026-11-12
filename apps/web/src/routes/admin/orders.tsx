@@ -1,6 +1,3 @@
-// apps/web/src/routes/admin/orders.tsx
-// 订单管理（R26.2）：分页列表，由通用 DataTable（react-table + react-virtual）渲染。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Badge } from "@openstarter/ui-web/components/badge";
 import { useQuery } from "@tanstack/react-query";
@@ -33,7 +30,6 @@ function AdminOrdersPage() {
   const total = ordersQuery.data?.total ?? 0;
   const totalPages = countTotalPages(total, LIST_PAGE_SIZE);
 
-  // 列定义 memo 化保持稳定引用；header/cell 用函数在渲染时取当前 locale。
   const columns = useMemo<DataColumn<AdminOrderRow>[]>(
     () => [
       columnHelper.accessor("orderNo", {

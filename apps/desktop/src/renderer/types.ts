@@ -1,5 +1,3 @@
-// apps/desktop/src/renderer/types.ts —— 类型定义
-
 export interface AppSettings {
   launchOnStart: boolean;
   minimizeToTray: boolean;
@@ -30,7 +28,6 @@ export interface ElectronAPI {
   platform: string;
   getVersion: () => Promise<string>;
 
-  // 认证
   authSignInEmail: (params: {
     email: string;
     password: string;
@@ -46,7 +43,6 @@ export interface ElectronAPI {
   }>;
   apiRequest: (request: { method: string; path: string; body?: unknown }) => Promise<ApiResponse>;
 
-  // 文件系统
   openFile: (options?: {
     filters?: { name: string; extensions: string[] }[];
   }) => Promise<string | null>;
@@ -54,15 +50,12 @@ export interface ElectronAPI {
   readFile: (path: string) => Promise<string | null>;
   writeFile: (path: string, data: string) => Promise<boolean>;
 
-  // 设置
   getSettings: () => Promise<AppSettings>;
   setSettings: (settings: Partial<AppSettings>) => Promise<AppSettings>;
 
-  // 窗口操作
   showWindow: () => Promise<void>;
   minimizeToTray: () => Promise<void>;
 
-  // 快捷键事件监听
   onShortcut: (callback: (action: string) => void) => () => void;
   retry: () => Promise<void>;
 }

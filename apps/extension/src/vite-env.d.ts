@@ -5,7 +5,7 @@
 // （MANIFEST_VERSION / BROWSER / COMMAND 等），不包含 VITE_ 前缀的自定义变量，
 // 见 https://wxt.dev/guide/essentials/config/environment-variables。
 // vite/client 提供通用 ImportMetaEnv 索引签名，此处再精确补上 VITE_APP_URL
-// 以获得严格类型（与 docs/superpowers/specs/2026-08-01-browser-extension-app-design.md §5 对齐）。
+// 以获得严格类型（与浏览器扩展设计文档的类型声明对齐）。
 interface ImportMetaEnv {
   readonly VITE_APP_URL: string;
 }

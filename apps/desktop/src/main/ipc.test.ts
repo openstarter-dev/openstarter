@@ -1,7 +1,3 @@
-// apps/desktop/src/main/ipc.test.ts —— 测试 IPC 模块的纯逻辑部分
-// 注意：ipcMain.handle 的注册需要 Electron 运行时，这里只测试纯函数
-// readSettings / writeSettings 是纯逻辑
-
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -30,8 +26,8 @@ describe("readSettings", () => {
 
     const settings = readSettings(dir);
     expect(settings.theme).toBe("dark");
-    expect(settings.launchOnStart).toBe(true); // default
-    expect(settings.minimizeToTray).toBe(true); // default
+    expect(settings.launchOnStart).toBe(true);
+    expect(settings.minimizeToTray).toBe(true);
 
     rmSync(dir, { force: true, recursive: true });
   });
@@ -55,7 +51,6 @@ describe("writeSettings", () => {
     expect(result.theme).toBe("dark");
     expect(result.autoStart).toBe(true);
 
-    // 读回确认
     const readBack = readSettings(dir);
     expect(readBack.theme).toBe("dark");
     expect(readBack.autoStart).toBe(true);
@@ -71,7 +66,7 @@ describe("writeSettings", () => {
     const readBack = readSettings(dir);
     expect(readBack.theme).toBe("dark");
     expect(readBack.autoStart).toBe(true);
-    expect(readBack.minimizeToTray).toBe(true); // default
+    expect(readBack.minimizeToTray).toBe(true);
 
     rmSync(dir, { force: true, recursive: true });
   });

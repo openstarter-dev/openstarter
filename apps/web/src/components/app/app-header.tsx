@@ -1,7 +1,3 @@
-// apps/web/src/components/app/app-header.tsx
-// Sticky top header for the app shell: sidebar trigger (desktop collapse +
-// mobile drawer), the current section title, and a right-hand action slot.
-
 import { SidebarTrigger } from "@openstarter/ui-web/components/sidebar";
 import { useRouterState } from "@tanstack/react-router";
 

@@ -24,7 +24,6 @@ export const Route = createFileRoute("/_auth-pages/verify-email")({
     }),
   component: VerifyEmailPage,
   validateSearch: (search: Record<string, unknown>): { email?: string; callbackUrl?: string } => ({
-    // 仅接受站内相对路径，防止邮件链接里的 callbackUrl 被用作 open redirect。
     callbackUrl:
       typeof search.callbackUrl === "string" && search.callbackUrl.startsWith("/")
         ? search.callbackUrl

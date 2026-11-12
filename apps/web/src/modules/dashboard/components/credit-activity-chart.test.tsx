@@ -1,6 +1,3 @@
-// 积分动态图组件测试：SVG 渲染（两条序列路径 + 图例 + sr-only 表视图）、
-// 指针/键盘读数、pending 骨架。ResizeObserver 以固定宽度打桩，使绘图层在 jsdom 下可测。
-
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -10,7 +7,6 @@ import type { DashboardStats } from "./stats-view";
 const CHART_WIDTH = 640;
 
 beforeAll(() => {
-  // jsdom 无 ResizeObserver：observe 时立即以固定 contentRect 回放一次。
   class ResizeObserverStub {
     private readonly observerCallback: ResizeObserverCallback;
     constructor(callback: ResizeObserverCallback) {
@@ -70,14 +66,12 @@ describe("CreditActivityChart", () => {
     for (const path of paths) {
       const d = path.getAttribute("d") ?? "";
       expect(d.startsWith("M ")).toBe(true);
-      // 29 段三次曲线（30 个点）。
       expect((d.match(/C /g) ?? []).length).toBe(29);
     }
-    // 图例 + 表头都会出现序列名，取图例行校验。
     expect(screen.getAllByText("Granted").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Used").length).toBeGreaterThan(0);
     const table = screen.getByRole("table");
-    expect(within(table).getAllByRole("row")).toHaveLength(31); // 表头 + 30 天
+    expect(within(table).getAllByRole("row")).toHaveLength(31);
   });
 
   it("空趋势数据不抛错，控件仍在", () => {
@@ -106,7 +100,6 @@ describe("CreditActivityChart", () => {
   it("鼠标按 x 吸附最近数据点，离开即收起读数", () => {
     renderChart();
     const slider = screen.getByRole("slider");
-    // jsdom 的 getBoundingClientRect 全 0：localX = clientX；左内边距 48，末点 x = 48+576。
     fireEvent.mouseMove(slider, { clientX: 48 });
     expect(slider.getAttribute("aria-valuenow")).toBe("1");
     expect(slider.getAttribute("aria-valuetext")).toContain(stats.trend[0].date);

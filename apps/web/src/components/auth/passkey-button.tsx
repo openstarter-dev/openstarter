@@ -1,7 +1,3 @@
-// Passkey 登录入口：浏览器 WebAuthn 流程（better-auth passkeyClient）。
-// 由 passkey 插件注册即可用（服务端 passkey() 无条件挂载，无 admin 开关）；
-// 仅在浏览器支持 WebAuthn（window.PublicKeyCredential）时渲染按钮。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Fingerprint } from "lucide-react";
@@ -19,7 +15,6 @@ interface PasskeyButtonProps {
 }
 
 export function PasskeyButton(_props: PasskeyButtonProps) {
-  // 认证页路由为 ssr:false，此处可直接在首渲时同步探测 WebAuthn 能力。
   const [supported] = useState(isWebAuthnSupported);
   const [submitting, setSubmitting] = useState(false);
 
@@ -37,7 +32,6 @@ export function PasskeyButton(_props: PasskeyButtonProps) {
       }
       toast.success(m["common.sign.two_factor_success"]());
     } catch (error) {
-      // 用户取消 WebAuthn 弹窗等浏览器侧异常：静默即可，无需报错打断。
       if (error instanceof Error && error.name === "NotAllowedError") {
         return;
       }

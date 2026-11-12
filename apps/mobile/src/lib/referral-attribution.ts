@@ -1,4 +1,3 @@
-// ?ref= 归因捕获：expo-secure-store 暂存（30 天 TTL），注册成功后一次性 bind。
 import { getItem, setItem, deleteItemAsync } from "expo-secure-store";
 
 import { apiClient } from "@/lib/api";
@@ -16,7 +15,6 @@ export function captureReferralAttribution(code: string): void {
   try {
     setItem(STORAGE_KEY, JSON.stringify({ at: Date.now(), code } satisfies StoredReferral));
   } catch {
-    // SecureStore 不可用/被禁：静默（归因是旁路）
   }
 }
 
@@ -39,7 +37,6 @@ export async function clearReferralAttribution(): Promise<void> {
   try {
     await deleteItemAsync(STORAGE_KEY);
   } catch {
-    // 忽略清除失败
   }
 }
 
@@ -52,10 +49,8 @@ export async function bindReferralAfterSignup(): Promise<void> {
       json: { code },
     });
     if (res.ok || res.status === 409 || res.status === 422) {
-      // 成功或 ALREADY_REFERRED 等也清除，避免反复重试
       await clearReferralAttribution();
     }
   } catch {
-    // 网络失败保留归因，下次登录页可重试
   }
 }

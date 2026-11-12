@@ -1,9 +1,3 @@
-// apps/desktop/src/window-state.ts —— 窗口尺寸位置的解析、校验、文件持久化。
-//
-// 不引入 electron-store，用 app.getPath("userData") 下的一个 JSON 文件即可（与仓库
-// 既有的"零额外 dev 依赖"风格一致，见 spec §5）。单独成文件是因为"解析一个可能已损坏的
-// JSON 状态文件"本身值得测——状态文件损坏导致启动崩溃是个真实故障模式。
-
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 

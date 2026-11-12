@@ -1,6 +1,3 @@
-// apps/mini-app/src/pages/login/index.tsx
-// 登录页（用 useAuth hook）
-
 import { useState } from "react";
 import { View, Text } from "@tarojs/components";
 import Taro from "@tarojs/taro";

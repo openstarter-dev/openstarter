@@ -1,12 +1,8 @@
-// OAuth 登录入口按钮（R5.3/R5.4）：依据 Config 启用集合展示 Google / GitHub / Apple 按钮。
-// 失败或用户取消时，better-auth 依 errorCallbackURL 重定向回登录页并由登录页展示可读提示。
-
 import { Button } from "@openstarter/ui-web/components/button";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 
-// OAuth 失败/取消时的回退地址（登录页据 `?error` 展示可读提示）。
 const OAUTH_ERROR_REDIRECT = "/login?error=oauth";
 
 interface OAuthButtonsProps {

@@ -1,7 +1,3 @@
-// 博客列表卡片：整卡为指向文章详情的链接（可读内容为文章标题）。
-// 封面 <img> 使用文章标题作为有意义的 alt（不含 image/photo/picture）；标题用语义化 <h2>。
-// 作者头像为装饰性图片（作者名以文本同时呈现），使用空 alt。
-
 import { Link } from "@tanstack/react-router";
 
 export type BlogCardProps = {

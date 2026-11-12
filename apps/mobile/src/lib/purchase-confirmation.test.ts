@@ -1,6 +1,3 @@
-// 购买确认轮询状态机测试：attempt → confirmed / pending / timeout。
-// 纯函数 + 注入时钟与探测函数，不 mock 定时器 API 本体。
-
 import { describe, expect, it } from "vitest";
 
 import { runPurchaseConfirmation } from "./purchase-confirmation";
@@ -51,7 +48,6 @@ describe("runPurchaseConfirmation", () => {
   });
 
   it("stops after the attempt budget even when the fake clock never advances", async () => {
-    // maxWaitMs=200/interval=100 → 预算 3 次探测；探测不推时钟也必须收敛。
     let calls = 0;
     const result = await runPurchaseConfirmation({
       clock: createFakeClock(),

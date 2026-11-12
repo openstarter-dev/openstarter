@@ -1,6 +1,3 @@
-// apps/desktop/src/main/shortcuts.test.ts
-// 快捷键模块的纯逻辑部分
-
 import { describe, expect, it } from "vitest";
 import { unregisterShortcuts } from "./shortcuts";
 

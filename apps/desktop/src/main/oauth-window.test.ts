@@ -1,5 +1,3 @@
-// apps/desktop/src/main/oauth-window.test.ts —— OAuth 窗口纯函数测试
-
 import { describe, it, expect } from "vitest";
 import { buildOAuthUrl, extractTokenFromCookies } from "./oauth-window";
 

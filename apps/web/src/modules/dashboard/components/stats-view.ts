@@ -1,6 +1,3 @@
-// 仪表盘数据视图类型：packages/api `DashboardStats` 的客户端镜像（含 balance 聚合）。
-// API 侧把 getBalance 与 getDashboardStats 的结果合并下发，这里描述最终信封数据。
-
 export interface DashboardTrendPoint {
   consumed: number;
   date: string;

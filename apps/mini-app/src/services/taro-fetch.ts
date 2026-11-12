@@ -1,11 +1,5 @@
-// apps/mini-app/src/services/taro-fetch.ts
-// Taro.request → fetch 适配器 + 极简 Response shim
-
 import Taro from "@tarojs/taro";
 import { getToken } from "@/utils/storage";
-
-// 小程序环境无 DOM 类型，Reducer 入参使用含 any 的宽松签名（运行时校验）。
-// 见 normalizeHeaders() 和 parseBody() 内 typeof 检查。
 
 /** 极简 Response shim（小程序环境无原生 Response API）。 */
 export class MiniResponse {
@@ -68,7 +62,6 @@ function normalizeHeaders(
 ): Record<string, string> {
   if (!headers) return {};
 
-  // Handle Headers instance (Web API, 小程序可能无此类型)
   if (typeof (headers as any).entries === "function") {
     try {
       return Object.fromEntries((headers as any).entries());
@@ -77,12 +70,10 @@ function normalizeHeaders(
     }
   }
 
-  // Handle array of tuples
   if (Array.isArray(headers)) {
     return Object.fromEntries(headers);
   }
 
-  // Handle plain object
   return headers as Record<string, string>;
 }
 

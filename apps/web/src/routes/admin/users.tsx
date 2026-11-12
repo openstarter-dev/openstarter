@@ -1,6 +1,3 @@
-// apps/web/src/routes/admin/users.tsx
-// 用户管理（R26.2）：分页列表 + 邮箱搜索（@tanstack/pacer Debouncer 防抖）。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Badge } from "@openstarter/ui-web/components/badge";
 import { Input } from "@openstarter/ui-web/components/input";
@@ -34,20 +31,15 @@ function AdminUsersPage() {
   const navigate = Route.useNavigate();
   const [searchInput, setSearchInput] = useState(q ?? "");
 
-  // URL 里的 q（如浏览器前进/后退、分享链接）反向同步输入框。
   useEffect(() => {
     setSearchInput(q ?? "");
   }, [q]);
 
-  // 用最新 navigate（ref）供 pacer 回调闭包使用；在 effect 里更新 ref，
-  // 避免渲染期间读写 ref.current（react(refs) 规则）。
   const navigateRef = useRef(navigate);
   useEffect(() => {
     navigateRef.current = navigate;
   });
 
-  // @tanstack/pacer：把「输入变化 → 导航到 URL」的副作用做 300ms 防抖，
-  // 替代手写 useEffect + setTimeout（同一副作用，pacer 管理计时与执行）。
   const debouncer = useMemo(
     () =>
       new Debouncer(
@@ -62,7 +54,6 @@ function AdminUsersPage() {
     [],
   );
 
-  // 组件卸载时取消未触发的防抖，避免离开路由后残留一次「拉回列表」的导航（H1）。
   useEffect(() => () => debouncer.cancel(), [debouncer]);
 
   const handleSearchChange = (value: string) => {

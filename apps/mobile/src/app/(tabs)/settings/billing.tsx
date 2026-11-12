@@ -1,10 +1,3 @@
-// billing 屏：plan 徽章 + 订阅三格（状态/方案/下一计费日）+ 升级入口 + 管理订阅。
-//
-// 401 = 未登录（清会话交门禁）；unreachable/server-error = 错误 + 重试按钮。
-// 升级入口的分流（App Store 审核 3.1.1：iOS 不得引导外跳购买）：
-//   - IAP 可用（供应商 SDK key 已配置 && configure 成功，构建期 env 固化）→ push 内置 paywall；
-//   - iOS 且 IAP 不可用 → 不渲染任何购买入口（只在已订阅时给管理订阅）；
-//   - Android 且 IAP 不可用 → Linking.openURL(`${apiUrl}/pricing`) 网页兜底。
 import { isAvailable, useCustomer } from "@openstarter/billing-mobile";
 import { Button, Card, CardContent, CardTitle, Text } from "@openstarter/ui-mobile";
 import { useTranslation } from "@openstarter/i18n-mobile";
@@ -61,13 +54,9 @@ export default function BillingScreen() {
   const { restore } = useCustomer();
   const [portalError, setPortalError] = useState<string | null>(null);
 
-  // IAP 可用 = 供应商平台 key 已配置（构建期 env）&& configure 成功。
-  // 支付供应商随构建固化（spec 决策 #6），不再读 web 管理端 revenuecat_enabled。
   const iapAvailable = isAvailable();
-  // 升级入口可见性：IAP 可用 → 内置 paywall；否则仅 Android 兜底网页定价页。
   const showUpgradeEntry = iapAvailable || Platform.OS !== "ios";
 
-  // 401 = 未登录而不是错误：清掉会话，门禁随即送回登录页。
   useEffect(() => {
     const unauthorized =
       planQuery.data?.status === "unauthorized" ||
@@ -116,7 +105,6 @@ export default function BillingScreen() {
     setPortalError(null);
     portalMutation.mutateAsync().then((result) => {
       if (result.status === "success" && result.data.billingUrl) {
-        // Linking 在 tsc 裸环境也可用；这里用动态引入保持组件树纯净。
         void import("react-native").then(({ Linking }) => {
           Linking.openURL(result.data.billingUrl).catch(() => {
             setPortalError(t("common.error.message"));
@@ -183,11 +171,9 @@ export default function BillingScreen() {
                     <Button
                       onPress={() => {
                         if (iapAvailable) {
-                          // 内置付费墙（RevenueCat 托管 UI + StoreKit 结算）。
                           router.push("/settings/paywall");
                           return;
                         }
-                        // Android 网页兜底：跳站外定价页（web 端自有支付）。
                         void import("react-native").then(({ Linking }) => {
                           const env = getEnv();
                           if (env.ok) {
@@ -208,7 +194,6 @@ export default function BillingScreen() {
                   {subscription?.hasSubscription && iapAvailable ? (
                     <Button
                       onPress={() => {
-                        // 恢复购买走策略层（失败静默返回 false，不打断）。
                         void restore();
                       }}
                       variant="ghost"

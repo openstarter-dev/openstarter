@@ -1,10 +1,3 @@
-// 博客详情页（R16.2 / R16.4 / R16.5）。
-//
-// SSR 经 RPC 调 GET /api/blog/:slug 渲染正文与元信息；文章不存在或未发布时抛 TanStack Router
-// 的 notFound()，由路由 notFoundComponent 渲染既有 NotFound 组件并返回 404。文案依当前 locale。
-//
-// 正文渲染：使用 Markdown 组件将 API 返回的 markdown 字符串渲染为 HTML。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";

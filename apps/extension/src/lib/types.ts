@@ -1,5 +1,3 @@
-// apps/extension/src/lib/types.ts —— Shared types for the extension.
-
 export type UserPlan = "none" | "trial" | "expired" | "member";
 
 export interface SubscriptionStatusView {

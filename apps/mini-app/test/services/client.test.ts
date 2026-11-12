@@ -35,8 +35,6 @@ describe("API client", () => {
   it("should have type-safe RPC methods", async () => {
     const mod = await import("../../src/services/client");
     const client = mod.createClient();
-    // hc returns a callable proxy with route methods
-    // In this test environment, the proxy is a function
     expect(typeof client).toBe("function");
   });
 });

@@ -1,13 +1,3 @@
-// 无密码登录表单（Magic Link / Email OTP）：依据 Config 启用集合渲染对应 UI。
-// 与 apps/web/src/components/auth/passwordless-form.tsx 同构，差异只有平台层：
-// toast → 内联文案，Input/Label → Field，onClick → onPress。
-//
-// - Magic Link：输入邮箱后下发一次性登录链接到邮箱；expo client 会把 callbackURL
-//   经 Linking.createURL 改写为 openstarter:// 深链，cookie exchange 复用 OAuth 管道。
-// - Email OTP：输入邮箱后下发一次性验证码，第二段输入验证码完成登录。
-//
-// 两个开关都关时组件不渲染（由 sign-in.tsx 控制）。
-
 import { useTranslation } from "@openstarter/i18n-mobile";
 import { Button, Field, Text } from "@openstarter/ui-mobile";
 import { useState } from "react";
@@ -48,7 +38,6 @@ export function PasswordlessForm({ magicLinkEnabled, emailOtpEnabled }: Password
     setNotice("");
     setSubmitting(true);
     const { error: resultError } = await authClient.signIn.magicLink({
-      // expo client 把相对 callbackURL 改写为 openstarter:// 深链（@better-auth/expo）。
       callbackURL: "/",
       email,
     });
@@ -88,7 +77,6 @@ export function PasswordlessForm({ magicLinkEnabled, emailOtpEnabled }: Password
     if (resultError) {
       setError(resultError.message ?? t("common.error.message"));
     }
-    // 成功后不手动跳转：门禁随会话变化接管。
   };
 
   const submitLabel = (() => {

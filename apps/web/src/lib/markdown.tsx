@@ -1,9 +1,3 @@
-// Lightweight markdown-to-HTML renderer for blog content.
-// Handles basic markdown: paragraphs, headings, links, bold/italic,
-// inline code, code blocks, lists, blockquotes, and horizontal rules.
-// Uses dangerouslySetInnerHTML with a simple regex-based parser.
-// Avoids heavy dependencies like react-markdown.
-
 interface MarkdownProps {
   content: string;
 }
@@ -27,11 +21,7 @@ function escapeHtml(text: string): string {
     .replace(/'/g, "&#039;");
 }
 
-// RFC 3986 scheme: ALPHA *( ALPHA / DIGIT / "+" / "-" / "." ) ":" — used only to
-// DETECT a scheme; anything without one is treated as a relative URL.
 const SCHEME_PATTERN = /^([a-zA-Z][a-zA-Z0-9+.-]*):/;
-// The only schemes a blog link may navigate to. Everything else (javascript:,
-// data:, vbscript:, …) is dropped and the link renders as plain text.
 const SAFE_SCHEMES = new Set(["http", "https", "mailto"]);
 
 /**
@@ -42,14 +32,11 @@ const SAFE_SCHEMES = new Set(["http", "https", "mailto"]);
 export function isSafeHref(url: string): boolean {
   const schemeMatch = SCHEME_PATTERN.exec(url.trimStart());
   if (!schemeMatch) {
-    return true; // relative URL or fragment — no scheme to abuse
+    return true;
   }
   return SAFE_SCHEMES.has(schemeMatch[1].toLowerCase());
 }
 
-// A code-fence language tag must survive insertion into class="language-…",
-// so it is allowlisted instead of escaped: no quotes, spaces, angle brackets,
-// ampersands, or equals signs can ever reach the attribute.
 const CODE_LANG_PATTERN = /^[A-Za-z0-9_+#.-]+$/;
 
 function renderCodeBlock(lang: string, codeLines: string[]): string {
@@ -58,15 +45,10 @@ function renderCodeBlock(lang: string, codeLines: string[]): string {
 }
 
 function processInline(text: string): string {
-  // Escape HTML to prevent XSS — must be done before markdown processing
   text = escapeHtml(text);
-  // Bold (**text**) — must be processed before italic
   text = text.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-  // Italic (*text*)
   text = text.replace(/\*(.+?)\*/g, "<em>$1</em>");
-  // Inline code (`text`)
   text = text.replace(/`(.+?)`/g, "<code>$1</code>");
-  // Links [text](url) — unsafe schemes render as plain text, never as <a href>
   text = text.replace(/\[(.+?)\]\((.+?)\)/g, (_match, label: string, href: string) =>
     isSafeHref(href) ? `<a href="${href}">${label}</a>` : label,
   );
@@ -81,7 +63,6 @@ function isListItem(line: string): [type: "ul" | "ol", content: string] | null {
   return null;
 }
 
-// Pure function exported for testing.
 export function renderMarkdown(content: string): string {
   const lines = content.split("\n");
   const result: string[] = [];
@@ -114,7 +95,6 @@ export function renderMarkdown(content: string): string {
   }
 
   for (const line of lines) {
-    // --- Code block ---
     if (inCodeBlock) {
       if (line.trim().startsWith("```")) {
         result.push(renderCodeBlock(codeBlockLang, codeBlockLines));
@@ -135,7 +115,6 @@ export function renderMarkdown(content: string): string {
       continue;
     }
 
-    // --- Empty line ---
     if (line.trim() === "") {
       flushBlockquote();
       flushList();
@@ -143,7 +122,6 @@ export function renderMarkdown(content: string): string {
       continue;
     }
 
-    // --- Horizontal rule ---
     if (/^[-*_]{3,}$/.test(line.trim())) {
       flushBlockquote();
       flushList();
@@ -151,7 +129,6 @@ export function renderMarkdown(content: string): string {
       continue;
     }
 
-    // --- Heading ---
     const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
     if (headingMatch) {
       flushBlockquote();
@@ -162,14 +139,12 @@ export function renderMarkdown(content: string): string {
       continue;
     }
 
-    // --- Blockquote ---
     if (line.trim().startsWith("> ")) {
       flushList();
       blockquoteLines.push(line.trim().slice(2));
       continue;
     }
 
-    // --- List item ---
     const listMatch = isListItem(line);
     if (listMatch) {
       flushBlockquote();
@@ -183,13 +158,11 @@ export function renderMarkdown(content: string): string {
       continue;
     }
 
-    // --- Paragraph ---
     flushBlockquote();
     flushList();
     result.push(`<p>${processInline(line)}</p>`);
   }
 
-  // Flush any remaining open block
   if (inCodeBlock) {
     result.push(renderCodeBlock(codeBlockLang, codeBlockLines));
   }

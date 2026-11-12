@@ -1,6 +1,3 @@
-// apps/desktop/src/renderer/hooks/useSettings.ts
-// 设置管理 hook
-
 import { useState, useEffect, useCallback } from "react";
 import type { AppSettings } from "../types";
 

@@ -1,4 +1,3 @@
-// apps/extension/src/components/suspense.tsx
 import { Suspense, type ReactNode } from "react";
 
 interface SuspenseWrapperProps {

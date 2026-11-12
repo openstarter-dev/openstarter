@@ -1,6 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-// 策略层禁止在 node 测试中求值（顶层原生模块依赖），mock 整个包。
 vi.mock("@openstarter/billing-mobile", () => ({
   Provider: ({ children }: { children: React.ReactNode }) => children,
   useCustomer: () => ({

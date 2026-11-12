@@ -1,4 +1,3 @@
-// apps/extension/src/components/main.tsx —— Placeholder main component for non-popup entrypoints.
 import type { ReactNode } from "react";
 
 export function Main({ className }: { className?: ReactNode }) {

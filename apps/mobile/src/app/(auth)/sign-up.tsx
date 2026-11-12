@@ -29,7 +29,6 @@ export default function SignUpScreen() {
         password: value.password,
       });
       if (result.error) {
-        // 邮箱未验证（重复注册已验证账号等场景）：转 verify-email 屏处理。
         if (result.error.code === "EMAIL_NOT_VERIFIED") {
           authClient.sendVerificationEmail({ email: value.email }).catch(() => undefined);
           void bindReferralAfterSignup();
@@ -42,8 +41,6 @@ export default function SignUpScreen() {
         setError(result.error.message ?? "Sign up failed");
         return;
       }
-      // 服务端可能要求邮箱验证（REQUIRE_EMAIL_VERIFICATION）。此时不会立即产生会话，
-      // 门禁也就不会跳转，因此给出明确提示而不是让人盯着不动的界面。
       setPendingVerification(true);
       void bindReferralAfterSignup();
     },

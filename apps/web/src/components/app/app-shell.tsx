@@ -1,8 +1,3 @@
-// apps/web/src/components/app/app-shell.tsx
-// Standard SaaS app shell: collapsible sidebar + sticky content header.
-// Wraps the shadcn SidebarProvider; the collapsed state is persisted in the
-// sidebar_state cookie so hydration restores the last choice.
-
 import { SidebarInset, SidebarProvider } from "@openstarter/ui-web/components/sidebar";
 import { Outlet, useRouteContext } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useState } from "react";
@@ -23,7 +18,6 @@ function readSidebarCookie(): boolean {
 
 export function AppShell({ children }: { children?: ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  // `_app` 守卫已校验并把会话放进路由上下文：作为侧栏首帧数据，避免 SSR 出骨架。
   const { session } = useRouteContext({ from: "/_app" });
 
   useEffect(() => {

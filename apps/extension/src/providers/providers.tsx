@@ -13,8 +13,6 @@ interface AppProvidersProps {
   value: { api: Api; auth: Auth };
 }
 
-// 插件端 Provider 链。i18n 无 Provider：语言跟随浏览器 UI 语言，由 @wxt-dev/i18n
-// 生成的 #i18n（browser.i18n 同步 API）直接取译文，不再有异步 locale 探测。
 export function AppProviders({ children, value }: AppProvidersProps) {
   return (
     <AuthStateProvider>

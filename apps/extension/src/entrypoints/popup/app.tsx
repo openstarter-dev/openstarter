@@ -1,7 +1,3 @@
-// apps/extension/src/entrypoints/popup/app.tsx —— popup 根组件：使用 TanStack Query
-// hooks 和 AuthState 实现 5 状态机。依赖通过 hooks 注入，main.tsx 负责装配。
-// 文案经 #i18n（@wxt-dev/i18n，跟随浏览器 UI 语言）取译文。
-// 见 spec §6（状态机）/§7（错误处理）。
 import { i18n } from "#i18n";
 
 import { useCreditsQuery, usePlanQuery, useSubscriptionQuery, useUserQuery } from "../../lib/hooks";
@@ -27,11 +23,9 @@ export function App(props: { deps: AppDeps }) {
   const planQuery = usePlanQuery();
   const subscriptionQuery = useSubscriptionQuery();
 
-  // Extract user from query - it's optional and doesn't block the panel
   const user =
     userQuery.data != null ? { name: userQuery.data.name, email: userQuery.data.email } : null;
 
-  // 1. env.ok === false → misconfigured
   if (!props.deps.env.ok) {
     return (
       <div className="p-6 text-destructive text-sm">
@@ -40,17 +34,14 @@ export function App(props: { deps: AppDeps }) {
     );
   }
 
-  // 2. isSignedOut → signed-out
   if (isSignedOut) {
     return <SignedOut onSignIn={props.deps.onSignIn} />;
   }
 
-  // 3. Any query is pending → loading
   if (creditsQuery.isPending || planQuery.isPending || subscriptionQuery.isPending) {
     return <p className="p-6 text-muted-foreground text-sm">{i18n.t("app.loading")}</p>;
   }
 
-  // 4. Any query has error → ErrorState with retry
   const errorQuery = creditsQuery.isError
     ? creditsQuery
     : planQuery.isError
@@ -72,7 +63,6 @@ export function App(props: { deps: AppDeps }) {
     );
   }
 
-  // 5. All data ready → AccountPanel
   const snapshot: AccountSnapshot = {
     creditsBalance: creditsQuery.data ?? 0,
     plan: (planQuery.data ?? "none") as AccountSnapshot["plan"],

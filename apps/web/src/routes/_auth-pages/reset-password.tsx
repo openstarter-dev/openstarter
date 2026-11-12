@@ -26,14 +26,12 @@ export const Route = createFileRoute("/_auth-pages/reset-password")({
       path: "/reset-password",
     }),
   component: ResetPasswordPage,
-  // 令牌与错误标记来自邮件重置链接的 query（R6.2/R6.3）。
   validateSearch: (search: Record<string, unknown>): { token?: string; error?: string } => ({
     error: typeof search.error === "string" ? search.error : undefined,
     token: typeof search.token === "string" ? search.token : undefined,
   }),
 });
 
-// 校验消息在模块作用域求值（locale 在请求期内固定），故保持字面量。
 const resetSchema = z
   .object({
     confirmPassword: z.string().min(8),
@@ -71,7 +69,6 @@ function ResetPasswordPage() {
     validators: { onSubmit: resetSchema },
   });
 
-  // 令牌缺失或链接错误：拒绝重置并引导重新发起（R6.3）。
   const tokenInvalid = !token || Boolean(linkError);
 
   return (

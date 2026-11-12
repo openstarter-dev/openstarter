@@ -74,7 +74,6 @@ export default function SignUpForm({
               return;
             }
             void bindReferralAfterSignup();
-            // 整页跳转：目标可能是任意站内路径（含查询串）。
             window.location.assign(redirectTo);
           },
         },

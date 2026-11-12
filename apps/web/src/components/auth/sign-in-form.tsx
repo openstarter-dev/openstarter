@@ -73,7 +73,6 @@ export default function SignInForm({
             toast.error(error.error.message || error.error.statusText);
           },
           onSuccess: () => {
-            // 整页跳转：目标可能是任意站内路径（含查询串），同时让 auth store 以新会话重载。
             window.location.assign(redirectTo);
           },
         },

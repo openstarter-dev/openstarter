@@ -1,8 +1,3 @@
-// 二步验证（2FA）验证页：登录后若用户开启 2FA，better-auth 的 twoFactorClient fetch
-// 插件会把 `twoFactorRedirect` 响应转成本插件的 onTwoFactorRedirect 回调（见
-// lib/auth-client 注入的跳转），落到本页。会话凭证此时在 2FA 临时 cookie 中，须先
-// 通过 TOTP 或备用码验证才建立正式会话。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Input } from "@openstarter/ui-web/components/input";

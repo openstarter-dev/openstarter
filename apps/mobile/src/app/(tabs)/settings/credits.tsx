@@ -1,5 +1,3 @@
-// credits 屏（重写）：余额大字 + 流水列表（all/grant/consume 客户端过滤）。
-// 过滤逻辑复用 lib/billing-format 的纯函数（可单测）。
 import { useTranslation } from "@openstarter/i18n-mobile";
 import { Button, Card, CardContent, CardTitle, Text } from "@openstarter/ui-mobile";
 import { Pressable, View } from "react-native";
@@ -59,7 +57,6 @@ export default function CreditsScreen() {
   const [filter, setFilter] = useState<CreditsFilter>("all");
   const result = creditsQuery.data;
 
-  // 401 = 未登录而不是错误：清掉会话，门禁随即送回登录页。
   useEffect(() => {
     if (result?.status === "unauthorized") {
       authClient.signOut().catch(() => undefined);

@@ -1,5 +1,3 @@
-// 仪表盘积分动态图：近 30 天逐日授予 / 消耗双曲线（零依赖原生 SVG，见 ui-web/line-chart）。
-
 import { m } from "@openstarter/i18n-web/messages";
 import {
   Card,

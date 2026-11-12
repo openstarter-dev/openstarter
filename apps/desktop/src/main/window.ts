@@ -1,7 +1,3 @@
-// apps/desktop/src/main/window.ts —— 创建主窗口、加载本地页面或兜底页、安全策略挂载。
-//
-// 这是唯一持有 BrowserWindow 生命周期的模块。所有决策（白名单判定、URL 解析、窗口状态
-// 校验）都来自纯逻辑模块，这里只做 Electron API 的搭接（见 spec §5）。
 import { join } from "node:path";
 import { app, BrowserWindow, shell } from "electron";
 
@@ -13,8 +9,6 @@ import {
 } from "./security";
 import type { WindowStateStore } from "./window-state";
 
-// esbuild 把本文件编译成 CommonJS 供 Electron 主进程加载：__dirname 在运行时解析到
-// dist/main/，preload.cjs 在 dist/ 下，resources/ 在项目根目录下。
 // biome-ignore lint/correctness/noGlobalDirnameFilename: 见上行注释；import.meta 不可用于 CJS 输出，__dirname 是正确选择。
 const DIST_DIR = __dirname;
 const OFFLINE_PAGE_PATH = join(DIST_DIR, "..", "..", "resources", "offline.html");
@@ -61,8 +55,6 @@ export function createMainWindow(params: CreateWindowParams): BrowserWindow {
   };
   win.on("close", (event) => {
     persistState();
-    // 默认行为：关闭时隐藏到托盘而非退出应用
-    // macOS 上 Command+Q 会直接退出，不受此影响
     if (process.platform !== "darwin") {
       event.preventDefault();
       win.hide();
@@ -114,7 +106,6 @@ export async function waitForDevServer(
         return true;
       }
     } catch {
-      // dev server not up yet
     }
     await delay(intervalMs);
   }
@@ -129,7 +120,7 @@ function delay(ms: number): Promise<void> {
 
 /**
  * 挂载全局 webContents 策略：任何新建的 webContents（不只是主窗口）都拒绝 webview 附加。
- * 落实 spec §9 "策略挂在 app.on('web-contents-created') 上而非只挂主窗口"。
+ * 落实"策略挂在 app.on('web-contents-created') 上而非只挂主窗口"。
  * 由 main.ts 在启动时显式调用一次，不作为模块顶层副作用——避免这个文件被以任何方式
  * import 时都无条件触碰 Electron 的 app 单例。
  */

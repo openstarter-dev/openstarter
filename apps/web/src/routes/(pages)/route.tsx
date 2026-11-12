@@ -9,9 +9,6 @@ export const Route = createFileRoute("/(pages)")({
   component: PagesLayout,
 });
 
-// Shared shell for MDX static pages (privacy, terms, ...). Reuses the site
-// header/footer and exposes a single <main>, so dropping a new `.mdx` page in
-// this group inherits the layout without touching any server logic.
 function PagesLayout() {
   return (
     <div className="flex min-h-svh flex-col">

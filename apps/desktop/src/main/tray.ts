@@ -1,6 +1,3 @@
-// apps/desktop/src/main/tray.ts —— 系统托盘
-// 创建托盘图标和菜单，管理窗口显示/隐藏
-
 import { app, Menu, Tray, BrowserWindow, nativeImage } from "electron";
 import { join } from "node:path";
 import { logInfo, logError } from "./log";

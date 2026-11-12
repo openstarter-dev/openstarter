@@ -1,9 +1,3 @@
-// 博客展示辅助（客户端安全）。
-//
-// 仅用于从已加载文章的 `categories` 文本派生**展示用**分类筛选入口（chips）。
-// 分类筛选的**权威归属判定**在服务端（packages/api 的 Blog_Module，Property 35）；
-// 此处的解析仅服务于 UI，且与服务端保持相同的格式约定（JSON 数组或逗号/分号分隔）。
-
 const CATEGORY_DELIMITERS = /[,;]/;
 
 /** 解析 `categories` 文本为分类词元（兼容 JSON 数组与逗号/分号分隔）。 */

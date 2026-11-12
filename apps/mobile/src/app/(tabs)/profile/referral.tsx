@@ -1,5 +1,3 @@
-// 分销屏：推荐码 + 统计卡片 + 佣金流水（filter tabs + list）。
-// 模式照抄 settings/credits.tsx：Screen + Card + Text + filter tabs + useQuery。
 import { useTranslation } from "@openstarter/i18n-mobile";
 import { useQuery } from "@tanstack/react-query";
 import { Clipboard, Pressable, Share, View } from "react-native";
@@ -113,14 +111,12 @@ export default function ReferralScreen() {
     try {
       await Share.share({ message: me.link });
     } catch {
-      // 分享取消/不可用：静默
     }
   };
 
   return (
     <Screen>
       <View className="gap-4 p-6">
-        {/* 统计卡片 */}
         <View className="flex-row gap-3">
           <Card className="flex-1 gap-1 p-4">
             <CardContent className="p-0">
@@ -154,7 +150,6 @@ export default function ReferralScreen() {
           </Card>
         </View>
 
-        {/* 推荐码 + 链接 + 操作按钮 */}
         <Card className="gap-3 p-4">
           <CardTitle>{t("settings.referral.code_label")}</CardTitle>
           <CardContent className="flex flex-col gap-2 p-0">
@@ -178,7 +173,6 @@ export default function ReferralScreen() {
           </CardContent>
         </Card>
 
-        {/* 佣金流水 */}
         <Card className="p-4">
           <CardTitle>{t("settings.referral.commissions_title")}</CardTitle>
           <CardContent className="flex flex-col gap-1 p-0 mt-2">

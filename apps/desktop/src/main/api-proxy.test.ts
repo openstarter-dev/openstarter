@@ -116,8 +116,6 @@ describe("ApiProxy", () => {
 
     await proxy({ method: "GET", path: "/api/user/profile" });
 
-    // Node fetch has no default Origin (unlike browsers); without it better-auth
-    // rejects with "Missing or null Origin".
     expect(mockFetch).toHaveBeenCalledWith(
       "http://localhost:3000/api/user/profile",
       expect.objectContaining({

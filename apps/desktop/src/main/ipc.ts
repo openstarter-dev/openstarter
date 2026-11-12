@@ -1,6 +1,3 @@
-// apps/desktop/src/main/ipc.ts —— 所有 IPC 处理器注册
-// 在 app.whenReady() 之后由 main.ts 调用 registerIpcHandlers()
-
 import { ipcMain, app, dialog, BrowserWindow } from "electron";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -128,7 +125,6 @@ export function registerIpcHandlers(userDataPath: string): void {
 }
 
 export function cleanupIpcHandlers(): void {
-  // 移除所有由本模块注册的 handler
   const channels = [
     "desktop:get-version",
     "desktop:get-settings",

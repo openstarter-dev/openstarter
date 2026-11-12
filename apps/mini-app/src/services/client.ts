@@ -1,6 +1,3 @@
-// apps/mini-app/src/services/client.ts
-// Hono RPC 类型安全客户端（主力 API 方式）
-
 import type { AppType } from "@openstarter/api";
 import { hc } from "hono/client";
 import { createTaroFetch } from "./taro-fetch";

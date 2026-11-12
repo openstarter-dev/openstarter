@@ -6,11 +6,6 @@ import {
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
-// Theme values map to `common.nav.theme_{value}` message keys. The key is only
-// known at runtime, but the candidate set is small and fixed, so each label is
-// resolved with a static `m["..."]()` lookup — a runtime-computed key into the
-// whole message namespace (`m[dynamicKey]()`) would defeat Paraglide's
-// tree-shaking and ship the entire catalog. Requirements: 23.2.
 const THEME_OPTIONS = [
   { value: "system", label: () => m["common.nav.theme_system"]() },
   { value: "light", label: () => m["common.nav.theme_light"]() },

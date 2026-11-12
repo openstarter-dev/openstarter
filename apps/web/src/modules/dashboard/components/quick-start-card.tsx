@@ -1,5 +1,3 @@
-// 仪表盘快速开始卡片：模板引导链接（settings / pricing / apikeys）。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { buttonVariants } from "@openstarter/ui-web/components/button";
 import {

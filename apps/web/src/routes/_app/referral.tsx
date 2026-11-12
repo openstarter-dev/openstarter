@@ -1,5 +1,3 @@
-// 分销入口薄壳：布局与逻辑在 modules/referral。挂在 _app 布局（AppShell + 登录守卫）下。
-
 import { createFileRoute } from "@tanstack/react-router";
 
 import { preloadQueries } from "@/lib/preload";

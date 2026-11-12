@@ -1,4 +1,3 @@
-// ?ref= 归因捕获：localStorage 暂存（30 天 TTL），注册成功后一次性 bind。
 const STORAGE_KEY = "ref:code";
 const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -18,7 +17,6 @@ export function captureReferralAttribution(code: string): void {
   try {
     store.setItem(STORAGE_KEY, JSON.stringify({ at: Date.now(), code } satisfies StoredReferral));
   } catch {
-    // localStorage 满/被禁：静默（归因是旁路）
   }
 }
 
@@ -54,9 +52,7 @@ export async function bindReferralAfterSignup(): Promise<void> {
       method: "POST",
     });
     if (res.ok) clearReferralAttribution();
-    // 409 ALREADY_REFERRED 等也清除，避免反复重试
     else if (res.status === 409 || res.status === 422) clearReferralAttribution();
   } catch {
-    // 网络失败保留归因，下次登录页可重试
   }
 }

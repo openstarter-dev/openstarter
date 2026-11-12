@@ -33,7 +33,6 @@ export default function SignInScreen() {
         password: value.password,
       });
       if (result.error) {
-        // 邮箱未验证：先发验证邮件，再进 verify-email 屏（对齐 web sign-in-form 行为）。
         if (result.error.code === "EMAIL_NOT_VERIFIED") {
           authClient.sendVerificationEmail({ email: value.email }).catch(() => undefined);
           router.replace({
@@ -44,7 +43,6 @@ export default function SignInScreen() {
         }
         setError(result.error.message ?? "Sign in failed");
       }
-      // 成功后不手动跳转：(auth)/_layout.tsx 的门禁会因会话变化把人带到 "/"。
     },
     validators: {
       onSubmit: z.object({

@@ -1,7 +1,5 @@
 import type { MDXComponents } from "mdx/types";
 
-// Element styling for MDX-authored static pages. Kept semantic so headings
-// preserve document outline and links stay readable for screen readers.
 export const mdxComponents: MDXComponents = {
   h1: (props) => <h1 className="mt-2 mb-6 font-bold text-3xl tracking-tight" {...props} />,
   h2: (props) => (

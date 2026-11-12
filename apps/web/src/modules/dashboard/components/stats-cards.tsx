@@ -1,6 +1,3 @@
-// 仪表盘统计卡片：六格 KPI（余额 / 近 30 天获得 / 消耗 / 消费 / 订单 / 活跃 Key）。
-// 数据来自 GET /user/dashboard-stats（见 modules/dashboard/lib/api.ts）。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { Card, CardContent } from "@openstarter/ui-web/components/card";
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";

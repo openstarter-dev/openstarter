@@ -1,16 +1,3 @@
-// 设备授权（RFC 8628）验证页面 —— CLI 登录流程的人侧入口。
-//
-// 流程：CLI 运行 `openstarter login` → 后端发设备码/用户码 → 用户打开
-// verification_uri_complete（即本页，附带 ?user_code=XXXX）→ 本页先 claim
-// （GET /api/auth/device?user_code=）把当前登录会话绑到该 deviceCode，再
-// approve 批准 → CLI 端轮询 token 端点拿到会话 token 登录完成。
-//
-// 注意：本页置于 _app 布局下（而非 _auth-pages），因为设备授权要求用户已登录
-// —— _app/route.tsx 的 beforeLoad 会把未登录者重定向到 /login 并在上下文注入 session，
-// 这正是 approve 端点所需（其 requireHeaders:true，靠会话 cookie 鉴权）。
-//
-// 端点调用统一走 modules/device/lib/api（authClient.$fetch.raw），文案走 Paraglide。
-
 import { m } from "@openstarter/i18n-web/messages";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

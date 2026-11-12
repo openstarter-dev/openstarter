@@ -1,6 +1,3 @@
-// apps/desktop/src/main/shortcuts.ts —— 全局快捷键
-// 注册系统级快捷键，通过 IPC 事件通知渲染进程
-
 import { globalShortcut, BrowserWindow } from "electron";
 import { logInfo, logWarn } from "./log";
 
@@ -25,7 +22,6 @@ export function registerShortcuts(window: BrowserWindow): void {
       }
     }
   } catch {
-    // 测试环境或 Electron 不可用时安全忽略
   }
 }
 
@@ -34,6 +30,5 @@ export function unregisterShortcuts(): void {
     globalShortcut.unregisterAll();
     logInfo("all shortcuts unregistered");
   } catch {
-    // 测试环境或 Electron 不可用时安全忽略
   }
 }

@@ -1,5 +1,3 @@
-// apps/desktop/src/renderer/pages/settings.tsx —— 设置页
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@openstarter/ui-web/components/card";
 import { Button } from "@openstarter/ui-web/components/button";

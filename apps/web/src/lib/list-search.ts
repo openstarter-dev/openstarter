@@ -1,11 +1,3 @@
-// 列表分页/搜索的 URL 状态 schema（search-validation）：
-// 把「第几页 / 搜什么」从组件 useState 提升为路由 search params，
-// 于是刷新、浏览器前进/后退、分享链接都能落回同一视图。
-//
-// 用法：路由 `validateSearch: listSearchParams`，组件里
-// `const { page } = Route.useSearch()` + `Route.useNavigate()` 以
-// `navigate({ search: (prev) => ({ ...prev, page }), replace: true })` 回写。
-
 import { z } from "zod";
 
 /**
@@ -20,7 +12,6 @@ export type ListSearch = z.infer<typeof listSearchParams>;
 
 /** 分页 + 邮箱搜索（admin users）。空搜索不落进 URL（q 省略），保持链接干净。 */
 export const listUsersSearchParams = listSearchParams.extend({
-  // 截断而非拒绝：粘贴超长文本时仍可搜索（前 200 字符）；脏值回落空串。
   q: z
     .string()
     .catch("")

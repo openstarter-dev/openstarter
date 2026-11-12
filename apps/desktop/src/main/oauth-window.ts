@@ -1,12 +1,3 @@
-// apps/desktop/src/main/oauth-window.ts —— OAuth 登录窗口
-//
-// 纯函数（可测试）：
-//   buildOAuthUrl —— 构造 OAuth 授权 URL
-//   extractTokenFromCookies —— 从 Cookie 数组提取 session token
-//
-// 窗口编排（测试覆盖在集成测试层）：
-//   openOAuthWindow —— 创建 BrowserWindow 完成 OAuth 流程
-
 import { BrowserWindow } from "electron";
 
 export interface OAuthResult {
@@ -18,8 +9,6 @@ export interface OAuthWindowOptions {
   getSession: () => Promise<{ user: { id: string; email: string; name?: string } } | null>;
   tokenStore: { get(): string | null; set(token: string): void; clear(): void };
 }
-
-// ─── 纯函数 ────────────────────────────────────────────────────
 
 /**
  * 构造 OAuth 授权 URL。
@@ -53,8 +42,6 @@ export function extractTokenFromCookies(cookies: ElectronCookie[]): string | nul
   return sessionCookie?.value ?? null;
 }
 
-// ─── 窗口编排 ──────────────────────────────────────────────────
-
 /**
  * 打开 OAuth 登录窗口并等待用户完成授权。
  *
@@ -86,14 +73,12 @@ export async function openOAuthWindow(
       },
     });
 
-    // 拦截导航到 callback URL
     const handleNavigation = async (event: { preventDefault: () => void }, url: string) => {
       if (url.startsWith(callbackUrl)) {
         event.preventDefault();
         win.close();
 
         try {
-          // 从 session 读取 cookie
           const cookies = await win.webContents.session.cookies.get({
             name: "openstarter.session_token",
           });
@@ -102,7 +87,6 @@ export async function openOAuthWindow(
             tokenStore.set(token);
           }
 
-          // 获取用户信息
           const session = await getSession();
           if (session?.user) {
             resolve({ user: session.user });
@@ -123,7 +107,6 @@ export async function openOAuthWindow(
       handleNavigation(event, url);
     });
 
-    // 窗口被用户关闭（取消授权）
     win.on("closed", () => {
       reject(new Error("OAuth window closed by user"));
     });

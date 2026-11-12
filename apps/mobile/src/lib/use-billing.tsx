@@ -1,9 +1,3 @@
-// apps/mobile/src/lib/use-billing.tsx —— 策略层接线（替代 use-revenuecat.ts + purchases.ts）。
-//
-// BillingProvider = 策略 Provider（挂载即 configure，供应商由构建期 env 决定）
-//                 + BillingLifecycle（会话联动 identify/reset + 客户信息推送失效缓存）。
-// 必须置于 QueryClientProvider 之内（useCustomer/useQueryClient 依赖 context）。
-// 生命周期钩子全部降级安全：IAP 不可用时为 no-op，永不抛错。
 import { Provider as StrategyProvider, useCustomer } from "@openstarter/billing-mobile";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -26,7 +20,7 @@ function invalidateBillingQueries(queryClient: ReturnType<typeof useQueryClient>
 }
 
 /**
- * 会话联动决策（spec §4.1）：isPending 期间不动（避免把读会话中间态当成登出），
+ * 会话联动决策：isPending 期间不动（避免把读会话中间态当成登出），
  * 有 userId → identify，否则 → reset。纯函数便于单测；BillingLifecycle 内消费。
  */
 export function resolveLifecycleAction(input: {
@@ -45,11 +39,9 @@ function BillingLifecycle() {
   const { data: session, isPending } = authClient.useSession();
   const userId = session?.user?.id;
 
-  // 会话变化：登录 → identify(userId)；登出 → reset()。
   useEffect(() => {
     const action = resolveLifecycleAction({ isPending, userId });
     if (action === "identify") {
-      // resolveLifecycleAction 已判定 userId 存在；TS 需显式收窄。
       if (userId) {
         identify(userId);
       }
@@ -58,7 +50,6 @@ function BillingLifecycle() {
     }
   }, [isPending, userId, identify, reset]);
 
-  // 客户信息推送（购买/续费/到期）→ 失效账单查询。不可用时返回空取消函数。
   useEffect(
     () => addCustomerInfoListener(() => invalidateBillingQueries(queryClient)),
     [addCustomerInfoListener, queryClient],

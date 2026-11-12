@@ -1,5 +1,3 @@
-// orders 屏：本地页码 state + useUserOrders(page) 分页拉取 + 金额格式化（分→元）。
-// 分页控件复用 common.table.*（Previous/Next/page_info）。
 import { useTranslation } from "@openstarter/i18n-mobile";
 import { Button, Card, CardContent, Text } from "@openstarter/ui-mobile";
 import { useEffect, useState } from "react";
@@ -26,7 +24,6 @@ export default function OrdersScreen() {
   const ordersQuery = useUserOrders(page);
   const result = ordersQuery.data;
 
-  // 401 = 未登录而不是错误：清掉会话，门禁随即送回登录页。
   useEffect(() => {
     if (result?.status === "unauthorized") {
       authClient.signOut().catch(() => undefined);
@@ -61,7 +58,6 @@ export default function OrdersScreen() {
     );
   }
 
-  // v1 全量展示当页；tab_all/one_time/subscription 过滤在每页数据上执行（服务端无该参数）。
   const filter: OrdersFilter = "all";
   const visible = filterOrders(result.data.items, filter);
   const total = result.data.total;

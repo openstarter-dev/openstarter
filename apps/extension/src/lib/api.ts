@@ -1,7 +1,3 @@
-// apps/extension/src/lib/api.ts —— 类型化 Hono RPC 客户端，携带 Bearer 会话头。
-// 与 apps/web/src/lib/api.ts 的差异只有两点：绝对 base URL（插件跑在
-// chrome-extension:// 源，不能靠相对路径）+ 显式 Authorization 头（无法依赖同源 cookie）。
-// 见 spec §3.2/§6。
 import type { AppType } from "@openstarter/api";
 import { hc } from "hono/client";
 

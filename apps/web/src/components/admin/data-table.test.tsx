@@ -1,5 +1,3 @@
-// DataTable（react-table + react-store + react-virtual 组合）冒烟测试：
-// 渲染表头/数据行，以及 react-store 列可见性偏好驱动的列隐藏。
 import { act, render, screen } from "@testing-library/react";
 import { legacyCreateColumnHelper } from "@tanstack/react-table/legacy";
 import { beforeEach, describe, expect, it } from "vitest";

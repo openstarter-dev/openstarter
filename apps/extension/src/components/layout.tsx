@@ -1,4 +1,3 @@
-// apps/extension/src/components/layout.tsx
 import { type ReactNode } from "react";
 import { ErrorBoundary } from "./error-boundary";
 import { SuspenseWrapper } from "./suspense";

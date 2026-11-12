@@ -1,4 +1,3 @@
-// react-store 列可见性偏好测试：store 读写、localStorage 持久化、恢复。
 import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 

@@ -1,11 +1,3 @@
-// apps/desktop/src/security.ts —— 导航白名单纯判定 + 安全策略处理器工厂。
-//
-// 远程加载模式下渲染进程执行的是远端代码，这里是防止远端页面在 app 内获得不该有能力的
-// 最后一道边界。判定只依赖 URL.origin 的相等性：origin 天然编码了 protocol/host/port，
-// 天然处理大小写；子域因 origin 不同而天然被拒绝；伪协议（javascript:/file:/data:）的
-// origin 恒为字符串 "null"，天然不等于任何合法 allowedOrigin。
-// 详见 docs/superpowers/specs/2026-08-01-desktop-app-design.md §9。
-
 /** 判断 targetUrl 是否与 allowedOrigin 同源。解析失败（畸形字符串）返回 false，不抛异常。 */
 export function isAllowedNavigation(targetUrl: string, allowedOrigin: string): boolean {
   try {

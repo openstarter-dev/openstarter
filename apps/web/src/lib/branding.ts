@@ -1,4 +1,3 @@
-// Single source of truth for brand identity.
 // TODO: replace these values with your own brand.
 export const BRAND_NAME = "openstarter";
 

@@ -1,8 +1,3 @@
-// apps/mobile 分析薄壳测试：env → 配置解析转发 + useScreenTracking 纯路径。
-// mobile 无 @testing-library/react，hook 不渲染组件 —— useScreenTracking
-// 的转发语义已由包内门面测试覆盖，此处验证模块导出完整性 + env 解析
-// 转发语义（app 侧真正的接线点）。
-
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("expo-router", () => ({
@@ -57,7 +52,7 @@ describe("initAnalyticsFromEnv", () => {
 
     expect(mockedResolveConfig).toHaveBeenCalledWith(process.env);
     expect(mockedInitAnalytics).toHaveBeenCalledWith({
-      gaMobileEnabled: false, // mocked resolver's canned return
+      gaMobileEnabled: false,
       openpanelClientId: "",
       openpanelClientSecret: "",
     });

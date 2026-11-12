@@ -51,7 +51,6 @@ describe("createTtlCache", () => {
     };
     await expect(cache.wrap("a", boom)).rejects.toThrow("boom");
     expect(cache.size).toBe(0);
-    // 失败后同 key 再 wrap 走 loader（未被失败污染）。
     const loader = vi.fn(async () => 7);
     expect(await cache.wrap("a", loader)).toBe(7);
   });
@@ -61,7 +60,6 @@ describe("createTtlCache", () => {
     const loader1 = vi.fn(async () => ({ post: null }));
     expect(await cache.wrap("missing-slug", loader1)).toEqual({ post: null });
     const loader2 = vi.fn(async () => ({ post: { slug: "x" } }));
-    // 二次 wrap 命中缓存里的 null，不调用 loader2。
     expect(await cache.wrap("missing-slug", loader2)).toEqual({ post: null });
     expect(loader2).not.toHaveBeenCalled();
   });
@@ -90,8 +88,8 @@ describe("createTtlCache", () => {
     const cache = createTtlCache<number>({ ttlMs: 10_000, maxEntries: 2 });
     cache.set("a", 1);
     cache.set("b", 2);
-    cache.set("a", 9); // a 变为最新
-    cache.set("c", 3); // 逐出的应是 b
+    cache.set("a", 9);
+    cache.set("c", 3);
     expect(cache.get("a")).toBe(9);
     expect(cache.get("b")).toBeUndefined();
     expect(cache.get("c")).toBe(3);

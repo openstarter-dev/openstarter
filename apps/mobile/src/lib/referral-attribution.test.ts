@@ -6,7 +6,6 @@ import {
   readStoredReferralCode,
 } from "@/lib/referral-attribution";
 
-// expo-secure-store 在 node test 环境不可用，mock 为同步 Map。
 vi.mock("expo-secure-store", () => {
   const store = new Map<string, string>();
   return {
@@ -20,8 +19,6 @@ vi.mock("expo-secure-store", () => {
   };
 });
 
-// auth-client 和 @better-auth/expo 依赖 expo-modules-core（TS 源码），vitest 无法处理。
-// 仅测试归因存储逻辑，无需真实 API 客户端。
 vi.mock("@/lib/api", () => ({
   apiClient: {},
 }));

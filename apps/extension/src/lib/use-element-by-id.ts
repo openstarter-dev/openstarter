@@ -1,4 +1,3 @@
-// apps/extension/src/lib/use-element-by-id.ts
 import { useEffect, useState } from "react";
 
 export function useElementById(id: string): HTMLElement | null {

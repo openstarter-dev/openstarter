@@ -1,5 +1,3 @@
-// settings 内嵌 Stack 的入口页：原设置页 + 「账户」卡片的三个入口行
-// （订阅与方案 / 额度明细 / 付款记录）。入口行 44×44 触控热区 + accessibilityLabel。
 import type { SupportedLocale } from "@openstarter/i18n-mobile";
 import { SUPPORTED_LOCALES, useTranslation } from "@openstarter/i18n-mobile";
 import { Button, Card, CardContent, CardTitle, Text } from "@openstarter/ui-mobile";

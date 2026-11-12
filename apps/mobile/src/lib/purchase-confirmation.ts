@@ -1,13 +1,3 @@
-// 购买确认轮询状态机（Task B5）。
-//
-// RC 付费墙回调成功 ≠ 服务端已建订阅：webhook 有 5-60s 的到达窗口。
-// 购买完成后有界轮询 plan/credits（默认 2s × 15 次 = 30s），三态收敛：
-//   - confirmed：服务端已反映购买，界面刷新即可；
-//   - timeout：窗口耗尽仍未确认 —— UI 显示 purchase_processing 兜底文案，
-//     webhook 仍是唯一事实来源，customerInfo 监听/下次拉取会补上。
-//
-// 纯函数设计：时钟与探测函数都由调用方注入，测试无需 mock timers。
-
 /** 轮询结果：确认 / 窗口耗尽。pending 不是终态，不对外暴露。 */
 export type PurchaseConfirmationResult = { status: "confirmed" } | { status: "timeout" };
 
@@ -38,9 +28,6 @@ export async function runPurchaseConfirmation(
   const sleep = options.sleep ?? (async () => undefined);
   const clock = options.clock ?? { now: () => Date.now() };
 
-  // 至少探测一次：即使 maxWaitMs=0，也给服务端一次即时确认的机会。
-  // 绝不依赖真实时钟推进：以"探测次数"为硬上限（deadline = maxWaitMs/intervalMs + 1），
-  // 时钟只用于已流逝时间的展示语义。这样假时钟（now 恒定）也不会死循环。
   const startedAt = clock.now();
   const maxAttempts = Math.max(1, Math.ceil(maxWaitMs / intervalMs) + 1);
   for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -48,7 +35,6 @@ export async function runPurchaseConfirmation(
     try {
       confirmed = await options.poll();
     } catch {
-      // 探测失败（网络抖动）视作本次未确认，继续等待。
       confirmed = false;
     }
     if (confirmed) {

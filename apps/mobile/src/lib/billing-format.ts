@@ -1,8 +1,3 @@
-// apps/mobile/src/lib/billing-format.ts —— billing 三屏的纯展示函数。
-//
-// 刻意与 React / 网络层解耦：金额格式化（分→元）、日期展示、积分流水类型
-// 过滤都是纯函数，可在 Node 环境下单测（对齐 api-error.ts 的做法）。
-
 /** 金额以最小货币单位（分）存储，展示时除以 100。 */
 const MINOR_UNIT_FACTOR = 100;
 

@@ -45,7 +45,6 @@ describe("buildPageHead", () => {
 
   it("generates Twitter Card tags", () => {
     const result = buildPageHead({ title: "About", path: "/about" });
-    // 无 og:image 时降级为 summary，避免声明 large_image 却缺图。
     expect(result.meta).toContainEqual({
       name: "twitter:card",
       content: "summary",
@@ -97,7 +96,6 @@ describe("buildPageHead", () => {
 
     it("self-canonicalizes a localized URL instead of pointing at the default locale", () => {
       const result = buildPageHead({ title: "About", path: "/about", locale: "zh" });
-      // 修复前：/zh/about 的 canonical 会指向英文版 /about，zh 内容被判为重复。
       expect(result.links).toContainEqual({
         rel: "canonical",
         href: "https://example.com/zh/about",

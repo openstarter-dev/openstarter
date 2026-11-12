@@ -1,6 +1,3 @@
-// apps/desktop/src/renderer/hooks/useIpc.ts
-// 类型安全的 IPC hook
-
 import { useCallback } from "react";
 
 export function useIpc() {

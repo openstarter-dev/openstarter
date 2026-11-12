@@ -1,7 +1,3 @@
-// 微信支付二维码浮层（R10.3）：结账返回微信 Native 渠道的 qrData 时，
-// 将 `codeUrl`（weixin://...）本地渲染为二维码供用户扫码支付（不外发第三方）。
-// 金额固定为人民币最小单位（分），以 ¥ 展示。
-
 import { Button } from "@openstarter/ui-web/components/button";
 import { QRCodeSVG } from "qrcode.react";
 

@@ -1,5 +1,3 @@
-// apps/extension/src/components/error-state.tsx —— 网络/服务端错误态（不含 401）。
-// Retry 按钮文案经 #i18n 取译文；错误 message 本身（来自 HTTP 层）保持原样。
 import { i18n } from "#i18n";
 
 import { Button } from "@openstarter/ui-web/components/button";

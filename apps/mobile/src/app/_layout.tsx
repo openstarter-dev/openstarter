@@ -16,21 +16,16 @@ import { useThemePreference } from "@/lib/theme";
 import { captureReferralAttribution } from "@/lib/referral-attribution";
 
 export default function RootLayout() {
-  // QueryClient 必须在渲染之间保持同一实例，否则每次重渲染都会丢掉全部缓存。
   const [queryClient] = useState(() => new QueryClient());
   const env = getEnv();
 
-  // 两个钩子必须无条件调用（React hooks 规则），因此放在 env 分支之前。
   useThemePreference();
   const { locale } = useAppLocale();
 
-  // 分析初始化：按构建期 env 选择供应商（都没配时门面返回 noop，无副作用）。
-  // 放在 effect 里而非模块顶层：init 内部动态 import 可选 SDK，只能在运行时执行。
   useEffect(() => {
     void initAnalyticsFromEnv();
   }, []);
 
-  // Deep link ?ref= 归因捕获：仅在首次挂载时读取初始 URL 的 ref 参数。
   useEffect(() => {
     (async () => {
       try {
@@ -43,7 +38,6 @@ export default function RootLayout() {
           captureReferralAttribution(ref);
         }
       } catch {
-        // URL 解析失败或 Linking 不可用：静默
       }
     })();
   }, []);

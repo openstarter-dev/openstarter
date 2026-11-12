@@ -37,7 +37,6 @@ export function createApiProxy(options: ApiProxyOptions) {
   const { baseUrl, getToken, fetchFn = fetch } = options;
 
   return async (request: ApiRequest): Promise<ApiResponse> => {
-    // Validate path
     if (!request.path.startsWith("/api/")) {
       return {
         code: -1,
@@ -59,7 +58,6 @@ export function createApiProxy(options: ApiProxyOptions) {
         body: request.body ? JSON.stringify(request.body) : undefined,
       });
 
-      // Handle 401 — token expired
       if (response.status === 401) {
         return {
           code: 401,
@@ -68,7 +66,6 @@ export function createApiProxy(options: ApiProxyOptions) {
       }
 
       const rawData: unknown = await response.json();
-      // API 响应统一为 envelope：{ code, message, data, error? }
       const data = rawData as {
         code?: number;
         message?: string;
@@ -76,7 +73,6 @@ export function createApiProxy(options: ApiProxyOptions) {
         error?: unknown;
       };
 
-      // API returned an error
       if (!response.ok) {
         return {
           code: (data.code as number) || response.status,
@@ -85,7 +81,6 @@ export function createApiProxy(options: ApiProxyOptions) {
         };
       }
 
-      // Success
       return {
         code: 200,
         message: "ok",

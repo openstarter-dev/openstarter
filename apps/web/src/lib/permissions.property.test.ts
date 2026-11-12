@@ -92,9 +92,6 @@ describe("admin UI permission matcher (Property 51, 52)", () => {
   });
 
   it("P52 each admin nav item is gated by some permission via ADMIN_NAV behavior", () => {
-    // Mirror the ADMIN_NAV structure: every item carries permission + uses
-    // matchPermission. Visibility must be derivable from matchPermission over
-    // the permission set. This is the Property 52 entry-filtering contract.
     const NAV_PERMISSIONS = ["admin.*", "taxonomy.read", "post.read", "ticket.read"];
     const adminUser = ["admin.*"];
     const editorUser = ["post.read", "post.write", "taxonomy.read"];

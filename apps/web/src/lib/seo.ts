@@ -1,34 +1,19 @@
-// SEO 端点共享逻辑（SEO_Module，R24）——服务端专用。
-//
-// 供 `routes/sitemap[.]xml.ts` / `robots[.]txt.ts` / `llms[.]txt.ts` / `llms-full[.]txt.ts`
-// 复用：站点基址派生、已发布文章数据获取（经类型化 RPC 复用 CMS 的 `listPublishedArticles`，
-// 仅已发布 —— R24.4），以及各产物的**纯**渲染函数（便于单测、无副作用）。
-//
-// 数据面严格走 apps/web → AppType（RPC）→ packages/api → CMS 服务：`@openstarter/api` 的 Hono
-// `app` 仅在服务端 handler 内**动态导入**（`app.fetch` 内存分派），不进入客户端产物；主机名仅用于
-// 构造合法 URL，Hono 依 pathname 路由（沿用博客 SSR 的既有模式）。
-
 import type { AppType } from "@openstarter/api";
 import { baseLocale, locales, localizeUrl } from "@openstarter/i18n-web/runtime";
 import { hc } from "hono/client";
 
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
 
-// 内存 RPC 基址：主机名仅用于构造合法 URL，请求经 `app.fetch` 就地分派（不实际出网）。
 const INTERNAL_RPC_BASE = "http://seo.internal";
 
-// 站点地图收录的公开页面路径（`""` 为首页）。仅公开、可索引页面；不含 /api、鉴权与私有区。
 const SITEMAP_STATIC_PATHS = ["", "/pricing", "/blog", "/privacy", "/terms"];
 
-// llms 文本收录的公开页面（标题 / 描述用于人类与大模型可读的站点导览）。
 const LLMS_STATIC_PAGES: { path: string; title: string; description: string }[] = [
   { path: "", title: "Home", description: "Landing page" },
   { path: "/pricing", title: "Pricing", description: "Pricing plans" },
   { path: "/blog", title: "Blog", description: "Blog posts and articles" },
 ];
 
-// robots 屏蔽的路径：鉴权 / 私有区与 API（避免抓取工具索引），并屏蔽带查询串的 URL。
-// 注：ssr:false 页面对爬虫只输出空壳，屏蔽可避免 soft-404 / 重复内容噪音。
 const ROBOTS_DISALLOW = [
   "/admin",
   "/api/",
@@ -42,15 +27,12 @@ const ROBOTS_DISALLOW = [
   "/*?*",
 ];
 
-// SEO 端点（sitemap / llms*.txt / robots.txt）响应缓存：内容低频变化，
-// 允许边缘/CDN 缓存 1h，过期后可先返回陈旧内容并后台再验证。
 export const SEO_CACHE_CONTROL = "public, s-maxage=3600, stale-while-revalidate=86400";
 
 const HOME_PRIORITY = 1;
 const STATIC_PAGE_PRIORITY = 0.8;
 const ARTICLE_PRIORITY = 0.6;
 
-// XML 转义：`<loc>`/`<lastmod>` 等文本内容需转义，避免 slug / URL 中的特殊字符破坏文档或注入。
 const XML_ESCAPE_PATTERN = /[&<>"']/g;
 const XML_ESCAPES: Record<string, string> = {
   "&": "&amp;",
@@ -60,7 +42,6 @@ const XML_ESCAPES: Record<string, string> = {
   "'": "&apos;",
 };
 
-// 折叠空白 / 换行为单空格，使 llms 的单行 Markdown 条目（标题 / 描述）不被换行破坏。
 const WHITESPACE_PATTERN = /\s+/g;
 
 type Locale = (typeof locales)[number];
@@ -118,7 +99,7 @@ async function createRpc() {
   });
 }
 
-/** 取已发布文章摘要（仅已发布，R24.4）；失败时回退空列表以保证端点始终可用。 */
+/** 取已发布文章摘要（仅已发布）；失败时回退空列表以保证端点始终可用。 */
 export async function fetchSeoArticles(): Promise<SeoArticle[]> {
   try {
     const rpc = await createRpc();
@@ -133,7 +114,7 @@ export async function fetchSeoArticles(): Promise<SeoArticle[]> {
   }
 }
 
-/** 取已发布文章全文（仅已发布，R24.4）；失败时回退空列表。 */
+/** 取已发布文章全文（仅已发布）；失败时回退空列表。 */
 export async function fetchSeoArticlesWithContent(): Promise<SeoArticleWithContent[]> {
   try {
     const rpc = await createRpc();
@@ -164,7 +145,6 @@ function sitemapEntryXml(origin: string, entry: SitemapEntry): string {
         )}"/>`,
     )
     .join("\n");
-  // 子元素顺序须符合 sitemap XSD 序列：loc → (xhtml:link 扩展) → lastmod → changefreq → priority。
   const lines = [
     "  <url>",
     `    <loc>${escapeXml(urlForLocale(origin, entry.path, baseLocale))}</loc>`,
@@ -180,7 +160,7 @@ function sitemapEntryXml(origin: string, entry: SitemapEntry): string {
 }
 
 /**
- * 渲染 sitemap.xml（R24.1、R24.4）：公开页面 + **已发布**文章 URL。
+ * 渲染 sitemap.xml：公开页面 + **已发布**文章 URL。
  *
  * locale 感知：`<loc>` 为 base locale 的**规范 URL**（无本地化前缀），各语言版本以
  * `xhtml:link rel="alternate" hreflang` 声明，避免重复本地化前缀导致重复内容。
@@ -207,7 +187,7 @@ export function buildSitemapXml(origin: string, articles: SeoArticle[]): string 
   ].join("\n");
 }
 
-/** 渲染 robots.txt（R24.2）：屏蔽鉴权/私有区与 API，并声明 sitemap 地址。 */
+/** 渲染 robots.txt：屏蔽鉴权/私有区与 API，并声明 sitemap 地址。 */
 export function buildRobotsTxt(origin: string): string {
   return [
     "User-Agent: *",
@@ -230,7 +210,7 @@ function llmsHeaderLines(): string[] {
   ];
 }
 
-/** 渲染 llms.txt（R24.3）：站点概览 + 公开页面与已发布文章的可读清单（规范 URL、无正文）。 */
+/** 渲染 llms.txt：站点概览 + 公开页面与已发布文章的可读清单（规范 URL、无正文）。 */
 export function buildLlmsTxt(origin: string, articles: SeoArticle[]): string {
   const lines: string[] = [
     ...llmsHeaderLines(),
@@ -251,7 +231,7 @@ export function buildLlmsTxt(origin: string, articles: SeoArticle[]): string {
   return lines.join("\n");
 }
 
-/** 渲染 llms-full.txt（R24.3）：站点概览 + 已发布文章全文（含正文），供大模型抓取。 */
+/** 渲染 llms-full.txt：站点概览 + 已发布文章全文（含正文），供大模型抓取。 */
 export function buildLlmsFullTxt(origin: string, articles: SeoArticleWithContent[]): string {
   const lines: string[] = [
     ...llmsHeaderLines(),

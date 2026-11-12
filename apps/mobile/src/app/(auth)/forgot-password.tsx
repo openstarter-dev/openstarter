@@ -20,8 +20,6 @@ export default function ForgotPasswordScreen() {
     defaultValues: { email: "" },
     onSubmit: async ({ value }) => {
       setError("");
-      // 重置链接必须落在 Web 端（原生端不实现重置表单），
-      // 因此 redirectTo 指向 API 同源的 /reset-password —— 与 apps/web 的行为一致。
       const result = await authClient.requestPasswordReset({
         email: value.email,
         redirectTo: env.ok ? `${env.apiUrl}/reset-password` : undefined,
@@ -30,7 +28,6 @@ export default function ForgotPasswordScreen() {
         setError(result.error.message ?? "Request failed");
         return;
       }
-      // 账户枚举防护：无论邮箱是否存在都展示同一结果。
       setSent(true);
     },
     validators: {

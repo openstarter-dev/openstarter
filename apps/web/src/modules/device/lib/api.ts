@@ -1,10 +1,3 @@
-// 设备授权（RFC 8628）人侧端点收敛。
-//
-// 这三个端点属于 Better-Auth 的 deviceAuthorization 插件（挂载于 /api/auth/*），
-// 不在 Hono AppType 的类型化 RPC 内；better-fetch 1.x 的 authClient.$fetch 也
-// 不暴露 raw Response（拿不到 error_description）。故统一在此模块内以集中式
-// fetch 实现：路径单点定义、错误解析单点实现，页面组件不接触网络细节。
-
 /** 设备授权端点基址（Better-Auth deviceAuthorization 插件挂载点）。 */
 const DEVICE_ENDPOINT_BASE = "/api/auth/device";
 
@@ -17,7 +10,6 @@ async function serverErrorMessage(res: Response): Promise<string | undefined> {
     };
     return body.error_description ?? body.message;
   } catch {
-    // 非 JSON 响应（如纯文本错误页）无法解析，交由调用方回退本地化文案。
     return undefined;
   }
 }

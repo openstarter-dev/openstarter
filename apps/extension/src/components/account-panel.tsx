@@ -1,6 +1,3 @@
-// apps/extension/src/components/account-panel.tsx —— 已登录态：只读账户面板。
-// 字段与 apps/web 的 settings/billing.tsx、settings/credits.tsx 对齐（同一后端投影）。
-// 文案经 #i18n（@wxt-dev/i18n，跟随浏览器 UI 语言）取译文。见 spec §6。
 import { i18n } from "#i18n";
 
 import { Badge } from "@openstarter/ui-web/components/badge";

@@ -1,5 +1,3 @@
-// apps/desktop/src/renderer/components/LoginForm.tsx —— 登录表单
-
 import { useState } from "react";
 import { Button } from "@openstarter/ui-web/components/button";
 import {

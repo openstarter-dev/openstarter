@@ -14,8 +14,6 @@ export default function AuthLayout() {
     return <Spinner />;
   }
 
-  // 已登录的人不该看到登录页。"/" 由 (tabs)/index.tsx 承载，
-  // 这里用路径而不是分组名，避免和路由组的内部命名耦合。
   if (gate === "authenticated") {
     return <Redirect href="/" />;
   }

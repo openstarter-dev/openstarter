@@ -97,7 +97,6 @@ describe("createFileWindowStateStore", () => {
     const store = createFileWindowStateStore(filePath);
     store.write({ height: 700, width: 1500 });
 
-    // 模拟文件被破坏（例如进程在写入过程中被杀死）。
     writeFileSync(filePath, "{corrupted");
 
     expect(store.read()).toEqual(DEFAULT_WINDOW_STATE);

@@ -1,8 +1,3 @@
-// apps/desktop/src/main/main.ts —— 主进程生命周期编排。
-//
-// dev 模式：加载 Vite dev server（http://localhost:5173，由 run-desktop.mjs 启动）。
-// prod 模式：加载本地构建产物（dist/renderer/index.html）。
-// 具体决策全部来自纯逻辑模块（config/security/window-state/menu），这里只做编排。
 import { join } from "node:path";
 import { app, BrowserWindow, ipcMain, Menu } from "electron";
 
@@ -39,12 +34,8 @@ async function main(): Promise<void> {
 
   await app.whenReady();
 
-  // 注册 IPC 处理器
   registerIpcHandlers(app.getPath("userData"));
 
-  // 初始化认证服务
-  // apps/web/.env 是唯一 env 事实源：优先 OPENSTARTER_API_URL（显式覆盖），
-  // 其次应用地址 VITE_APP_URL，最后 localhost 兜底。
   const API_BASE_URL =
     process.env.OPENSTARTER_API_URL ||
     process.env.VITE_APP_URL ||
@@ -60,7 +51,6 @@ async function main(): Promise<void> {
     apiRequest: apiProxy,
   });
 
-  // 注册认证 IPC 处理器
   ipcMain.handle("auth:sign-in-email", async (_event, { email, password }) => {
     try {
       const result = await authService.signInWithEmail(email, password);
@@ -105,7 +95,6 @@ async function main(): Promise<void> {
     return apiProxy(request);
   });
 
-  // 构建加载 URL：dev 模式指向 Vite dev server，prod 模式指向本地文件
   const resolvedUrl: { ok: true; url: string } =
     mode === "dev"
       ? { ok: true, url: "http://localhost:5173" }
@@ -114,7 +103,6 @@ async function main(): Promise<void> {
           url: `file://${join(__dirname, "..", "renderer", "index.html")}`,
         };
 
-  // dev 模式等待 Vite dev server 就绪
   if (mode === "dev") {
     logInfo("waiting for renderer dev server at", resolvedUrl.url);
     const ready = await waitForDevServer(resolvedUrl.url);
@@ -129,13 +117,10 @@ async function main(): Promise<void> {
 
   let currentWindow = createMainWindow({ resolvedUrl, windowStateStore });
 
-  // 创建系统托盘
   createTray(currentWindow);
 
-  // 注册全局快捷键
   registerShortcuts(currentWindow);
 
-  // 退出时清理
   app.on("before-quit", () => {
     destroyTray();
     unregisterShortcuts();
@@ -152,8 +137,6 @@ async function main(): Promise<void> {
     }
   });
 
-  // 是否检查、检查什么条件，全部由 maybeCheckForUpdates 内部判断（含 isUpdaterDisabled）；
-  // 这里只负责延迟调度，不重复判断一次开关，避免两处逻辑分叉。
   setTimeout(() => {
     maybeCheckForUpdates(isPackaged).catch((error: unknown) => {
       logError("update check failed", error);

@@ -6,7 +6,6 @@ import type { ReactNode } from "react";
 import { ApiClientProvider } from "./api-context";
 import { useCreditsQuery, usePlanQuery, useSubscriptionQuery } from "./hooks";
 
-// Helper to create a mock API response
 function mockResponse<T>(
   data: T,
   ok = true,
@@ -18,7 +17,6 @@ function mockResponse<T>(
   };
 }
 
-// Create mock API client
 function createMockApi() {
   return {
     api: {
@@ -31,7 +29,6 @@ function createMockApi() {
   };
 }
 
-// Create a test wrapper that provides both API client and QueryClient
 function createTestWrapper(mockApi: ReturnType<typeof createMockApi>) {
   const queryClient = new QueryClient({
     defaultOptions: {

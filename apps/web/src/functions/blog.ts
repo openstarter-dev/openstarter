@@ -1,23 +1,3 @@
-// 博客 SSR 数据加载（R16.1 / R16.2 / R16.3）。
-//
-// 经类型化 RPC（`hc<AppType>`）调用**公开只读**博客端点 `GET /api/blog` 与 `GET /api/blog/:slug`，
-// 数据面严格走 apps/web → AppType（RPC）→ packages/api → CMS 服务，不反向依赖、不直接导入服务模块。
-//
-// SSR 说明：在 server function 内以内存方式将请求分派给已挂载的 Hono `app`（`app.fetch`），
-// 避免在 SSR 期解析部署 origin/端口；`app` 仅在服务端 handler 内**动态导入**，不进入客户端产物。
-// locale 由 localeMiddleware 依请求解析注入，供组件按当前语言渲染文案（R16.5）。
-//
-// 缓存（进程内 60s TTL，lib/ttl-cache.ts）：已发布文章是低频变更内容，此前每个文档
-// 请求都回源打 DB。CDN 层的 s-maxage（lib/page-cache.ts）过期回源后仍有本层兜底；
-// 新发布/下架文章最迟 TTL 后可见。locale 不入缓存 key——数据载荷与 locale 无关
-// （文案渲染在组件层），locale 由请求上下文即时拼回，中英请求共享同一份数据缓存。
-//
-// 错误语义（sf-error-handling / sf-input-validation）：
-// - 输入经 zod 校验（GET server fn 的数据以字符串形态过 wire，故数值用 coerce）；
-// - 真实故障（5xx / 网络失败 / 信封缺 data）抛出，由路由 error boundary 呈现——
-//   不再 `?? []` 吞成「暂无文章」，后端挂掉伪装成空博客比报错更糟；
-// - 唯一合法的「空」是详情页 404（文章不存在/未发布），返回 `post: null` 交由路由转 notFound()。
-
 import type { AppType } from "@openstarter/api";
 import { createServerFn } from "@tanstack/react-start";
 import { hc } from "hono/client";
@@ -26,13 +6,11 @@ import { z } from "zod";
 import { createTtlCache } from "@/lib/ttl-cache";
 import { localeMiddleware } from "@/middleware/locale";
 
-// 内存 RPC 基址：主机名仅用于构造合法 URL，Hono 依 pathname 路由；请求经 `app.fetch` 就地分派。
 const INTERNAL_RPC_BASE = "http://blog.internal";
 
 const NOT_FOUND_STATUS = 404;
 const BLOG_CACHE_TTL_MS = 60_000;
 
-// 与后端 listQuery（createPaginationSchema(100, 12).extend({category})）对齐的入参约束。
 const blogListInput = z.object({
   category: z.string().min(1).max(100).optional(),
   page: z.coerce.number().int().min(1).optional(),
@@ -101,7 +79,6 @@ async function fetchBlogPost(slug: string) {
   return json.data;
 }
 
-// 404（null）同样缓存：slug 扫描与不存在文章的重复回源都应被挡住。容量上限防穷举撑爆内存。
 const blogListCache = createTtlCache<Awaited<ReturnType<typeof fetchBlogList>>>({
   maxEntries: 64,
   ttlMs: BLOG_CACHE_TTL_MS,
@@ -116,7 +93,6 @@ export const getBlogPostsFn = createServerFn({ method: "GET" })
   .middleware([localeMiddleware])
   .validator((input: unknown) => blogListInput.parse(input))
   .handler(async ({ data, context }) => {
-    // key 与后端 listQuery 默认值（page=1 / pageSize=12）对齐，避免同一数据多 key。
     const cacheKey = JSON.stringify([data.category ?? null, data.page ?? 1, data.pageSize ?? 12]);
     const payload = await blogListCache.wrap(cacheKey, () => fetchBlogList(data));
     return {

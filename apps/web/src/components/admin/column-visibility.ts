@@ -1,13 +1,3 @@
-// react-store 列可见性偏好（跨 admin 数据表共享同一套偏好机制）。
-//
-// 一张表对应一个 `tableKey`；隐藏的列记录为 `false`。偏好写入单一 TanStack
-// Store（跨组件/跨路由共享、reactive），并镜像到 localStorage 持久化。
-//
-// SSR 说明（TanStack Start）：store 初始状态固定为 `{}`，服务端与客户端首渲染
-// 一致 → 无 hydration mismatch。localStorage 里的历史偏好由消费组件在
-// `restoreColumnVisibility`（mount 后调用）一次性恢复，因此「恢复偏好」发生在
-// 客户端挂载后，而非初始 render。
-
 import { createStore, useStore } from "@tanstack/react-store";
 
 const STORAGE_KEY = "admin.table.column-visibility.v1";
@@ -38,7 +28,6 @@ function writePersisted(map: ColumnVisibilityMap): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
   } catch {
-    // 隐私模式/配额耗尽时静默降级为「仅内存共享」，不阻断功能。
   }
 }
 
@@ -60,8 +49,6 @@ export function restoreColumnVisibility(tableKey: string): void {
 export function setColumnVisibility(tableKey: string, visibility: Record<string, boolean>): void {
   columnVisibilityStore.setState((prev) => {
     const next = { ...prev, [tableKey]: visibility };
-    // 以持久化值合并，而不是以内存 store 为基底：内存 store 可能尚未加载其他
-    // 标签页的最新偏好，直接用 prev 会把它整表冲掉。
     const merged = { ...readPersisted(), [tableKey]: visibility };
     writePersisted(merged);
     return next;
