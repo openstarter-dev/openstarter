@@ -55,7 +55,8 @@ The API is organized as modular domains under `src/modules/`, with each domain f
 src/
 ├── index.ts               # Hono app entry, route composition root
 ├── middleware/            # Auth, RBAC, plan gating middleware
-├── schema/                # Shared Zod validation schemas (pagination, id param)
+├── schema/                # All Zod validation schemas + domain value vocabularies
+│                          # (mirrors modules/: schema/user.ts, schema/admin/rbac.ts, schema/mcp.ts, ...)
 └── modules/               # Domain modules (routers + services colocated)
     ├── ai/                # AI domain (media generation + LLM chat + model catalog + tasks)
     │   ├── media/         # Image/video providers (Replicate / Fal / OpenAI / New API)
@@ -91,7 +92,8 @@ Each domain module follows this pattern:
 
 ```
 modules/{domain}/
-├── router.ts              # Hono router (includes route definitions + validation)
+├── router.ts              # Hono router (route definitions; validation schemas
+│                          # imported from src/schema/{domain})
 ├── service.ts             # Business logic (optional, for complex domains)
 └── index.ts               # Barrel export (optional)
 ```
@@ -109,19 +111,34 @@ modules/{domain}/
 
 ### Schema Organization
 
-Shared schemas are centralized in `src/schema/shared.ts`:
+All Zod validation schemas (and the domain value vocabularies they consume)
+live in `src/schema/`, mirroring the `modules/` layout. Routers and services
+import from there; `schema/` never imports back from `modules/` (the single
+allowed exception is the zero-dependency type module
+`modules/ai/media/types.ts`):
 
-- `idParam` — standard ID parameter schema
-- `paginationSchema` — default pagination (page + pageSize)
-- `createPaginationSchema(max, default)` — custom pagination
+- `schema/shared.ts` — cross-domain schemas exported via the `schema` barrel:
+  - `idParam` — standard ID parameter schema
+  - `paginationSchema` — default pagination (page + pageSize)
+  - `createPaginationSchema(max, default)` — custom pagination
+- `schema/{domain}.ts` — domain-specific schemas (`schema/user.ts`,
+  `schema/billing.ts`, `schema/referral.ts`, ...), including domain
+  vocabularies born for validation (`PostType`/`POST_TYPE_VALUES`,
+  `TICKET_STATUS`/`TICKET_STATUS_VALUES`, `AI_MEDIA_TYPES`, ...)
+- `schema/{domain}/{subdomain}.ts` — mirrors sub-domain routers
+  (`schema/content/posts.ts`, `schema/admin/rbac.ts`, `schema/support/tickets.ts`, ...)
+- `schema/mcp.ts` — MCP tool input schemas (`mcpPaginationSchema`,
+  ticket/chat/order tools; use plain `z.number()` — MCP args are already
+  native JSON — and carry `.describe()` strings for the model)
 
-Routers extend these with domain-specific fields:
+Domain schema files use locally-scoped names (`listQuery`, `createBody`, ...);
+they are imported from their specific path (not the barrel) to avoid
+cross-domain name collisions:
 
 ```ts
-const listQuery = paginationSchema.extend({
-  status: z.enum(STATUS_VALUES).optional(),
-  search: z.string().optional(),
-});
+// modules/admin/overview/router.ts
+import { idParam } from "../../../schema"; // shared barrel
+import { inviteBatchBody, listQuery } from "../../../schema/admin/overview";
 ```
 
 ## Commands
@@ -231,8 +248,11 @@ const { data } = await client.user.orders.$get({ query: { page: 1 } });
 ### Phase 3: Schema Centralization
 
 - Extracted repeated schemas to `src/schema/shared.ts` (pagination, idParam)
-- Routers now `.extend()` shared schemas instead of duplicating definitions
-- Eliminates ~27 lines of boilerplate across modules
+- All domain-specific validation schemas now live under `src/schema/`
+  (mirroring `modules/`), alongside the domain value vocabularies they
+  consume — routers and services import from `schema/`, never the reverse
+- Eliminates schema duplication across modules (e.g., admin/referral router
+  and service shared one `manualCreateBody` definition)
 
 ## Testing
 
