@@ -123,7 +123,18 @@ pnpm dev
 Every entry point reads it directly — Vite and `dotenv` for the web app,
 `packages/db` for migrations, each app's own build entry for the rest — so no
 global env wrapper is needed. `pnpm with-env <cmd>` is available for manual
-injection, and every app derives its API base URL from `URL`.
+injection, and every app derives its API base URL from `VITE_APP_URL` (falling
+back to `APP_URL` / `BETTER_AUTH_URL` / `URL`, then `http://localhost:3000` — so
+local dev needs none of them). Better-auth's `baseURL`, SSR canonical URLs and
+email links resolve through the same `packages/shared/src/app-url.ts` helper.
+
+Two templates are kept in sync key-by-key: `apps/web/.env.example` (local dev)
+and `apps/web/.env.production.example` (production). On Cloudflare Workers the
+production file is a checklist — copy the plain values into `wrangler.jsonc`
+`vars` and the secrets via `wrangler secret put`; on self-hosted Node copy it to
+`apps/web/.env`. The repo deliberately avoids Vite's `.env.development` /
+`.env.production`, because the server runtime and the other five apps only read
+`.env`.
 
 Open [http://localhost:3000](http://localhost:3000). The API is served from the
 same origin under `/api/*`. Product branding starts in
@@ -143,12 +154,12 @@ cp wrangler.example.jsonc wrangler.jsonc
 
 Fill in the placeholders:
 
-| Placeholder                                               | Value                                                       |
-| --------------------------------------------------------- | ----------------------------------------------------------- |
-| `routes[].pattern`                                        | production hostname (apex or www — pick one, 301 the other) |
-| `compatibility_date`                                      | any date your wrangler version supports                     |
-| `vars.VITE_APP_URL` / `vars.BETTER_AUTH_URL` / `vars.URL` | the same `https://…` URL                                    |
-| `d1_databases[].database_id`                              | output of `wrangler d1 create openstarter-db`               |
+| Placeholder                  | Value                                                       |
+| ---------------------------- | ----------------------------------------------------------- |
+| `routes[].pattern`           | production hostname (apex or www — pick one, 301 the other) |
+| `compatibility_date`         | any date your wrangler version supports                     |
+| `vars.VITE_APP_URL`          | the production app URL (single origin)                      |
+| `d1_databases[].database_id` | output of `wrangler d1 create openstarter-db`               |
 
 Then deploy and finish the one-time setup:
 

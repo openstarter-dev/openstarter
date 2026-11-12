@@ -142,8 +142,12 @@ const listQuery = paginationSchema.extend({
 ## Environment
 
 `apps/web/.env` is the single environment source for the whole monorepo
-(copy `apps/web/.env.example`; there is no root `.env`). Every entry point loads
-it itself — there is no global env wrapper:
+(copy `apps/web/.env.example`; there is no root `.env`). `apps/web/.env.production.example`
+is the production counterpart (same keys, production values): a checklist for
+`wrangler.jsonc` vars + `wrangler secret put` on Cloudflare, or a file to copy to
+`apps/web/.env` on self-hosted Node. Vite's `.env.development` / `.env.production`
+are intentionally unused — the server runtime and the other apps only read `.env`.
+Every entry point loads it itself — there is no global env wrapper:
 
 - `apps/web` — Vite for the client + `dotenv/config` in `packages/db` (cwd =
   `apps/web`) for the server runtime
@@ -163,12 +167,16 @@ Required variables:
   `d1`, Workers reads the `DB` binding and local dev falls back to the sqlite
   file at this URL (`file:local.db` at the repo root, created by `pnpm db:push`
   / `pnpm db:migrate`)
-- `URL` — web app origin (also the API origin; other apps derive their base URL from it)
+- `VITE_APP_URL` — web app origin (also the API origin). Resolved once by
+  `packages/shared/src/app-url.ts` (`VITE_APP_URL` → `APP_URL` →
+  `BETTER_AUTH_URL` → `URL` → `http://localhost:3000`) and used for better-auth's
+  `baseURL`, SSR canonical URLs, email links and every app's derived API base;
+  `BETTER_AUTH_URL` / `URL` remain supported as aliases
 - `PRODUCT_NAME` — Used in emails, marketing site
 - `DEFAULT_LOCALE` — Default i18n locale (e.g., `en-US`)
 
 Extension / mobile / mini-app / cli / desktop read the web app address from
-`apps/web/.env` (or the injected `URL`) at build time; `OPENSTARTER_API_URL`
+`apps/web/.env` at build time; `OPENSTARTER_API_URL`
 stays available as an explicit override for CI/deployments. See apps/web and
 packages/auth for app-specific env vars.
 
