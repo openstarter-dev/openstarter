@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { getAppUrl, isLoopbackAppUrl } from "./utils";
+import { getAppUrl, isLoopbackAppUrl, mobileSchemeOrigin, parseOriginList } from "./utils";
 
 const DEFAULT_APP_URL = "http://localhost:3000";
 
@@ -47,5 +47,33 @@ describe("isLoopbackAppUrl", () => {
     "http://localhost:3000/",
   ])("does not treat %s as loopback", (url) => {
     expect(isLoopbackAppUrl(url)).toBe(false);
+  });
+});
+
+describe("parseOriginList", () => {
+  it("splits, trims and dedupes comma separated origins", () => {
+    expect(parseOriginList(" https://a.com , https://b.com,,https://a.com ")).toEqual([
+      "https://a.com",
+      "https://b.com",
+    ]);
+  });
+
+  it("returns an empty list for missing values", () => {
+    expect(parseOriginList(undefined)).toEqual([]);
+    expect(parseOriginList("")).toEqual([]);
+    expect(parseOriginList(" , ")).toEqual([]);
+  });
+});
+
+describe("mobileSchemeOrigin", () => {
+  it("builds the deep link origin from the configured scheme", () => {
+    expect(mobileSchemeOrigin("openstarter")).toBe("openstarter://");
+    expect(mobileSchemeOrigin(" MyApp ")).toBe("myapp://");
+  });
+
+  it("falls back to openstarter for blank or malformed schemes", () => {
+    expect(mobileSchemeOrigin("")).toBe("openstarter://");
+    expect(mobileSchemeOrigin(undefined)).toBe("openstarter://");
+    expect(mobileSchemeOrigin("://bad scheme")).toBe("openstarter://");
   });
 });

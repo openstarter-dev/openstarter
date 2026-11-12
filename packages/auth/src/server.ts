@@ -27,7 +27,13 @@ import { authSchema, organizationTeams } from "./auth-database-schema";
 import { createAuthEmailCallbacks, createChangeEmailOptions } from "./email-callbacks";
 import { env } from "./env";
 import { hooks } from "./hooks";
-import { getAppUrl, getUrl, isLoopbackAppUrl } from "./lib/utils";
+import {
+  getAppUrl,
+  getUrl,
+  isLoopbackAppUrl,
+  mobileSchemeOrigin,
+  parseOriginList,
+} from "./lib/utils";
 import { ac, ADMIN_ROLES, DEFAULT_ROLE, roles } from "./rbac";
 import { AuthProvider, SocialProvider, VerificationType } from "./types";
 
@@ -89,6 +95,13 @@ const otpExpiresIn = runtimeConfigs.email_otp_expires_in
 const appUrl = getAppUrl();
 const isHttpsAppUrl = appUrl.startsWith("https://");
 const allowLocalOrigins = isLoopbackAppUrl(appUrl);
+
+// ─── 跨端来源白名单（trustedOrigins）──────────────────────────────────────────
+// 默认只信任：baseURL 自身 origin（better-auth 自动追加）+ 移动端 scheme + Apple 登录域名。
+// 扩展 origin 与自定义域名一律显式配置，不再默认信任 `chrome-extension://` 前缀。
+const mobileOrigin = mobileSchemeOrigin(env.MOBILE_APP_SCHEME);
+const extensionOrigin = env.EXTENSION_ORIGIN.trim();
+const extraTrustedOrigins = parseOriginList(env.TRUSTED_ORIGINS);
 
 // One Tap 的 audience 必须与客户端拿到的 client id 一致：DB 配置优先（它是公开配置的来源），
 // env 仅作兜底。任一缺失或 Google provider 未注册时不挂载插件——否则回调会抛
@@ -303,15 +316,17 @@ export const auth = betterAuth({
       : {}),
   },
   trustedOrigins: [
-    // 移动端深链回跳（Expo Router scheme，见 apps/mobile/app.config.ts）。
-    // 与 expoClient({ scheme: "openstarter" }) 及 cookiePrefix 保持同名。
-    "openstarter://",
+    // 移动端深链回跳（Expo Router scheme，见 apps/mobile/app.config.ts），
+    // 与 expoClient({ scheme }) 及 cookiePrefix 同名；由 MOBILE_APP_SCHEME 配置。
+    mobileOrigin,
     /* Needed only for Apple ID authentication */
     "https://appleid.apple.com",
-    // 浏览器扩展页面自身的 origin：扩展以 Bearer 桥接会话，但请求带 credentials 时
-    // 仍会走 origin 校验，需要显式信任。未配置 EXTENSION_ORIGIN 时退化为前缀匹配
-    // （开发期 / 多构建 ID 可用）；发布后建议钉到具体扩展 ID，避免信任任意扩展。
-    env.EXTENSION_ORIGIN || "chrome-extension://",
+    // 扩展页面 origin 与自定义域名一律显式声明（默认「白名单为空」）：
+    // - EXTENSION_ORIGIN：chrome-extension://<id>，仅在扩展直接发起带 cookie 的请求时需要；
+    //   Bearer 桥接不需要它，故默认不配置也不影响扩展登录。
+    // - TRUSTED_ORIGINS：逗号分隔的额外来源，覆盖自建域名、局域网调试等。
+    ...(extensionOrigin ? [extensionOrigin] : []),
+    ...extraTrustedOrigins,
     // 本地调试来源只在 baseURL 本身是 loopback 时放开——不能用 NODE_ENV 判断：
     // auth env 预设把缺省的 NODE_ENV 兜底成 "development"，Worker 上会恒为真，
     // 生产也会信任 localhost。非 loopback 的来源（含局域网 IP）由 baseURL 自身

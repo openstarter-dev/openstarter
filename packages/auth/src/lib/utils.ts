@@ -73,6 +73,37 @@ export const isLoopbackAppUrl = (appUrl: string): boolean =>
   /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?$/i.test(appUrl);
 
 /**
+ * 解析逗号分隔的来源白名单（`TRUSTED_ORIGINS`）。
+ *
+ * 去空白、去空项、去重；不做 URL 归一化——better-auth 的 `trustedOrigins` 既接受
+ * 完整 origin，也接受 `scheme://` 前缀与 `*` 通配，调用方自行决定精度。
+ */
+export const parseOriginList = (value: string | undefined): string[] => {
+  if (!value) {
+    return [];
+  }
+  const origins = new Set<string>();
+  for (const item of value.split(",")) {
+    const trimmed = item.trim();
+    if (trimmed) {
+      origins.add(trimmed);
+    }
+  }
+  return [...origins];
+};
+
+/**
+ * 生成移动端深链来源（`scheme://`）。
+ *
+ * 空值或含非法字符时回退 `openstarter`，避免把空白 scheme 塞进 trustedOrigins
+ * 后静默匹配到 `://` 前缀。
+ */
+export const mobileSchemeOrigin = (scheme: string | undefined): string => {
+  const normalized = scheme?.trim().toLowerCase() ?? "";
+  return /^[a-z][a-z0-9+.-]*$/.test(normalized) ? `${normalized}://` : "openstarter://";
+};
+
+/**
  * 组装验证 / 回调 URL。
  *
  * 给定 `url` 与 `type` 时，返回 better-auth 生成的原始可执行回调 URL；否则返回
