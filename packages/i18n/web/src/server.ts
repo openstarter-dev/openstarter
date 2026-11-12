@@ -1,4 +1,7 @@
-// @openstarter/i18n/server —— 服务端 locale 解析入口。
+// @openstarter/i18n-web/server —— 服务端 locale 解析入口。
+// 注意与本包其他子路径的分工：./runtime（Paraglide 编译出的 getLocale/localizeUrl 等）、
+// ./messages（编译出的 m）、./middleware（Paraglide 的 paraglideMiddleware，见 paraglide.ts）、
+// ./server（本文件，按请求头/cookie/URL 解析受支持 locale）。
 // 依「显式 URL 前缀 / locale cookie / Accept-Language / 默认语言」的顺序解析请求语言；
 // request 可空（缺省或无匹配时回落默认语言）。供 Auth_Service 传给邮件渲染按语言取文案。
 // 位于 auth 依赖层之下，不依赖 packages/api、packages/auth（仅复用包根的受支持语言集合）。

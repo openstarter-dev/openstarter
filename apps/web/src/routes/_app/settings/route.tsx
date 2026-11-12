@@ -1,6 +1,6 @@
+import { m } from "@openstarter/i18n-web/messages";
 import { cn } from "@openstarter/ui-web/lib/utils";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/_app/settings")({
   component: SettingsLayout,

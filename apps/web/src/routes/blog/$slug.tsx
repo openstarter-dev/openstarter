@@ -5,6 +5,7 @@
 //
 // 正文渲染：使用 Markdown 组件将 API 返回的 markdown 字符串渲染为 HTML。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
@@ -14,7 +15,6 @@ import { getBlogPostFn } from "@/functions/blog";
 import { formatBlogDate } from "@/lib/blog-i18n";
 import { Markdown } from "@/lib/markdown";
 import { buildPageHead } from "@/lib/page-head";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {

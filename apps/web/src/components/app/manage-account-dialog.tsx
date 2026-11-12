@@ -2,6 +2,7 @@
 // Manage Account 模态框：复用 settings 各区块组件，在弹窗内提供
 // 左侧导航（md 以上）切换区块，移动端导航横向滚动。
 
+import { m } from "@openstarter/i18n-web/messages";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,6 @@ import {
 import { cn } from "@openstarter/ui-web/lib/utils";
 import type { ComponentType } from "react";
 import { useState } from "react";
-import { m } from "@/paraglide/messages.js";
 
 import { AccountsPage } from "@/components/app/settings/accounts";
 import { ApiKeysPage } from "@/components/app/settings/apikeys";

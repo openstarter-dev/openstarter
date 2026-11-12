@@ -1,4 +1,5 @@
 // 分销面板：推荐码/链接 + 统计卡片 + 佣金流水 + 下线列表。
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Card } from "@openstarter/ui-web/components/card";
 import {
@@ -15,7 +16,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { referral } from "@/modules/referral/lib/api";
-import { m } from "@/paraglide/messages.js";
 
 const QR_SIZE = 120;
 

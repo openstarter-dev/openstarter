@@ -19,7 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { countTotalPages, LIST_PAGE_SIZE } from "@/lib/list-search";
 import { user } from "@/modules/user/lib/api";
-import { m } from "@/paraglide/messages.js";
+import { m } from "@openstarter/i18n-web/messages";
 
 function formatDate(value: string | null | undefined): string {
   if (!value) {

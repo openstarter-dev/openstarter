@@ -3,6 +3,7 @@
 // lib/auth-client 注入的跳转），落到本页。会话凭证此时在 2FA 临时 cookie 中，须先
 // 通过 TOTP 或备用码验证才建立正式会话。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Input } from "@openstarter/ui-web/components/input";
 import { Label } from "@openstarter/ui-web/components/label";
@@ -12,7 +13,6 @@ import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 import { buildPageHead } from "@/lib/page-head";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/_auth-pages/two-factor")({
   ssr: false,

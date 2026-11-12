@@ -1,6 +1,7 @@
 // apps/web/src/routes/admin/ai-models.tsx
 // AI 模型目录管理（Task 10）：列表 + Dialog 表单（create/update）+ 删除。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Badge } from "@openstarter/ui-web/components/badge";
 import { Button } from "@openstarter/ui-web/components/button";
 import {
@@ -45,7 +46,6 @@ import {
   aiModelsKeys,
   AI_MODEL_MEDIA_TYPES,
 } from "@/modules/admin/lib/api";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/admin/ai-models")({
   validateSearch: listSearchParams,

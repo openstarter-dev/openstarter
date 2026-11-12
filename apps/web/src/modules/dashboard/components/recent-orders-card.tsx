@@ -1,5 +1,6 @@
 // 仪表盘最近订单卡片：复用 user.queries.orders（第 1 页），紧凑展示最近 5 条。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Badge } from "@openstarter/ui-web/components/badge";
 import { buttonVariants } from "@openstarter/ui-web/components/button";
 import {
@@ -23,7 +24,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
-import { m } from "@/paraglide/messages.js";
 import { user } from "@/modules/user/lib/api";
 
 const PREVIEW_COUNT = 5;

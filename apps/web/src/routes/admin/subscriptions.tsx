@@ -1,6 +1,7 @@
 // apps/web/src/routes/admin/subscriptions.tsx
 // 订阅管理（R26.2）：分页列表，由通用 DataTable（react-table）渲染。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Badge } from "@openstarter/ui-web/components/badge";
 import { useQuery } from "@tanstack/react-query";
 import { legacyCreateColumnHelper } from "@tanstack/react-table/legacy";
@@ -12,7 +13,6 @@ import { DataTable, type DataColumn } from "@/components/admin/data-table";
 import { countTotalPages, listSearchParams, LIST_PAGE_SIZE } from "@/lib/list-search";
 import { preloadQueries } from "@/lib/preload";
 import { admin, type AdminSubscriptionRow } from "@/modules/admin/lib/api";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/admin/subscriptions")({
   validateSearch: listSearchParams,

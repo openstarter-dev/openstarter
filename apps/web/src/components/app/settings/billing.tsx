@@ -11,7 +11,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { user } from "@/modules/user/lib/api";
-import { m } from "@/paraglide/messages.js";
+import { m } from "@openstarter/i18n-web/messages";
 
 const PLAN_LABEL: Record<string, string> = {
   expired: m["settings.billing.plan_expired"](),

@@ -1,3 +1,4 @@
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
@@ -16,7 +17,6 @@ import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
 import { buildPageHead } from "@/lib/page-head";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/_auth-pages/reset-password")({
   head: () =>

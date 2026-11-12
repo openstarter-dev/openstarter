@@ -13,8 +13,8 @@
     "noEmit": true,
 
     /* Paraglide emits JSDoc-typed .js (no .d.ts); allowJs lets tsc resolve the
-       generated src/paraglide runtime. checkJs stays off so the generated
-       files are not error-checked. */
+       compiled runtime exported by @openstarter/i18n-web/{messages,runtime}. checkJs
+       stays off so the generated files are not error-checked. */
     "allowJs": true,
 
     /* Linting */

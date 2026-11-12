@@ -2,6 +2,7 @@
 // 供未注册访客先体验再落库；游客在 Accounts 页可后续 Link 正式账号。
 // 由 anonymous 开关（Config `anonymous_auth_enabled`）控制是否渲染。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { useNavigate } from "@tanstack/react-router";
 import { Ghost } from "lucide-react";
@@ -9,7 +10,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
-import { m } from "@/paraglide/messages.js";
 
 interface AnonymousButtonProps {
   /** 匿名登录后跳转的地址，默认跳转到 dashboard。 */

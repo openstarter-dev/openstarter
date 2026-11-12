@@ -1,7 +1,6 @@
+import { m } from "@openstarter/i18n-web/messages";
 import { LayoutDashboard, Settings, Share2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-
-import { m } from "@/paraglide/messages.js";
 
 type NavItem = {
   to: "/dashboard" | "/settings" | "/referral";

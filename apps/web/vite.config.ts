@@ -10,9 +10,9 @@ import { nitro } from "nitro/vite";
 import { defineConfig } from "vite";
 
 // Paraglide compiles the shared en/zh message catalog into the locale runtime
-// consumed here. The inlang project, messages and the plugin factory all live
-// in packages/i18n/web; the compiled runtime lands in src/paraglide
-// (git-ignored, regenerated on every dev/build).
+// consumed here. The inlang project, messages, plugin factory and the compiled
+// output all live in packages/i18n/web (git-ignored, regenerated on every
+// dev/build); app code imports it through @openstarter/i18n-web/{messages,runtime,middleware}.
 
 // Cloudflare Workers build (`pnpm cf:build`, NITRO_PRESET=cloudflare_module):
 // stub out DB drivers that don't match the runtime database. mysql2 crashes
@@ -85,7 +85,6 @@ export default defineConfig({
     // locale-aware URL rewrite (localizeUrl / deLocalizeUrl) and message
     // compilation, leaving the tanstackStart -> viteReact order untouched.
     createParaglidePlugin({
-      outdir: "./src/paraglide",
       outputStructure: "message-modules",
       cookieName: "PARAGLIDE_LOCALE",
       // url: locale from the path prefix (/zh/...); cookie: user preference set

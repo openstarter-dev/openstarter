@@ -1,5 +1,5 @@
 # Oxlint ignore patterns (gitignore syntax)
-apps/web/src/paraglide
+packages/i18n/web/src/compiled
 apps/web/.output
 apps/mobile/src/paraglide
 apps/mobile/.expo

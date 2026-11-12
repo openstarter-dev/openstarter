@@ -1,6 +1,7 @@
 // apps/web/src/routes/admin/index.tsx
 // 管理后台首页（R25.4 / R26.5）：展示 Analytics_Service 汇总指标概览（用户/订单/订阅/积分消耗）。
 
+import { m } from "@openstarter/i18n-web/messages";
 import {
   Card,
   CardContent,
@@ -13,7 +14,6 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { AdminHeader } from "@/components/admin/list";
 import { admin } from "@/modules/admin/lib/api";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/admin/")({
   loader: ({ context: { queryClient } }) => queryClient.prefetchQuery(admin.queries.metrics()),

@@ -12,10 +12,10 @@
 // 否则多域名/预览部署下 canonical 会指向主域。
 
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type SupportedLocale } from "@openstarter/i18n-web";
+import { getLocale, localizeUrl } from "@openstarter/i18n-web/runtime";
 import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
-import { getLocale, localizeUrl } from "@/paraglide/runtime.js";
 
 export interface PageHeadInput {
   title: string;

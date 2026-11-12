@@ -3,6 +3,7 @@
 // SSR 经 RPC 调 GET /api/blog 拉取已发布文章，展示标题/摘要/封面/发布信息；支持按分类精确筛选
 // （?category=，仅展示归属该分类的已发布文章）；文案依当前 locale 渲染。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { BlogCard } from "@/components/blog/blog-card";
@@ -11,7 +12,6 @@ import { getBlogPostsFn } from "@/functions/blog";
 import { collectCategories } from "@/lib/blog";
 import { formatBlogDate } from "@/lib/blog-i18n";
 import { buildPageHead } from "@/lib/page-head";
-import { m } from "@/paraglide/messages.js";
 
 type BlogSearch = {
   category?: string;

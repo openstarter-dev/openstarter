@@ -6,6 +6,7 @@
 // 由 admin 后台的 System Settings 开关 `magic_link_enabled` / `email_otp_enabled` 控制,
 // 公共配置端点(`/api/config/public)下发到前端;开关关闭时本组件不渲染对应入口。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Input } from "@openstarter/ui-web/components/input";
 import { Label } from "@openstarter/ui-web/components/label";
@@ -13,7 +14,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
-import { m } from "@/paraglide/messages.js";
 
 export type PasswordlessMode = "magic-link" | "email-otp";
 

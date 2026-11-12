@@ -3,6 +3,7 @@
 // 通过 GET /api/admin/config 拉取 `{configs, settings, groups, tabs}`,
 // 按 tab 切换、按 group 分卡渲染所有平台级开关与凭证项,本地编辑后批量提交。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Card, CardContent, CardHeader } from "@openstarter/ui-web/components/card";
 import { Input } from "@openstarter/ui-web/components/input";
@@ -23,7 +24,6 @@ import { toast } from "sonner";
 
 import { AdminHeader, StatusText } from "@/components/admin/list";
 import { admin } from "@/modules/admin/lib/api";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/admin/settings")({
   loader: ({ context: { queryClient } }) => queryClient.prefetchQuery(admin.queries.config()),

@@ -11,10 +11,10 @@
 //
 // 端点调用统一走 modules/device/lib/api（authClient.$fetch.raw），文案走 Paraglide。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
-import { m } from "@/paraglide/messages.js";
 import { approveDevice, claimDevice, denyDevice, DeviceFlowError } from "@/modules/device/lib/api";
 
 type Phase = "claiming" | "ready" | "approving" | "approved" | "denied" | "error";

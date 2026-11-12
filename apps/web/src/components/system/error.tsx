@@ -1,7 +1,7 @@
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 
 import { BRAND_NAME } from "@/lib/branding";
-import { m } from "@/paraglide/messages.js";
 
 export function ErrorPage({ error }: { error: Error }) {
   const isDev = import.meta.env.DEV;

@@ -7,6 +7,7 @@
 //
 // 消费侧只负责「列定义 + 数据」，统一渲染 shadcn Table，消除各列表页重复表格。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Checkbox } from "@openstarter/ui-web/components/checkbox";
 import { Popover, PopoverContent, PopoverTrigger } from "@openstarter/ui-web/components/popover";
@@ -29,7 +30,6 @@ import {
   setColumnVisibility,
   useColumnVisibility,
 } from "@/components/admin/column-visibility";
-import { m } from "@/paraglide/messages.js";
 
 /** 虚拟滚动估算行高（px）；翻页/多行时虚拟化会重算。 */
 const VIRTUAL_ROW_ESTIMATE = 48;

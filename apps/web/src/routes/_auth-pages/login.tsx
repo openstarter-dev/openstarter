@@ -1,3 +1,4 @@
+import { m } from "@openstarter/i18n-web/messages";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -6,7 +7,6 @@ import SignInForm from "@/components/auth/sign-in-form";
 import SignUpForm from "@/components/auth/sign-up-form";
 import { OneTapPrompt } from "@/components/auth/one-tap-prompt";
 import { buildPageHead } from "@/lib/page-head";
-import { m } from "@/paraglide/messages.js";
 
 const DEFAULT_REDIRECT = "/dashboard";
 

@@ -11,7 +11,7 @@ import { Label } from "@openstarter/ui-web/components/label";
 import { useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { m } from "@/paraglide/messages.js";
+import { m } from "@openstarter/i18n-web/messages";
 
 export function DangerPage() {
   const { data: session } = authClient.useSession();

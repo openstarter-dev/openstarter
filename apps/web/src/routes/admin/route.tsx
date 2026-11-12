@@ -1,12 +1,12 @@
 // apps/web/src/routes/admin/route.tsx
 // 管理后台外壳（Admin_Console，R26）：登录 + 平台级 RBAC 守卫、分组侧边导航（按权限过滤）。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { cn } from "@openstarter/ui-web/lib/utils";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 
 import { authClient } from "@/lib/auth-client";
 import { matchAnyPermission, matchPermission } from "@/lib/permissions";
-import { m } from "@/paraglide/messages.js";
 import { user } from "@/modules/user/lib/api";
 
 type AdminPath =

@@ -2,13 +2,13 @@
 // 由 passkey 插件注册即可用（服务端 passkey() 无条件挂载，无 admin 开关）；
 // 仅在浏览器支持 WebAuthn（window.PublicKeyCredential）时渲染按钮。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Fingerprint } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
-import { m } from "@/paraglide/messages.js";
 
 export const isWebAuthnSupported = (): boolean =>
   typeof window !== "undefined" && Boolean(window.PublicKeyCredential);

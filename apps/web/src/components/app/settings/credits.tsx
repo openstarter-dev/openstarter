@@ -1,3 +1,4 @@
+import { m } from "@openstarter/i18n-web/messages";
 import { Badge } from "@openstarter/ui-web/components/badge";
 import {
   Card,
@@ -12,7 +13,6 @@ import { useMemo } from "react";
 
 import { DataTable, type DataColumn } from "@/components/admin/data-table";
 import { user, type CreditHistoryRow } from "@/modules/user/lib/api";
-import { m } from "@/paraglide/messages.js";
 
 const columnHelper = legacyCreateColumnHelper<CreditHistoryRow>();
 

@@ -11,7 +11,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { auth } from "@/modules/auth/lib/api";
-import { m } from "@/paraglide/messages.js";
+import { m } from "@openstarter/i18n-web/messages";
 
 const LINKABLE_PROVIDERS = ["google", "github", "apple"] as const;
 

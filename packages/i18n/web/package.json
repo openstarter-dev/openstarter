@@ -5,6 +5,15 @@
     ".": {
       "default": "./src/index.ts"
     },
+    "./middleware": {
+      "default": "./src/compiled/server.js"
+    },
+    "./messages": {
+      "default": "./src/compiled/messages.js"
+    },
+    "./runtime": {
+      "default": "./src/compiled/runtime.js"
+    },
     "./*": {
       "default": "./src/*.ts"
     }

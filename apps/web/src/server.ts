@@ -8,11 +8,11 @@
 // (not Paraglide's de-localized one) to avoid a double-rewrite redirect loop.
 // Requirements: 23.3, 23.4.
 
+import { paraglideMiddleware } from "@openstarter/i18n-web/middleware";
+import { deLocalizeUrl } from "@openstarter/i18n-web/runtime";
 import handler from "@tanstack/react-start/server-entry";
 
 import { applyPageCacheHeaders } from "@/lib/page-cache";
-import { paraglideMiddleware } from "@/paraglide/server.js";
-import { deLocalizeUrl } from "@/paraglide/runtime.js";
 
 // Cloudflare Workers binding injection — `@openstarter/db/server` reads the D1
 // (and optional Hyperdrive) binding from `globalThis.__CF_ENV__` (see

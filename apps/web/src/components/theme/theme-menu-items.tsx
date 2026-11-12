@@ -1,11 +1,10 @@
+import { m } from "@openstarter/i18n-web/messages";
 import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@openstarter/ui-web/components/dropdown-menu";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-
-import { m } from "@/paraglide/messages.js";
 
 // Theme values map to `common.nav.theme_{value}` message keys. The key is only
 // known at runtime, but the candidate set is small and fixed, so each label is

@@ -1,3 +1,4 @@
+import { getLocale, setLocale } from "@openstarter/i18n-web/runtime";
 import { Button } from "@openstarter/ui-web/components/button";
 import {
   DropdownMenu,
@@ -6,8 +7,6 @@ import {
   DropdownMenuTrigger,
 } from "@openstarter/ui-web/components/dropdown-menu";
 import { Globe } from "lucide-react";
-
-import { getLocale, setLocale } from "@/paraglide/runtime.js";
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },

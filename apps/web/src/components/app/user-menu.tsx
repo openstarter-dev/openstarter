@@ -1,3 +1,4 @@
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import {
   DropdownMenu,
@@ -16,7 +17,6 @@ import { useState } from "react";
 import { ManageAccountDialog } from "@/components/app/manage-account-dialog";
 import { ThemeMenuItems } from "@/components/theme/theme-menu-items";
 import { authClient } from "@/lib/auth-client";
-import { m } from "@/paraglide/messages.js";
 
 export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 // 博客日期本地化（R16.5）。
 //
-// 全站界面文案已由 Paraglide 运行时（apps/web/src/paraglide，消息定义在 packages/i18n/web）承载：
+// 全站界面文案已由 Paraglide 运行时（@openstarter/i18n-web/runtime，消息定义与编译产物都在 packages/i18n/web）承载：
 // 博客文案统一以 m["blog.*"]() 解析（见 routes/blog/*），不再走本地文案字典。此处仅保留与
 // 翻译键无关的「按当前 locale 本地化文章日期」纯函数，供列表页/详情页复用。
 

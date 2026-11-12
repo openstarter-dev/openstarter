@@ -22,7 +22,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { tickets } from "@/modules/tickets/lib/api";
-import { m } from "@/paraglide/messages.js";
+import { m } from "@openstarter/i18n-web/messages";
 
 function statusVariant(status: string): "default" | "secondary" | "outline" {
   if (status === "open") {

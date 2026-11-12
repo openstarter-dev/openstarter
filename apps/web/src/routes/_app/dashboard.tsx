@@ -2,6 +2,7 @@
 // 仪表盘：标准 SaaS 概览布局 —— 顶部欢迎语 + 六格 KPI 统计卡 + 积分动态图 + 最近订单 + 快速开始。
 // 数据面经类型化 RPC（`client.api.user.dashboard-stats`）→ packages/api（requireAuth）。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Alert, AlertDescription, AlertTitle } from "@openstarter/ui-web/components/alert";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
@@ -12,7 +13,6 @@ import { RecentOrdersCard } from "@/modules/dashboard/components/recent-orders-c
 import { StatsCards } from "@/modules/dashboard/components/stats-cards";
 import { dashboard } from "@/modules/dashboard/lib/api";
 import { user } from "@/modules/user/lib/api";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/_app/dashboard")({
   // intent 预加载：hover 时先跑 loader，把 stats + 最近订单预取进 Query 缓存，

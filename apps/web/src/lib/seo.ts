@@ -9,10 +9,10 @@
 // 构造合法 URL，Hono 依 pathname 路由（沿用博客 SSR 的既有模式）。
 
 import type { AppType } from "@openstarter/api";
+import { baseLocale, locales, localizeUrl } from "@openstarter/i18n-web/runtime";
 import { hc } from "hono/client";
 
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
-import { baseLocale, locales, localizeUrl } from "@/paraglide/runtime.js";
 
 // 内存 RPC 基址：主机名仅用于构造合法 URL，请求经 `app.fetch` 就地分派（不实际出网）。
 const INTERNAL_RPC_BASE = "http://seo.internal";

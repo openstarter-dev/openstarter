@@ -1,6 +1,7 @@
 // apps/web/src/routes/admin/roles.tsx
 // 角色管理（R26.2/R26.3）：列出/创建/编辑/删除角色，并覆盖式设置角色权限集合。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { Checkbox } from "@openstarter/ui-web/components/checkbox";
 import {
@@ -28,7 +29,6 @@ import { toast } from "sonner";
 
 import { AdminHeader, StatusText } from "@/components/admin/list";
 import { admin } from "@/modules/admin/lib/api";
-import { m } from "@/paraglide/messages.js";
 
 export const Route = createFileRoute("/admin/roles")({
   loader: ({ context: { queryClient } }) =>

@@ -4,6 +4,8 @@
 // (state persisted in the sidebar_state cookie, Cmd/Ctrl+B toggles) and a
 // slide-in Sheet on mobile — replacing the old hand-rolled Sidebar + Drawer.
 
+import { m } from "@openstarter/i18n-web/messages";
+import { getLocale, setLocale } from "@openstarter/i18n-web/runtime";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,8 +38,6 @@ import { ManageAccountDialog } from "@/components/app/manage-account-dialog";
 import { APP_NAV_ITEMS } from "@/components/app/app-nav";
 import { authClient } from "@/lib/auth-client";
 import { BRAND_NAME } from "@/lib/branding";
-import { m } from "@/paraglide/messages.js";
-import { getLocale, setLocale } from "@/paraglide/runtime.js";
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },

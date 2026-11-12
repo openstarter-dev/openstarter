@@ -1,4 +1,6 @@
 import { buildAnalyticsHeadScripts } from "@openstarter/analytics-web/scripts";
+import { m } from "@openstarter/i18n-web/messages";
+import { getLocale } from "@openstarter/i18n-web/runtime";
 import { Toaster } from "@openstarter/ui-web/components/sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -9,8 +11,6 @@ import { ThemeProvider } from "@/components/theme/theme-provider";
 import { getAnalyticsConfigFn } from "@/functions/analytics";
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
 import { buildPageHead } from "@/lib/page-head";
-import { m } from "@/paraglide/messages.js";
-import { getLocale } from "@/paraglide/runtime.js";
 
 import appCss from "../index.css?url";
 

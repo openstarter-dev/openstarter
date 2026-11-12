@@ -13,7 +13,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { authClient } from "@/lib/auth-client";
-import { m } from "@/paraglide/messages.js";
+import { m } from "@openstarter/i18n-web/messages";
 
 export function ProfilePage() {
   const { data: session } = authClient.useSession();

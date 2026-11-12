@@ -1,5 +1,6 @@
 // 仪表盘积分动态图：近 30 天逐日授予 / 消耗双曲线（零依赖原生 SVG，见 ui-web/line-chart）。
 
+import { m } from "@openstarter/i18n-web/messages";
 import {
   Card,
   CardContent,
@@ -9,8 +10,6 @@ import {
 } from "@openstarter/ui-web/components/card";
 import { LineChart } from "@openstarter/ui-web/components/line-chart";
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
-
-import { m } from "@/paraglide/messages.js";
 
 import type { DashboardStats } from "./stats-view";
 

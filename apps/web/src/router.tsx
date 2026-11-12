@@ -1,10 +1,9 @@
+import { m } from "@openstarter/i18n-web/messages";
+import { deLocalizeUrl, localizeUrl } from "@openstarter/i18n-web/runtime";
 import { QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
 import { toast } from "sonner";
-
-import { m } from "@/paraglide/messages.js";
-import { deLocalizeUrl, localizeUrl } from "@/paraglide/runtime.js";
 
 import Loader from "./components/loader";
 import { ErrorPage } from "./components/system/error";

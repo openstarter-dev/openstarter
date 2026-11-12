@@ -1,5 +1,6 @@
 // 仪表盘快速开始卡片：模板引导链接（settings / pricing / apikeys）。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { buttonVariants } from "@openstarter/ui-web/components/button";
 import {
   Card,
@@ -11,8 +12,6 @@ import {
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, KeyRound, Settings, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-
-import { m } from "@/paraglide/messages.js";
 
 interface QuickLink {
   href: "/settings" | "/settings/apikeys" | "/pricing";

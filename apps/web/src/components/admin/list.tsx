@@ -1,9 +1,9 @@
 // apps/web/src/components/admin/list.tsx
 // 管理后台通用列表脚手架：页头（标题/描述/操作区）与分页控件。供各实体管理页复用（R26.2）。
 
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import type { ReactNode } from "react";
-import { m } from "@/paraglide/messages.js";
 
 export function AdminHeader({
   title,
