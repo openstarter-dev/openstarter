@@ -21,8 +21,6 @@ const THEME_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');var m=
 
 export const Route = createRootRouteWithContext<RouterAppContext>()({
   component: RootDocument,
-  // 只保留全站必需项与兜底标题：canonical / hreflang / og:url 由各页面自己的 head 声明，
-  // 避免 root 的链接与页面链接同时输出（重复 canonical 会让整组失效）。
   head: ({ loaderData }) => ({
     meta: [
       { charSet: "utf-8" },

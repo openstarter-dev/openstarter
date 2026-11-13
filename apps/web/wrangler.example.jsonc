@@ -1,66 +1,15 @@
-// Cloudflare Workers deploy config — TEMPLATE (placeholders only, no secrets).
-//
-// `wrangler.jsonc` is git-ignored on purpose: the working copy carries
-// production bindings (custom domain, D1 database_id, prod vars) and should not
-// land in git history. Copy this template instead of committing your copy:
-//
-//   cp wrangler.example.jsonc wrangler.jsonc
-//
-// Fill in the four placeholder groups before the first deploy:
-//   1. routes[].pattern                          — production hostname
-//   2. compatibility_date                        — supported by your wrangler
-//   3. vars.VITE_APP_URL                      — production app URL (single origin)
-//   4. d1_databases[].database_id                — from `wrangler d1 create`
-//
-// Build + deploy:
-//   pnpm cf:build    # NITRO_PRESET=cloudflare_module vite build
-//   pnpm cf:deploy   # rebuild + wrangler deploy
-//
-// `cf:build` makes nitro emit .output/server/wrangler.json (entry, assets,
-// no_bundle) and wrangler loads it through the generated
-// .wrangler/deploy/config.json redirect. Never edit those generated files.
-//
-// Secrets never live here — set them once per Worker:
-//   wrangler secret put BETTER_AUTH_SECRET
-//   wrangler secret put CONFIG_ENCRYPTION_KEY
-//
-// No custom domain yet? Comment out `routes`, set `workers_dev: true`, and the
-// Worker is reachable at https://<worker>.<your-subdomain>.workers.dev.
-//
-// Database backends on Workers (chosen by `vars.DATABASE_PROVIDER`):
-//   - "d1" (default)         — zero external infra; binding `DB` in d1_databases.
-//   - "postgresql"            — via Hyperdrive; binding `HYPERDRIVE`. The build
-//                               keeps the postgres.js driver in the bundle when
-//                               DATABASE_PROVIDER=postgresql (see vite.config.ts).
-//                               Schema/RBAC scripts still talk to Postgres
-//                               directly (DATABASE_URL), never through Hyperdrive.
-//
-// Mirrors ShipAny's wrangler.example.jsonc.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "openstarter",
 
-  // Custom Domain binding. The zone must be active in the SAME Cloudflare
-  // account; wrangler creates the proxied DNS record + certificate itself, so
-  // do not pre-create an A/AAAA/CNAME for the hostname.
-  // Pick ONE canonical hostname (apex or www). Attaching both as separate
-  // custom domains publishes duplicate content — add a 301 Redirect Rule for
-  // the other one instead.
   "routes": [
     { "pattern": "<your-domain.com>", "custom_domain": true },
-    // { "pattern": "www.<your-domain.com>", "custom_domain": true }
   ],
 
-  // Keep the *.workers.dev URL disabled in production. Set to true only when
-  // there is no custom domain (and then remove `routes`).
   "workers_dev": false,
-  // Version preview URLs (*-<worker>.<subdomain>.workers.dev) would otherwise
-  // bypass `workers_dev: false`.
   "preview_urls": false,
 
   "compatibility_flags": ["nodejs_compat"],
-  // Pin to a date supported by your wrangler version:
-  // https://developers.cloudflare.com/workers/platform/compatibility-dates/
   "compatibility_date": "<YYYY-MM-DD>",
 
   "observability": {
@@ -69,20 +18,10 @@
 
   "vars": {
     "DATABASE_PROVIDER": "d1",
-    // Runtime NODE_ENV. Workers do NOT define it automatically, and both better-auth
-    // (rate limiting is only on when NODE_ENV === "production") and the auth env preset
-    // (falls back to "development") depend on it. Leaving it unset silently disables
-    // production rate limiting and trusts localhost origins.
     "NODE_ENV": "production",
-    // App origin: better-auth baseURL (OAuth callbacks + trustedOrigins), email /
-    // payment callbacks and SSR canonical URLs all resolve from this single value
-    // (read directly from process.env by better-auth + the web app). VITE_APP_NAME
-    // is read by the shared config layer.
     "VITE_APP_URL": "https://<your-domain.com>",
     "VITE_APP_NAME": "OpenStarter",
     "VITE_DEFAULT_LOCALE": "en",
-    // CONFIG_ENCRYPTION_KEY (AES-256-GCM key for admin-stored secrets) must NOT
-    // be a var — set it with `wrangler secret put CONFIG_ENCRYPTION_KEY`.
   },
 
   "d1_databases": [
@@ -90,27 +29,8 @@
       "binding": "DB",
       "database_name": "openstarter-db",
       "database_id": "<output-of-wrangler-d1-create>",
-      // Drizzle migrations are generated into packages/db/src/migrations/sqlite
-      // (see packages/db/drizzle.config.prod.ts → out). Run `pnpm db:generate`
-      // from the repo root before `cf:deploy`, then apply them to the PRODUCTION
-      // database — `--remote` is required, otherwise wrangler targets local D1:
-      //   wrangler d1 migrations apply openstarter-db --remote
       "migrations_dir": "../../packages/db/src/migrations/sqlite",
     },
   ],
 
-  // ── Postgres via Hyperdrive (instead of D1) ────────────────────────────────
-  // 1. wrangler hyperdrive create <name> --connection-string="postgres://..." (your direct PG url)
-  // 2. Set vars.DATABASE_PROVIDER to "postgresql" and remove the d1_databases block.
-  // 3. Uncomment and fill the binding. The build keeps postgres.js in the bundle
-  //    when DATABASE_PROVIDER=postgresql — see vite.config.ts.
-  //    Also `wrangler secret put DATABASE_URL` so schema/migration scripts (which
-  //    bypass Hyperdrive) can reach the DB directly.
-  // "hyperdrive": [
-  //   { "binding": "HYPERDRIVE", "id": "<output-of-wrangler-hyperdrive-create>" }
-  // ]
-
-  // Other optional bindings — uncomment when needed:
-  // "kv_namespaces": [{ "binding": "CACHE", "id": "<kv-namespace-id>" }],
-  // "r2_buckets":     [{ "binding": "BUCKET", "bucket_name": "<bucket-name>" }]
 }

@@ -1,6 +1,5 @@
 const CATEGORY_DELIMITERS = /[,;]/;
 
-/** 解析 `categories` 文本为分类词元（兼容 JSON 数组与逗号/分号分隔）。 */
 export function parseCategories(raw: string | null | undefined): string[] {
   if (!raw) {
     return [];
@@ -36,7 +35,6 @@ function parseJsonArray(value: string): string[] | null {
   }
 }
 
-/** 汇总一组文章中出现的全部分类（去重、按名称升序），用于渲染筛选入口。 */
 export function collectCategories(items: ReadonlyArray<{ categories?: string | null }>): string[] {
   const seen = new Set<string>();
   for (const item of items) {

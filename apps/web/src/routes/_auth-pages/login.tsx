@@ -11,7 +11,6 @@ import { buildPageHead } from "@/lib/page-head";
 
 const DEFAULT_REDIRECT = "/dashboard";
 
-/** 只接受站内相对路径：挡掉 `//evil.com`、绝对 URL 之类的开放重定向。 */
 function safeRedirect(value: unknown): string {
   if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
     return DEFAULT_REDIRECT;

@@ -33,10 +33,6 @@ import { authClient } from "@/lib/auth-client";
 
 const apiKeysQueryKey = ["user", "apikeys"] as const;
 
-/**
- * API Key 管理：签发 / 列表 / 吊销全部走 better-auth 官方 `@better-auth/api-key` 插件。
- * 明文 key 只在创建响应里出现一次；列表仅返回可展示前缀（`start`）。
- */
 export function ApiKeysPage() {
   const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);

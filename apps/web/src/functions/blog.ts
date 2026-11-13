@@ -47,7 +47,6 @@ function buildListQuery(input: z.infer<typeof blogListInput>): {
   return query;
 }
 
-/** 回源拉取已发布文章列表（不含 locale——locale 由 handler 拼回，不进缓存）。 */
 async function fetchBlogList(input: z.infer<typeof blogListInput>) {
   const rpc = await createRpc();
   const res = await rpc.api.blog.$get({ query: buildListQuery(input) });
@@ -62,7 +61,6 @@ async function fetchBlogList(input: z.infer<typeof blogListInput>) {
   return { items: payload.items, total: payload.total };
 }
 
-/** 回源拉取单篇文章；不存在/未发布返回 null（404 业务语义）。 */
 async function fetchBlogPost(slug: string) {
   const rpc = await createRpc();
   const res = await rpc.api.blog[":slug"].$get({ param: { slug } });
@@ -88,7 +86,6 @@ const blogPostCache = createTtlCache<Awaited<ReturnType<typeof fetchBlogPost>>>(
   ttlMs: BLOG_CACHE_TTL_MS,
 });
 
-/** 已发布博客列表：可选按分类精确筛选、分页；随响应回传当前 locale 与激活分类。 */
 export const getBlogPostsFn = createServerFn({ method: "GET" })
   .middleware([localeMiddleware])
   .validator((input: unknown) => blogListInput.parse(input))
@@ -103,7 +100,6 @@ export const getBlogPostsFn = createServerFn({ method: "GET" })
     };
   });
 
-/** 单篇已发布博客文章：未发布 / 不存在时 `post` 为 `null`（由路由 loader 转 404）。 */
 export const getBlogPostFn = createServerFn({ method: "GET" })
   .middleware([localeMiddleware])
   .validator((input: unknown) => blogSlugInput.parse(input))

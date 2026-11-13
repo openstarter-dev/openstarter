@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
 interface AnonymousButtonProps {
-  /** 匿名登录后跳转的地址，默认跳转到 dashboard。 */
   callbackURL?: string;
 }
 

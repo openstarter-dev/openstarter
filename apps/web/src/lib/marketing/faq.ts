@@ -3,7 +3,6 @@ export type FaqEntry = {
   answer: string;
 };
 
-// TODO: replace with your own FAQ entries.
 export const FAQ_ENTRIES: FaqEntry[] = [
   {
     question: "Is there a free trial?",

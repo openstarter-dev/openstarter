@@ -25,10 +25,8 @@ interface AdminNavGroup {
   items: AdminNavItem[];
 }
 
-/** 后台入口的权限请求：`admin` 资源的 `*` 动作（定义见 packages/auth/src/rbac/access.ts）。 */
 const ADMIN_ACCESS: { admin: "*"[] } = { admin: ["*"] };
 
-/** 代码内定义的角色（与 rbac/access.ts 的 PlatformRole 一致）。 */
 const KNOWN_ROLES = ["admin", "user"] as const;
 
 type KnownRole = (typeof KNOWN_ROLES)[number];
@@ -77,8 +75,6 @@ export const Route = createFileRoute("/admin")({
       throw redirect({ search: { redirect: location.href }, to: "/login" });
     }
 
-    // 判定交给 better-auth：与服务端 `userHasPermission` 共用同一组 ac/roles。
-    // 会话对象在运行时带 `role`（user 表整行），但插件的 Session 推导未包含该字段。
     const { role } = session.data.user as { role?: string | null };
     const allowed = parseKnownRoles(role).some((name) =>
       authClient.admin.checkRolePermission({ permissions: ADMIN_ACCESS, role: name }),

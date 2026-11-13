@@ -10,7 +10,6 @@ function safeLocalStorage(): Storage | null {
   return typeof window === "undefined" ? null : window.localStorage;
 }
 
-/** URL ?ref=xxx → localStorage（幂等，重复捕获覆盖刷新时间戳）。 */
 export function captureReferralAttribution(code: string): void {
   const store = safeLocalStorage();
   if (!store) return;
@@ -20,7 +19,6 @@ export function captureReferralAttribution(code: string): void {
   }
 }
 
-/** 读有效归因码；过期/损坏/null 环境一律 null。 */
 export function readStoredReferralCode(): string | null {
   const store = safeLocalStorage();
   if (!store) return null;
@@ -36,12 +34,10 @@ export function readStoredReferralCode(): string | null {
   }
 }
 
-/** bind 成功或明确放弃后清除。 */
 export function clearReferralAttribution(): void {
   safeLocalStorage()?.removeItem(STORAGE_KEY);
 }
 
-/** 注册成功后调用：有归因码则 POST /api/referral/bind（失败静默），成功后清除。 */
 export async function bindReferralAfterSignup(): Promise<void> {
   const code = readStoredReferralCode();
   if (!code) return;

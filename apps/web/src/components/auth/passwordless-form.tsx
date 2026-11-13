@@ -10,7 +10,6 @@ import { authClient } from "@/lib/auth-client";
 export type PasswordlessMode = "magic-link" | "email-otp";
 
 interface PasswordlessFormProps {
-  /** 登录成功后的回跳地址（默认 /dashboard）。 */
   callbackURL?: string;
   emailOtpEnabled: boolean;
   magicLinkEnabled: boolean;

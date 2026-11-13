@@ -46,7 +46,6 @@ const WHITESPACE_PATTERN = /\s+/g;
 
 type Locale = (typeof locales)[number];
 
-/** SEO 文章摘要项（经 RPC 取回；时间为 ISO 8601 字符串）。 */
 export type SeoArticle = {
   slug: string;
   title: string | null;
@@ -55,20 +54,14 @@ export type SeoArticle = {
   updatedAt: string;
 };
 
-/** SEO 文章全文项：在摘要基础上附带正文。 */
 export type SeoArticleWithContent = SeoArticle & {
   content: string | null;
 };
 
-/** 取逗号分隔头部（如经多级代理的 `x-forwarded-*`）的首个值并去空白。 */
 function firstToken(value: string): string {
   return (value.split(",").at(0) ?? value).trim();
 }
 
-/**
- * 从请求派生站点基址（scheme + host）。优先采用反向代理转发头（`x-forwarded-proto` /
- * `x-forwarded-host`），回退到请求 URL 自身的 origin；末尾不含斜杠。
- */
 export function getSiteOrigin(request: Request): string {
   const url = new URL(request.url);
   const forwardedProto = request.headers.get("x-forwarded-proto");
@@ -86,7 +79,6 @@ function singleLine(value: string): string {
   return value.replace(WHITESPACE_PATTERN, " ").trim();
 }
 
-/** 依 locale 生成某路径的绝对 URL（基址 + 本地化路径）。base locale 无前缀、其余带 `/{locale}` 前缀。 */
 function urlForLocale(origin: string, path: string, locale: Locale): string {
   return localizeUrl(`${origin}${path || "/"}`, { locale }).href;
 }
@@ -99,7 +91,6 @@ async function createRpc() {
   });
 }
 
-/** 取已发布文章摘要（仅已发布）；失败时回退空列表以保证端点始终可用。 */
 export async function fetchSeoArticles(): Promise<SeoArticle[]> {
   try {
     const rpc = await createRpc();
@@ -114,7 +105,6 @@ export async function fetchSeoArticles(): Promise<SeoArticle[]> {
   }
 }
 
-/** 取已发布文章全文（仅已发布）；失败时回退空列表。 */
 export async function fetchSeoArticlesWithContent(): Promise<SeoArticleWithContent[]> {
   try {
     const rpc = await createRpc();
@@ -159,12 +149,6 @@ function sitemapEntryXml(origin: string, entry: SitemapEntry): string {
   return lines.join("\n");
 }
 
-/**
- * 渲染 sitemap.xml：公开页面 + **已发布**文章 URL。
- *
- * locale 感知：`<loc>` 为 base locale 的**规范 URL**（无本地化前缀），各语言版本以
- * `xhtml:link rel="alternate" hreflang` 声明，避免重复本地化前缀导致重复内容。
- */
 export function buildSitemapXml(origin: string, articles: SeoArticle[]): string {
   const staticEntries: SitemapEntry[] = SITEMAP_STATIC_PATHS.map((path) => ({
     path,
@@ -187,7 +171,6 @@ export function buildSitemapXml(origin: string, articles: SeoArticle[]): string 
   ].join("\n");
 }
 
-/** 渲染 robots.txt：屏蔽鉴权/私有区与 API，并声明 sitemap 地址。 */
 export function buildRobotsTxt(origin: string): string {
   return [
     "User-Agent: *",
@@ -210,7 +193,6 @@ function llmsHeaderLines(): string[] {
   ];
 }
 
-/** 渲染 llms.txt：站点概览 + 公开页面与已发布文章的可读清单（规范 URL、无正文）。 */
 export function buildLlmsTxt(origin: string, articles: SeoArticle[]): string {
   const lines: string[] = [
     ...llmsHeaderLines(),
@@ -231,7 +213,6 @@ export function buildLlmsTxt(origin: string, articles: SeoArticle[]): string {
   return lines.join("\n");
 }
 
-/** 渲染 llms-full.txt：站点概览 + 已发布文章全文（含正文），供大模型抓取。 */
 export function buildLlmsFullTxt(origin: string, articles: SeoArticleWithContent[]): string {
   const lines: string[] = [
     ...llmsHeaderLines(),

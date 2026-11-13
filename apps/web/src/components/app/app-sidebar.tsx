@@ -201,7 +201,6 @@ export function AppSidebar({ initialSession }: { initialSession?: SessionUserSum
                       authClient.signOut({
                         fetchOptions: {
                           onSuccess: () => {
-                            // 先离开受保护路由，再清空用户态缓存并强制路由重新校验 session。
                             void navigate({ to: "/" }).finally(() => {
                               queryClient.clear();
                               void router.invalidate();

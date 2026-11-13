@@ -6,9 +6,6 @@ import { LIST_PAGE_SIZE } from "@/lib/list-search";
 
 const PAGE_SIZE = LIST_PAGE_SIZE;
 
-/**
- * user 域 query key 工厂（分层前缀，失效可粗可细；tickets 等相邻模块共用）。
- */
 export const userKeys = {
   all: ["user"] as const,
   credits: () => ["user", "credits"] as const,
@@ -27,11 +24,9 @@ const getPlan = client.api.user.plan.$get;
 const getSubscription = client.api.user.subscription.$get;
 const createBillingPortal = client.api.user["billing-portal"].$post;
 
-/** 计费 portal 响应 data；不手写形状，后端字段变更直接在这里报错。 */
 type BillingPortalData = NonNullable<InferResponseType<typeof createBillingPortal, 200>["data"]>;
 
 type CreditsData = NonNullable<InferResponseType<typeof getCredits, 200>["data"]>;
-/** 用户积分流水行（积分历史列表），从 user.credits 响应推导。 */
 export type CreditHistoryRow = CreditsData["history"][number];
 
 type OrdersData = NonNullable<InferResponseType<typeof getOrders, 200>["data"]>;

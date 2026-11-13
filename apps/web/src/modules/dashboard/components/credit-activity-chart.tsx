@@ -11,7 +11,6 @@ import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 
 import type { DashboardStats } from "./stats-view";
 
-/** 轴刻度只显示 `MM-DD`，避免横轴拥挤。 */
 function formatTick(date: string): string {
   return date.slice(5);
 }

@@ -7,7 +7,6 @@ const STALE_WHILE_REVALIDATE = 86_400;
 const STATIC_PATHS = new Set(["/", "/pricing", "/privacy", "/terms"]);
 const BLOG_PATH_PATTERN = /^\/blog(?:\/[^/]+)?$/;
 
-/** 规范（去 locale 前缀）路径 → 缓存策略；null 表示不可公共缓存。 */
 export function pageCachePolicy(pathname: string): PageCachePolicy | null {
   if (STATIC_PATHS.has(pathname)) {
     return "static-page";
@@ -20,13 +19,6 @@ export function buildPageCacheControl(policy: PageCachePolicy): string {
   return `public, max-age=0, must-revalidate, s-maxage=${sMaxage}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`;
 }
 
-/**
- * 依策略为 SSR HTML 响应补 Cache-Control。
- *
- * @param pathname 已去 locale 前缀的规范路径（如 "/pricing"，而非 "/zh/pricing"）
- * @param method   请求方法
- * @param response 框架产出的原始响应
- */
 export function applyPageCacheHeaders(pathname: string, method: string, response: Response): Response {
   const policy = pageCachePolicy(pathname);
   if (!policy || method !== "GET") {

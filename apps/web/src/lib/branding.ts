@@ -1,4 +1,3 @@
-// TODO: replace these values with your own brand.
 export const BRAND_NAME = "openstarter";
 
 export const BRAND_TAGLINE = "Ship your SaaS in days, not months.";

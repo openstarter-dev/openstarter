@@ -5,7 +5,6 @@ import { getOneTapAuthClient } from "@/lib/auth-client";
 import { publicConfig } from "@/modules/public-config/lib/api";
 
 interface OneTapPromptProps {
-  /** One Tap 登录成功后的跳转地址（默认 /dashboard）。 */
   callbackURL?: string;
 }
 

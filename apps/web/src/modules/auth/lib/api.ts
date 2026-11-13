@@ -2,7 +2,6 @@ import { queryOptions } from "@tanstack/react-query";
 
 import { authClient } from "@/lib/auth-client";
 
-/** auth 域 query key 工厂。 */
 export const authKeys = {
   all: ["auth"] as const,
   accounts: () => ["auth", "accounts"] as const,

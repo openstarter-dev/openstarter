@@ -98,7 +98,6 @@ function AdminUsersPage() {
           </span>
         ),
       }),
-      // 用户级操作（角色/封禁/会话/冒充/删除）全部委托 better-auth admin 插件。
       columnHelper.display({
         cell: (info) => <UserActions user={info.row.original} />,
         header: () => m["admin.users.actions"](),

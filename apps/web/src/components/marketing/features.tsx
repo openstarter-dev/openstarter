@@ -8,7 +8,6 @@ interface Feature {
   title: string;
 }
 
-// TODO: replace with your product features.
 const FEATURES: Feature[] = [
   {
     description: "From database to UI with Drizzle, Hono RPC, and TanStack - no codegen drift.",

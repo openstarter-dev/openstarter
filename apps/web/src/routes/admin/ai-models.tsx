@@ -119,7 +119,6 @@ function AdminAiModelsPage() {
     },
   });
 
-  /** 开关是纯可预测变更：先改写缓存，失败按 context 回滚，成功后由 meta.invalidates 取真值。 */
   const toggleMutation = useMutation({
     ...admin.mutations.toggleAiModel(),
     onMutate: async ({ id, enabled }) => {

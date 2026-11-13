@@ -22,28 +22,17 @@ import {
   useColumnVisibility,
 } from "@/components/admin/column-visibility";
 
-/** 虚拟滚动估算行高（px）；翻页/多行时虚拟化会重算。 */
 const VIRTUAL_ROW_ESTIMATE = 48;
 const VIRTUAL_OVERSCAN = 10;
-/** 虚拟滚动容器高度；超长列表在此高度内滚动渲染。 */
 const VIRTUAL_CONTAINER_HEIGHT = 560;
 
-/**
- * 列定义类型：TValue 用 `any` 吸收 accessor 列各自的具体取值类型，使具体类型的
- * accessor 列能赋给统一数组（react-table v9 legacy 的 ColumnDef TValue 逆变）。
- */
 export type DataColumn<TData extends RowData> = LegacyColumnDef<TData, any>;
 
 export interface DataTableProps<TData extends RowData> {
-  /** react-table 列定义（经 legacyCreateColumnHelper 构造，类型安全）。 */
   columns: DataColumn<TData>[];
-  /** 当前页数据；应保持稳定引用（调用方 useMemo/useQuery 数据）。 */
   data: TData[];
-  /** 列可见性偏好唯一键（跨路由共享、localStorage 持久化）。 */
   tableKey: string;
-  /** 稳定行 id 工厂（默认用行索引）。 */
   getRowId?: (row: TData) => string;
-  /** 开启行虚拟滚动（react-virtual），适合长列表。 */
   virtualized?: boolean;
 }
 

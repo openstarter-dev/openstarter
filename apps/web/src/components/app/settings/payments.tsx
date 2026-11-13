@@ -38,10 +38,6 @@ function statusVariant(status: string): "secondary" | "outline" {
   return status === "paid" ? "secondary" : "outline";
 }
 
-/**
- * 支付记录列表。路由页传 `page` + `to`，分页渲染为可预取、可后退的链接；
- * 不传 `to` 时退化为本地 useState（ManageAccountDialog 弹窗内复用，无独立 URL）。
- */
 export function PaymentsPage({
   page: pageProp,
   to,

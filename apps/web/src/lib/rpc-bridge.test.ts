@@ -6,11 +6,6 @@ import { setRpcFetchBridge } from "@/lib/rpc-bridge";
 const jsonResponse = (body: unknown): Response =>
   new Response(JSON.stringify(body), { headers: { "Content-Type": "application/json" } });
 
-/**
- * 回归：客户端用相对 base（`/`），服务端 `fetch` 无法解析相对 URL
- * （`TypeError: Failed to parse URL`），SSR 的 loader prefetch 会被 `allSettled` 静默吞掉。
- * 桥接必须在服务端接管这些调用，并在浏览器侧如实回落到全局 fetch。
- */
 describe("SSR RPC 桥接", () => {
   afterEach(() => {
     setRpcFetchBridge(undefined);

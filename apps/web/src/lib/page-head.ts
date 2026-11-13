@@ -10,7 +10,6 @@ export interface PageHeadInput {
   image?: string;
   path: string;
   type?: "website" | "article";
-  /** 显式指定 locale（测试/特殊场景）；默认取 Paraglide 当前请求 locale。 */
   locale?: SupportedLocale;
 }
 
@@ -38,7 +37,6 @@ function absolutizeUrl(path: string): string {
   return `${base}/${path.replace(/^\/+/, "")}`;
 }
 
-/** 依 locale 生成某路径的绝对 URL（基址 + Paraglide 本地化前缀；base locale 无前缀）。 */
 function urlForLocale(path: string, locale: SupportedLocale): string {
   return localizeUrl(absolutizeUrl(path), { locale }).href;
 }
@@ -56,11 +54,6 @@ function formatTitle(title: string): string {
   return title === BRAND_NAME ? BRAND_NAME : `${title} | ${BRAND_NAME}`;
 }
 
-/**
- * 仅标题的 head（登录后私有页用）。
- * 私有页不声明 canonical/hreflang（这些只属于可索引的公开页），
- * noindex 由 `_app` / `admin` 布局统一注入。
- */
 export function buildPageTitle(title: string): Pick<PageHead, "meta"> {
   return { meta: [{ title: formatTitle(title) }] };
 }

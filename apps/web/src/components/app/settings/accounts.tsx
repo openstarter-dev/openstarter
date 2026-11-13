@@ -61,8 +61,6 @@ export function AccountsPage() {
     }
   };
 
-  // better-auth 1.7 起 unlinkAccount 只接受本地 account 行 id（不再接受 providerId /
-  // provider 侧 accountId），见 1.7 升级指南「Account API 选择器改为强类型」。
   const handleUnlink = async (accountRowId: string) => {
     if (unlinkInFlight.current) {
       return;

@@ -4,24 +4,16 @@ import { useEffect, useRef } from "react";
 
 interface DrawerProps {
   children: ReactNode;
-  /** Extra classes for the sliding panel (e.g. background, padding). */
   className?: string;
-  /** Accessible name for the dialog. */
   label: string;
   onClose: () => void;
   open: boolean;
-  /** Edge the panel slides in from. */
   side?: "left" | "right";
 }
 
 const FOCUSABLE_SELECTOR =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-/**
- * A mobile-only slide-in drawer rendered as a modal dialog. Handles Escape to
- * close, scrim click to close, body scroll lock, initial focus, focus return to
- * the trigger, and a basic Tab focus trap. Hidden at `md` and up.
- */
 export function Drawer({ open, onClose, label, side = "right", className, children }: DrawerProps) {
   const panelRef = useRef<HTMLDivElement>(null);
 

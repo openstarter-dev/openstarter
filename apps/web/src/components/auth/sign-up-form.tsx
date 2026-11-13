@@ -25,7 +25,6 @@ export default function SignUpForm({
   redirectTo = "/dashboard",
 }: {
   onSwitchToSignIn: () => void;
-  /** 注册成功后的目标地址（由 /login?redirect= 校验后下发）。 */
   redirectTo?: string;
 }) {
   const navigate = useNavigate({ from: "/" });

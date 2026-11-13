@@ -17,7 +17,6 @@ import { Route as AdminSettingsRoute } from "./admin/settings";
 import { Route as AdminSubscriptionsRoute } from "./admin/subscriptions";
 import { Route as AdminUsersRoute } from "./admin/users";
 
-/** `deps` 与真实 loaderDeps 一致（分页页由 search 校验给出 page，缺省 1）。 */
 const ROUTE_QUERY_KEYS: Record<
   string,
   { deps?: Record<string, unknown>; keys: unknown[][]; route: AnyRoute }

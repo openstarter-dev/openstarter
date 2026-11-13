@@ -7,7 +7,6 @@ const getStats = client.api.user["dashboard-stats"].$get;
 
 type DashboardStats = NonNullable<InferResponseType<typeof getStats, 200>["data"]>;
 
-/** dashboard 域 query key 工厂。 */
 export const dashboardKeys = {
   stats: () => ["dashboard", "stats"] as const,
 };

@@ -6,11 +6,6 @@ import { LIST_PAGE_SIZE } from "@/lib/list-search";
 
 const PAGE_SIZE = LIST_PAGE_SIZE;
 
-/**
- * admin 域 query key 工厂（qk-hierarchical-organization）。
- * 列表增删改后需整表失效，故保留 `all` 前缀；页面与 mutation 都只引用工厂，
- * 不写字面量 key，避免两侧漂移。
- */
 export const adminKeys = {
   all: ["admin"] as const,
   aiModels: {
@@ -25,7 +20,6 @@ export const adminKeys = {
   users: (page: number, search: string) => ["admin", "users", page, search] as const,
 } as const;
 
-/** `ai_model` 目录行的媒体类型（与后端 AI_MEDIA_TYPES 一致）。 */
 export const AI_MODEL_MEDIA_TYPES = ["text", "image", "video", "music", "speech"] as const;
 
 export type AiModelMediaType = (typeof AI_MODEL_MEDIA_TYPES)[number];
@@ -40,9 +34,7 @@ const getSubscriptions = client.api.admin.subscriptions.$get;
 const getUsers = client.api.admin.users.$get;
 
 type AiModelListData = NonNullable<InferResponseType<typeof getAiModels, 200>["data"]>;
-/** admin 模型列表行，直接从 RPC 响应推导。 */
 export type AiModelRow = AiModelListData["items"][number];
-/** 整页列表形态（乐观更新按 page 改写 items）。 */
 export type AiModelList = AiModelListData;
 
 type AdminConfigData = NonNullable<InferResponseType<typeof getAdminConfig, 200>["data"]>;
@@ -52,13 +44,11 @@ type OrderListData = NonNullable<InferResponseType<typeof getOrders, 200>["data"
 type SubscriptionListData = NonNullable<InferResponseType<typeof getSubscriptions, 200>["data"]>;
 type UserListData = NonNullable<InferResponseType<typeof getUsers, 200>["data"]>;
 
-/** admin 模型列表行类型。 */
 export type AdminCreditRow = CreditListData["items"][number];
 export type AdminOrderRow = OrderListData["items"][number];
 export type AdminSubscriptionRow = SubscriptionListData["items"][number];
 export type AdminUserRow = UserListData["items"][number];
 
-/** admin 模型创建请求体，直接从后端 zod schema 推导。 */
 export type AiModelPayload = InferRequestType<typeof createAiModel>["json"];
 
 const queries = {

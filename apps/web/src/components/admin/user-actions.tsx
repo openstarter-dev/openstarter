@@ -25,7 +25,6 @@ import { toast } from "sonner";
 import { adminKeys } from "@/modules/admin/lib/api";
 import { authClient } from "@/lib/auth-client";
 
-/** 代码内定义的角色（与 packages/auth/src/rbac/access.ts 保持一致）。 */
 const ROLE_OPTIONS = ["admin", "user"] as const;
 
 type RoleOption = (typeof ROLE_OPTIONS)[number];
@@ -58,10 +57,6 @@ interface UserSession {
 const firstRole = (role: string | null | undefined): RoleOption =>
   toRoleOption((role ?? "").split(",")[0]?.trim() ?? "");
 
-/**
- * 后台用户操作入口：角色、封禁、会话、冒充、删除全部走 better-auth `admin` 插件，
- * 不再自建用户/角色接口。业务字段（积分、订单等）仍由 `/api/admin/*` 提供，二者互不覆盖。
- */
 export function UserActions({ user }: { user: UserActionsTarget }) {
   const queryClient = useQueryClient();
   const [panel, setPanel] = useState<Panel>(null);

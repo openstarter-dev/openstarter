@@ -37,7 +37,6 @@ function statusMessage(phase: Phase): string {
   }
 }
 
-/** 流程错误文案：服务端拒绝 → 其业务文案或「被拒」默认；网络失败 → 网络默认。 */
 function flowErrorMessage(
   err: unknown,
   fallbacks: { rejected: string; requestFailed: string },

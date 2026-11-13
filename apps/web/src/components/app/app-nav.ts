@@ -4,7 +4,6 @@ import type { LucideIcon } from "lucide-react";
 
 type NavItem = {
   to: "/dashboard" | "/settings" | "/referral";
-  /** 惰性求值：模块顶层调用 m[...]() 会把首次 SSR 请求的 locale 冻结在模块作用域。 */
   label: () => string;
   icon: LucideIcon;
 };

@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 
 import { BRAND_TAGLINE } from "@/lib/branding";
 
-// TODO: replace with your product copy.
 const COPY = {
   primaryCta: "Start free trial",
   secondaryCta: "View pricing",

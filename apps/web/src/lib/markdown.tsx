@@ -24,11 +24,6 @@ function escapeHtml(text: string): string {
 const SCHEME_PATTERN = /^([a-zA-Z][a-zA-Z0-9+.-]*):/;
 const SAFE_SCHEMES = new Set(["http", "https", "mailto"]);
 
-/**
- * Whether a (HTML-escaped) link URL is safe to put in an href attribute.
- * Scheme detection is case-insensitive and tested after trimming leading
- * control/whitespace characters; URLs with no scheme count as relative.
- */
 export function isSafeHref(url: string): boolean {
   const schemeMatch = SCHEME_PATTERN.exec(url.trimStart());
   if (!schemeMatch) {

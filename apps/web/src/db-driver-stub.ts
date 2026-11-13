@@ -8,13 +8,11 @@ function unavailable(): never {
 }
 
 const stub = new Proxy(unavailable, {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get: (): any => stub,
   apply: unavailable,
   construct: unavailable,
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const anyStub = stub as any;
 
 export default anyStub;

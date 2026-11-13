@@ -7,7 +7,6 @@ export type PublicConfig = NonNullable<
   InferResponseType<typeof client.api.config.public.$get, 200>["data"]
 >;
 
-/** 公共配置 query key（登录前页面共用，长期缓存）。 */
 export const publicConfigKeys = {
   get: () => ["public-config"] as const,
 };

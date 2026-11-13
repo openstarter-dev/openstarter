@@ -69,8 +69,6 @@ export function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
             authClient.signOut({
               fetchOptions: {
                 onSuccess: () => {
-                  // 先离开受保护路由，再清空用户态缓存并强制路由重新校验 session，
-                  // 避免换号后命中上一个账号的 fresh 缓存。
                   void navigate({ to: "/" }).finally(() => {
                     queryClient.clear();
                     void router.invalidate();

@@ -1,7 +1,6 @@
 import { Button } from "@openstarter/ui-web/components/button";
 import { QRCodeSVG } from "qrcode.react";
 
-/** 前端渲染微信二维码所需数据（对应结账返回的 qrData + 订单号）。 */
 export interface WechatQr {
   amount: number;
   codeUrl: string;

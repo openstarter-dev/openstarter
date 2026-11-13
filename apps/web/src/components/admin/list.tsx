@@ -3,10 +3,6 @@ import { Button } from "@openstarter/ui-web/components/button";
 import { Link, type LinkComponentProps, type RegisteredRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 
-/**
- * 分页链接的 `to` 类型（路由并集）。分页页把 `page` 放在 search 里，
- * 所以用链接而不是按钮：可新标签打开、hover 走 intent 预取、后退可回到上一页。
- */
 export type PaginationTo = NonNullable<
   LinkComponentProps<"a", RegisteredRouter, string, string>["to"]
 >;

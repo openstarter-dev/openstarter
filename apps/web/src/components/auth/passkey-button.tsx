@@ -10,7 +10,6 @@ export const isWebAuthnSupported = (): boolean =>
   typeof window !== "undefined" && Boolean(window.PublicKeyCredential);
 
 interface PasskeyButtonProps {
-  /** 保留以与其它登录按钮签名对齐（passkey 登录后跳转由 WebAuthn 流程决定）。 */
   callbackURL?: string;
 }
 
