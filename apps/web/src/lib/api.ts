@@ -1,9 +1,20 @@
-import type { AppType } from "@openstarter/api";
+import { hcWithType } from "@openstarter/api/client";
 // 必须显式导入 query-core，下面的 declare module 才会被 TS 识别为模块增强。
 import type {} from "@tanstack/query-core";
-import { hc } from "hono/client";
 
-export const client = hc<AppType>("/");
+import { getRpcFetchBridge, type RpcFetch } from "@/lib/rpc-bridge";
+
+/**
+ * 浏览器：相对 base 走同源请求（`/api/*` 由 `routes/api/$.ts` 转给 Hono）。
+ * 服务端：相对 URL 无法 fetch，改由 `src/server.ts` 装入的进程内桥接执行（见 rpc-bridge）。
+ * 每次调用时取桥接，避免依赖模块求值顺序。
+ */
+const rpcFetch: RpcFetch = (input, init) => {
+  const bridge = getRpcFetchBridge();
+  return bridge ? bridge(input, init) : fetch(input, init);
+};
+
+export const client = hcWithType("/", { fetch: rpcFetch });
 
 /**
  * mutation 经 meta 声明的失效目标（meta-invalidation 模式）。
