@@ -1,4 +1,4 @@
-import { consume, revoke } from "@openstarter/billing-web";
+import { consume, CreditContentionError, revoke } from "@openstarter/billing-web";
 import { type AiTask, aiTask, type NewAiTask } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
@@ -69,7 +69,9 @@ export async function findTask(id: string): Promise<AiTask | undefined> {
   return result;
 }
 
-export function createTask(params: CreateTaskParams): Promise<AiTask> {
+const MAX_CREATE_TASK_ATTEMPTS = 3;
+
+export async function createTask(params: CreateTaskParams): Promise<AiTask> {
   const id = getUuid();
   const scene = params.scene ?? AI_TASK_SCENE;
   const costCredits = params.costCredits ?? 0;
@@ -88,32 +90,45 @@ export function createTask(params: CreateTaskParams): Promise<AiTask> {
     userId: params.userId,
   };
 
-  return db().transaction(async (tx) => {
-    await tx.insert(aiTask).values(record);
+  for (let attempt = 1; attempt <= MAX_CREATE_TASK_ATTEMPTS; attempt += 1) {
+    try {
+      return await db().transaction(async (tx) => {
+        await tx.insert(aiTask).values(record);
 
-    if (costCredits > 0) {
-      const result = await consume({
-        credits: costCredits,
-        description: `AI ${params.mediaType} generation`,
-        metadata: JSON.stringify({ taskId: id }),
-        scene,
-        tx,
-        userId: params.userId,
+        if (costCredits > 0) {
+          const result = await consume({
+            credits: costCredits,
+            description: `AI ${params.mediaType} generation`,
+            metadata: JSON.stringify({ taskId: id }),
+            scene,
+            tx,
+            userId: params.userId,
+          });
+
+          if (!(result.success && result.consumedCredit)) {
+            throw new InsufficientCreditsError();
+          }
+
+          await tx
+            .update(aiTask)
+            .set({ creditId: result.consumedCredit.id })
+            .where(eq(aiTask.id, id));
+        }
+
+        const [created] = await tx.select().from(aiTask).where(eq(aiTask.id, id)).limit(1);
+        if (!created) {
+          throw new Error("Failed to load AI task after creation");
+        }
+        return created;
       });
-
-      if (!(result.success && result.consumedCredit)) {
-        throw new InsufficientCreditsError();
+    } catch (error) {
+      if (!(error instanceof CreditContentionError) || attempt === MAX_CREATE_TASK_ATTEMPTS) {
+        throw error;
       }
-
-      await tx.update(aiTask).set({ creditId: result.consumedCredit.id }).where(eq(aiTask.id, id));
     }
+  }
 
-    const [created] = await tx.select().from(aiTask).where(eq(aiTask.id, id)).limit(1);
-    if (!created) {
-      throw new Error("Failed to load AI task after creation");
-    }
-    return created;
-  });
+  throw new Error("unreachable");
 }
 
 export async function updateTask(params: UpdateTaskParams): Promise<void> {
