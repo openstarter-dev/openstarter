@@ -2,6 +2,7 @@ import { Button } from "@openstarter/ui-web/components/button";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
+import { rememberInviteCode } from "@/lib/invite-code";
 
 const OAUTH_ERROR_REDIRECT = "/login?error=oauth";
 
@@ -10,6 +11,7 @@ interface OAuthButtonsProps {
   callbackURL?: string;
   githubEnabled: boolean;
   googleEnabled: boolean;
+  inviteCode?: string;
 }
 
 export function OAuthButtons({
@@ -17,12 +19,16 @@ export function OAuthButtons({
   googleEnabled,
   githubEnabled,
   callbackURL = "/dashboard",
+  inviteCode,
 }: OAuthButtonsProps) {
   if (!(appleEnabled || googleEnabled || githubEnabled)) {
     return null;
   }
 
   const handleSocial = (provider: "google" | "github" | "apple") => {
+    if (inviteCode) {
+      rememberInviteCode(inviteCode);
+    }
     authClient.signIn
       .social({ callbackURL, errorCallbackURL: OAUTH_ERROR_REDIRECT, provider })
       .catch((error: unknown) => {

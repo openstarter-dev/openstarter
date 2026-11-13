@@ -40,4 +40,38 @@ describe("authentication middleware properties", () => {
       { numRuns: 100 },
     );
   });
+
+  it("rejects an anonymous session when anonymous auth is disabled", async () => {
+    const app = new Hono().get(
+      "/protected",
+      createRequireAuth({
+        getSession: async () => ({ user: { id: "anon-1", isAnonymous: true } }),
+        isAnonymousAllowed: () => false,
+        validateApiKey: () => Promise.resolve(null),
+      }),
+      (c) => c.json({ userId: c.get("userId") }),
+    );
+
+    const response = await app.request("/protected");
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({ code: -1, message: "unauthorized" });
+  });
+
+  it("allows an anonymous session when anonymous auth is enabled", async () => {
+    const app = new Hono().get(
+      "/protected",
+      createRequireAuth({
+        getSession: async () => ({ user: { id: "anon-1", isAnonymous: true } }),
+        isAnonymousAllowed: () => true,
+        validateApiKey: () => Promise.resolve(null),
+      }),
+      (c) => c.json({ userId: c.get("userId") }),
+    );
+
+    const response = await app.request("/protected");
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({ userId: "anon-1" });
+  });
 });

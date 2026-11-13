@@ -8,11 +8,13 @@ export interface Session {
   user: {
     email?: string;
     id: string;
+    isAnonymous?: boolean;
   };
 }
 
 export interface AuthDependencies {
   getSession: (headers: Headers) => Promise<Session | null>;
+  isAnonymousAllowed?: () => boolean;
   validateApiKey: (key: string) => Promise<string | null>;
 }
 
@@ -33,12 +35,19 @@ export async function resolveApiKeyUserId(
   return await validateKey(token);
 }
 
+function isSessionAllowed(session: Session, dependencies: AuthDependencies): boolean {
+  return !session.user.isAnonymous || (dependencies.isAnonymousAllowed?.() ?? true);
+}
+
 export function createRequireAuth(dependencies: AuthDependencies) {
   return createMiddleware<{
     Variables: { userId: string; session: Session | null };
   }>(async (c, next) => {
     const session = await dependencies.getSession(c.req.raw.headers);
     if (session?.user) {
+      if (!isSessionAllowed(session, dependencies)) {
+        return c.json(respErr("unauthorized"), 401);
+      }
       c.set("session", session);
       c.set("userId", session.user.id);
       await next();
@@ -62,7 +71,7 @@ export function createAuthMiddlewares(dependencies: AuthDependencies) {
     Variables: { session: Session | null };
   }>(async (c, next) => {
     const session = await dependencies.getSession(c.req.raw.headers);
-    c.set("session", session);
+    c.set("session", session && isSessionAllowed(session, dependencies) ? session : null);
     await next();
   });
 

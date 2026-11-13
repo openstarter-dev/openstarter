@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
+import { rememberInviteCode } from "@/lib/invite-code";
 import { bindReferralAfterSignup } from "@/lib/referral-attribution";
 import { publicConfig } from "@/modules/public-config/lib/api";
 
@@ -40,6 +41,7 @@ export default function SignUpForm({
   const magicLinkEnabled = configs.magic_link_enabled === "true";
   const emailOtpEnabled = configs.email_otp_enabled === "true";
   const emailVerificationEnabled = configs.email_verification_enabled === "true";
+  const inviteCodeRequired = configs.invite_code_required === "true";
   const hasSocial = enabledOAuthProviders.length > 0;
   const signUpModes: SignUpMode[] = [
     ...(emailEnabled ? (["password"] as const) : []),
@@ -47,6 +49,7 @@ export default function SignUpForm({
     ...(emailOtpEnabled ? (["email-otp"] as const) : []),
   ];
   const [selectedMode, setSelectedMode] = useState<SignUpMode>("password");
+  const [inviteCode, setInviteCode] = useState("");
   const activeMode = signUpModes.includes(selectedMode) ? selectedMode : signUpModes[0];
 
   const form = useForm({
@@ -56,6 +59,14 @@ export default function SignUpForm({
       password: "",
     },
     onSubmit: async ({ value }) => {
+      const code = inviteCode.trim();
+      if (inviteCodeRequired && code === "") {
+        toast.error("Invite code is required");
+        return;
+      }
+      if (code) {
+        rememberInviteCode(code);
+      }
       await authClient.signUp.email(
         {
           email: value.email,
@@ -63,6 +74,7 @@ export default function SignUpForm({
           password: value.password,
         },
         {
+          headers: code ? { "x-invite-code": code } : undefined,
           onError: (error) => {
             toast.error(error.error.message || error.error.statusText);
           },
@@ -95,6 +107,18 @@ export default function SignUpForm({
     <div className="mx-auto mt-10 w-full max-w-md p-6">
       <h1 className="mb-6 text-center font-bold text-3xl">Create Account</h1>
 
+      {inviteCodeRequired ? (
+        <div className="mb-4 space-y-2">
+          <Label htmlFor="invite-code">Invite code</Label>
+          <Input
+            id="invite-code"
+            onChange={(e) => setInviteCode(e.target.value)}
+            placeholder="Required to create an account"
+            value={inviteCode}
+          />
+        </div>
+      ) : null}
+
       {hasSocial && (
         <div className="mb-4">
           <OAuthButtons
@@ -102,6 +126,7 @@ export default function SignUpForm({
             callbackURL={redirectTo}
             githubEnabled={githubEnabled}
             googleEnabled={googleEnabled}
+            inviteCode={inviteCode}
           />
         </div>
       )}
@@ -222,6 +247,7 @@ export default function SignUpForm({
             <PasswordlessForm
               callbackURL={redirectTo}
               emailOtpEnabled={emailOtpEnabled}
+              inviteCode={inviteCode}
               magicLinkEnabled={magicLinkEnabled}
               mode="magic-link"
             />
@@ -231,6 +257,7 @@ export default function SignUpForm({
             <PasswordlessForm
               callbackURL={redirectTo}
               emailOtpEnabled={emailOtpEnabled}
+              inviteCode={inviteCode}
               magicLinkEnabled={magicLinkEnabled}
               mode="email-otp"
             />

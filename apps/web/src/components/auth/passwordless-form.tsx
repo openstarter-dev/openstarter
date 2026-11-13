@@ -6,12 +6,14 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
+import { rememberInviteCode } from "@/lib/invite-code";
 
 export type PasswordlessMode = "magic-link" | "email-otp";
 
 interface PasswordlessFormProps {
   callbackURL?: string;
   emailOtpEnabled: boolean;
+  inviteCode?: string;
   magicLinkEnabled: boolean;
   mode?: PasswordlessMode;
 }
@@ -20,6 +22,7 @@ export function PasswordlessForm({
   callbackURL = "/dashboard",
   magicLinkEnabled,
   emailOtpEnabled,
+  inviteCode,
   mode: selectedMode,
 }: PasswordlessFormProps) {
   const modes: PasswordlessMode[] = [];
@@ -47,6 +50,9 @@ export function PasswordlessForm({
       toast.error(m["common.sign.enter_email"]());
       return;
     }
+    if (inviteCode) {
+      rememberInviteCode(inviteCode);
+    }
     setSubmitting(true);
     const { error } = await authClient.signIn.magicLink({
       callbackURL,
@@ -64,6 +70,9 @@ export function PasswordlessForm({
     if (!email) {
       toast.error(m["common.sign.enter_email"]());
       return;
+    }
+    if (inviteCode) {
+      rememberInviteCode(inviteCode);
     }
     setSubmitting(true);
     const { error } = await authClient.emailOtp.sendVerificationOtp({
