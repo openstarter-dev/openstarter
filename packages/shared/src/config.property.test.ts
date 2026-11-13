@@ -28,6 +28,28 @@ describe("config defaults and masks (Property 3, 3.7)", () => {
     expect(PROTECTED_CONFIG_KEYS.has("db_schema")).toBe(true);
   });
 
+  it("auth flags and provider credentials are env-only and protected", () => {
+    const settings = getSettings();
+    const names = [
+      "email_auth_enabled",
+      "email_verification_enabled",
+      "invite_code_required",
+      "anonymous_auth_enabled",
+      "google_auth_enabled",
+      "google_one_tap_enabled",
+      "google_client_id",
+      "github_auth_enabled",
+      "apple_auth_enabled",
+      "magic_link_enabled",
+      "email_otp_enabled",
+    ];
+
+    for (const name of names) {
+      expect(PROTECTED_CONFIG_KEYS.has(name)).toBe(true);
+      expect(settings.find((setting) => setting.name === name)?.envOnly).toBe(true);
+    }
+  });
+
   it("P3.7 maskConfigValue round-trips through isMaskedConfigValue", () => {
     expect(maskConfigValue("abcdefgh").startsWith("••••")).toBe(true);
     expect(isMaskedConfigValue(maskConfigValue("abcdefgh"))).toBe(true);

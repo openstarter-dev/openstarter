@@ -27,6 +27,11 @@ export type ConfigMap = Record<string, string>;
 /** 单个配置项定义（驱动后台设置界面与写入校验）。 */
 export interface Setting {
   defaultValue?: string;
+  /**
+   * True for settings whose effective value comes from environment variables.
+   * They are hidden from the admin editor and cannot be written through the DB.
+   */
+  envOnly?: boolean;
   group: string;
   name: string;
   options?: { label: string; value: string }[];
@@ -284,8 +289,30 @@ export function getSettingGroups(): SettingGroup[] {
  * 全部配置项定义（含 name / type / group / tab 等元数据）。
  * 既驱动后台分类展示（R2.4），也作为写入校验（R2.5）与秘密键识别的依据。
  */
+const ENV_ONLY_SETTING_NAMES: ReadonlySet<string> = new Set([
+  "email_auth_enabled",
+  "email_verification_enabled",
+  "invite_code_required",
+  "anonymous_auth_enabled",
+  "google_auth_enabled",
+  "google_one_tap_enabled",
+  "google_client_id",
+  "google_client_secret",
+  "github_auth_enabled",
+  "github_client_id",
+  "github_client_secret",
+  "apple_auth_enabled",
+  "apple_client_id",
+  "apple_client_secret",
+  "apple_app_bundle_identifier",
+  "magic_link_enabled",
+  "email_otp_enabled",
+  "magic_link_expires_in",
+  "email_otp_expires_in",
+]);
+
 export function getSettings(): Setting[] {
-  return [
+  const settings: Setting[] = [
     // General / App Info
     {
       group: "appinfo",
@@ -1163,6 +1190,10 @@ export function getSettings(): Setting[] {
       type: "text",
     },
   ];
+
+  return settings.map((setting) =>
+    ENV_ONLY_SETTING_NAMES.has(setting.name) ? { ...setting, envOnly: true } : setting,
+  );
 }
 
 // 计算一次，供派生数据复用（settings 为静态定义）。
@@ -1192,6 +1223,21 @@ const procEnv: Record<string, string | undefined> =
 
 const readEnv = (key: string): string | undefined => procEnv[key];
 
+/** Parse an environment boolean, failing fast instead of silently treating typos as false. */
+function readBooleanEnv(key: string, fallback: string): string {
+  const raw = readEnv(key)?.trim().toLowerCase();
+  if (raw === undefined || raw === "") {
+    return fallback;
+  }
+  if (raw === "true" || raw === "1") {
+    return "true";
+  }
+  if (raw === "false" || raw === "0") {
+    return "false";
+  }
+  throw new Error(`Environment variable ${key} must be true/false or 1/0`);
+}
+
 /**
  * 环境变量配置（预定义默认）。缺失的键回退到此处的静态默认值（R2.3）。
  * getAllConfigs 以 { ...settingDefaults, ...envConfigs, ...dbConfigs } 合并，DB 覆盖 env。
@@ -1216,6 +1262,33 @@ export const envConfigs: ConfigMap = {
 
   // 认证
   auth_url: readEnv("AUTH_URL") ?? readEnv("VITE_APP_URL") ?? "",
+
+  // 认证开关（env-only；数据库 config 表不能覆盖）
+  email_auth_enabled: readBooleanEnv("EMAIL_AUTH_ENABLED", "true"),
+  email_verification_enabled: readBooleanEnv(
+    "EMAIL_VERIFICATION_REQUIRED",
+    readBooleanEnv("EMAIL_VERIFICATION_ENABLED", "false"),
+  ),
+  invite_code_required: readBooleanEnv("INVITE_CODE_REQUIRED", "false"),
+  anonymous_auth_enabled: readBooleanEnv("ANONYMOUS_AUTH_ENABLED", "false"),
+  google_auth_enabled: readBooleanEnv(
+    "GOOGLE_AUTH_ENABLED",
+    readEnv("GOOGLE_CLIENT_ID") && readEnv("GOOGLE_CLIENT_SECRET") ? "true" : "false",
+  ),
+  google_one_tap_enabled: readBooleanEnv("GOOGLE_ONE_TAP_ENABLED", "false"),
+  google_client_id: readEnv("GOOGLE_CLIENT_ID") ?? readEnv("VITE_GOOGLE_CLIENT_ID") ?? "",
+  github_auth_enabled: readBooleanEnv(
+    "GITHUB_AUTH_ENABLED",
+    readEnv("GITHUB_CLIENT_ID") && readEnv("GITHUB_CLIENT_SECRET") ? "true" : "false",
+  ),
+  apple_auth_enabled: readBooleanEnv(
+    "APPLE_AUTH_ENABLED",
+    readEnv("APPLE_CLIENT_ID") && readEnv("APPLE_CLIENT_SECRET") ? "true" : "false",
+  ),
+  magic_link_enabled: readBooleanEnv("MAGIC_LINK_ENABLED", "false"),
+  email_otp_enabled: readBooleanEnv("EMAIL_OTP_ENABLED", "false"),
+  magic_link_expires_in: readEnv("MAGIC_LINK_EXPIRES_IN") ?? "1800",
+  email_otp_expires_in: readEnv("EMAIL_OTP_EXPIRES_IN") ?? "300",
 
   // 支付 - Creem
   creem_api_key: readEnv("CREEM_API_KEY") ?? "",
@@ -1323,6 +1396,9 @@ export async function getDbConfigs(): Promise<ConfigMap> {
       if (!(row.name && row.value)) {
         continue;
       }
+      if (PROTECTED_CONFIG_KEYS.has(row.name)) {
+        continue;
+      }
 
       if (isEncryptedSecret(row.value)) {
         try {
@@ -1373,6 +1449,27 @@ export const PROTECTED_CONFIG_KEYS: ReadonlySet<string> = new Set([
   "db_schema",
   "db_singleton_enabled",
   "db_max_connections",
+  // Auth flags and provider credentials are deployment configuration. They are
+  // read from env only; existing config rows must not override them.
+  "email_auth_enabled",
+  "email_verification_enabled",
+  "invite_code_required",
+  "anonymous_auth_enabled",
+  "google_auth_enabled",
+  "google_one_tap_enabled",
+  "google_client_id",
+  "google_client_secret",
+  "github_auth_enabled",
+  "github_client_id",
+  "github_client_secret",
+  "apple_auth_enabled",
+  "apple_client_id",
+  "apple_client_secret",
+  "apple_app_bundle_identifier",
+  "magic_link_enabled",
+  "email_otp_enabled",
+  "magic_link_expires_in",
+  "email_otp_expires_in",
 ]);
 
 /**

@@ -22,6 +22,15 @@
     "VITE_APP_URL": "https://<your-domain.com>",
     "VITE_APP_NAME": "OpenStarter",
     "VITE_DEFAULT_LOCALE": "en",
+    "EMAIL_AUTH_ENABLED": "true",
+    "EMAIL_VERIFICATION_REQUIRED": "false",
+    "INVITE_CODE_REQUIRED": "false",
+    "ANONYMOUS_AUTH_ENABLED": "false",
+    "GOOGLE_ONE_TAP_ENABLED": "false",
+    "MAGIC_LINK_ENABLED": "false",
+    "EMAIL_OTP_ENABLED": "false",
+    "MAGIC_LINK_EXPIRES_IN": "1800",
+    "EMAIL_OTP_EXPIRES_IN": "300",
   },
 
   "d1_databases": [

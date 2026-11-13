@@ -69,9 +69,11 @@ export const overviewRouter = new Hono()
   // ── 站点设置（Config_Service） ────────────────────────────────────────────────
   .get("/config", async (c) => {
     const configs = await getAdminConfigs();
-    const settings = getSettings();
-    const groups = getSettingGroups();
-    const tabs = getSettingTabs();
+    const settings = getSettings().filter((setting) => !setting.envOnly);
+    const groups = getSettingGroups().filter((group) =>
+      settings.some((setting) => setting.group === group.name),
+    );
+    const tabs = getSettingTabs().filter((tab) => groups.some((group) => group.tab === tab.name));
     return c.json(respData({ configs, groups, settings, tabs }));
   })
   .post("/config", zValidator("json", saveConfigBody), async (c) => {
