@@ -1,6 +1,3 @@
-// Referral service tests: bindReferral validation matrix + lazy generation + stats,
-// using the shared api-test-database harness with referral tables created in setUp.
-
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Database } from "@openstarter/db";
 import { db } from "@openstarter/db/server";
@@ -92,7 +89,6 @@ afterAll(() => {
 
 beforeEach(async () => {
   if (state.database) {
-    // Clear referral child tables first (they reference user), before resetApiTestDatabase deletes users
     const sql = (await import("drizzle-orm")).sql;
     await state.database.run(sql.raw("DELETE FROM referral_relation"));
     await state.database.run(sql.raw("DELETE FROM commission"));
@@ -106,7 +102,6 @@ describe("bindReferral", () => {
     await insertUser(db(), { email: "referrer@example.com", id: "userA" });
     await insertUser(db(), { email: "referred@example.com", id: "userB" });
 
-    // Create referral code for userA
     const code = await getOrCreateReferralCode("userA");
 
     const res = await bindReferral({ code, userId: "userB" });
@@ -138,11 +133,9 @@ describe("bindReferral", () => {
     const codeA = await getOrCreateReferralCode("userA");
     const codeC = await getOrCreateReferralCode("userC");
 
-    // Bind userB to userA first
     const firstRes = await bindReferral({ code: codeA, userId: "userB" });
     expect(firstRes.ok).toBe(true);
 
-    // Try to bind userB to userC
     const secondRes = await bindReferral({ code: codeC, userId: "userB" });
     expect(secondRes.error).toBe(BindReferralError.ALREADY_REFERRED);
     expect(secondRes.ok).toBe(false);
@@ -153,11 +146,9 @@ describe("bindReferral", () => {
     await insertUser(db(), { email: "refB@example.com", id: "userB" });
     await insertUser(db(), { email: "referred@example.com", id: "userD" });
 
-    // userA's code refers userB
     const codeA = await getOrCreateReferralCode("userA");
     await bindReferral({ code: codeA, userId: "userB" });
 
-    // userB's code tries to refer userD → should fail
     const codeB = await getOrCreateReferralCode("userB");
     const res = await bindReferral({ code: codeB, userId: "userD" });
     expect(res.error).toBe(BindReferralError.NO_SECOND_LEVEL);
@@ -194,18 +185,15 @@ describe("getMyReferralStats", () => {
     await insertUser(db(), { email: "ref1@example.com", id: "userB" });
     await insertUser(db(), { email: "ref2@example.com", id: "userC" });
 
-    // Create referral relations
     const codeA = await getOrCreateReferralCode("userA");
     await bindReferral({ code: codeA, userId: "userB" });
     await bindReferral({ code: codeA, userId: "userC" });
 
-    // Insert a pending commission
     const sql = (await import("drizzle-orm")).sql;
     await db().run(sql`
       INSERT INTO commission (id, order_no, referrer_id, referred_user_id, base_amount, base_currency, rate, commission_credits, status)
       VALUES ('comm-1', 'order-1', 'userA', 'userB', 1000, 'USD', 1000, 100, 'pending')
     `);
-    // Insert a settled commission
     await db().run(sql`
       INSERT INTO commission (id, order_no, referrer_id, referred_user_id, base_amount, base_currency, rate, commission_credits, status)
       VALUES ('comm-2', 'order-2', 'userA', 'userC', 2000, 'USD', 1000, 200, 'settled')

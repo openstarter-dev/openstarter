@@ -1,13 +1,3 @@
-// Shared test scaffolding for the MCP module tests.
-//
-// Mirrors the harness pattern in `service.property.test.ts`: a per-suite SQLite
-// database with `db()` from `@openstarter/db/server` redirected to it, plus
-// in-shape recreation of tables whose committed harness DDL predates the active
-// schema (`chat`, `chat_message`, `ticket`, `ticket_message`). Also wires a
-// JSON-RPC test client through `StreamableHTTPClientTransport` so requests run
-// against the real `createMcpHandler` fetch — the same handler the router
-// serves in production.
-
 import type { Database } from "@openstarter/db/server";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 import { sql } from "drizzle-orm";
@@ -19,18 +9,13 @@ import {
   resetApiTestDatabase,
 } from "../../test/api-test-database";
 
-/** Shared millisecond-timestamp default matching the harness DDL style. */
 const NOW_EXPR = "(cast((julianday('now') - 2440587.5)*86400000 as integer))";
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
-  /** Overridden per test to simulate the authenticated API-key owner. */
   currentUserId: "user-1" as string,
 }));
 
-// `@openstarter/auth` validates env at import time (BETTER_AUTH_SECRET etc.);
-// the MCP tools only need `getUserPlan`, so stub the barrel to keep the suite
-// hermetic — same pattern as `middleware/plan-gate.test.ts`.
 vi.mock("@openstarter/auth", () => ({
   getUserPlan: vi.fn(async (userId: string) => ({ plan: "none" as const, userId })),
 }));
@@ -51,9 +36,6 @@ vi.mock(
   },
 );
 
-// The shared harness predates the active order/chat/ticket schemas (legacy
-// `transaction_id`/`sender` columns etc.). Drop & recreate the tables the MCP
-// tools touch, matching `packages/db/src/schema/schema.sqlite.ts`.
 const RESHAPE_TABLES = [
   `DROP TABLE IF EXISTS "order"`,
   `CREATE TABLE "order" (
@@ -179,7 +161,6 @@ export interface McpTestHarness {
     structuredContent?: unknown;
   }>;
   close: () => Promise<void>;
-  /** Delete every row from all harness tables (run in beforeEach). */
   reset: () => Promise<void>;
   listTools: () => Promise<Array<{ name: string; description?: string }>>;
 }
@@ -191,11 +172,6 @@ export const setCurrentUserId = (userId: string): void => {
 
 export const getDatabase = (): Database => state.database as Database;
 
-/**
- * Boot the suite database and a real MCP client talking to the module's
- * handler over an in-process streamable HTTP transport. `buildHandler` is a
- * callback so each test file wires the server factory it exercises.
- */
 export const createMcpTestHarness = async (
   suiteName: string,
   buildFetch: () => (request: Request) => Promise<Response>,

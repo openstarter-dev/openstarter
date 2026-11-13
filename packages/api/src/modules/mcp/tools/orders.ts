@@ -1,5 +1,3 @@
-// Orders + AI task MCP tools: read-only projections over the caller's records.
-
 import type { McpServer } from "@modelcontextprotocol/server";
 
 import { getTasks } from "../../ai/tasks/service";

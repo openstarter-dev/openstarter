@@ -1,10 +1,3 @@
-/**
- * LLM module tests — service layer integration tests with in-memory SQLite.
- *
- * Reuses the in-memory SQLite harness and adds the `chat` / `chat_message`
- * tables that the LLM module depends on.
- */
-
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { sql } from "drizzle-orm";

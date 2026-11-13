@@ -1,10 +1,3 @@
-// Support-ticket MCP tools: read the caller's threads; create/reply as the user.
-//
-// This is the only write surface exposed over MCP. Writes go through the
-// existing tickets service with `role` pinned to `user` — an API key can
-// never post as an admin. Ownership is verified before any cross-ticket read
-// or append; other users' ticket ids are indistinguishable from unknown ids.
-
 import type { McpServer } from "@modelcontextprotocol/server";
 
 import {

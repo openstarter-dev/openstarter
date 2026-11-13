@@ -1,13 +1,3 @@
-/**
- * LLM chat credit metering service tests (Task 5) — real SQLite credit ledger.
- *
- * Follows the established `vi.mock("@openstarter/db/server")` + in-file
- * snake_case `CREATE TABLE` DDL pattern (see `ai/tasks/service.property.test.ts`
- * and `ai/catalog/service.test.ts`): tables `user`, `credit` (billing ledger)
- * and `ai_model` (Task 2 catalog) are created in a per-suite temp file DB.
- * Balance is seeded via `grant` + `insertUser`.
- */
-
 import { grant } from "@openstarter/billing-web";
 import type { Database } from "@openstarter/db";
 import { credit } from "@openstarter/db/schema";
@@ -101,13 +91,10 @@ afterAll(() => {
 beforeEach(async () => {
   if (state.database) {
     await resetApiTestDatabase(state.database);
-    // The shared harness reset does not know the `ai_model` table (Task 2);
-    // clear it here so per-test `createModel` seeds never collide.
     await state.database.run(sql.raw("DELETE FROM ai_model"));
   }
 });
 
-/** Seed a priced `ai_model` row (fresh per test — `beforeEach` resets the DB). */
 const seedPricedModel = async (
   overrides: Partial<{ creditPrice: number; maxOutputTokens: number | null }> = {},
 ) => {
@@ -128,7 +115,6 @@ describe("preloadChatCredits", () => {
     await grant({ credits: 100, description: "seed", userId });
     await seedPricedModel();
 
-    // historyChars = 4000 ASCII chars → 1000 input tokens; (1000 + 4096)/1000 → ceil = 6 → 12 credits.
     const result = await preloadChatCredits({
       chatId: "chat-1",
       historyChars: 4000,
@@ -256,7 +242,6 @@ describe("settleChatCredits", () => {
     expect(preload.consumedCreditId).not.toBeNull();
     expect(await sumRemainingCredits(userId)).toBe(88);
 
-    // Actual usage 1500 tokens → ceil(1500/1000) * 2 = 4 credits.
     await settleChatCredits({
       consumedCreditId: preload.consumedCreditId,
       estimatedCost: preload.estimatedCost,
@@ -267,7 +252,6 @@ describe("settleChatCredits", () => {
 
     expect(await sumRemainingCredits(userId)).toBe(96);
 
-    // Old consume record revoked (soft-deleted); a fresh consume of 4 exists.
     const consumeRows = await state
       .database!.select()
       .from(credit)
@@ -319,7 +303,6 @@ describe("settleChatCredits", () => {
       userId,
     });
 
-    // Actual 9000 tokens → 20 credits > 12: preload stays (platform absorbs the excess).
     await settleChatCredits({
       consumedCreditId: preload.consumedCreditId,
       estimatedCost: preload.estimatedCost,
@@ -390,8 +373,6 @@ describe("settleChatCredits", () => {
     });
     expect(await sumRemainingCredits(userId)).toBe(88);
 
-    // Confirm the entry existed before settle, then simulate it being removed
-    // between preload and settle (admin deletes the model mid-session).
     expect(await findModelByProviderAndId("openai", "gpt-priced")).not.toBeNull();
     await state.database!.run(sql.raw(`DELETE FROM ai_model WHERE model_id = 'gpt-priced'`));
 

@@ -1,8 +1,3 @@
-// packages/api/src/modules/billing —— 结账与支付回调路由（R12）。
-//
-// 路由只负责：挂鉴权、校验入参、读取渠道名/原始请求，并把领域结果映射为
-// 结构化响应。产品定价、订单构造、webhook 验签与事件编排均在 ./service。
-
 import { zValidator } from "@hono/zod-validator";
 import { respData, respErr } from "@openstarter/shared";
 import { Hono } from "hono";
@@ -54,7 +49,6 @@ export const billingRouter = new Hono()
   .post("/payment/webhook/:provider", async (c) => {
     const providerName = c.req.param("provider");
 
-    // RevenueCat 走独立门禁（商店代扣集成，不进 PaymentManager；见 ./service）。
     const result =
       providerName === REVENUECAT_PROVIDER
         ? await processRevenueCatWebhook(c.req.raw)

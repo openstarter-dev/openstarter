@@ -1,6 +1,3 @@
-// packages/api/src/schema/admin/tickets —— 工单管理端入参校验（modules/admin/tickets 路由复用）。
-//
-// 状态/角色词汇表与长度上限复用用户侧 schema/support/tickets，两侧保持单一事实源。
 import { z } from "zod";
 
 import { paginationSchema } from "../shared";

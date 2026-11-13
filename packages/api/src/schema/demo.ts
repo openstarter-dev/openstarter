@@ -1,4 +1,3 @@
-// packages/api/src/schema/demo —— demo 域入参校验（modules/demo 路由复用）。
 import { z } from "zod";
 
 const DEFAULT_LIMIT = 10;

@@ -1,32 +1,16 @@
-// packages/api/src/middleware/plan-gate.test.ts —— 订阅方案守卫中间件测试。
-//
-// 测试策略：
-//   - 使用 `vi.mock` 注入 `getUserPlan` 返回值，不依赖数据库。
-//   - 用 `createMiddleware` 设置桩 `userId` 模拟 `requireAuth` 的契约。
-//   - 覆盖：401（无 userId）、403（方案不足）、通过（方案充足）、层级语义。
-
 import { Hono } from "hono";
 import { createMiddleware } from "hono/factory";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requirePlan } from "./plan-gate";
 
-// 注入桩 `getUserPlan`。`@openstarter/auth` 的真实实现依赖数据库，
-// 测试中返回受控值。vi.mock 调用会被 hoist 到文件顶部执行。
 vi.mock("@openstarter/auth", () => ({
   getUserPlan: vi.fn(),
 }));
 
-// 导入被 mock 的模块（import 实际发生在 vi.mock 之后，拿到的是 mock 版本）。
 import { getUserPlan } from "@openstarter/auth";
 const mockGetUserPlan = vi.mocked(getUserPlan);
 
-/**
- * 构建一个测试用 Hono 应用，模拟 `requireAuth` → `requirePlan` → handler 的中间件链。
- *
- * 为避免 Hono 类型对展开中间件数组的限制，通过 `app.use` 注册中间件链，
- * 再单独定义路由处理函数。
- */
 function buildApp(
   userId: string | null,
   requiredPlan: Parameters<typeof requirePlan>[0] = "member",
@@ -35,7 +19,6 @@ function buildApp(
   const app = new Hono<{ Variables: { userId: string } }>();
 
   if (userId) {
-    // 模拟 `requireAuth` 的契约：设置 c.var.userId。
     app.use(
       "/protected",
       createMiddleware<{ Variables: { userId: string } }>(async (c, next) => {

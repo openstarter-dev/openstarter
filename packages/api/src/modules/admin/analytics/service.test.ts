@@ -1,6 +1,3 @@
-// getPublicAnalyticsConfig 测试：vi.mock 掉 getAllConfigs，锁定
-// 「web 端三键正确映射、绝不多发其它键（含移动端/敏感键）」的契约。
-
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@openstarter/shared/config", () => ({
@@ -11,7 +8,6 @@ vi.mock("@openstarter/shared/config", () => ({
     openpanel_client_secret: "op-secret", // 移动端键：绝不允许出现在公开配置里
     plausible_domain: "example.com",
     plausible_src: "https://plausible.example.com/js/script.js",
-    // 干扰项：绝不允许出现在公开配置里
     stripe_secret_key: "sk_live_danger",
   })),
 }));

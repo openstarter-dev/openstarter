@@ -1,7 +1,3 @@
-// Dashboard stats service tests: in-memory SQLite (reuses src/test harness),
-// seeds credit / order / apikey rows and asserts aggregation semantics and
-// per-user scoping (dashboard data must never leak across users).
-
 import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Database } from "@openstarter/db";
@@ -35,7 +31,6 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 const isoDaysAgo = (days: number): Date => new Date(Date.now() - days * DAY_MS);
 
-/** Insert one credit row with explicit timestamps (harness defaults are "now"). */
 const insertCredit = async (values: {
   credits: number;
   createdAt: Date;
@@ -57,7 +52,6 @@ const insertCredit = async (values: {
   `);
 };
 
-/** Insert one paid order with explicit createdAt. */
 const insertOrder = async (values: {
   amount: number;
   createdAt: Date;
@@ -76,7 +70,6 @@ const insertOrder = async (values: {
   `);
 };
 
-/** Insert one apikey row（字段对齐 `@better-auth/api-key` 的模型）。 */
 const insertApiKey = async (values: {
   createdAt: Date;
   enabled?: boolean;
@@ -84,7 +77,6 @@ const insertApiKey = async (values: {
   id: string;
   userId: string;
 }) => {
-  // key/start 先在 JS 侧拼接——不要把参数嵌进 SQL 字符串字面量，绑定顺序会错位。
   const hashedKey = `hash-${values.id}`;
   await db().run(sql`
     INSERT INTO apikey (
@@ -136,7 +128,6 @@ describe("getDashboardStats", () => {
   it("sums grant/consume credits and paid spend over the last 30 days", async () => {
     const userId = await insertUser(db(), { email: "stats@example.com", id: "user-stats" });
 
-    // Inside the 30-day window.
     await insertCredit({
       credits: 500,
       createdAt: isoDaysAgo(5),
@@ -156,7 +147,6 @@ describe("getDashboardStats", () => {
       transactionType: "consume",
       userId,
     });
-    // Outside the 30-day window (must not count).
     await insertCredit({
       credits: 9_999,
       createdAt: isoDaysAgo(45),
@@ -166,7 +156,6 @@ describe("getDashboardStats", () => {
       transactionType: "grant",
       userId,
     });
-    // Revoked consumption (status deleted — must not count).
     await insertCredit({
       credits: -50,
       createdAt: isoDaysAgo(2),
@@ -203,7 +192,6 @@ describe("getDashboardStats", () => {
     expect(stats.creditsConsumed30d).toBe(120);
     expect(stats.ordersCount).toBe(2);
     expect(stats.paidOrdersCount).toBe(1);
-    // spendTotal is the latest currency's paid total (mixed-currency orders are not summed).
     expect(stats.spendTotal).toEqual({ currency: "USD", total: 2900 });
   });
 
@@ -233,14 +221,11 @@ describe("getDashboardStats", () => {
     const stats = await getDashboardStats(userId);
 
     expect(stats.trend).toHaveLength(30);
-    // Oldest bucket first.
     expect(stats.trend[0]?.date.length).toBe(10);
-    // 按日期键定位桶：避免「ISO 日期随运行时刻跨日」导致的固定下标脆弱性。
     const seededDateKey = isoDaysAgo(2).toISOString().slice(0, 10);
     const twoDaysAgo = stats.trend.find((point) => point.date === seededDateKey);
     expect(twoDaysAgo?.granted).toBe(300);
     expect(twoDaysAgo?.consumed).toBe(100);
-    // Buckets without activity stay zero.
     expect(stats.trend.at(-1)?.granted).toBe(0);
     expect(stats.trend.at(-1)?.consumed).toBe(0);
   });

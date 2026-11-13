@@ -1,9 +1,3 @@
-// packages/api/src/modules/storage —— 图片上传路由（POST /storage/upload-image，R18）。
-//
-// 路由只负责：鉴权/方案门禁、按 Content-Type 解析上传载荷（multipart 或 JSON
-// base64）、文件数校验，以及把领域错误映射为结构化响应。大小限额与上传编排
-// 在 ./service（uploadImages / resolveUploadLimitKb），存储渠道细节在 ./manager。
-
 import { Buffer } from "node:buffer";
 import { respData, respErr } from "@openstarter/shared";
 import { logger } from "@openstarter/shared/logger";
@@ -19,13 +13,11 @@ import { type UploadInput, uploadImages } from "./service";
 const BAD_REQUEST_STATUS = 400;
 const DATA_URL_PREFIX = /^data:[^;]+;base64,/;
 
-/** 解码 base64（可含 `data:` URL 前缀）为字节。 */
 function decodeBase64(input: string): Uint8Array {
   const base64 = input.replace(DATA_URL_PREFIX, "");
   return new Uint8Array(Buffer.from(base64, "base64"));
 }
 
-/** multipart 文件条目的结构化形态：只声明 parseMultipart 实际用到的成员。 */
 interface MultipartFilePart {
   arrayBuffer: () => Promise<ArrayBuffer>;
   name?: string;
@@ -36,7 +28,6 @@ function hasArrayBuffer(value: object): value is MultipartFilePart {
   return typeof (value as { arrayBuffer?: unknown }).arrayBuffer === "function";
 }
 
-/** 解析 multipart/form-data 的 `files` 字段为归一化条目。 */
 async function parseMultipart(request: Request): Promise<UploadInput[]> {
   const form = await request.formData();
   const parts: MultipartFilePart[] = [];
@@ -54,7 +45,6 @@ async function parseMultipart(request: Request): Promise<UploadInput[]> {
   );
 }
 
-/** 解析 JSON base64 入参为归一化条目。 */
 async function parseBase64(request: Request): Promise<UploadInput[]> {
   const json: unknown = await request.json();
   const parsed = base64Body.safeParse(json);

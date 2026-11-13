@@ -1,14 +1,3 @@
-// Integration tests for the MCP module (Phase 2/3 of the mcp-builder skill).
-//
-// Drives the real `createMcpHandler` through an in-process streamable HTTP
-// transport — the same handler the router serves — over the shared SQLite
-// harness (`src/test/api-test-database.ts`). Covers:
-//   - tools/list exposes the full read-only + ticket-write tool set;
-//   - each read-only tool returns the authenticated user's own data;
-//   - cross-user isolation returns an actionable isError result;
-//   - the two write tools persist through the tickets service with role=user;
-//   - schema violations come back as isError, not protocol errors.
-
 import type { Database } from "@openstarter/db/server";
 import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
@@ -114,8 +103,6 @@ describe("mcp module", () => {
     harness = await createMcpTestHarness(
       "mcp-server",
       () => (request) =>
-        // Mirror the router's authInfo injection: the API-key owner's userId
-        // travels as authInfo.clientId (see index.ts).
         mcpHandler.fetch(request, {
           authInfo: { clientId: getCurrentUserId(), scopes: ["mcp"], token: "" },
         }),

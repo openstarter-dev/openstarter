@@ -1,12 +1,3 @@
-/**
- * Admin referral router tests — config/commissions/relations/rate management.
- *
- * Mirrors the harness pattern from referral/router.test.ts and admin/overview/router.test.ts:
- * - x-test-user-id requireAuth mock
- * - rbac passthrough
- * - temp SQLite + referral/commission/user DDL
- */
-
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { sql } from "drizzle-orm";
 import type { Database } from "@openstarter/db";
@@ -254,7 +245,6 @@ describe("admin referral", () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { code: number };
     expect(body.code).toBe(0);
-    // 更新 savedConfig 以便 GET 回读
     state.savedConfig = { enabled: true, defaultRate: 1500, minSettleCredits: 100 };
   });
 
@@ -275,7 +265,6 @@ describe("admin referral", () => {
     await insertTestUser("user-a", "referrer@example.com");
     await insertTestUser("user-b", "referred@example.com");
 
-    // Insert pending commission
     const commissionId = "comm-1";
     await state.database!.run(
       sql`INSERT INTO commission (id, order_no, referrer_id, referred_user_id, base_amount, base_currency, rate, commission_credits, status)
@@ -306,7 +295,6 @@ describe("admin referral", () => {
     expect(body.code).toBe(0);
     expect(body.data.transactionNo).toBe("tx-1");
 
-    // Verify commission status changed to settled
     const rows = (await state.database!.all(
       sql`SELECT status, transaction_no, settled_by FROM commission WHERE id = ${commissionId}`,
     )) as Array<
@@ -335,7 +323,6 @@ describe("admin referral", () => {
     expect(body.code).toBe(-1);
     expect(body.message).toBe("NOT_PENDING");
 
-    // grant should NOT be called again (幂等)
     expect(state.mockGrant).not.toHaveBeenCalled();
   });
 
@@ -354,7 +341,6 @@ describe("admin referral", () => {
     const voidBody = (await res.json()) as { code: number };
     expect(voidBody.code).toBe(0);
 
-    // Verify status changed to void
     const voidRows = (await state.database!.all(
       sql`SELECT status FROM commission WHERE id = ${commissionId}`,
     )) as Array<{ status: string } & { [key: string]: unknown }>;
@@ -362,7 +348,6 @@ describe("admin referral", () => {
     if (!voidRow) throw new Error("commission row not found");
     expect(voidRow.status).toBe("void");
 
-    // Verify no credit records for referral scene
     const credits = (await state.database!.all(
       sql`SELECT * FROM credit WHERE transaction_scene = 'referral'`,
     )) as Array<Record<string, unknown>>;
@@ -372,20 +357,17 @@ describe("admin referral", () => {
   it("PUT rate: 设 3000 / 清 null", async () => {
     await insertTestUser("user-1", "rate-user@example.com");
 
-    // 先建 referral 行
     const referralId = "ref-1";
     await state.database!.run(
       sql`INSERT INTO referral (id, user_id, code) VALUES (${referralId}, 'user-1', 'RATE0001')`,
     );
 
-    // 设 customRate = 3000
     const setRes = await request("/users/user-1/rate", {
       method: "PUT",
       body: JSON.stringify({ customRate: 3000 }),
     });
     expect(setRes.status).toBe(200);
 
-    // 回读
     const rows1 = (await state.database!.all(
       sql`SELECT custom_rate FROM referral WHERE user_id = 'user-1'`,
     )) as Array<{ custom_rate: number | null } & { [key: string]: unknown }>;
@@ -393,7 +375,6 @@ describe("admin referral", () => {
     if (!row1) throw new Error("referral row not found");
     expect(row1.custom_rate).toBe(3000);
 
-    // 清 null
     const clearRes = await request("/users/user-1/rate", {
       method: "PUT",
       body: JSON.stringify({ customRate: null }),
@@ -428,7 +409,6 @@ describe("admin referral", () => {
     const body1 = (await res1.json()) as { code: number; data: { id: string } };
     expect(body1.code).toBe(0);
 
-    // 第二次发同样的 orderNo → 幂等
     const res2 = await request("/commissions", {
       method: "POST",
       body: JSON.stringify(createBody),
@@ -436,10 +416,8 @@ describe("admin referral", () => {
     expect(res2.status).toBe(200);
     const body2 = (await res2.json()) as { code: number; data: { id: string } };
     expect(body2.code).toBe(0);
-    // 返回同一行
     expect(body2.data.id).toBe(body1.data.id);
 
-    // 确认 commission 表只有 1 条
     const countRows = (await state.database!.all(
       sql`SELECT COUNT(*) as cnt FROM commission WHERE order_no = 'order-manual-1'`,
     )) as Array<{ cnt: number } & { [key: string]: unknown }>;

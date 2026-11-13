@@ -1,5 +1,3 @@
-// 公开配置端点测试：白名单下发 —— 敏感键绝不出现，revenuecat_enabled 随开关出现。
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const configsState = vi.hoisted(() => ({
@@ -10,7 +8,6 @@ vi.mock("@openstarter/shared/config", () => ({
   getAllConfigs: () => Promise.resolve(configsState.map),
 }));
 
-// 绕开 admin/analytics 的传递依赖（db 等），仅本套件用不到其真实逻辑。
 vi.mock("../admin/analytics", () => ({
   getPublicAnalyticsConfig: () => Promise.resolve({}),
 }));

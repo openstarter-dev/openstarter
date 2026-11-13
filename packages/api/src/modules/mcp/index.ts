@@ -1,9 +1,3 @@
-// MCP module entry: Hono router + barrel exports.
-//
-// Endpoint: POST/GET /api/mcp (streamable HTTP, stateless). Access is API-key
-// only (`apiKeyAuth`) — browser sessions must not reach the transport. The
-// resolved userId travels to tools as `authInfo.clientId`.
-
 import { Hono } from "hono";
 
 import { apiKeyAuth } from "../../middleware/auth";

@@ -1,12 +1,3 @@
-// Property tests for the tickets service (Task 28).
-//
-// Reuses the in-memory SQLite harness in `src/test/api-test-database.ts`. The
-// committed harness DDL predates the active tickets schema (it declares legacy
-// `description` / `sender` / `message` / `ticket_no` columns that the service no
-// longer writes), so we drop & recreate the `ticket` and `ticket_message` tables
-// in-shape (matching `packages/db/src/schema/schema.sqlite.ts`) right after the
-// harness is created. No other source file is touched.
-
 import type { Database } from "@openstarter/db/server";
 import { sql } from "drizzle-orm";
 import fc from "fast-check";
@@ -90,7 +81,6 @@ describe("tickets service (P44, P45, P46)", () => {
     }
   });
 
-  // **Property 44: 工单创建产生 open 状态与首条用户消息**
   it("P44 createTicket yields an open ticket with exactly one user message carrying the provided content", async () => {
     await fc.assert(
       fc.asyncProperty(
@@ -123,7 +113,6 @@ describe("tickets service (P44, P45, P46)", () => {
     );
   });
 
-  // **Property 45: 工单状态迁移**
   it("P45 ticket transitions: fresh=open, admin reply→replied, user reply→open, status update→closed", async () => {
     const transition = fc.constantFrom<"reply-admin" | "reply-user" | "close">(
       "reply-admin",
@@ -179,7 +168,6 @@ describe("tickets service (P44, P45, P46)", () => {
     );
   });
 
-  // **Property 46: 工单访问隔离**
   it("P46 listing as a user returns only that user's tickets; listing as admin returns all seeded tickets", async () => {
     await fc.assert(
       fc.asyncProperty(

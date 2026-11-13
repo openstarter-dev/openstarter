@@ -1,8 +1,3 @@
-// Referral router composition tests — 挂载完整性回归。
-//
-// 验证 referralRouter 的四个端点通过完整组合根可达，
-// 以及 bind 的错误码路由（404/409/422）。
-
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { sql } from "drizzle-orm";
 import type { Database } from "@openstarter/db";
@@ -224,7 +219,6 @@ describe("referral router composition (mount regression)", () => {
     await insertTestUser("user-1", "ref@example.com");
     await insertTestUser("user-2", "referee@example.com");
 
-    // Pre-create referral code for user-1
     const db = state.database!;
     await db.run(
       sql`INSERT INTO referral (id, user_id, code) VALUES ('ref-1', 'user-1', 'CODE1234')`,
@@ -256,7 +250,6 @@ describe("referral router composition (mount regression)", () => {
     await db.run(
       sql`INSERT INTO referral (id, user_id, code) VALUES ('ref-1', 'user-1', 'CODE1234')`,
     );
-    // Pre-create relation for user-2
     await db.run(
       sql`INSERT INTO referral_relation (id, referrer_id, referred_user_id, code) VALUES ('rel-1', 'user-1', 'user-2', 'CODE1234')`,
     );

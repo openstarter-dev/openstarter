@@ -1,6 +1,3 @@
-// packages/api/src/modules/ai/media/utils —— AI 域内共享的纯工具（供各 provider 的入参构建复用）。
-
-/** 返回不含指定键的浅拷贝（替代 `delete`，遵循 ultracite 的「禁用 delete」）。 */
 export function omitKeys(
   obj: Record<string, unknown>,
   keys: readonly string[],
@@ -14,7 +11,6 @@ export function omitKeys(
   return result;
 }
 
-/** 回调 URL 是否可用于 webhook（http(s) 且非本地回环，供应商无法回调本地地址）。 */
 export function isValidCallbackUrl(callbackUrl?: string): boolean {
   return Boolean(
     callbackUrl &&

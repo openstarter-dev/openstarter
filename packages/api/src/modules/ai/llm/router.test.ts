@@ -1,9 +1,3 @@
-/**
- * POST /llm/chats/:id/messages 的编排测试：mock auth/plan/provider/credits/
- * service 与 @tanstack/ai 的 chat()，经 Hono 直连请求验证 AG-UI body 校验、
- * 402/502 兜底、以及「onFinish 才 settle+落库；中断/错误保留预扣」。
- */
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -64,12 +58,6 @@ type AnyMiddleware = {
   onFinish?: (ctx: unknown, info: unknown) => unknown;
 };
 
-/**
- * 模拟 chat()：产出一个文本增量事件；mode=finish 时在流内触发
- * middleware.onFinish（复刻真实 chat()「运行结束才回调」的时序）。
- * mode=abort 只产出增量、不触发任何终态钩子（对应 onAbort 路径）。
- * mode=error 产出后抛错（对应 onError 路径）。
- */
 function fakeChat(mode: "finish" | "abort" | "error", content = "答") {
   return (options: { middleware?: Array<AnyMiddleware> }) =>
     (async function* () {
@@ -99,7 +87,7 @@ async function post(body: unknown) {
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
   });
-  const text = await res.text(); // 消费完流
+  const text = await res.text();
   return { res, text };
 }
 
@@ -167,7 +155,6 @@ describe("POST /llm/chats/:id/messages", () => {
     await post(AGUI_BODY);
     expect(mocks.settleChatCredits).not.toHaveBeenCalled();
     expect(mocks.revoke).not.toHaveBeenCalled();
-    // user 消息在流前照常落库（迁移前行为）；此处断言的是 assistant 不落库。
     expect(mocks.createMessage).not.toHaveBeenCalledWith(
       expect.objectContaining({ role: "assistant" }),
     );
@@ -175,12 +162,9 @@ describe("POST /llm/chats/:id/messages", () => {
 
   it("流中途抛错（onError 路径）：不 settle、不落库、不撤销", async () => {
     mocks.chat.mockImplementation((_o: unknown) => fakeChat("error")(_o as never));
-    // 真实 chat() 的迭代期错误由 toServerSentEventsResponse 处理；此处容忍
-    // 「整体请求失败」或「200 后流截断」任一形态，只断言副作用三不发生。
     await post(AGUI_BODY).catch(() => undefined);
     expect(mocks.settleChatCredits).not.toHaveBeenCalled();
     expect(mocks.revoke).not.toHaveBeenCalled();
-    // user 消息在流前照常落库（迁移前行为）；此处断言的是 assistant 不落库。
     expect(mocks.createMessage).not.toHaveBeenCalledWith(
       expect.objectContaining({ role: "assistant" }),
     );

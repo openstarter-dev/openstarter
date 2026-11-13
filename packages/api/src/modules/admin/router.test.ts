@@ -1,16 +1,3 @@
-/**
- * Admin router composition tests — 挂载完整性回归（Task 10 review HIGH-1）。
- *
- * 背景：Task 4 曾把前台门面 `aiModelsRouter`（仅 GET）以别名误挂到 /admin/ai-models，
- * admin CRUD 子路由不可达。子路由测试直连 `adminAiModelsRouter` 发请求，绕过了聚合器，
- * 故未能捕获。本文件专门针对**组合根挂载**：经完整 `adminRouter` 断言
- * `/admin/ai-models` 上 POST/PATCH/DELETE 可达 CRUD 处理器（非 404、信封语义正确）。
- * CRUD 自身语义由 ai/catalog/router.test.ts 覆盖，此处不重复。
- *
- * 沿用 ai/catalog/router.test.ts 的 harness：x-test-user-id requireAuth mock、
- * plan-gate/rbac 透传、临时 SQLite + ai_model DDL。
- */
-
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { sql } from "drizzle-orm";
@@ -64,8 +51,6 @@ vi.mock("../../middleware/rbac", async () => {
 
 import { Hono } from "hono";
 
-// analytics/overview/tickets 子路由在本文件的作用域外（各自有守卫与依赖）；
-// 挂载断言只针对 ai-models 组合缝，其余子路由 mock 为空路由避免拉入无关依赖。
 vi.mock("./analytics/router", () => ({ analyticsRouter: new Hono() }));
 vi.mock("./overview/router", () => ({ overviewRouter: new Hono() }));
 vi.mock("./tickets/router", () => ({ adminTicketsRouter: new Hono() }));
@@ -119,7 +104,6 @@ afterAll(() => {
   state.database = undefined;
 });
 
-// 完整组合根：adminRouter 经 /admin 前缀挂载（与 packages/api/src/index.ts 一致）。
 const app = new Hono().route("/admin", adminRouter);
 
 function request(path: string, init: RequestInit = {}) {
@@ -145,7 +129,6 @@ describe("admin router composition (mount regression)", () => {
       method: "POST",
     });
 
-    // 门面误挂时此处为 404（门面仅注册 GET）；CRUD 可达时为 200 信封。
     expect(response.status).toBe(200);
     const body = (await response.json()) as { code: number; data: { modelId: string } };
     expect(body.code).toBe(0);

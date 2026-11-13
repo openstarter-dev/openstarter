@@ -1,9 +1,3 @@
-// packages/api/src/storage/r2 —— Cloudflare R2 存储 provider（对齐 ShipAny `core/storage/r2.ts`）。
-//
-// R2 为 S3 兼容端点：同样以 `aws4fetch` 的 `AwsClient`（region 固定 `auto`）做 SigV4 签名直传。
-// 相较 S3，R2 在对象键前追加可配置的 `uploadPath` 前缀，端点默认取
-// `https://<accountId>.r2.cloudflarestorage.com`（可被自定义 `endpoint` 覆盖）。
-
 import { AwsClient } from "aws4fetch";
 import type {
   StorageDownloadUploadOptions,
@@ -12,7 +6,6 @@ import type {
   StorageUploadResult,
 } from "./types";
 
-/** Cloudflare R2 配置。`accountId` 或 `endpoint` 至少其一用于定位端点。 */
 export interface R2Configs {
   accountId?: string;
   accessKeyId: string;
@@ -31,7 +24,6 @@ const DEFAULT_UPLOAD_PATH = "uploads";
 const LEADING_SLASHES = /^\/+/;
 const TRAILING_SLASHES = /\/+$/;
 
-/** Cloudflare R2 存储 provider 实现。 */
 export class R2Provider implements StorageProvider {
   readonly name = "r2";
   private readonly configs: R2Configs;
@@ -95,9 +87,6 @@ export class R2Provider implements StorageProvider {
           "Content-Disposition": options.disposition || DEFAULT_DISPOSITION,
           "Content-Length": options.body.length.toString(),
         },
-        // aws4fetch 需按字节内容计算 SigV4 签名，故必须直传 ArrayBufferView（不可用 Blob）。
-        // `Uint8Array` 在运行时即合法请求体；这里以环境声明的 RequestInit["body"] 形态收窄，
-        // 不引用 DOM 全局 `BodyInit`（无 DOM lib 的消费方如 Taro 端直读本包源码时会缺该名）。
         body: options.body as RequestInit["body"],
       });
 
@@ -157,7 +146,6 @@ export class R2Provider implements StorageProvider {
   }
 }
 
-/** 用给定配置创建 R2 provider。 */
 export function createR2Provider(configs: R2Configs): R2Provider {
   return new R2Provider(configs);
 }

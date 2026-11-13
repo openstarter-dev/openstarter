@@ -1,9 +1,3 @@
-// packages/api/src/storage/s3 —— S3 兼容存储 provider（对齐 ShipAny `core/storage/s3.ts`）。
-//
-// 以 `aws4fetch` 的 `AwsClient` 做 SigV4 请求签名 + `fetch` 直传（避免引入重型 AWS SDK，
-// 与参照实现一致）。适配任意 S3 兼容端点（AWS S3、MinIO 等）。上传/存在性检查失败时返回
-// 结构化 {@link StorageUploadResult}（`success:false` + `error`），不抛未捕获异常。
-
 import { AwsClient } from "aws4fetch";
 import type {
   StorageDownloadUploadOptions,
@@ -12,7 +6,6 @@ import type {
   StorageUploadResult,
 } from "./types";
 
-/** S3 兼容存储配置。`publicDomain` 存在时用于生成对外可访问 URL（CDN/自定义域）。 */
 export interface S3Configs {
   endpoint: string;
   region: string;
@@ -25,7 +18,6 @@ export interface S3Configs {
 const DEFAULT_CONTENT_TYPE = "application/octet-stream";
 const DEFAULT_DISPOSITION = "inline";
 
-/** S3 兼容存储 provider 实现。 */
 export class S3Provider implements StorageProvider {
   readonly name = "s3";
   private readonly configs: S3Configs;
@@ -75,9 +67,6 @@ export class S3Provider implements StorageProvider {
           "Content-Disposition": options.disposition || DEFAULT_DISPOSITION,
           "Content-Length": options.body.length.toString(),
         },
-        // aws4fetch 需按字节内容计算 SigV4 签名，故必须直传 ArrayBufferView（不可用 Blob）。
-        // `Uint8Array` 在运行时即合法请求体；这里以环境声明的 RequestInit["body"] 形态收窄，
-        // 不引用 DOM 全局 `BodyInit`（无 DOM lib 的消费方如 Taro 端直读本包源码时会缺该名）。
         body: options.body as RequestInit["body"],
       });
 
@@ -136,7 +125,6 @@ export class S3Provider implements StorageProvider {
   }
 }
 
-/** 用给定配置创建 S3 provider。 */
 export function createS3Provider(configs: S3Configs): S3Provider {
   return new S3Provider(configs);
 }

@@ -1,5 +1,3 @@
-// 分销用户端服务：推荐码管理、绑定校验（仅一级）、统计与分页查询。
-
 import { commission, referral, referralRelation } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
@@ -15,18 +13,16 @@ export const BindReferralError = {
 } as const;
 export type BindReferralError = (typeof BindReferralError)[keyof typeof BindReferralError];
 
-/** 惰性生成推荐码：首次访问时为用户建 referral 行（8 位短码，去易混字符）。 */
 export async function getOrCreateReferralCode(userId: string): Promise<string> {
   const [existing] = await db().select().from(referral).where(eq(referral.userId, userId)).limit(1);
   if (existing) return existing.code;
   const code = generateReferralCode();
   await db().insert(referral).values({ code, id: getUuid(), userId }).onConflictDoNothing();
-  // 并发下 onConflictDoNothing 可能没插入 → 回读一次
   const [row] = await db().select().from(referral).where(eq(referral.userId, userId)).limit(1);
   return row ? row.code : code;
 }
 
-const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"; // 去 0/O/1/I/L
+const CODE_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 function generateReferralCode(): string {
   let code = "";
   for (let i = 0; i < 8; i += 1) {
@@ -35,7 +31,6 @@ function generateReferralCode(): string {
   return code;
 }
 
-/** 绑定推荐关系（注册后一次）。返回 { ok: true } 或 { ok: false, error }。 */
 export async function bindReferral(params: {
   code: string;
   userId: string;
@@ -52,7 +47,6 @@ export async function bindReferral(params: {
     .limit(1);
   if (myRelation) return { error: BindReferralError.ALREADY_REFERRED, ok: false };
 
-  // 防二级：码主人自己不能有推荐人。
   const [referrerRelation] = await db()
     .select()
     .from(referralRelation)
@@ -69,7 +63,6 @@ export async function bindReferral(params: {
   return { ok: true };
 }
 
-/** 我的分销统计。 */
 export async function getMyReferralStats(userId: string): Promise<{
   pendingCredits: number;
   referredCount: number;
@@ -110,7 +103,6 @@ export interface ListCommissionsResult {
   total: number;
 }
 
-/** 分页返回当前用户的佣金流水，按创建时间倒序。 */
 export async function listMyCommissions(
   params: ListCommissionsParams,
 ): Promise<ListCommissionsResult> {
@@ -142,7 +134,6 @@ export interface ListRelationsResult {
   total: number;
 }
 
-/** 分页返回当前用户的下级关系，按创建时间倒序。 */
 export async function listMyRelations(params: ListRelationsParams): Promise<ListRelationsResult> {
   const { userId, page, pageSize } = params;
   const where = eq(referralRelation.referrerId, userId);

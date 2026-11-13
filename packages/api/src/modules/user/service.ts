@@ -1,15 +1,3 @@
-// packages/api/src/user/service —— 面向当前用户的自助数据服务（Settings_Panel 数据面，R27）。
-//
-// 汇集 Settings_Panel（任务 34）所需的、以「当前登录用户」为范围的只读查询：
-//   - 订单/支付记录（本服务 `listUserOrders`）：直接查 `order` 表（按 userId 过滤、排除软删），
-//     供「支付记录」区块分页展示；不复用 billing 的支付编排（那是写路径），仅做读投影。
-//   - 订阅状态视图、积分余额/历史、方案状态：分别复用 `@openstarter/billing`
-//     （`getSubscriptionStatusView`/`getBalance`/`getHistory`）与 `@openstarter/auth`
-//     （`getUserPlan`）的既有服务函数——本服务不重复其领域逻辑。
-//
-// 依赖分层 api → db（读投影）/ billing / auth，无反向、无环。所有查询均以路由中间件解析出的
-// `userId` 为范围，天然隔离他人数据（R27：仅本人自助数据）。
-
 import { CreditStatus, CreditTransactionType } from "@openstarter/billing-web/credits";
 import { apikey, credit, order, user as userTable } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
@@ -17,9 +5,6 @@ import { and, count, desc, eq, gt, gte, isNull, or, sql } from "drizzle-orm";
 
 export type UserOrder = typeof order.$inferSelect;
 
-// ─── 用户资料（Profile） ──────────────────────────────────────────────────────
-
-/** 客户端可见的用户资料投影：仅暴露非敏感字段。 */
 export interface UserProfile {
   createdAt: Date | null;
   email: string;
@@ -48,7 +33,6 @@ function toProfileView(row: {
   };
 }
 
-/** 读取当前用户资料；用户不存在返回 null（由路由映射 404）。 */
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
   const row = await db()
     .select(profileSelect)
@@ -59,7 +43,6 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
   return row ? toProfileView(row) : null;
 }
 
-/** 更新当前用户资料；用户不存在返回 null（由路由映射 404）。 */
 export async function updateUserProfile(
   userId: string,
   input: { name: string },
@@ -73,20 +56,17 @@ export async function updateUserProfile(
   return updated ? toProfileView(updated) : null;
 }
 
-/** 仪表盘趋势桶：某一天的授予 / 消耗积分合计。 */
 export interface DashboardTrendPoint {
   consumed: number;
   date: string;
   granted: number;
 }
 
-/** 仪表盘消费总额（按最近一笔已支付订单的币种聚合，混合币种不做跨币种求和）。 */
 export interface DashboardSpendTotal {
   currency: string;
   total: number;
 }
 
-/** 仪表盘汇总统计（GET /user/dashboard-stats）。 */
 export interface DashboardStats {
   activeApiKeys: number;
   creditsConsumed30d: number;
@@ -108,10 +88,6 @@ export interface ListUserOrdersResult {
   total: number;
 }
 
-/**
- * 分页返回当前用户的订单（支付记录），按创建时间倒序，排除软删（`deletedAt` 非空）。
- * 仅以 `userId` 为范围——不暴露他人订单（R27 自助数据隔离）。
- */
 export async function listUserOrders(params: ListUserOrdersParams): Promise<ListUserOrdersResult> {
   const { userId, page, pageSize } = params;
   const database = db();
@@ -131,23 +107,12 @@ export async function listUserOrders(params: ListUserOrdersParams): Promise<List
   return { items, total: totalRows[0]?.value ?? 0 };
 }
 
-/** 仪表盘趋势/窗口统计的天数。 */
 const DASHBOARD_WINDOW_DAYS = 30;
 
-/** 将日期归一为 `YYYY-MM-DD`（UTC），作为趋势桶的键。 */
 function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-/**
- * 仪表盘汇总统计：近 30 天积分授予/消耗、订单数与已支付消费、活跃 API Key 数，
- * 以及逐日积分趋势（30 桶，含无活动补零）。
- *
- * 全部查询均以 `userId` 为范围（与 {@link listUserOrders} 的自助数据隔离口径一致），
- * 六项聚合互不依赖，经 `Promise.all` 并行执行。积分口径复用 billing 的领域常量：
- * 授予 = `grant` + `active`；消耗 = `consume` + `active`（已撤销的消费不计入，为净消耗）。
- * 消费总额按「最近一笔已支付订单的币种」聚合，混合币种不做跨币种求和。
- */
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const database = db();
 
@@ -177,7 +142,6 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
         .select({ value: count() })
         .from(order)
         .where(and(eq(order.userId, userId), isNull(order.deletedAt), eq(order.status, "paid"))),
-      // 最近一笔已支付订单的币种（desc 限 1），消费总额按该币种聚合。
       database
         .select({ currency: order.currency })
         .from(order)
@@ -211,8 +175,6 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
         )
     : [];
 
-  // 逐日趋势桶：UTC 日粒度，窗口内无活动的日期补零，保证曲线横轴稳定。
-  // （GROUP BY 复用同一 date(...) 表达式——SQLite 不接受按列别名分组。）
   const trendRows = await database
     .select({
       bucket: sql<string>`date(${credit.createdAt} / 1000, 'unixepoch')`,

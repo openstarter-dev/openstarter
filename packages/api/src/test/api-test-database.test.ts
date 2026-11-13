@@ -12,7 +12,6 @@ import {
 const state: { database?: ReturnType<typeof createSqliteTestDb> } = {};
 
 vi.mock("@openstarter/db/server", () => ({
-  // The mocked db() returns the per-suite handle; tests overwrite state.database.
   db: () => {
     if (!state.database) {
       throw new Error("test database not initialized");

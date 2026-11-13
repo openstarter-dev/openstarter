@@ -14,7 +14,6 @@ interface Note {
   userId: string;
 }
 
-// 进程内存储（见上文存储说明）。单实例内随 userId 隔离、跨请求存活。
 const notes: Note[] = [];
 let noteIdCounter = 1;
 

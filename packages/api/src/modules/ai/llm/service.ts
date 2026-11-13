@@ -1,11 +1,3 @@
-/**
- * LLM chat service — conversation and message persistence.
- *
- * Uses the existing `chat` / `chatMessage` tables. The `chatMessage` table
- * stores message payloads in its `parts` column (JSON array of content parts,
- * per the AI SDK convention); `chat.parts` holds the accumulated context.
- */
-
 import { db } from "@openstarter/db/server";
 import { chat, chatMessage } from "@openstarter/db/schema";
 import { getUuid } from "@openstarter/shared/id";
@@ -13,12 +5,10 @@ import { and, desc, eq, sql } from "drizzle-orm";
 
 const PAGE_SIZE = 20;
 
-/** Serialize plain text into the AI SDK `parts` JSON format. */
 function toParts(text: string): string {
   return JSON.stringify([{ type: "text", text }]);
 }
 
-/** Extract plain text from the AI SDK `parts` JSON format. */
 function fromParts(parts: string | null | undefined): string {
   if (!parts) return "";
   try {
@@ -29,9 +19,6 @@ function fromParts(parts: string | null | undefined): string {
   }
 }
 
-/**
- * Create a new chat session.
- */
 export async function createChat(args: {
   userId: string;
   title?: string;
@@ -66,9 +53,6 @@ export async function createChat(args: {
   };
 }
 
-/**
- * Get a specific chat (verify ownership).
- */
 export async function getChat(args: {
   id: string;
   userId: string;
@@ -82,9 +66,6 @@ export async function getChat(args: {
   return results[0] ?? null;
 }
 
-/**
- * List user's chats with pagination.
- */
 export async function getUserChats(args: {
   userId: string;
   page: number;
@@ -113,17 +94,11 @@ export async function getUserChats(args: {
   };
 }
 
-/**
- * Delete a chat and its messages (cascade delete).
- */
 export async function deleteChat(args: { id: string; userId: string }): Promise<void> {
   const database = db();
   await database.delete(chat).where(and(eq(chat.id, args.id), eq(chat.userId, args.userId)));
 }
 
-/**
- * Update chat title and bump updatedAt.
- */
 export async function updateChat(args: {
   id: string;
   userId: string;
@@ -139,10 +114,6 @@ export async function updateChat(args: {
     .where(and(eq(chat.id, args.id), eq(chat.userId, args.userId)));
 }
 
-/**
- * Create a chat message (user or assistant).
- * Message payload is stored in the `parts` column (AI SDK JSON format).
- */
 export async function createMessage(args: {
   chatId: string;
   userId: string;
@@ -182,9 +153,6 @@ export async function createMessage(args: {
   };
 }
 
-/**
- * Get messages for a chat with pagination (newest first, reversed for display).
- */
 export async function getChatMessages(args: {
   chatId: string;
   userId: string;
@@ -229,10 +197,6 @@ export async function getChatMessages(args: {
   };
 }
 
-/**
- * Get chronological message history for AI SDK context assembly, plus the
- * total character count used for credit pre-charge estimation.
- */
 export async function getMessageHistory(args: { chatId: string; userId: string }): Promise<{
   messages: Array<{ role: "user" | "assistant"; content: string }>;
   totalChars: number;

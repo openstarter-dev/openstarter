@@ -1,11 +1,3 @@
-// packages/api/src/modules/ai/media/newapi —— New API 中转站供应商测试。
-//
-// 覆盖：
-//   - 图片（OpenAI 兼容）：url / b64_json 两种响应、base URL 归一化、saveFiles 转存；
-//   - 视频：创建任务（task_id）、查询 completed / failed、metadata 透传、saveFiles 转存；
-//   - 非 2xx → AIProviderRequestError；image 任务不走 query。
-// fetch 以 vi.stubGlobal mock，不触网。
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AIProviderRequestError } from "./errors";
@@ -98,7 +90,6 @@ describe("NewAPIProvider", () => {
   });
 
   it("base URL 只填域名时自动补 /v1；带 path 时保持原样", async () => {
-    // 每次调用返回新的 Response（同一个 Response body 只能读取一次）。
     const fetchMock = vi.fn().mockImplementation(async () => jsonResponse({ data: [] }));
     vi.stubGlobal("fetch", fetchMock);
 

@@ -1,5 +1,3 @@
-// packages/api/src/schema/admin/referral —— 分销管理端入参校验
-// （modules/admin/referral 路由与服务复用）。
 import { z } from "zod";
 
 import { paginationSchema } from "../shared";
@@ -14,7 +12,6 @@ export const commissionsQuery = paginationSchema.extend({
   status: z.string().min(1).optional(),
 });
 
-// 手动补记佣金：路由 zValidator 与服务侧 manualCreateCommission 的防御性 parse 共用。
 export const manualCreateBody = z.object({
   baseAmount: z.number().int().min(0),
   orderNo: z.string().min(1).max(64),

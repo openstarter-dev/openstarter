@@ -1,8 +1,3 @@
-/**
- * LLM chat module types — conversation and message structures.
- */
-
-/** Chat session. */
 export interface Chat {
   id: string;
   title: string;
@@ -21,13 +16,12 @@ export interface NewChat {
   userId: string;
 }
 
-/** Individual chat message. */
 export interface ChatMessage {
   id: string;
   chatId: string;
   role: "user" | "assistant";
   content: string;
-  parts?: string; // JSON, for future multimodal support
+  parts?: string;
   model?: string;
   provider?: string;
   status: "success" | "error";
@@ -46,7 +40,6 @@ export interface NewChatMessage {
   userId: string;
 }
 
-/** Streaming event from AI SDK. */
 export interface StreamEventMessage {
   type: "text" | "tool-call" | "error" | "done";
   text?: string;

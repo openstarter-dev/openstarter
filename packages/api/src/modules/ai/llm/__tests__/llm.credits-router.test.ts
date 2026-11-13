@@ -1,15 +1,3 @@
-/**
- * LLM credits router tests — chat message streaming with credit preload/settle.
- *
- * 沿用 ai/catalog/router.test.ts 的 harness：requireAuth 走 x-test-user-id header
- * mock，plan-gate 透传；`./credits` 的 preload/settle mock 为 vi.fn（计费语义由
- * credits.test.ts 覆盖，此处聚焦路由接线：预扣 402 短路、成功路径参数透传）。
- * `./provider` 的 getAdapter mock 返回装配哨兵，`@tanstack/ai` 的 chat mock 产出
- * 文本增量并在 finish 模式触发 middleware.onFinish（复刻真实 chat() 的回调时序），
- * 避免真实 LLM 装配。数据库沿用 llm.test.ts 的 in-memory SQLite harness
- * （chat / chat_message 真表）。
- */
-
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { sql } from "drizzle-orm";
@@ -38,8 +26,6 @@ vi.mock("@openstarter/db/server", async (importOriginal) => {
   };
 });
 
-// @openstarter/billing-web：revoke mock（路由的预扣撤销路径直接消费该原语；
-// consume/revoke 语义由 billing 包自身测试覆盖）。
 vi.mock("@openstarter/billing-web", () => ({
   revoke: state.revoke,
 }));
@@ -52,8 +38,6 @@ vi.mock("@openstarter/auth/server", () => ({
   createAuth: vi.fn(() => ({ api: { getSession: vi.fn(async () => null) } })),
 }));
 
-// ../../../../middleware/auth：从 x-test-user-id header 注入 userId，不做真实鉴权
-// （notes.test.ts 同款；导出形状与真实 auth.ts 一致：apiKeyAuth/authMiddleware/requireAuth）。
 vi.mock("../../../../middleware/auth", async () => {
   const { createMiddleware } = await import("hono/factory");
   const passthrough = createMiddleware<{ Variables: { session: null } }>(async (_c, next) => {
@@ -86,15 +70,11 @@ vi.mock("../credits", async (importOriginal) => {
   };
 });
 
-// ./provider：getAdapter 返回装配哨兵（含 maxTokensKey，供路由组装 modelOptions）；
-// isLLMEnabled 恒 true。
 vi.mock("../provider", () => ({
   getAdapter: state.getAdapter,
   isLLMEnabled: () => Promise.resolve(true),
 }));
 
-// @tanstack/ai：仅 mock chat（流装配），toServerSentEventsResponse 沿用真实实现
-// —— 响应头/编码语义由真实 SSE 编码器给出，fake 流只产出 TEXT_MESSAGE_CONTENT。
 vi.mock("@tanstack/ai", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@tanstack/ai")>();
   return { ...actual, chat: state.chat };
@@ -108,11 +88,6 @@ type AnyMiddleware = {
   onFinish?: (ctx: unknown, info: unknown) => unknown;
 };
 
-/**
- * 模拟 chat()：产出一个文本增量事件；mode=finish 时在流内触发
- * middleware.onFinish（复刻真实 chat()「运行结束才回调」的时序，settle 因此
- * 在响应体被消费时发生）；mode=error 产出后抛错（对应 onError 路径）。
- */
 function fakeChat(mode: "finish" | "error", content: string, totalTokens: number) {
   return (options: { middleware?: Array<AnyMiddleware> }) =>
     (async function* () {
@@ -144,7 +119,6 @@ function sendMessage(path: string, init: RequestInit = {}) {
   });
 }
 
-/** AG-UI 请求体（TanStack useChat 经 fetchServerSentEvents 的 wire 格式）。 */
 function jsonInit(chatId: string, content: string): RequestInit {
   return {
     body: JSON.stringify({
@@ -245,10 +219,8 @@ describe("POST /llm/chats/:id/messages — credit wiring", () => {
     expect(response.status).toBe(402);
     const body = (await response.json()) as { code: number; message: string; data: unknown };
     expect(body.message).toBe("insufficient credits");
-    // respErr 不携带 data 字段（ApiResponse.data 可选，失败时省略）。
     expect(body.data).toBeUndefined();
 
-    // 预扣失败必须短路在 user 消息落库之前 —— 历史仅含 seed 的 1 条。
     const history = await state.database
       ?.select()
       .from((await import("@openstarter/db/schema")).chatMessage);
@@ -283,7 +255,6 @@ describe("POST /llm/chats/:id/messages — credit wiring", () => {
       historyChars: expect.any(Number),
     });
 
-    // user 消息在预扣成功后落库（流前，与迁移前一致）。
     const history = await state.database
       ?.select()
       .from((await import("@openstarter/db/schema")).chatMessage);
@@ -304,17 +275,14 @@ describe("POST /llm/chats/:id/messages — credit wiring", () => {
 
     const response = await sendMessage(`/llm/chats/${chatId}/messages`, jsonInit(chatId, "hi"));
     expect(response.status).toBe(200);
-    // 消费响应体以驱动 fake 流 —— settle 在流内 onFinish 触发（真实时序）。
     await response.text();
 
-    // 输出封顶按目录 maxTokensKey 组装进 modelOptions（目录值优先）。
     expect(state.chat).toHaveBeenCalledTimes(1);
     const chatArgs = state.chat.mock.calls[0]?.[0] as {
       modelOptions?: Record<string, unknown>;
     };
     expect(chatArgs.modelOptions).toEqual({ max_tokens: 2048 });
 
-    // onFinish 冲账：整包透传预扣归属 + 实际用量（FinishInfo.usage.totalTokens）。
     expect(state.settleChatCredits).toHaveBeenCalledTimes(1);
     expect(state.settleChatCredits).toHaveBeenCalledWith({
       consumedCreditId: "c2",
@@ -324,7 +292,6 @@ describe("POST /llm/chats/:id/messages — credit wiring", () => {
       model: "gpt-4o-mini",
     });
 
-    // 冲账失败不得向已完成的流抛错（仅 warn，流已 200）。
     state.settleChatCredits.mockRejectedValueOnce(new Error("settle boom"));
     const chatId2 = await seedChatWithHistory();
     state.preloadChatCredits.mockResolvedValue({
@@ -353,7 +320,6 @@ describe("POST /llm/chats/:id/messages — credit wiring", () => {
     expect(body.code).toBe(-1);
     expect(body.message).toBe("OpenAI API key not configured (openai_api_key)");
 
-    // 预扣已撤销（资金不悬空）；流未装配、结算未发生。
     expect(state.revoke).toHaveBeenCalledTimes(1);
     expect(state.revoke).toHaveBeenCalledWith({ consumeCreditId: "c-late-fail" });
     expect(state.settleChatCredits).not.toHaveBeenCalled();

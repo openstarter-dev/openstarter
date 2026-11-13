@@ -1,11 +1,3 @@
-// packages/api/src/modules/ai/media/replicate —— Replicate 供应商（主，对齐 ShipAny `core/ai/replicate.ts`，R19.1/R19.2）。
-//
-// 与参照实现的差异：改用 `fetch` 直连 Replicate REST API（对齐 ShipAny 其余供应商 fal/kie/gemini
-// 的 fetch 风格、避免过重 SDK 依赖），保留其 generate/query/formatInput/mapStatus 的行为语义。
-//   - 创建预测（模型态）：POST {baseUrl}/models/{owner}/{name}/predictions
-//   - 查询预测：GET {baseUrl}/predictions/{id}
-// 成功且启用自定义存储（注入了 saveFiles）时，产出的图片/视频经注入回调转存到对象存储并回写 URL。
-
 import { getUuid } from "@openstarter/shared/id";
 import { AIProviderRequestError } from "./errors";
 import { persistMediaFiles } from "./save-files";
@@ -23,24 +15,15 @@ import { isValidCallbackUrl, omitKeys } from "./utils";
 
 const DEFAULT_BASE_URL = "https://api.replicate.com/v1";
 
-/** 图片输入需重映射为 `input_images` 的模型。 */
 const FLUX_MODELS: readonly string[] = ["black-forest-labs/flux-2-pro"];
-/** 图片输入需重映射为 `reference_images` 的模型。 */
 const VEO_MODELS: readonly string[] = ["google/veo-3.1"];
-/** 图片输入需重映射为 `input_reference`、时长重映射为 `seconds` 的模型。 */
 const SORA_MODELS: readonly string[] = ["openai/sora-2"];
 
-/**
- * Replicate 配置。`apiToken` 为必填凭证；`baseUrl` 可覆盖默认端点。
- * `saveFiles`/`uuid`/`customStorage` 为可注入项（见 {@link AIProviderInjection}）。
- * @docs https://replicate.com/
- */
 export interface ReplicateConfigs extends AIProviderInjection {
   apiToken: string;
   baseUrl?: string;
 }
 
-/** Replicate 预测响应（仅提取本域关心的字段，其余保留在 taskResult 原样回传）。 */
 interface ReplicatePrediction {
   id: string;
   status: string;
@@ -49,7 +32,6 @@ interface ReplicatePrediction {
   created_at?: string;
 }
 
-/** 把 Replicate 的 output（string | string[]）归一化为 URL 数组。 */
 function extractUrls(output: unknown): string[] {
   if (Array.isArray(output)) {
     return output.filter((item): item is string => typeof item === "string");
@@ -60,10 +42,6 @@ function extractUrls(output: unknown): string[] {
   return [];
 }
 
-/**
- * Replicate 供应商。异步型：`generate` 创建预测返回任务句柄（PENDING），`query` 轮询结果。
- * @docs https://replicate.com/
- */
 export class ReplicateProvider implements AIProvider {
   readonly name = "replicate";
   private readonly configs: ReplicateConfigs;
@@ -224,7 +202,6 @@ export class ReplicateProvider implements AIProvider {
     }
   }
 
-  /** 把归一化 options 翻译为 Replicate 原生 input，并按模型重映射图片输入/时长键。 */
   private formatInput(args: {
     model: string;
     prompt: string;

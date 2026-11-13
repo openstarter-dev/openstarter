@@ -32,7 +32,6 @@ describe("RBAC middleware properties", () => {
           );
           app.get(
             "/protected",
-            // 判定器恒返回“无权限”，覆盖任意 resource/action 组合下的拒绝语义。
             createRequirePermission(requiredPermission, async () => false),
             routeHandler,
           );

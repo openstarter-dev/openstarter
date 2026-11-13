@@ -1,8 +1,3 @@
-// Profile-domain MCP tools: identity, subscription status, and credit ledger.
-//
-// All reads are scoped to the authenticated user resolved from the request
-// context — tool arguments never influence whose data is returned.
-
 import { getUserPlan } from "@openstarter/auth";
 import { getBalance, getHistory, getSubscriptionStatusView } from "@openstarter/billing-web";
 import { user as userTable } from "@openstarter/db/schema";

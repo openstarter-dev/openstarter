@@ -1,12 +1,7 @@
-// 笔记路由集成测试：mock requireAuth 直接注入 userId，绕过 Better Auth / API Key，
-// 验证信封结构、按用户隔离、创建→列出→获取的完整闭环（进程序内存存储）。
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// 校验 note id 形如 `note_<数字>`。顶层声明，避免 useTopLevelRegex。
 const NOTE_ID_PATTERN = /^note_\d+$/;
 
-// mock 中间件：requireAuth 只把 userId 写入 context，不做真实鉴权。
 vi.mock("../../middleware/auth", async () => {
   const { createMiddleware } = await import("hono/factory");
   const requireAuth = createMiddleware<{
@@ -65,7 +60,6 @@ describe("notes routes", () => {
   });
 
   it("GET /notes lists notes scoped to the requesting user", async () => {
-    // 用专属 userId 创建两条，用另一 userId 创建一条，确认隔离。
     await request("/notes", {
       body: JSON.stringify({ name: "A" }),
       headers: { "content-type": "application/json" },
@@ -88,7 +82,6 @@ describe("notes routes", () => {
 
     expect(body.code).toBe(0);
     expect(Array.isArray(body.data)).toBe(true);
-    // 返回项必须全部属于 iso-user，绝不包含 other-user 的笔记。
     for (const note of body.data as Array<{ userId: string }>) {
       expect(note.userId).toBe("iso-user");
     }
@@ -108,7 +101,6 @@ describe("notes routes", () => {
       headers: { "content-type": "application/json" },
       method: "POST",
     });
-    // @hono/zod-validator 默认在 body 校验失败时返回 400
     expect([400, 422]).toContain(response.status);
   });
 });

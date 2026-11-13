@@ -1,10 +1,3 @@
-// In-memory SQLite test harness shared by packages/api property tests.
-//
-// Returns a createDb()-backed handle with all 22 Phase 0-5 tables pre-created
-// (sqlite shapes). Test code then mocks `@openstarter/db/server` to route `db()`
-// to this instance. Each test file owns a fresh database file so the fast-check
-// iterations cannot bleed state between rows.
-
 import { rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -229,12 +222,6 @@ const removeDatabaseFiles = (path: string) => {
   rmSync(`${path}-wal`, { force: true });
 };
 
-/**
- * Create a per-suite sqlite database with the 10 Phase 0-5 tables used by
- * api property tests (subscription, order, credit, ai_task, ticket,
- * ticket_message, post, taxonomy, apikey, user). Tests that only need a subset
- * may seed only the rows they require.
- */
 export const createApiTestDatabase = async (suiteName: string) => {
   const databasePath = join(tmpdir(), `openstarter-api-${process.pid}-${suiteName}.sqlite`);
   removeDatabaseFiles(databasePath);
@@ -262,7 +249,6 @@ export const resetApiTestDatabase = (database: Database) =>
     ),
   );
 
-/** Insert a single user row with sensible defaults; tests override only what they assert on. */
 export const insertUser = async (
   database: Database,
   overrides: Partial<{

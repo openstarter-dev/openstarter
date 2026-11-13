@@ -1,13 +1,3 @@
-/**
- * AI model catalog service tests — in-memory SQLite with the local DDL pattern.
- *
- * Reuses the `vi.mock("@openstarter/db/server")` + in-file `CREATE TABLE`
- * harness from `modules/ai/llm/__tests__/llm.test.ts`. The `ai_model` DDL mirrors
- * the Task 2 sqlite schema (snake_case columns + the
- * `uq_ai_model_provider_model` unique index). Provider availability is mocked
- * at both seams: `../llm/provider` (LLM side) and `../ai/manager` (media side).
- */
-
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { sql } from "drizzle-orm";
@@ -119,7 +109,6 @@ describe("AI Catalog Service", () => {
         mediaType: "video",
         creditPrice: 20,
       });
-      // Enabled filter: a disabled model must not appear even if its provider is available.
       await createModel({
         provider: "openai",
         modelId: "o3-mini",
@@ -129,7 +118,6 @@ describe("AI Catalog Service", () => {
         enabled: false,
       });
 
-      // fal 未装配 → 不可用；openai/replicate 可用
       const grouped = await listAvailableModelsByMediaType();
 
       expect(grouped.text.map((m) => m.modelId)).toEqual(["gpt-4o-mini"]);
@@ -143,7 +131,6 @@ describe("AI Catalog Service", () => {
 
   describe("createModel", () => {
     it("rejects duplicate provider+modelId", async () => {
-      // Unique key: gpt-4o-mini already exists from the grouping test (shared in-file DB).
       await createModel({
         provider: "openai",
         modelId: "dup-check",

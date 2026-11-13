@@ -1,13 +1,3 @@
-// Property tests for the AI tasks service (Task 27).
-//
-// Reuses the in-memory SQLite harness in `src/test/api-test-database.ts`. The
-// committed harness DDL for `ai_task` predates the active schema (it declares
-// legacy `task_no` / `user_email` / `result_url` / `error` columns the service no
-// longer writes and omits `scene` / `task_id` / `task_info` / `task_result` the
-// service now writes), so we drop & recreate the `ai_task` table in-shape
-// (matching `packages/db/src/schema/schema.sqlite.ts`) right after the harness
-// is created. No other source file is touched.
-
 import { grant } from "@openstarter/billing-web";
 import { aiTask, credit } from "@openstarter/db/schema";
 import { type Database, db } from "@openstarter/db/server";
@@ -42,7 +32,6 @@ vi.mock("@openstarter/db/server", async (importOriginal) => {
 
 const NOW_EXPR = "(cast((julianday('now') - 2440587.5)*86400000 as integer))";
 
-// Reshape `ai_task` to match the drizzle sqlite schema (see header comment).
 const RESHAPE_AI_TASK: readonly string[] = [
   "DROP TABLE IF EXISTS ai_task",
   `CREATE TABLE ai_task (
@@ -107,7 +96,6 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
     }
   });
 
-  /** Property 39: AI task creation atomically consumes credits */
   it("P39 for balance >= cost > 0, createTask persists a pending task, stores the consume record id in creditId, and drops the balance by exactly cost", async () => {
     await fc.assert(
       fc.asyncProperty(
@@ -172,7 +160,6 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
     );
   });
 
-  /** Property 40: Insufficient credits rolls back task creation entirely */
   it("P40 for cost > balance >= 0, createTask rejects with InsufficientCreditsError and leaves no ai_task row and balance unchanged", async () => {
     await fc.assert(
       fc.asyncProperty(
@@ -194,7 +181,6 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
               userId,
             });
           }
-          // Guarantee the cost strictly exceeds the available balance.
           const effectiveCost = costCredits + grantedBalance + 1;
 
           const balanceBefore = await sumRemainingCredits(userId);
@@ -223,7 +209,6 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
     );
   });
 
-  /** Property 41: Task failure revokes already-consumed credits */
   it("P41 for a pending task with cost > 0, updateTask to failed revokes the prior consume and restores the balance to the pre-task level", async () => {
     await fc.assert(
       fc.asyncProperty(
@@ -281,7 +266,6 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
     );
   });
 
-  /** Property 42: Task success retains the credit deduction */
   it("P42 for a pending task with cost > 0, updateTask to success leaves the consume record active and the balance at the post-deduction level", async () => {
     await fc.assert(
       fc.asyncProperty(
@@ -346,7 +330,6 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
     );
   });
 
-  /** Property 43: AI task pagination/filter consistency */
   it("P43 varied userId/mediaType/status seeding yields consistent getTasks filters by userId, mediaType, and status", async () => {
     await fc.assert(
       fc.asyncProperty(

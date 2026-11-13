@@ -1,9 +1,3 @@
-/**
- * provider 适配解析测试 — 纯函数 resolveAdapterSpec 覆盖各供应商的
- * 密钥/baseURL/max-token 键映射；getAdapter 只做实例化冒烟。
- * getAllConfigs 打桩为进程内对象，不触 DB。
- */
-
 import { describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({

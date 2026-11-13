@@ -1,11 +1,3 @@
-// packages/api/src/modules/ai/media/fal —— Fal 供应商（对齐 ShipAny `core/ai/fal.ts`，R19.1/R19.2）。
-//
-// 与参照实现一致以 `fetch` 直连 Fal 队列 API：
-//   - 创建任务：POST {baseUrl}/{model}（可选 ?fal_webhook=）→ 返回 request_id 作为任务句柄。
-//   - 查询状态：GET {baseUrl}/{model}/requests/{id}/status
-//   - 拉取结果：GET {baseUrl}/{model}/requests/{id}
-// 成功且启用自定义存储时，产出的图片/视频经注入回调转存到对象存储并回写 URL。
-
 import { getUuid } from "@openstarter/shared/id";
 import { AIProviderRequestError } from "./errors";
 import { persistMediaFiles } from "./save-files";
@@ -23,13 +15,8 @@ import { isValidCallbackUrl, omitKeys } from "./utils";
 
 const DEFAULT_BASE_URL = "https://queue.fal.run";
 
-/** 图片输入需重映射为 `input_images` 的模型（其余映射为 `image_url`）。 */
 const KLING_EDIT_MODELS: readonly string[] = ["fal-ai/kling-video/o1/video-to-video/edit"];
 
-/**
- * Fal 配置。`apiKey` 为必填凭证；`saveFiles`/`uuid`/`customStorage` 为可注入项。
- * @docs https://fal.ai/
- */
 export interface FalConfigs extends AIProviderInjection {
   apiKey: string;
 }
@@ -52,10 +39,6 @@ interface FalResultResponse {
   images?: FalMediaItem[];
 }
 
-/**
- * Fal 供应商。异步型：`generate` 入队返回 request_id（PENDING），`query` 轮询状态与结果。
- * @docs https://fal.ai/
- */
 export class FalProvider implements AIProvider {
   readonly name = "fal";
   private readonly configs: FalConfigs;
@@ -208,7 +191,6 @@ export class FalProvider implements AIProvider {
     };
   }
 
-  /** 从结果响应中按媒体类型提取图片或视频。 */
   private extractMedia(args: {
     data: FalResultResponse;
     mediaType?: AIMediaType;
@@ -259,7 +241,6 @@ export class FalProvider implements AIProvider {
     }
   }
 
-  /** 查询用模型标识：取 `owner/name`（去除更深路径段）。 */
   private getQueryModel(model?: string): string {
     if (!model) {
       return "";
@@ -271,7 +252,6 @@ export class FalProvider implements AIProvider {
     return `${parts[0]}/${parts[1]}`;
   }
 
-  /** 把归一化 options 翻译为 Fal 原生 input，并重映射图片/视频输入键。 */
   private formatInput(args: {
     model: string;
     prompt: string;

@@ -1,5 +1,3 @@
-// Chat MCP tools: read-only access to the caller's LLM conversations.
-
 import type { McpServer } from "@modelcontextprotocol/server";
 
 import { getChat, getChatMessages, getUserChats } from "../../ai/llm/service";

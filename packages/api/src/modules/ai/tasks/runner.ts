@@ -1,15 +1,3 @@
-// packages/api/src/modules/ai/tasks/runner —— 生成任务的运行时编排。
-//
-// 串起「供应商解析 → 服务端定价 → 建任务（原子扣费）→ 派发 → 结果/状态回写」，
-// 供路由层直接消费；路由只保留鉴权、入参校验与状态码映射（不再内联这些步骤）。
-//
-// 价格口径（Task 7）：目录优先 —— 已定价条目（creditPrice > 0）覆盖 mediaType
-// 配置价；目录未命中 / 0 价 / 查询失败一律回退 `ai_credits_cost_<mediaType>`，
-// 再回退 `ai_credits_cost`。
-//
-// 失败语义：配置态不可用（供应商未启用/凭证缺失）与运行态供应商错误分列，
-// 由 {@link StartTaskOutcome.reason} 区分，路由据此映射 502/503/402。
-
 import type { AiTask } from "@openstarter/db/schema";
 import { getAllConfigs } from "@openstarter/shared/config";
 
@@ -35,9 +23,6 @@ const TERMINAL_STATUSES: ReadonlySet<string> = new Set([
   AITaskStatus.CANCELED,
 ]);
 
-// ─── 供应商与定价 ──────────────────────────────────────────────────────────────
-
-/** 解析可用的供应商名：显式指定优先，否则默认渠道；不可用返回 null（不抛错）。 */
 export async function resolveAvailableProviderName(requested?: string): Promise<string | null> {
   const manager = await getAIManager();
   const name = requested ?? manager.getDefaultProvider()?.name;
@@ -47,7 +32,6 @@ export async function resolveAvailableProviderName(requested?: string): Promise<
   return manager.getProvider(name) ? name : null;
 }
 
-/** 解析本次生成的扣费额度：目录价优先，回退配置价（非法/缺省按 0 处理）。 */
 export async function resolveTaskCostCredits(
   mediaType: string,
   provider?: string,
@@ -70,7 +54,6 @@ export async function resolveTaskCostCredits(
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
-// ─── 状态回写 ────────────────────────────────────────────────────────────────
 
 function markTaskFailed(id: string, errorMessage: string): Promise<void> {
   return updateTask({
@@ -90,7 +73,6 @@ function persistDispatchData(id: string, data: AITaskResult): Promise<void> {
   });
 }
 
-/** 派发阶段的失败原因：配置态不可用（503）与运行态供应商错误（502）分列。 */
 type DispatchFailure = "provider_runtime_error" | "provider_unavailable";
 
 type GenerationOutcome = { ok: true } | { message: string; ok: false; reason: DispatchFailure };
@@ -120,7 +102,6 @@ async function runGeneration(
   return { ok: true };
 }
 
-// ─── 对外编排 ────────────────────────────────────────────────────────────────
 
 export type StartTaskFailure = DispatchFailure | "insufficient_credits";
 
@@ -137,11 +118,6 @@ export interface StartGenerationTaskParams {
   userId: string;
 }
 
-/**
- * 建任务并派发：余额不足 → `insufficient_credits`（任务不落库、积分不扣）；
- * 供应商配置态不可用 → `provider_unavailable`；派发运行态失败 → 任务置失败并
- * 撤销扣费（`provider_runtime_error`）。
- */
 export async function startGenerationTask(
   params: StartGenerationTaskParams,
 ): Promise<StartTaskOutcome> {
@@ -186,10 +162,6 @@ export async function startGenerationTask(
   return { ok: true, task: updated ?? task };
 }
 
-/**
- * 查询前刷新任务状态：已终态或无供应商任务句柄时原样返回；否则回查供应商并
- * 回写结果。供应商查询失败按「保持原状」处理（不把临时故障写成任务失败）。
- */
 export async function refreshTask(task: AiTask): Promise<AiTask> {
   if (!task.taskId || TERMINAL_STATUSES.has(task.status)) {
     return task;

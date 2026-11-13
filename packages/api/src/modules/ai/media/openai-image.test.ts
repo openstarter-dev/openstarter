@@ -1,17 +1,9 @@
-// packages/api/src/modules/ai/media/openai-image —— OpenAI 生图供应商测试（Task 11）。
-//
-// 同步型供应商（无 query）：POST {baseUrl}/images/generations，响应 data:[{b64_json}]
-// → data URL → persistMediaFiles（注入 saveFiles 时转存回写，未注入时原样返回 data URL）。
-// fetch 以 vi.stubGlobal mock，覆盖：成功转存、非 2xx 抛 AIProviderRequestError、
-// mediaType 非 image 抛错、options.n 限 1-4。
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AIProviderRequestError } from "./errors";
 import { AIMediaType, AITaskStatus, type AIGenerateParams } from "./types";
 import { OpenAIImageProvider, type OpenAIImageConfigs } from "./openai-image";
 
-/** 构造 OpenAI images/generations 成功响应（n 张 b64_json）。 */
 function generationsResponse(b64List: readonly string[]): Response {
   return new Response(JSON.stringify({ data: b64List.map((b64_json) => ({ b64_json })) }), {
     status: 200,
@@ -67,7 +59,6 @@ describe("OpenAIImageProvider", () => {
     expect(saveFiles).toHaveBeenCalledTimes(1);
     const savedFiles = (saveFiles.mock.calls[0]?.[0] ?? []) as Array<{ url: string; key: string }>;
     expect(savedFiles).toHaveLength(2);
-    // 待转存 URL 为 data URL（b64_json → data:image/png;base64,...）。
     expect(savedFiles[0]?.url).toBe("data:image/png;base64,AAAA");
     expect(savedFiles[1]?.url).toBe("data:image/png;base64,BBBB");
 

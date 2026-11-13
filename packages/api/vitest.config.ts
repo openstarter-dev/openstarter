@@ -5,7 +5,6 @@ export default defineProject({
     environment: "node",
     include: ["src/**/*.test.ts"],
     name: "api",
-    // Property tests can be CPU-bound under workspace-wide Turbo concurrency.
     testTimeout: 30_000,
   },
 });

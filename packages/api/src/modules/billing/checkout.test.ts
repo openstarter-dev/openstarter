@@ -1,9 +1,5 @@
-// 结账路由集成测试：mock requireAuth 注入 userId、mock createCheckout 捕获入参，
-// 验证「价格只由服务端产品目录决定」——客户端传入的 amount/credits 等字段一律被忽略。
-
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// mock 中间件：requireAuth 只把 userId 写入 context，不做真实鉴权。
 vi.mock("../../middleware/auth", async () => {
   const { createMiddleware } = await import("hono/factory");
   const requireAuth = createMiddleware<{
@@ -16,7 +12,6 @@ vi.mock("../../middleware/auth", async () => {
   return { requireAuth };
 });
 
-// mock 支付编排：捕获 createCheckout 收到的完整入参。
 const createCheckoutMock = vi.hoisted(() => vi.fn());
 vi.mock("@openstarter/billing-web/payment", async () => {
   const actual = await vi.importActual<typeof import("@openstarter/billing-web/payment")>(
@@ -53,7 +48,6 @@ beforeEach(() => {
 describe("POST /checkout", () => {
   it("derives price and credits from the server-side catalog, ignoring client values", async () => {
     const response = await request({
-      // 客户端伪造的金额/积分：必须被完全忽略。
       amount: 1,
       credits: 999_999,
       creditsValidDays: 9999,
@@ -98,8 +92,6 @@ describe("POST /checkout", () => {
     const response = await request({ productId: "made_up_product" });
 
     expect(response.status).toBe(400);
-    // billingRouter 独立请求时 HTTPException 以纯文本返回 message；
-    // 挂载到主 app 后由 onError 包装为统一信封。
     const text = await response.text();
     expect(text).toContain("unknown product");
     expect(createCheckoutMock).not.toHaveBeenCalled();

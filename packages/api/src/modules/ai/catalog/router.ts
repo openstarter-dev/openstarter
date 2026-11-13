@@ -1,18 +1,3 @@
-/**
- * AI model catalog routes — 前台门面 + admin CRUD（Task 4）。
- *
- * - `aiModelsRouter`：`GET /ai/models` 门面端点，挂载于组合根 "/" 下，经 basePath
- *   暴露为 `GET /api/ai/models`（`client.api.ai.models.$get()`）。requireAuth +
- *   requirePlan("member")，返回 Task 3 {@link listAvailableModelsByMediaType} 的
- *   五键分组（仅 enabled 且 provider 可用的模型）。
- * - `adminAiModelsRouter`：admin 侧目录 CRUD，经 admin/router.ts 挂载为
- *   `/api/admin/ai-models*`。`.use(requireAuth).use(requirePermission("admin.*"))`
- *   与 rbac/overview 等子路由一致，自包含、可独立测试。
- *
- * 错误语义沿用仓库约定：重复 (provider, modelId) 转 409 信封、目标缺失 404、
- * zValidator 校验失败 400，其余错误上抛交由 app.onError 统一处理。
- */
-
 import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
@@ -36,7 +21,6 @@ const NOT_FOUND_STATUS = 404;
 
 const PERMISSION_ADMIN = "admin.*";
 
-/** 前台门面：按媒体类型分组的可用模型目录。 */
 export const aiModelsRouter = new Hono().get(
   "/ai/models",
   requireAuth,
@@ -47,7 +31,6 @@ export const aiModelsRouter = new Hono().get(
   },
 );
 
-/** admin 目录 CRUD：GET/POST /ai-models + PATCH/DELETE /ai-models/:id。 */
 export const adminAiModelsRouter = new Hono()
   .use(requireAuth)
   .use(requirePermission(PERMISSION_ADMIN))

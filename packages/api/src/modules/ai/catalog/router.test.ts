@@ -1,11 +1,3 @@
-/**
- * AI model catalog router tests — facade endpoint + admin CRUD.
- *
- * 沿用 notes.test.ts 的 requireAuth mock（x-test-user-id header）；plan-gate 与
- * rbac 守卫 mock 为透传中间件（守卫语义由各自中间件测试覆盖）。数据库沿用本目录
- * service.test.ts 的 in-memory SQLite harness —— CRUD 断言走真实 service 实现。
- */
-
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { sql } from "drizzle-orm";
@@ -29,7 +21,6 @@ vi.mock("@openstarter/db/server", async (importOriginal) => {
   };
 });
 
-// Provider 可用性双侧 seam：LLM 侧 openai，媒体侧 replicate；fal 未装配（不可用）。
 vi.mock("../llm/provider", () => ({
   getAvailableProviders: () => Promise.resolve(["openai"]),
 }));
@@ -38,7 +29,6 @@ vi.mock("../media/manager", () => ({
   getAIManager: () => Promise.resolve({ getProviderNames: () => ["replicate"] }),
 }));
 
-// requireAuth：从 x-test-user-id header 注入 userId，不做真实鉴权（notes.test.ts 同款）。
 vi.mock("../../../middleware/auth", async () => {
   const { createMiddleware } = await import("hono/factory");
   const requireAuth = createMiddleware<{
@@ -51,7 +41,6 @@ vi.mock("../../../middleware/auth", async () => {
   return { requireAuth };
 });
 
-// requirePlan / requirePermission：透传中间件（拒绝语义由中间件自身测试覆盖）。
 vi.mock("../../../middleware/plan-gate", async () => {
   const { createMiddleware } = await import("hono/factory");
   const passthrough = createMiddleware(async (_c, next) => {
@@ -141,7 +130,6 @@ function jsonInit(method: string, body: unknown): RequestInit {
 }
 
 describe("GET /ai/models facade", () => {
-  // 本 describe 先于 admin CRUD 执行（文件内顺序执行），此时 music/video/speech 无数据。
   it("returns the five-key grouped envelope with enabled + available models only", async () => {
     await createModel({
       provider: "openai",
@@ -157,7 +145,6 @@ describe("GET /ai/models facade", () => {
       mediaType: "image",
       creditPrice: 5,
     });
-    // disabled：provider 可用也不得出现。
     await createModel({
       provider: "openai",
       modelId: "facade-disabled",
@@ -166,7 +153,6 @@ describe("GET /ai/models facade", () => {
       creditPrice: 2,
       enabled: false,
     });
-    // fal 未装配 → 不可用，不得出现。
     await createModel({
       provider: "fal",
       modelId: "facade-seedance",
@@ -219,7 +205,6 @@ describe("admin AI model CRUD", () => {
     expect(body.data.provider).toBe("openai");
     expect(body.data.modelId).toBe("admin-gpt");
     expect(body.data.creditPrice).toBe(3);
-    // createBody 缺省字段应用默认值。
     expect(body.data.enabled).toBe(true);
     expect(body.data.sortOrder).toBe(0);
     expect(body.data.id).toBeTruthy();
@@ -270,7 +255,6 @@ describe("admin AI model CRUD", () => {
     expect(filteredBody.data.items).toHaveLength(2);
     expect(filteredBody.data.items.every((m) => m.mediaType === "speech")).toBe(true);
 
-    // 分页切片：pageSize=1 仍上报过滤后的完整 total。
     const paged = await adminRequest("/?mediaType=speech&page=2&pageSize=1");
     expect(paged.status).toBe(200);
     const pagedBody = (await paged.json()) as {
@@ -320,7 +304,6 @@ describe("admin AI model CRUD", () => {
     expect(body.code).toBe(0);
     expect(body.data.enabled).toBe(false);
     expect(body.data.displayName).toBe("Patched Target");
-    // 未提交的字段不得被重置为默认值。
     expect(body.data.creditPrice).toBe(7);
   });
 
@@ -348,7 +331,6 @@ describe("admin AI model CRUD", () => {
     const body = (await response.json()) as { code: number; message: string };
     expect(body).toEqual({ code: 0, message: "ok" });
 
-    // 删除真实生效：再次 PATCH 该 id 返回 404。
     const gone = await adminRequest(`/${created.id}`, jsonInit("PATCH", { enabled: true }));
     expect(gone.status).toBe(404);
   });

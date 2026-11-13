@@ -25,7 +25,6 @@ import {
 
 const PERMISSION_ADMIN = "admin.*";
 
-// ─── Router ───────────────────────────────────────────────────────────────────
 
 export const referralAdminRouter = new Hono()
   .use(requireAuth)

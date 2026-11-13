@@ -19,13 +19,11 @@ import { createBody, listQuery, updateBody } from "../../../schema/content/taxon
 const SLUG_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
 
-// 权限码（`resource.action`）。与通配符 RBAC 约定一致：授予 `taxonomy.*` 或 `*` 即可通行。
 const PERMISSION_READ = "taxonomy.read";
 const PERMISSION_CREATE = "taxonomy.create";
 const PERMISSION_UPDATE = "taxonomy.update";
 const PERMISSION_DELETE = "taxonomy.delete";
 
-/** slug 唯一冲突转 409（交由 app.onError 统一返回结构化 respErr）；其余错误原样上抛。 */
 function rethrowAsHttp(err: unknown): never {
   if (err instanceof SlugConflictError) {
     throw new HTTPException(SLUG_CONFLICT_STATUS, { message: err.message });

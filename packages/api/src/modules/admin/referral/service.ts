@@ -1,5 +1,3 @@
-// 分销管理端服务：结算/作废/补记/代理比例/列表/配置读写。
-
 import { and, count, desc, eq } from "drizzle-orm";
 import type { z } from "zod";
 
@@ -18,7 +16,6 @@ import { db } from "@openstarter/db/server";
 
 import { manualCreateBody } from "../../../schema/admin/referral";
 
-// ─── 结算（Settle） ────────────────────────────────────────────────────────────
 
 export async function settleCommission(params: {
   adminUserId: string;
@@ -69,7 +66,6 @@ export async function settleCommission(params: {
   }
 }
 
-// ─── 作废（Void） ──────────────────────────────────────────────────────────────
 
 export async function voidCommission(params: {
   commissionId: string;
@@ -93,7 +89,6 @@ export async function voidCommission(params: {
   return { ok: true };
 }
 
-// ─── 手动补记（Manual Create） ────────────────────────────────────────────────
 
 export async function manualCreateCommission(
   input: unknown,
@@ -101,7 +96,6 @@ export async function manualCreateCommission(
   const body = manualCreateBody.parse(input);
   const id = getUuid();
 
-  // 幂等：onConflictDoNothing(orderNo)，已存在时回读当前行
   const [inserted] = await db()
     .insert(commission)
     .values({
@@ -123,7 +117,6 @@ export async function manualCreateCommission(
     return { ok: true, data: { id: inserted.id } };
   }
 
-  // 已存在：回读当前行
   const [existing] = await db()
     .select()
     .from(commission)
@@ -132,7 +125,6 @@ export async function manualCreateCommission(
   return { ok: true, data: { id: existing!.id } };
 }
 
-// ─── 代理比例（Custom Rate） ───────────────────────────────────────────────────
 
 export async function setCustomRate(params: {
   userId: string;
@@ -140,7 +132,6 @@ export async function setCustomRate(params: {
 }): Promise<{ ok: boolean }> {
   const { userId, customRate } = params;
 
-  // 无 referral 行则先建
   const [existing] = await db().select().from(referral).where(eq(referral.userId, userId)).limit(1);
 
   if (!existing) {
@@ -165,7 +156,6 @@ function generateReferralCode(): string {
   return code;
 }
 
-// ─── 列表查询 ──────────────────────────────────────────────────────────────────
 
 export interface ListCommissionsParams {
   page: number;
@@ -224,7 +214,6 @@ export async function listRelations(params: ListRelationsParams): Promise<ListRe
   return { items, total: Number(totalRows[0]?.value ?? 0) };
 }
 
-// ─── 配置读写 ──────────────────────────────────────────────────────────────────
 
 export async function getReferralConfigForAdmin(): Promise<ReferralConfigResult> {
   const cfg = await getReferralConfig();
