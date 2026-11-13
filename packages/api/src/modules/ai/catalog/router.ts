@@ -1,7 +1,7 @@
-import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 
+import { zValidator } from "../../../lib/validator";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
 import { requirePermission } from "../../../middleware/rbac";

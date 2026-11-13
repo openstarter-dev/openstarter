@@ -1,7 +1,7 @@
-import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 
+import { zValidator } from "../../lib/validator";
 import { requireAuth } from "../../middleware/auth";
 import { paginationSchema } from "../../schema";
 import { bindBody } from "../../schema/referral";

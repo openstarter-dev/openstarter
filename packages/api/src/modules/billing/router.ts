@@ -1,8 +1,8 @@
-import { zValidator } from "@hono/zod-validator";
 import { respData, respErr } from "@openstarter/shared";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 
+import { zValidator } from "../../lib/validator";
 import { requireAuth } from "../../middleware/auth";
 import { checkoutBody } from "../../schema/billing";
 import {

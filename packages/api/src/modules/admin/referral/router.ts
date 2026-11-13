@@ -1,7 +1,7 @@
-import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 
+import { zValidator } from "../../../lib/validator";
 import { idParam, paginationSchema } from "../../../schema";
 import {
   commissionsQuery,
@@ -24,7 +24,6 @@ import {
 } from "./service";
 
 const PERMISSION_ADMIN = "admin.*";
-
 
 export const referralAdminRouter = new Hono()
   .use(requireAuth)

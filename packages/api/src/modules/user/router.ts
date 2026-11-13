@@ -1,8 +1,8 @@
-import { zValidator } from "@hono/zod-validator";
 import { getUserPlan } from "@openstarter/auth";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 
+import { zValidator } from "../../lib/validator";
 import { requireAuth } from "../../middleware/auth";
 import { paginationSchema } from "../../schema";
 import { creditsQuery, updateProfileSchema } from "../../schema/user";

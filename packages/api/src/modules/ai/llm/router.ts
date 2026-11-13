@@ -1,9 +1,9 @@
-import { zValidator } from "@hono/zod-validator";
 import { chat, toServerSentEventsResponse } from "@tanstack/ai";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";
 
+import { zValidator } from "../../../lib/validator";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
 import { paginationSchema } from "../../../schema";
@@ -30,7 +30,6 @@ const STATUS_NOT_FOUND = 404;
 const STATUS_BAD_REQUEST = 400;
 const STATUS_PROVIDER_ERROR = 502;
 const STATUS_INSUFFICIENT_CREDITS = 402;
-
 
 export const llmRouter = new Hono()
   // GET /llm/chats — List user's chats

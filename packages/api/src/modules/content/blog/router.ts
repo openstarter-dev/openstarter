@@ -1,7 +1,7 @@
-import { zValidator } from "@hono/zod-validator";
 import { respData, respErr } from "@openstarter/shared";
 import { Hono } from "hono";
 
+import { zValidator } from "../../../lib/validator";
 import { listBlogArticles } from "../blog";
 import { findPublishedBySlug } from "../posts";
 import { listQuery, slugParam } from "../../../schema/content/blog";

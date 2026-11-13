@@ -1,8 +1,8 @@
-import { zValidator } from "@hono/zod-validator";
 import { respData, respErr, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 
+import { zValidator } from "../../../lib/validator";
 import { SlugConflictError } from "../errors";
 import { createPost, deletePost, getPostById, listPosts, updatePost } from "../posts";
 import { requireAuth } from "../../../middleware/auth";

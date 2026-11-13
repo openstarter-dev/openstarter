@@ -1,4 +1,3 @@
-import { zValidator } from "@hono/zod-validator";
 import { createInviteCodesBatch, deleteInviteCode, listInviteCodes } from "@openstarter/auth";
 import { respData, respOk, respPage } from "@openstarter/shared";
 import {
@@ -10,6 +9,7 @@ import {
 } from "@openstarter/shared/config";
 import { Hono } from "hono";
 
+import { zValidator } from "../../../lib/validator";
 import { idParam } from "../../../schema";
 import { inviteBatchBody, listQuery, saveConfigBody } from "../../../schema/admin/overview";
 import { listCredits, listOrders, listSubscriptions, listUsers } from "../index";
