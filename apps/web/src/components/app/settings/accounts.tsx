@@ -61,7 +61,9 @@ export function AccountsPage() {
     }
   };
 
-  const handleUnlink = async (accountId: string, providerId: string) => {
+  // better-auth 1.7 起 unlinkAccount 只接受本地 account 行 id（不再接受 providerId /
+  // provider 侧 accountId），见 1.7 升级指南「Account API 选择器改为强类型」。
+  const handleUnlink = async (accountRowId: string) => {
     if (unlinkInFlight.current) {
       return;
     }
@@ -71,11 +73,10 @@ export function AccountsPage() {
     }
 
     unlinkInFlight.current = true;
-    setUnlinking(accountId);
+    setUnlinking(accountRowId);
     try {
       const result = await authClient.unlinkAccount({
-        accountId,
-        providerId,
+        accountId: accountRowId,
       });
       if (result.error) {
         toast.error(result.error.message || m["settings.accounts.unlink_failed"]());
@@ -117,7 +118,7 @@ export function AccountsPage() {
                     <Button
                       disabled={unlinking !== null || accounts.length <= 1}
                       onClick={() => {
-                        handleUnlink(account.accountId, account.providerId).catch(
+                        handleUnlink(account.id).catch(
                           (error: Error) => {
                             toast.error(error.message);
                           },

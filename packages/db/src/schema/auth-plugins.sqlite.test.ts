@@ -50,6 +50,7 @@ beforeAll(async () => {
     CREATE TABLE team (
       id TEXT PRIMARY KEY NOT NULL,
       name TEXT NOT NULL,
+      member_count INTEGER NOT NULL DEFAULT 0,
       organization_id TEXT NOT NULL REFERENCES organization(id) ON DELETE CASCADE,
       created_at INTEGER NOT NULL,
       updated_at INTEGER
@@ -121,6 +122,7 @@ beforeAll(async () => {
   await database.run(sql`
     CREATE TABLE team_member (
       id TEXT PRIMARY KEY NOT NULL,
+      membership_key TEXT UNIQUE,
       team_id TEXT NOT NULL REFERENCES team(id) ON DELETE CASCADE,
       user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
       created_at INTEGER

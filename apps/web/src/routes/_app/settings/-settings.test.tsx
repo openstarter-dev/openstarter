@@ -115,7 +115,7 @@ beforeEach(() => {
 });
 
 describe("Settings account data", () => {
-  it("loads and unlinks accounts with providerId and accountId", async () => {
+  it("loads and unlinks accounts by local account row id", async () => {
     authMocks.listAccounts.mockResolvedValue({
       data: [
         account({ id: "account-row", providerId: "google" }),
@@ -132,8 +132,7 @@ describe("Settings account data", () => {
 
     await waitFor(() => {
       expect(authMocks.unlinkAccount).toHaveBeenCalledWith({
-        accountId: "google-account",
-        providerId: "google",
+        accountId: "account-row",
       });
     });
   });

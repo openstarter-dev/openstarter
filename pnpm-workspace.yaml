@@ -15,10 +15,10 @@ allowBuilds:
 # 只有单一消费方的库直接写在该包 package.json 里，不再经过 catalog。
 catalog:
   # better-auth 家族：插件与核心必须严格同版本，即使当前只有一个包引用也留在这里
-  "@better-auth/drizzle-adapter": 1.6.33
-  "@better-auth/expo": 1.6.33
-  "@better-auth/passkey": 1.6.33
-  better-auth: 1.6.33
+  "@better-auth/drizzle-adapter": 1.7.22
+  "@better-auth/expo": 1.7.22
+  "@better-auth/passkey": 1.7.22
+  better-auth: 1.7.22
 
   # 渲染层：web / desktop / extension / mini-app / email / ui-* 共享同一套版本
   "@types/react": 19.2.17

@@ -43,6 +43,20 @@
       "when": 1794523773230,
       "tag": "0005_awesome_justin_hammer",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1794558648843,
+      "tag": "0006_certain_mister_fear",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1794558752119,
+      "tag": "0007_mysterious_wasp",
+      "breakpoints": true
     }
   ]
 }

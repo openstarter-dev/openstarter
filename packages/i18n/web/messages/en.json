@@ -1180,5 +1180,12 @@
   "common.sign.verify": "Verify",
   "common.sign.verifying": "Verifying...",
   "common.sign.back": "Back",
-  "common.sign.otp_code_label": "Enter the code sent to {email}"
+  "common.sign.otp_code_label": "Enter the code sent to {email}",
+  "auth:error.originNotConfigured": "Server origin is not configured",
+  "auth:error.otp.notConfigured": "Email OTP is not configured",
+  "auth:error.twoFactor.totpAlreadyEnabled": "TOTP is already enabled",
+  "auth:error.twoFactor.totpNotConfigured": "TOTP is not configured",
+  "auth:error.user.idCannotBeUpdated": "User ID cannot be updated",
+  "admin:error.cannotSetUsersPhoneNumber": "You are not allowed to set users phone number",
+  "organization:error.invitation.cannotList": "You are not allowed to list invitations"
 }

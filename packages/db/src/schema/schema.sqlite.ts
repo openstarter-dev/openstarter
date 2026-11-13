@@ -224,6 +224,7 @@ export const team = table(
   {
     createdAt: integer("created_at", { mode: "timestamp_ms" }).notNull(),
     id: text("id").primaryKey(),
+    memberCount: integer("member_count").default(0).notNull(),
     name: text("name").notNull(),
     organizationId: text("organization_id")
       .notNull()
@@ -238,6 +239,7 @@ export const teamMember = table(
   {
     createdAt: integer("created_at", { mode: "timestamp_ms" }),
     id: text("id").primaryKey(),
+    membershipKey: text("membership_key").unique(),
     teamId: text("team_id")
       .notNull()
       .references(() => team.id, { onDelete: "cascade" }),
@@ -253,7 +255,7 @@ export const teamMember = table(
 
 // ─── Device Authorization (RFC 8628) ─────────────────────────────────────────
 // Better Auth deviceAuthorization 插件要求 deviceCode 模型：CLI 登录经设备授权流写于此。
-// 插件字段契约见 better-auth@1.6.11 dist/plugins/device-authorization/index.d.mts。
+// 插件字段契约见 better-auth@1.7 dist/plugins/device-authorization/index.d.mts。
 
 export const deviceCode = table(
   "device_code",
@@ -270,7 +272,8 @@ export const deviceCode = table(
     userId: text("user_id"),
   },
   (t) => [
-    index("idx_device_code_user_code").on(t.userCode),
+    // better-auth 1.7 要求 user_code 唯一（1.6 只有普通索引）。
+    uniqueIndex("uq_device_code_user_code").on(t.userCode),
     index("idx_device_code_status").on(t.status),
   ],
 );

@@ -1180,5 +1180,12 @@
   "common.sign.verify": "验证",
   "common.sign.verifying": "验证中...",
   "common.sign.back": "返回",
-  "common.sign.otp_code_label": "输入发送至 {email} 的验证码"
+  "common.sign.otp_code_label": "输入发送至 {email} 的验证码",
+  "auth:error.originNotConfigured": "服务端未配置 origin",
+  "auth:error.otp.notConfigured": "未配置邮箱验证码",
+  "auth:error.twoFactor.totpAlreadyEnabled": "已启用 TOTP",
+  "auth:error.twoFactor.totpNotConfigured": "未配置 TOTP",
+  "auth:error.user.idCannotBeUpdated": "用户 ID 不可修改",
+  "admin:error.cannotSetUsersPhoneNumber": "无权修改用户手机号",
+  "organization:error.invitation.cannotList": "无权查看邀请列表"
 }
