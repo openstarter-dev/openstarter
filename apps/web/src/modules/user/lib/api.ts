@@ -27,10 +27,13 @@ const getCredits = client.api.user.credits.$get;
 const getOrders = client.api.user.orders.$get;
 const getPlan = client.api.user.plan.$get;
 const getSubscription = client.api.user.subscription.$get;
+const createBillingPortal = client.api.user["billing-portal"].$post;
 
 type ApiKeyListData = NonNullable<InferResponseType<typeof getApiKeys, 200>["data"]>;
 /** 创建 API key 的响应 data（含一次性展示的明文 key），从 RPC 响应推导。 */
 type ApiKeyRow = NonNullable<InferResponseType<typeof client.api.apikeys.$post, 200>["data"]>;
+/** 计费 portal 响应 data；不手写形状，后端字段变更直接在这里报错。 */
+type BillingPortalData = NonNullable<InferResponseType<typeof createBillingPortal, 200>["data"]>;
 
 type CreditsData = NonNullable<InferResponseType<typeof getCredits, 200>["data"]>;
 /** 用户积分流水行（积分历史列表），从 user.credits 响应推导。 */
@@ -100,7 +103,7 @@ const mutations = {
     mutationOptions({
       mutationFn: async () => {
         const res = await client.api.user["billing-portal"].$post();
-        return unwrapMutation<{ billingUrl?: string }>(
+        return unwrapMutation<BillingPortalData>(
           res,
           "Failed to create billing portal session",
         );
