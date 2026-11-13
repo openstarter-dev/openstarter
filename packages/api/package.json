@@ -5,6 +5,12 @@
     ".": {
       "default": "./src/index.ts"
     },
+    "./client": {
+      "default": "./src/client/index.ts"
+    },
+    "./client/*": {
+      "default": "./src/client/*.ts"
+    },
     "./*": {
       "default": "./src/*.ts"
     }
@@ -26,6 +32,7 @@
     "@tanstack/ai-anthropic": "0.19.1",
     "@tanstack/ai-gemini": "0.33.1",
     "@tanstack/ai-openai": "0.24.1",
+    "@tanstack/query-core": "^5.101.2",
     "aws4fetch": "1.0.20",
     "drizzle-orm": "catalog:",
     "hono": "catalog:",

@@ -782,6 +782,9 @@ importers:
       '@tanstack/ai-openai':
         specifier: 0.24.1
         version: 0.24.1(@tanstack/ai@0.61.0(@opentelemetry/api@1.9.1)(zod@4.4.3))(ws@8.21.0)(zod@4.4.3)
+      '@tanstack/query-core':
+        specifier: ^5.101.2
+        version: 5.101.2
       aws4fetch:
         specifier: 1.0.20
         version: 1.0.20
