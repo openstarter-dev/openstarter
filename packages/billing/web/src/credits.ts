@@ -12,7 +12,7 @@
 import { type Credit, credit, type NewCredit } from "@openstarter/db/schema";
 import { type Database, db } from "@openstarter/db/server";
 import { getSnowId, getUuid } from "@openstarter/shared/id";
-import { and, asc, desc, eq, gt, isNull, or, sql, sum } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, isNotNull, isNull, ne, or, sql, sum } from "drizzle-orm";
 
 // ─── 领域词汇（Domain vocabulary） ─────────────────────────────────────────────
 
@@ -220,13 +220,27 @@ export interface ConsumeCreditsResult {
 }
 
 /**
+ * Raised when another consumer changed the same credit batches between the
+ * balance read and the conditional decrement. Callers that own the
+ * transaction can retry it; `consume()` already retries its own transaction.
+ */
+export class CreditContentionError extends Error {
+  constructor() {
+    super("Credit balance changed concurrently");
+    this.name = "CreditContentionError";
+  }
+}
+
+const MAX_CONSUME_ATTEMPTS = 3;
+
+/**
  * 在给定事务句柄内执行消费（余额核对 → FIFO 扣减 → 写 consume 流水）。
  *
  * - 余额 < 消费额 → 整体拒绝，`{ success: false }`，不修改任何记录（R13.5）。
  * - 余额充足 → 取全部有效批次按 `expiresAt ASC`（null 最后）从最早到期起先进先出扣减，
- *   每批新剩余额在 JS 侧依事务内读值算出，再对各不同批次以绝对值并行写回
- *   （互不影响、与顺序无关）；随后写入一条 `consume` 流水，其 `consumedDetail`
- *   持久化逐批扣减明细（金额守恒：Σamount == 消费额，R13.4）。
+ *   逐批条件扣减（`remaining >= take`）；并发消费者已改动批次时 affected rows 为 0，
+ *   抛 `CreditContentionError` 回滚，由外层重试。随后写入一条 `consume` 流水，其
+ *   `consumedDetail` 持久化逐批扣减明细（金额守恒：Σamount == 消费额，R13.4）。
  */
 async function consumeWithinTransaction(
   tx: BillingTransaction,
@@ -252,31 +266,30 @@ async function consumeWithinTransaction(
     .where(validGrantConditions(userId, now))
     .orderBy(sql`case when ${credit.expiresAt} is null then 1 else 0 end`, asc(credit.expiresAt));
 
-  // 3. 纯计算逐批扣减方案（无 I/O）：记录每批新剩余额与扣减额。
+  // 3. 纯计算逐批扣减方案（无 I/O）：记录每批扣减额。
   let remaining = amount;
-  const plan: { creditId: string; newRemaining: number; amount: number }[] = [];
+  const plan: { amount: number; creditId: string }[] = [];
   for (const batch of batches) {
     if (remaining <= 0) {
       break;
     }
     const take = Math.min(remaining, batch.remainingCredits);
-    plan.push({
-      amount: take,
-      creditId: batch.id,
-      newRemaining: batch.remainingCredits - take,
-    });
+    plan.push({ amount: take, creditId: batch.id });
     remaining -= take;
   }
 
-  // 4. 对各不同批次并行写回绝对剩余额（distinct 行、绝对值 → 与顺序无关，事务内原子提交）。
-  await Promise.all(
-    plan.map((item) =>
-      tx
-        .update(credit)
-        .set({ remainingCredits: item.newRemaining })
-        .where(eq(credit.id, item.creditId)),
-    ),
-  );
+  // 4. 逐批条件扣减：`remaining = remaining - take` 且要求余额仍足够。
+  //    并发消费者若先提交，后者的 affected rows 为 0，抛冲突并回滚整个事务。
+  for (const item of plan) {
+    const updated = await tx
+      .update(credit)
+      .set({ remainingCredits: sql`${credit.remainingCredits} - ${item.amount}` })
+      .where(and(eq(credit.id, item.creditId), gte(credit.remainingCredits, item.amount)))
+      .returning({ id: credit.id });
+    if (updated.length === 0) {
+      throw new CreditContentionError();
+    }
+  }
 
   // 5. 写入一条 consume 流水，`consumedDetail` 保存逐批明细 `[{ creditId, amount }]`。
   const detail: ConsumedDetailItem[] = plan.map((item) => ({
@@ -308,11 +321,27 @@ async function consumeWithinTransaction(
  * 若注入了事务句柄 `tx`（如 AI 任务在其自身事务内），则在该事务内执行；
  * 否则自行开启事务，保证「余额核对 + 逐批扣减 + 写流水」整体原子。
  */
+async function consumeInOwnTransaction(
+  params: ConsumeCreditsParams,
+): Promise<ConsumeCreditsResult> {
+  for (let attempt = 1; attempt <= MAX_CONSUME_ATTEMPTS; attempt += 1) {
+    try {
+      return await db().transaction((tx) => consumeWithinTransaction(tx, params));
+    } catch (error) {
+      if (!(error instanceof CreditContentionError) || attempt === MAX_CONSUME_ATTEMPTS) {
+        throw error;
+      }
+    }
+  }
+
+  throw new Error("unreachable");
+}
+
 export function consume(params: ConsumeCreditsParams): Promise<ConsumeCreditsResult> {
   if (params.tx) {
     return consumeWithinTransaction(params.tx, params);
   }
-  return db().transaction((tx) => consumeWithinTransaction(tx, params));
+  return consumeInOwnTransaction(params);
 }
 
 // ─── 撤销（Revoke，14.3 / R13.6） ─────────────────────────────────────────────
@@ -325,52 +354,46 @@ export interface RevokeCreditsParams {
 /**
  * 撤销一条消费记录（R13.6）。
  *
- * 依目标 `consume` 记录的 `consumedDetail` 逐条**原子自增**返还对应批次的
- * `remainingCredits`（`remaining = remaining + amount`，SQL 表达式避免读改写竞态），
- * 并将该 consume 记录置为 `status='deleted'`（软删）。全程在单个事务内完成，
- * 保证「返还总额 == 原扣减总额」。
+ * 先在事务内用 `active → deleted` 的条件更新**抢占**该 consume 记录；只有抢占成功
+ * 的事务才依 `consumedDetail` 逐条原子返还批次（`remaining = remaining + amount`）。
+ * 并发/重复调用时，后到者 affected rows 为 0，直接无操作。全程单事务，保证
+ * 「返还总额 == 原扣减总额」。
  *
  * 目标记录不存在、非 `active` 的 `consume`、或无明细时为无操作（幂等）。
  */
 export async function revoke(params: RevokeCreditsParams): Promise<void> {
   const { consumeCreditId } = params;
 
-  const [record] = await db()
-    .select()
-    .from(credit)
-    .where(
-      and(
-        eq(credit.id, consumeCreditId),
-        eq(credit.transactionType, CreditTransactionType.CONSUME),
-        eq(credit.status, CreditStatus.ACTIVE),
-      ),
-    )
-    .limit(1);
-
-  if (!record?.consumedDetail) {
-    return;
-  }
-
-  const items = JSON.parse(record.consumedDetail) as ConsumedDetailItem[];
-
   await db().transaction(async (tx) => {
-    // 各批次互不影响，逐条原子自增可并行执行。
-    await Promise.all(
-      items.map((item) =>
-        tx
-          .update(credit)
-          .set({
-            remainingCredits: sql`${credit.remainingCredits} + ${item.amount}`,
-          })
-          .where(eq(credit.id, item.creditId)),
-      ),
-    );
-
-    // 将该 consume 记录软删（status='deleted'），完成撤销。
-    await tx
+    // 先原子抢占：只有把 active 改成 deleted 的事务才能执行返还。
+    // 并发/重复调用时，后到者 affected rows 为 0，直接无操作。
+    const [claimed] = await tx
       .update(credit)
       .set({ status: CreditStatus.DELETED })
-      .where(eq(credit.id, consumeCreditId));
+      .where(
+        and(
+          eq(credit.id, consumeCreditId),
+          eq(credit.transactionType, CreditTransactionType.CONSUME),
+          eq(credit.status, CreditStatus.ACTIVE),
+          isNotNull(credit.consumedDetail),
+          ne(credit.consumedDetail, ""),
+        ),
+      )
+      .returning({ consumedDetail: credit.consumedDetail, id: credit.id });
+
+    if (!claimed?.consumedDetail) {
+      return;
+    }
+
+    const items = JSON.parse(claimed.consumedDetail) as ConsumedDetailItem[];
+
+    // 逐批原子自增返还；同一事务内完成，失败则整体回滚。
+    for (const item of items) {
+      await tx
+        .update(credit)
+        .set({ remainingCredits: sql`${credit.remainingCredits} + ${item.amount}` })
+        .where(eq(credit.id, item.creditId));
+    }
   });
 }
 
