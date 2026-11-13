@@ -214,12 +214,20 @@ The API uses Hono RPC for end-to-end type safety:
 // Backend: export the Hono app type
 export type AppType = typeof routes;
 
-// Client: instantiate the RPC client
-const client = hc<AppType>(apiBaseUrl);
+// Client (web / extension / mobile / mini-app): always go through the pre-typed factory
+// in @openstarter/api/client — never `hc<AppType>` + `import type { AppType }` directly.
+import { hcWithType } from "@openstarter/api/client";
+
+const client = hcWithType(apiBaseUrl);
 
 // Full autocomplete from schema to UI
-const { data } = await client.user.orders.$get({ query: { page: 1 } });
+const { data } = await client.api.user.orders.$get({ query: { page: "1" } });
 ```
+
+`@openstarter/api/client` also applies `ApplyGlobalResponse`, so error responses
+(`{ code: -1, message }` on 401/403/404/409/422/500) are typed. The web client uses a
+relative base (`/`) and falls back to an in-process `app.fetch` bridge on the server
+(`apps/web/src/server.ts` + `lib/rpc-bridge.ts`) so SSR loader prefetch carries cookies.
 
 ### Better-Auth
 
