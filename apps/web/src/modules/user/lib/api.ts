@@ -14,7 +14,6 @@ export const userKeys = {
   apiKeys: () => ["user", "apikeys"] as const,
   credits: () => ["user", "credits"] as const,
   orders: (page: number) => ["user", "orders", page] as const,
-  permissions: () => ["user", "permissions"] as const,
   plan: () => ["user", "plan"] as const,
   subscription: () => ["user", "subscription"] as const,
   tickets: {
@@ -26,7 +25,6 @@ export const userKeys = {
 const getApiKeys = client.api.apikeys.$get;
 const getCredits = client.api.user.credits.$get;
 const getOrders = client.api.user.orders.$get;
-const getPermissions = client.api.user.permissions.$get;
 const getPlan = client.api.user.plan.$get;
 const getSubscription = client.api.user.subscription.$get;
 
@@ -39,7 +37,6 @@ type CreditsData = NonNullable<InferResponseType<typeof getCredits, 200>["data"]
 export type CreditHistoryRow = CreditsData["history"][number];
 
 type OrdersData = NonNullable<InferResponseType<typeof getOrders, 200>["data"]>;
-type PermissionListData = NonNullable<InferResponseType<typeof getPermissions, 200>["data"]>;
 type PlanData = NonNullable<InferResponseType<typeof getPlan, 200>["data"]>;
 type SubscriptionData = NonNullable<InferResponseType<typeof getSubscription, 200>["data"]>;
 
@@ -85,15 +82,6 @@ const queries = {
       queryKey: userKeys.plan(),
       refetchOnWindowFocus: true,
       staleTime: 0,
-    }),
-  permissions: () =>
-    queryOptions({
-      queryFn: async ({ signal }) => {
-        const res = await getPermissions(undefined, withAbort(signal));
-        return (await unwrapQuery<PermissionListData>(res, "Failed to load permissions")) ?? [];
-      },
-      queryKey: userKeys.permissions(),
-      staleTime: 5 * 60 * 1000,
     }),
   subscription: () =>
     queryOptions({

@@ -10,6 +10,7 @@ import {
   passkeyClient,
   twoFactorClient,
 } from "@openstarter/auth/client/web";
+import { platformAc, platformRoles } from "@openstarter/auth/rbac/access";
 import { localizeUrl } from "@openstarter/i18n-web/runtime";
 import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 
@@ -36,7 +37,7 @@ export const authClient = createAuthClient({
     emailOTPClient(),
     twoFactorClient({ onTwoFactorRedirect: goToTwoFactor }),
     anonymousClient(),
-    adminClient(),
+    adminClient({ ac: platformAc, roles: platformRoles }),
     organizationClient(),
     lastLoginMethodClient(),
   ],
@@ -83,7 +84,7 @@ export const getOneTapAuthClient = (
         emailOTPClient(),
         twoFactorClient({ onTwoFactorRedirect: goToTwoFactor }),
         anonymousClient(),
-        adminClient(),
+        adminClient({ ac: platformAc, roles: platformRoles }),
         organizationClient(),
         lastLoginMethodClient(),
         oneTapClient({ clientId }),

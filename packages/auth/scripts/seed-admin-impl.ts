@@ -3,7 +3,7 @@
 //
 // 密码使用与 Better-Auth 一致的 scrypt 实现（`better-auth/crypto.hashPassword`),
 // 写入 `account` 表的 `password` 字段;后续用该 email/password 在 /login 登录
-// 即可访问 /admin（角色 = `user.role` 字段，权限码见 rbac/permissions.ts）。
+// 即可访问 /admin（角色 = `user.role` 字段，权限码见 rbac/access.ts）。
 
 import { PlatformRole } from "@openstarter/auth";
 import { account, user } from "@openstarter/db/schema";

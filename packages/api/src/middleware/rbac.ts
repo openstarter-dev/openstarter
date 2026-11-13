@@ -1,25 +1,50 @@
-// packages/api/src/middleware/rbac —— 平台级 RBAC 权限中间件（R4.3/R7.7/R7.8）。
+// packages/api/src/middleware/rbac —— 平台级权限中间件。
 //
-// `requirePermission(code)` 解析当前主体（会话用户或 API Key 所属用户）的权限码集合后，
-// **仅**以通配符匹配器 `matchPermission` 判定，缺失权限返回 403。
+// 判定不再自建：权限码（`resource.action`）转成 access control 请求体后，交给
+// better-auth 的 `auth.api.userHasPermission`（服务端，使用 admin 插件的 ac/roles）。
+// 无会话的调用方（API Key 认证）走 `hasPermission(userId, code)` 兜底，
+// 它用的是同一组 `platformRoles`，语义与插件端点一致。
 //
-// 明确边界：平台级授权唯一依据通配符 RBAC，与 better-auth `organization` 插件的 `ac`/`roles`
-// 完全解耦——不读取任何组织成员关系或团队角色。须在 `requireAuth` 之后使用（读取 `c.var.userId`）。
+// 边界：与 organization 插件的团队角色完全解耦，不读取任何组织成员关系。
+// 须在 `requireAuth` 之后使用（读取 `c.var.userId`）。
 
-import { matchPermission } from "@openstarter/auth/rbac/matcher";
-import { getUserPermissionCodes } from "@openstarter/auth/rbac/service";
+import { toPermissionRequest } from "@openstarter/auth/rbac/access";
+import { hasPermission } from "@openstarter/auth/rbac/service";
 import { respErr } from "@openstarter/shared";
 import { createMiddleware } from "hono/factory";
 
-export type PermissionCodeResolver = (userId: string) => Promise<string[]>;
+export interface PermissionCheckInput {
+  code: string;
+  headers: Headers;
+  userId: string;
+}
+
+/** 权限判定函数（可注入，便于测试拒绝语义而不依赖数据库或会话）。 */
+export type PermissionChecker = (input: PermissionCheckInput) => Promise<boolean>;
 
 /**
- * 生成可注入权限解析器的校验中间件。该 seam 让拒绝语义无需数据库或外部服务即可验证，
- * 且依赖面只包含平台权限码，不接受 organization 授权数据。
+ * 生产判定：优先按会话问 better-auth（`userHasPermission` 直接复用插件里配置的
+ * ac/roles）；没有会话（API Key）时退回按 userId 读 `user.role` 的同一套角色判定。
  */
+export const checkPlatformPermission: PermissionChecker = async ({ code, headers, userId }) => {
+  try {
+    // 动态引入：auth 实例在模块求值时会校验 env，按需加载可避免仅为注册中间件
+    // 就拉整条 auth 初始化链（也让纯单元测试无需准备 env）。
+    const { createAuth } = await import("@openstarter/auth/server");
+    const { success } = await createAuth().api.userHasPermission({
+      body: { permissions: toPermissionRequest(code) },
+      headers,
+    });
+    return success;
+  } catch {
+    return hasPermission(userId, code);
+  }
+};
+
+/** 生成可注入判定函数的守卫；缺少 userId 返回 401，权限不足返回 403。 */
 export function createRequirePermission(
   code: string,
-  resolvePermissionCodes: PermissionCodeResolver,
+  check: PermissionChecker = checkPlatformPermission,
 ) {
   return createMiddleware<{ Variables: { userId: string } }>(async (context, next) => {
     const userId = context.get("userId");
@@ -27,8 +52,8 @@ export function createRequirePermission(
       return context.json(respErr("unauthorized"), 401);
     }
 
-    const codes = await resolvePermissionCodes(userId);
-    if (!matchPermission(code, codes)) {
+    const allowed = await check({ code, headers: context.req.raw.headers, userId });
+    if (!allowed) {
       return context.json(respErr("forbidden"), 403);
     }
 
@@ -36,10 +61,7 @@ export function createRequirePermission(
   });
 }
 
-/**
- * 生产平台权限守卫。缺少该权限（通配符匹配后仍不命中）返回 403；
- * 未解析到主体（未先经 requireAuth）返回 401。
- */
+/** 生产平台权限守卫。 */
 export function requirePermission(code: string) {
-  return createRequirePermission(code, getUserPermissionCodes);
+  return createRequirePermission(code);
 }

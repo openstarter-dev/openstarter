@@ -9,19 +9,19 @@ import { getAllConfigs } from "@openstarter/shared/config";
 import { NodeEnv } from "@openstarter/shared/constants";
 import { logger } from "@openstarter/shared/logger";
 import { betterAuth } from "better-auth/minimal";
+import { admin } from "better-auth/plugins/admin";
+import { anonymous } from "better-auth/plugins/anonymous";
+import { bearer } from "better-auth/plugins/bearer";
+import { deviceAuthorization } from "better-auth/plugins/device-authorization";
+import { emailOTP } from "better-auth/plugins/email-otp";
+import { magicLink } from "better-auth/plugins/magic-link";
+import { organization } from "better-auth/plugins/organization";
+import { twoFactor } from "better-auth/plugins/two-factor";
+// 这两个插件在 better-auth 1.6.x 尚无子路径导出（package.json exports 里没有
+// ./plugins/one-tap 与 ./plugins/last-login-method），只能暂时从 barrel 引入；
+// 上游补齐后改为子路径即可彻底移除 barrel。
+import { lastLoginMethod, oneTap } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
-import {
-  admin,
-  anonymous,
-  bearer,
-  deviceAuthorization,
-  emailOTP,
-  lastLoginMethod,
-  magicLink,
-  oneTap,
-  organization,
-  twoFactor,
-} from "better-auth/plugins";
 import { MAGIC_LINK_EXPIRES_IN, OTP_EXPIRES_IN, REQUIRE_EMAIL_VERIFICATION } from "./auth.config";
 import { authSchema, organizationTeams } from "./auth-database-schema";
 import { createAuthEmailCallbacks, createChangeEmailOptions } from "./email-callbacks";
@@ -34,7 +34,14 @@ import {
   mobileSchemeOrigin,
   parseOriginList,
 } from "./lib/utils";
-import { ac, ADMIN_ROLES, DEFAULT_ROLE, roles } from "./rbac";
+import {
+  ac as orgAc,
+  ADMIN_ROLES,
+  DEFAULT_ROLE,
+  platformAc,
+  platformRoles,
+  roles as orgRoles,
+} from "./rbac";
 import { AuthProvider, SocialProvider, VerificationType } from "./types";
 
 // better-auth 的邮件回调契约要求返回 Promise<void>，而 @openstarter/email 的 sendEmail 返回
@@ -207,13 +214,18 @@ export const auth = betterAuth({
     twoFactor(),
     anonymous(),
     // 用户/会话/封禁/冒充/角色管理全部交给 better-auth：`user.role` 是角色唯一载体
-    // （支持逗号分隔多角色），代码内权限表（rbac/permissions.ts）与 `adminRoles` 共用
-    // 同一组常量，避免后台授权与插件判定各说各话。
-    admin({ adminRoles: [...ADMIN_ROLES], defaultRole: DEFAULT_ROLE }),
+    // （支持逗号分隔多角色）。语句与角色定义在 rbac/access.ts，插件端点鉴权与业务端点
+    // 的 userHasPermission 共用同一组对象，避免两边判定不一致。
+    admin({
+      ac: platformAc,
+      adminRoles: [...ADMIN_ROLES],
+      defaultRole: DEFAULT_ROLE,
+      roles: platformRoles,
+    }),
     organization({
-      ac,
+      ac: orgAc,
       organizationHooks: hooks.organization,
-      roles,
+      roles: orgRoles,
       sendInvitationEmail: (
         { invitation, inviter, organization: invitedOrganization },
         request,

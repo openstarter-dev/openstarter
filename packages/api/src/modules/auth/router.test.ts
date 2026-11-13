@@ -14,9 +14,7 @@ vi.mock("@openstarter/auth", () => {
       api: { getSession: authMocks.getSession },
       handler: authMocks.authHandler,
     }),
-    getUserPermissionCodes: unusedService,
     listApiKeys: unusedService,
-    matchPermission: unusedService,
     revokeApiKey: unusedService,
     validateApiKey: unusedService,
   };

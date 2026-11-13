@@ -18,12 +18,8 @@ describe("RBAC middleware properties", () => {
       fc.asyncProperty(
         segmentArbitrary,
         segmentArbitrary,
-        fc.array(segmentArbitrary, { maxLength: 8 }),
-        async (resource, action, unrelatedActions) => {
+        async (resource, action) => {
           const requiredPermission = `${resource}.${action}`;
-          const deniedCodes = unrelatedActions.map(
-            (unrelatedAction) => `other_${resource}.${unrelatedAction}`,
-          );
           const routeHandler = vi.fn((context) => context.json({ ok: true }));
           const app = new Hono<{ Variables: { userId: string } }>();
 
@@ -36,7 +32,8 @@ describe("RBAC middleware properties", () => {
           );
           app.get(
             "/protected",
-            createRequirePermission(requiredPermission, (_userId) => Promise.resolve(deniedCodes)),
+            // 判定器恒返回“无权限”，覆盖任意 resource/action 组合下的拒绝语义。
+            createRequirePermission(requiredPermission, async () => false),
             routeHandler,
           );
 

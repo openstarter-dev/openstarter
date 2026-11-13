@@ -3,9 +3,8 @@ import { cn } from "@openstarter/ui-web/lib/utils";
 import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 
 import { getServerSessionFn } from "@/functions/session";
+import { authClient } from "@/lib/auth-client";
 import { buildPageTitle } from "@/lib/page-head";
-import { matchAnyPermission, matchPermission } from "@/lib/permissions";
-import { user } from "@/modules/user/lib/api";
 
 type AdminPath =
   | "/admin"
@@ -18,7 +17,6 @@ type AdminPath =
 
 interface AdminNavItem {
   label: () => string;
-  permission: string;
   to: AdminPath;
 }
 
@@ -27,34 +25,42 @@ interface AdminNavGroup {
   items: AdminNavItem[];
 }
 
+/** 后台入口的权限请求：`admin` 资源的 `*` 动作（定义见 packages/auth/src/rbac/access.ts）。 */
+const ADMIN_ACCESS: { admin: "*"[] } = { admin: ["*"] };
+
+/** 代码内定义的角色（与 rbac/access.ts 的 PlatformRole 一致）。 */
+const KNOWN_ROLES = ["admin", "user"] as const;
+
+type KnownRole = (typeof KNOWN_ROLES)[number];
+
+const parseKnownRoles = (role: string | null | undefined): KnownRole[] =>
+  (role ?? "")
+    .split(",")
+    .map((name) => name.trim())
+    .filter((name): name is KnownRole => (KNOWN_ROLES as readonly string[]).includes(name));
+
 export const ADMIN_NAV: AdminNavGroup[] = [
   {
     group: () => m["admin.nav.overview"](),
-    items: [{ label: () => m["admin.nav.dashboard"](), permission: "admin.*", to: "/admin" }],
+    items: [{ label: () => m["admin.nav.dashboard"](), to: "/admin" }],
   },
   {
     group: () => m["admin.nav.access_control"](),
     items: [
-      { label: () => m["admin.nav.users"](), permission: "admin.*", to: "/admin/users" },
-      { label: () => m["admin.nav.ai_models"](), permission: "admin.*", to: "/admin/ai-models" },
-      { label: () => m["admin.nav.settings"](), permission: "admin.*", to: "/admin/settings" },
+      { label: () => m["admin.nav.users"](), to: "/admin/users" },
+      { label: () => m["admin.nav.ai_models"](), to: "/admin/ai-models" },
+      { label: () => m["admin.nav.settings"](), to: "/admin/settings" },
     ],
   },
   {
     group: () => m["admin.nav.billing"](),
     items: [
-      { label: () => m["admin.nav.orders"](), permission: "admin.*", to: "/admin/orders" },
-      {
-        label: () => m["admin.nav.subscriptions"](),
-        permission: "admin.*",
-        to: "/admin/subscriptions",
-      },
-      { label: () => m["admin.nav.credits"](), permission: "admin.*", to: "/admin/credits" },
+      { label: () => m["admin.nav.orders"](), to: "/admin/orders" },
+      { label: () => m["admin.nav.subscriptions"](), to: "/admin/subscriptions" },
+      { label: () => m["admin.nav.credits"](), to: "/admin/credits" },
     ],
   },
 ];
-
-const ALL_ADMIN_PERMISSIONS = ADMIN_NAV.flatMap((g) => g.items.map((item) => item.permission));
 
 export const Route = createFileRoute("/admin")({
   staleTime: 60 * 1000,
@@ -64,36 +70,29 @@ export const Route = createFileRoute("/admin")({
       ...buildPageTitle(m["common.systems.admin"]()).meta,
     ],
   }),
-  beforeLoad: async ({ context: { queryClient }, location }) => {
-    // 权限查询失败不再静默降级成空数组：抛给 errorComponent，用户能看到"重试"，
-    // 而不是莫名跳回 dashboard。
-    const [session, permissions] = await Promise.all([
-      getServerSessionFn(),
-      queryClient.ensureQueryData(user.queries.permissions()),
-    ]);
+  beforeLoad: async ({ location }) => {
+    const session = await getServerSessionFn();
 
     if (!session.data) {
       throw redirect({ search: { redirect: location.href }, to: "/login" });
     }
 
-    if (!matchAnyPermission(ALL_ADMIN_PERMISSIONS, permissions)) {
+    // 判定交给 better-auth：与服务端 `userHasPermission` 共用同一组 ac/roles。
+    // 会话对象在运行时带 `role`（user 表整行），但插件的 Session 推导未包含该字段。
+    const { role } = session.data.user as { role?: string | null };
+    const allowed = parseKnownRoles(role).some((name) =>
+      authClient.admin.checkRolePermission({ permissions: ADMIN_ACCESS, role: name }),
+    );
+
+    if (!allowed) {
       throw redirect({ to: "/dashboard" });
     }
-
-    return { permissions };
   },
   component: AdminLayout,
   ssr: false,
 });
 
 function AdminLayout() {
-  const { permissions } = Route.useRouteContext();
-
-  const visibleGroups = ADMIN_NAV.map((group) => ({
-    group: group.group(),
-    items: group.items.filter((item) => matchPermission(item.permission, permissions)),
-  })).filter((group) => group.items.length > 0);
-
   return (
     <div className="flex min-h-svh">
       <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar md:flex">
@@ -103,10 +102,10 @@ function AdminLayout() {
           </Link>
         </div>
         <nav className="flex-1 space-y-4 overflow-y-auto p-3">
-          {visibleGroups.map((group) => (
-            <div key={group.group}>
+          {ADMIN_NAV.map((group) => (
+            <div key={group.group()}>
               <p className="px-2 pb-1 font-medium text-muted-foreground text-xs uppercase">
-                {group.group}
+                {group.group()}
               </p>
               <div className="flex flex-col gap-0.5">
                 {group.items.map((item) => (

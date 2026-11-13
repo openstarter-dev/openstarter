@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { adminKeys } from "@/modules/admin/lib/api";
 import { authClient } from "@/lib/auth-client";
 
-/** 代码内定义的角色（与 packages/auth/src/rbac/permissions.ts 保持一致）。 */
+/** 代码内定义的角色（与 packages/auth/src/rbac/access.ts 保持一致）。 */
 const ROLE_OPTIONS = ["admin", "user"] as const;
 
 type RoleOption = (typeof ROLE_OPTIONS)[number];

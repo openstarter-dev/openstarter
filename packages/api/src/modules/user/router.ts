@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { getUserPermissionCodes, getUserPlan } from "@openstarter/auth";
+import { getUserPlan } from "@openstarter/auth";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 
@@ -19,11 +19,6 @@ const NOT_FOUND_STATUS = 404;
 const UNPROCESSABLE_STATUS = 422;
 
 export const userRouter = new Hono()
-  // 当前用户的平台级权限码集合
-  .get("/user/permissions", requireAuth, async (c) => {
-    const codes = await getUserPermissionCodes(c.get("userId"));
-    return c.json(respData(codes));
-  })
   // 当前用户的订阅状态视图
   .get("/user/subscription", requireAuth, async (c) => {
     const view = await getSubscriptionStatusView(c.get("userId"));
