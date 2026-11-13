@@ -184,14 +184,27 @@ const CREATE_TABLE_STATEMENTS: readonly string[] = [
   )`,
   `CREATE TABLE apikey (
     id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    title TEXT NOT NULL,
-    key_prefix TEXT NOT NULL,
-    key_hash TEXT NOT NULL,
-    status TEXT NOT NULL,
+    config_id TEXT NOT NULL DEFAULT 'default',
+    name TEXT,
+    start TEXT,
+    reference_id TEXT NOT NULL,
+    prefix TEXT,
+    key TEXT NOT NULL,
+    refill_interval INTEGER,
+    refill_amount INTEGER,
+    last_refill_at INTEGER,
+    enabled INTEGER NOT NULL DEFAULT true,
+    rate_limit_enabled INTEGER NOT NULL DEFAULT true,
+    rate_limit_time_window INTEGER NOT NULL DEFAULT 86400000,
+    rate_limit_max INTEGER NOT NULL DEFAULT 10,
+    request_count INTEGER NOT NULL DEFAULT 0,
+    remaining INTEGER,
+    last_request INTEGER,
+    expires_at INTEGER,
     created_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
     updated_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
-    deleted_at INTEGER
+    permissions TEXT,
+    metadata TEXT
   )`,
 ];
 

@@ -52,10 +52,6 @@ vi.mock("@openstarter/auth/server", () => ({
   createAuth: vi.fn(() => ({ api: { getSession: vi.fn(async () => null) } })),
 }));
 
-vi.mock("@openstarter/auth/apikeys/service", () => ({
-  validateApiKey: vi.fn(async () => null),
-}));
-
 // ../../../../middleware/auth：从 x-test-user-id header 注入 userId，不做真实鉴权
 // （notes.test.ts 同款；导出形状与真实 auth.ts 一致：apiKeyAuth/authMiddleware/requireAuth）。
 vi.mock("../../../../middleware/auth", async () => {

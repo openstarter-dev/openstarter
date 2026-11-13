@@ -8,6 +8,7 @@ import { getLocaleFromRequest } from "@openstarter/i18n-web/server";
 import { getAllConfigs } from "@openstarter/shared/config";
 import { NodeEnv } from "@openstarter/shared/constants";
 import { logger } from "@openstarter/shared/logger";
+import { apiKey } from "@better-auth/api-key";
 import { betterAuth } from "better-auth/minimal";
 import { admin } from "better-auth/plugins/admin";
 import { anonymous } from "better-auth/plugins/anonymous";
@@ -18,9 +19,6 @@ import { magicLink } from "better-auth/plugins/magic-link";
 import { oneTap } from "better-auth/plugins/one-tap";
 import { organization } from "better-auth/plugins/organization";
 import { twoFactor } from "better-auth/plugins/two-factor";
-// better-auth 1.7 仍未给 last-login-method 提供子路径导出（exports 里没有
-// ./plugins/last-login-method），当前只能从 barrel 引入；上游补齐后即可移除。
-import { lastLoginMethod } from "better-auth/plugins";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
 import { MAGIC_LINK_EXPIRES_IN, OTP_EXPIRES_IN, REQUIRE_EMAIL_VERIFICATION } from "./auth.config";
 import { authSchema, organizationTeams } from "./auth-database-schema";
@@ -42,7 +40,7 @@ import {
   platformRoles,
   roles as orgRoles,
 } from "./rbac";
-import { AuthProvider, SocialProvider, VerificationType } from "./types";
+import { SocialProvider, VerificationType } from "./types";
 
 // better-auth 的邮件回调契约要求返回 Promise<void>，而 @openstarter/email 的 sendEmail 返回
 // 结构化 EmailSendResult（R22.3，供程序化调用方判断成败）。此轻量适配器丢弃返回值
@@ -53,15 +51,6 @@ const sendEmail = async (params: SendEmailParams): Promise<void> => {
 };
 
 const emailCallbacks = createAuthEmailCallbacks(sendEmail);
-const LOGIN_METHOD_BY_PATH = new Map<string, AuthProvider>([
-  ["/magic-link/verify", AuthProvider.MAGIC_LINK],
-  ["/passkey/verify-authentication", AuthProvider.PASSKEY],
-  ["/sign-in/email-otp", AuthProvider.EMAIL_OTP],
-  // 匿名登录与 Google One Tap 回调：默认 resolver 不识别这两个路径，
-  // 显式映射使 last-used-method cookie 覆盖全部登录入口。
-  ["/sign-in/anonymous", AuthProvider.ANONYMOUS],
-  ["/one-tap/callback", AuthProvider.GOOGLE],
-]) as Map<string, AuthProvider>;
 
 // ─── 运行时配置读取（Runtime config-driven enablement）──────────────────────────
 //
@@ -216,6 +205,13 @@ export const auth = betterAuth({
     // 用户/会话/封禁/冒充/角色管理全部交给 better-auth：`user.role` 是角色唯一载体
     // （支持逗号分隔多角色）。语句与角色定义在 rbac/access.ts，插件端点鉴权与业务端点
     // 的 userHasPermission 共用同一组对象，避免两边判定不一致。
+    // API Key：官方插件接管签发 / 哈希存储 / 校验 / 限流 / 过期，UI 走 authClient.apiKey.*
+    apiKey({
+      defaultPrefix: "sk_",
+      // 与旧 UI 展示一致：sk_ + 8 位，共 11 个字符
+      startingCharactersConfig: { charactersLength: 11 },
+      requireName: true,
+    }),
     admin({
       ac: platformAc,
       adminRoles: [...ADMIN_ROLES],
@@ -248,9 +244,6 @@ export const auth = betterAuth({
         });
       },
       teams: organizationTeams,
-    }),
-    lastLoginMethod({
-      customResolveMethod: (ctx) => LOGIN_METHOD_BY_PATH.get(ctx.path) ?? null,
     }),
     // One Tap 依赖 socialProviders.google 提供 audience，故与 Google 登录同条件注册；
     // 关闭时不挂载，端点 404（此前无条件挂载会在回调时抛 "Google client ID is required"）。

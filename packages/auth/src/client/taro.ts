@@ -11,7 +11,6 @@ export {
   adminClient,
   organizationClient,
   inferAdditionalFields,
-  lastLoginMethodClient,
 } from "better-auth/client/plugins";
 
 export { createAuthClient } from "better-auth/client";

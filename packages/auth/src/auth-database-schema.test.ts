@@ -1,5 +1,9 @@
+import { apiKey } from "@better-auth/api-key";
 import { passkey } from "@better-auth/passkey";
-import { admin, anonymous, organization, twoFactor } from "better-auth/plugins";
+import { admin } from "better-auth/plugins/admin";
+import { anonymous } from "better-auth/plugins/anonymous";
+import { organization } from "better-auth/plugins/organization";
+import { twoFactor } from "better-auth/plugins/two-factor";
 import { getTableColumns } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
@@ -7,6 +11,7 @@ import { authSchema, organizationTeams } from "./auth-database-schema";
 
 const EXPECTED_AUTH_MODELS = [
   "account",
+  "apikey",
   "deviceCode",
   "invitation",
   "member",
@@ -28,6 +33,7 @@ describe("Better Auth database schema projection", () => {
 });
 
 it("matches the local Better Auth plugin runtime model fields", () => {
+  const apiKeySchema = apiKey().schema;
   const passkeySchema = passkey().schema;
   const twoFactorSchema = twoFactor().schema;
   const anonymousSchema = anonymous().schema;
@@ -37,6 +43,12 @@ it("matches the local Better Auth plugin runtime model fields", () => {
   }).schema;
   const withGeneratedId = (fields: Record<string, object>) => ["id", ...Object.keys(fields)].sort();
 
+  expect(Object.keys(getTableColumns(authSchema.apikey)).sort()).toEqual(
+    withGeneratedId(apiKeySchema.apikey.fields),
+  );
+  expect(Object.keys(getTableColumns(authSchema.apikey)).sort()).toEqual(
+    withGeneratedId(apiKeySchema.apikey.fields),
+  );
   expect(Object.keys(getTableColumns(authSchema.passkey)).sort()).toEqual(
     withGeneratedId(passkeySchema.passkey.fields),
   );

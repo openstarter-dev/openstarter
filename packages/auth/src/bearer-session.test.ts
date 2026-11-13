@@ -2,7 +2,7 @@
 // 的值可以直接作为 Authorization: Bearer 请求头认证（浏览器插件端会话桥接的前提）。
 // 覆盖 R: docs/superpowers/specs/2026-08-01-browser-extension-app-design.md §3.2/§4。
 import { parseSetCookieHeader } from "better-auth/cookies";
-import { bearer } from "better-auth/plugins";
+import { bearer } from "better-auth/plugins/bearer";
 import { getTestInstance } from "better-auth/test";
 import { beforeAll, describe, expect, it } from "vitest";
 

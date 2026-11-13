@@ -2,7 +2,6 @@ import {
   anonymousClient,
   createAuthClient,
   emailOTPClient,
-  lastLoginMethodClient,
   magicLinkClient,
   organizationClient,
   passkeyClient,
@@ -28,7 +27,6 @@ export function createExtensionAuthClient(origin: string, cookieReader: CookieRe
       twoFactorClient(),
       anonymousClient(),
       organizationClient(),
-      lastLoginMethodClient(),
     ],
   });
 }

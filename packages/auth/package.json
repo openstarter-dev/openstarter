@@ -16,6 +16,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/api-key": "catalog:",
     "@better-auth/drizzle-adapter": "catalog:",
     "@better-auth/expo": "catalog:",
     "@better-auth/passkey": "catalog:",

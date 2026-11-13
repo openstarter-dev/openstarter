@@ -1,7 +1,7 @@
 import { keepPreviousData, mutationOptions, queryOptions } from "@tanstack/react-query";
 import type { InferResponseType } from "hono/client";
 
-import { assertOk, client, unwrapMutation, unwrapQuery, withAbort } from "@/lib/api";
+import { client, unwrapMutation, unwrapQuery, withAbort } from "@/lib/api";
 import { LIST_PAGE_SIZE } from "@/lib/list-search";
 
 const PAGE_SIZE = LIST_PAGE_SIZE;
@@ -11,7 +11,6 @@ const PAGE_SIZE = LIST_PAGE_SIZE;
  */
 export const userKeys = {
   all: ["user"] as const,
-  apiKeys: () => ["user", "apikeys"] as const,
   credits: () => ["user", "credits"] as const,
   orders: (page: number) => ["user", "orders", page] as const,
   plan: () => ["user", "plan"] as const,
@@ -22,16 +21,12 @@ export const userKeys = {
   },
 };
 
-const getApiKeys = client.api.apikeys.$get;
 const getCredits = client.api.user.credits.$get;
 const getOrders = client.api.user.orders.$get;
 const getPlan = client.api.user.plan.$get;
 const getSubscription = client.api.user.subscription.$get;
 const createBillingPortal = client.api.user["billing-portal"].$post;
 
-type ApiKeyListData = NonNullable<InferResponseType<typeof getApiKeys, 200>["data"]>;
-/** 创建 API key 的响应 data（含一次性展示的明文 key），从 RPC 响应推导。 */
-type ApiKeyRow = NonNullable<InferResponseType<typeof client.api.apikeys.$post, 200>["data"]>;
 /** 计费 portal 响应 data；不手写形状，后端字段变更直接在这里报错。 */
 type BillingPortalData = NonNullable<InferResponseType<typeof createBillingPortal, 200>["data"]>;
 
@@ -44,14 +39,6 @@ type PlanData = NonNullable<InferResponseType<typeof getPlan, 200>["data"]>;
 type SubscriptionData = NonNullable<InferResponseType<typeof getSubscription, 200>["data"]>;
 
 const queries = {
-  apiKeys: () =>
-    queryOptions({
-      queryFn: async ({ signal }) => {
-        const res = await getApiKeys({ query: {} }, withAbort(signal));
-        return unwrapQuery<ApiKeyListData>(res, "Failed to load API keys");
-      },
-      queryKey: userKeys.apiKeys(),
-    }),
   credits: () =>
     queryOptions({
       queryFn: async ({ signal }) => {
@@ -107,23 +94,6 @@ const mutations = {
           res,
           "Failed to create billing portal session",
         );
-      },
-    }),
-  createApiKey: () =>
-    mutationOptions({
-      meta: { invalidates: [userKeys.apiKeys()] },
-      mutationFn: async (title: string) => {
-        const res = await client.api.apikeys.$post({ json: { title } });
-        return unwrapMutation<ApiKeyRow>(res, "Failed to create API key");
-      },
-    }),
-  revokeApiKey: () =>
-    mutationOptions({
-      meta: { invalidates: [userKeys.apiKeys()] },
-      mutationFn: async (id: string) => {
-        const res = await client.api.apikeys.$delete({ query: { id } });
-        await assertOk(res, "Failed to revoke API key");
-        return id;
       },
     }),
 };

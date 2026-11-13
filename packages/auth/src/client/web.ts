@@ -1,3 +1,4 @@
+export { apiKeyClient } from "@better-auth/api-key/client";
 export { passkeyClient } from "@better-auth/passkey/client";
 export {
   emailOTPClient,
@@ -7,7 +8,6 @@ export {
   adminClient,
   organizationClient,
   inferAdditionalFields,
-  lastLoginMethodClient,
   oneTapClient,
 } from "better-auth/client/plugins";
 

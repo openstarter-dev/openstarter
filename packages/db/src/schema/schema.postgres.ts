@@ -478,26 +478,42 @@ export const credit = table(
   ],
 );
 
+// API Key 模型对齐 better-auth `@better-auth/api-key` 的 `apikey` schema：
+// 字段名与语义直接取自插件（key = 哈希值、start = 可展示前缀、referenceId = 所属用户）。
 export const apikey = table(
   "apikey",
   {
+    configId: text("config_id").notNull().default("default"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
-    deletedAt: timestamp("deleted_at"),
+    enabled: boolean("enabled").default(true).notNull(),
+    expiresAt: timestamp("expires_at"),
     id: text("id").primaryKey(),
-    keyHash: text("key_hash").notNull(),
-    keyPrefix: text("key_prefix").notNull(),
-    status: text("status").notNull(),
-    title: text("title").notNull(),
+    key: text("key").notNull(),
+    lastRefillAt: timestamp("last_refill_at"),
+    lastRequest: timestamp("last_request"),
+    metadata: text("metadata"),
+    name: text("name"),
+    permissions: text("permissions"),
+    prefix: text("prefix"),
+    rateLimitEnabled: boolean("rate_limit_enabled").default(true).notNull(),
+    rateLimitMax: integer("rate_limit_max").default(10).notNull(),
+    rateLimitTimeWindow: integer("rate_limit_time_window").default(86400000).notNull(),
+    referenceId: text("reference_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    refillAmount: integer("refill_amount"),
+    refillInterval: integer("refill_interval"),
+    remaining: integer("remaining"),
+    requestCount: integer("request_count").default(0).notNull(),
+    start: text("start"),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => new Date())
       .notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
   },
   (t) => [
-    index("idx_apikey_user_status").on(t.userId, t.status),
-    index("idx_apikey_keyhash_status").on(t.keyHash, t.status),
+    index("idx_apikey_reference_id").on(t.referenceId),
+    index("idx_apikey_key").on(t.key),
+    index("idx_apikey_config_id").on(t.configId),
   ],
 );
 

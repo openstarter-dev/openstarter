@@ -76,18 +76,24 @@ const insertOrder = async (values: {
   `);
 };
 
-/** Insert one apikey row. */
+/** Insert one apikey row（字段对齐 `@better-auth/api-key` 的模型）。 */
 const insertApiKey = async (values: {
   createdAt: Date;
+  enabled?: boolean;
+  expiresAt?: Date | null;
   id: string;
-  status: string;
   userId: string;
 }) => {
-  // keyHash 先在 JS 侧拼接——不要把参数嵌进 SQL 字符串字面量，绑定顺序会错位。
-  const keyHash = `hash-${values.id}`;
+  // key/start 先在 JS 侧拼接——不要把参数嵌进 SQL 字符串字面量，绑定顺序会错位。
+  const hashedKey = `hash-${values.id}`;
   await db().run(sql`
-    INSERT INTO apikey (id, user_id, title, key_prefix, key_hash, status, created_at, updated_at)
-    VALUES (${values.id}, ${values.userId}, 'key', 'osk_', ${keyHash}, ${values.status},
+    INSERT INTO apikey (
+      id, config_id, name, start, reference_id, key, enabled, rate_limit_enabled,
+      rate_limit_max, rate_limit_time_window, request_count, expires_at, created_at, updated_at
+    )
+    VALUES (${values.id}, 'default', 'key', 'sk_abcd', ${values.userId}, ${hashedKey},
+      ${values.enabled ?? true}, 1, 10, 86400000, 0,
+      ${values.expiresAt ? values.expiresAt.getTime() : null},
       ${values.createdAt.getTime()}, ${values.createdAt.getTime()})
   `);
 };
@@ -264,7 +270,6 @@ describe("getDashboardStats", () => {
     await insertApiKey({
       createdAt: isoDaysAgo(1),
       id: "k-other",
-      status: "active",
       userId: otherId,
     });
 
@@ -279,11 +284,17 @@ describe("getDashboardStats", () => {
     expect(other.activeApiKeys).toBe(1);
   });
 
-  it("counts active (non-revoked) API keys", async () => {
+  it("counts enabled, non-expired API keys", async () => {
     const userId = await insertUser(db(), { email: "keys@example.com", id: "user-keys" });
 
-    await insertApiKey({ createdAt: isoDaysAgo(3), id: "k-active", status: "active", userId });
-    await insertApiKey({ createdAt: isoDaysAgo(2), id: "k-deleted", status: "deleted", userId });
+    await insertApiKey({ createdAt: isoDaysAgo(3), id: "k-active", userId });
+    await insertApiKey({ createdAt: isoDaysAgo(2), enabled: false, id: "k-revoked", userId });
+    await insertApiKey({
+      createdAt: isoDaysAgo(2),
+      expiresAt: isoDaysAgo(1),
+      id: "k-expired",
+      userId,
+    });
 
     const stats = await getDashboardStats(userId);
 

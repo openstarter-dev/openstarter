@@ -1,6 +1,5 @@
 export * from "./types";
 export * from "./rbac";
-export * from "./apikeys";
 export * from "./invite-codes";
 export * from "./lib/utils";
 export * from "./lib/schema";

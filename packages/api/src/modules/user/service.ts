@@ -13,7 +13,7 @@
 import { CreditStatus, CreditTransactionType } from "@openstarter/billing-web/credits";
 import { apikey, credit, order, user as userTable } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
-import { and, count, desc, eq, gte, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, isNull, or, sql } from "drizzle-orm";
 
 export type UserOrder = typeof order.$inferSelect;
 
@@ -188,7 +188,11 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
         .select({ value: count() })
         .from(apikey)
         .where(
-          and(eq(apikey.userId, userId), eq(apikey.status, "active"), isNull(apikey.deletedAt)),
+          and(
+            eq(apikey.referenceId, userId),
+            eq(apikey.enabled, true),
+            or(isNull(apikey.expiresAt), gt(apikey.expiresAt, new Date())),
+          ),
         ),
     ]);
 

@@ -1187,5 +1187,12 @@
   "auth:error.twoFactor.totpNotConfigured": "未配置 TOTP",
   "auth:error.user.idCannotBeUpdated": "用户 ID 不可修改",
   "admin:error.cannotSetUsersPhoneNumber": "无权修改用户手机号",
-  "organization:error.invitation.cannotList": "无权查看邀请列表"
+  "organization:error.invitation.cannotList": "无权查看邀请列表",
+  "auth:error.apiKey.invalid": "API Key 无效",
+  "auth:error.apiKey.disabled": "API Key 已被禁用",
+  "auth:error.apiKey.expired": "API Key 已过期",
+  "auth:error.apiKey.usageExceeded": "API Key 使用次数已达上限",
+  "auth:error.apiKey.refill": "API Key 配额补充配置无效",
+  "auth:error.apiKey.userBanned": "该用户已被封禁",
+  "auth:error.apiKey.unauthorized": "该 API Key 无权执行此请求"
 }

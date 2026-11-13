@@ -1187,5 +1187,12 @@
   "auth:error.twoFactor.totpNotConfigured": "TOTP is not configured",
   "auth:error.user.idCannotBeUpdated": "User ID cannot be updated",
   "admin:error.cannotSetUsersPhoneNumber": "You are not allowed to set users phone number",
-  "organization:error.invitation.cannotList": "You are not allowed to list invitations"
+  "organization:error.invitation.cannotList": "You are not allowed to list invitations",
+  "auth:error.apiKey.invalid": "Invalid API key",
+  "auth:error.apiKey.disabled": "API key is disabled",
+  "auth:error.apiKey.expired": "API key has expired",
+  "auth:error.apiKey.usageExceeded": "API key usage limit reached",
+  "auth:error.apiKey.refill": "API key refill configuration is invalid",
+  "auth:error.apiKey.userBanned": "User is banned",
+  "auth:error.apiKey.unauthorized": "API key is not authorized for this request"
 }

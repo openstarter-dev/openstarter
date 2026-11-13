@@ -1,9 +1,9 @@
 import {
   adminClient,
+  apiKeyClient,
   anonymousClient,
   createAuthClient,
   emailOTPClient,
-  lastLoginMethodClient,
   magicLinkClient,
   oneTapClient,
   organizationClient,
@@ -38,8 +38,8 @@ export const authClient = createAuthClient({
     twoFactorClient({ onTwoFactorRedirect: goToTwoFactor }),
     anonymousClient(),
     adminClient({ ac: platformAc, roles: platformRoles }),
+    apiKeyClient(),
     organizationClient(),
-    lastLoginMethodClient(),
   ],
 });
 
@@ -85,8 +85,8 @@ export const getOneTapAuthClient = (
         twoFactorClient({ onTwoFactorRedirect: goToTwoFactor }),
         anonymousClient(),
         adminClient({ ac: platformAc, roles: platformRoles }),
+        apiKeyClient(),
         organizationClient(),
-        lastLoginMethodClient(),
         oneTapClient({ clientId }),
       ],
     }) as unknown as AuthClientWithOneTap;

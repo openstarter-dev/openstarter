@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Route as DashboardRoute } from "./_app/dashboard";
 import { Route as AccountsRoute } from "./_app/settings/accounts";
-import { Route as ApiKeysRoute } from "./_app/settings/apikeys";
 import { Route as BillingRoute } from "./_app/settings/billing";
 import { Route as CreditsRoute } from "./_app/settings/credits";
 import { Route as PaymentsRoute } from "./_app/settings/payments";
@@ -30,7 +29,6 @@ const ROUTE_QUERY_KEYS: Record<
     ],
     route: DashboardRoute,
   },
-  "/_app/settings/apikeys": { keys: [["user", "apikeys"]], route: ApiKeysRoute },
   "/_app/settings/billing": {
     keys: [
       ["user", "subscription"],

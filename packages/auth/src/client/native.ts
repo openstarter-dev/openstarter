@@ -17,7 +17,6 @@ export {
   anonymousClient,
   emailOTPClient,
   inferAdditionalFields,
-  lastLoginMethodClient,
   magicLinkClient,
   organizationClient,
   twoFactorClient,

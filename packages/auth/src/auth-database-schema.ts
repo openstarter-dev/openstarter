@@ -1,5 +1,6 @@
 import {
   account,
+  apikey,
   deviceCode,
   invitation,
   member,
@@ -15,6 +16,7 @@ import {
 
 export const authSchema = {
   account,
+  apikey,
   deviceCode,
   invitation,
   member,

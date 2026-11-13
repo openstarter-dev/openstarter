@@ -1,3 +1,4 @@
+import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import {
   Card,
@@ -24,37 +25,67 @@ import {
   TableHeader,
   TableRow,
 } from "@openstarter/ui-web/components/table";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { user } from "@/modules/user/lib/api";
-import { m } from "@openstarter/i18n-web/messages";
 
+import { authClient } from "@/lib/auth-client";
+
+const apiKeysQueryKey = ["user", "apikeys"] as const;
+
+/**
+ * API Key 管理：签发 / 列表 / 吊销全部走 better-auth 官方 `@better-auth/api-key` 插件。
+ * 明文 key 只在创建响应里出现一次；列表仅返回可展示前缀（`start`）。
+ */
 export function ApiKeysPage() {
+  const queryClient = useQueryClient();
   const [createOpen, setCreateOpen] = useState(false);
-  const [title, setTitle] = useState("");
+  const [name, setName] = useState("");
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
-  const keysQuery = useQuery(user.queries.apiKeys());
+  const keysQuery = useQuery({
+    queryKey: apiKeysQueryKey,
+    queryFn: async () => {
+      const { data, error } = await authClient.apiKey.list({ query: {} });
+      if (error) {
+        throw new Error(error.message || "Failed to load API keys");
+      }
+      return data?.apiKeys ?? [];
+    },
+  });
 
   const createMutation = useMutation({
-    ...user.mutations.createApiKey(),
-    onSuccess: (data) => {
-      setRevealedKey(data.key);
-      setTitle("");
+    mutationFn: async (keyName: string) => {
+      const { data, error } = await authClient.apiKey.create({ name: keyName });
+      if (error) {
+        throw new Error(error.message || "Failed to create API key");
+      }
+      return data;
+    },
+    onSuccess: async (data) => {
+      setRevealedKey(data?.key ?? null);
+      setName("");
       setCreateOpen(false);
       toast.success(m["settings.apikeys.created"]());
+      await queryClient.invalidateQueries({ queryKey: apiKeysQueryKey });
     },
   });
 
   const revokeMutation = useMutation({
-    ...user.mutations.revokeApiKey(),
-    onSuccess: () => {
+    mutationFn: async (keyId: string) => {
+      const { error } = await authClient.apiKey.delete({ keyId });
+      if (error) {
+        throw new Error(error.message || "Failed to revoke API key");
+      }
+      return keyId;
+    },
+    onSuccess: async () => {
       toast.success(m["settings.apikeys.revoke_success"]());
+      await queryClient.invalidateQueries({ queryKey: apiKeysQueryKey });
     },
   });
 
-  const items = keysQuery.data?.items ?? [];
+  const items = keysQuery.data ?? [];
 
   return (
     <Card>
@@ -91,9 +122,9 @@ export function ApiKeysPage() {
               <TableBody>
                 {items.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="font-medium">{item.title}</TableCell>
+                    <TableCell className="font-medium">{item.name ?? "-"}</TableCell>
                     <TableCell className="font-mono text-muted-foreground">
-                      {item.keyPrefix}...
+                      {item.start ?? "-"}...
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {new Date(item.createdAt).toLocaleDateString()}
@@ -131,15 +162,15 @@ export function ApiKeysPage() {
             <Label htmlFor="apikey-title">{m["settings.apikeys.key_title"]()}</Label>
             <Input
               id="apikey-title"
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => setName(e.target.value)}
               placeholder={m["settings.apikeys.key_placeholder"]()}
-              value={title}
+              value={name}
             />
           </div>
           <DialogFooter>
             <Button
-              disabled={title.trim().length === 0 || createMutation.isPending}
-              onClick={() => createMutation.mutate(title.trim())}
+              disabled={name.trim().length === 0 || createMutation.isPending}
+              onClick={() => createMutation.mutate(name.trim())}
               type="button"
             >
               {createMutation.isPending
