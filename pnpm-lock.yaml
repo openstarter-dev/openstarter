@@ -190,9 +190,6 @@ importers:
 
   apps/extension:
     dependencies:
-      '@openstarter/api':
-        specifier: workspace:*
-        version: link:../../packages/api
       '@openstarter/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -236,6 +233,9 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
     devDependencies:
+      '@openstarter/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@tailwindcss/vite':
         specifier: ^4.3.1
         version: 4.3.1(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))
@@ -293,9 +293,6 @@ importers:
       '@babel/runtime':
         specifier: ^7
         version: 7.29.7
-      '@openstarter/api':
-        specifier: workspace:*
-        version: link:../../packages/api
       '@openstarter/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -330,6 +327,9 @@ importers:
       '@babel/preset-react':
         specifier: ^8.0.1
         version: 8.0.1(@babel/core@7.29.7)
+      '@openstarter/api':
+        specifier: workspace:*
+        version: link:../../packages/api
       '@tarojs/cli':
         specifier: ^4
         version: 4.2.1(@types/node@26.0.1)

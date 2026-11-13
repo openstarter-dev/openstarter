@@ -1,5 +1,4 @@
-import type { AppType } from "@openstarter/api";
-import { hc } from "hono/client";
+import { hcWithType } from "@openstarter/api/client";
 
 import type { CookieReader } from "./session";
 import { readSessionToken } from "./session";
@@ -13,7 +12,7 @@ export async function buildAuthHeader(
 }
 
 export function createExtensionApiClient(origin: string, cookieReader: CookieReader) {
-  return hc<AppType>(origin, {
+  return hcWithType(origin, {
     headers: () => buildAuthHeader(origin, cookieReader),
   });
 }

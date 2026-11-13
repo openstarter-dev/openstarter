@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7",
-    "@openstarter/api": "workspace:*",
     "@openstarter/auth": "workspace:*",
     "@openstarter/shared": "workspace:*",
     "@tarojs/components": "^4.2.1",
@@ -25,6 +24,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^8.0.1",
+    "@openstarter/api": "workspace:*",
     "@tarojs/cli": "^4",
     "@tarojs/plugin-framework-react": "^4",
     "@tarojs/plugin-platform-weapp": "^4",
