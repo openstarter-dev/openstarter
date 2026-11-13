@@ -1,4 +1,4 @@
-import { hcWithType } from "@openstarter/api/client";
+import { createApiClient } from "@openstarter/api/client";
 import { createTaroFetch } from "./taro-fetch";
 import { useAuthStore } from "@/stores/auth-store";
 import { removeToken } from "@/utils/storage";
@@ -12,7 +12,8 @@ function handleUnauthorized() {
 }
 
 export function createClient() {
-  return hcWithType(getApiBaseUrl(), {
+  return createApiClient({
+    baseUrl: getApiBaseUrl(),
     fetch: createTaroFetch(handleUnauthorized),
   });
 }
