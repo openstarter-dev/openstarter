@@ -21,7 +21,6 @@ import { referralRouter } from "./modules/referral";
 import { aiModelsRouter } from "./modules/ai/catalog/router";
 import { aiRouter } from "./modules/ai/media/router";
 import { llmRouter } from "./modules/ai/llm";
-import { authRouter } from "./modules/auth/router";
 import { billingRouter } from "./modules/billing/router";
 import { configRouter } from "./modules/config/router";
 import { contentRouter } from "./modules/content/router";
@@ -51,13 +50,9 @@ app.onError((err, c) => {
 // basePath 作用域：以下所有路由经 /api 前缀暴露。
 const api = app.basePath("/api");
 
-// 精确拦截原生 unlink-account：条件 DELETE 在数据库语句级维护"至少一个登录方式"不变量，
-// 必须先于 Better Auth wildcard 注册，防止并发直接 API 请求绕过。
-api.route("/", authRouter);
-
-// better-auth handler（R4.1）：/api/auth/* 其余能力全量委托给 better-auth，
-// 现有登录/注册/OAuth/magicLink/emailOTP/passkey/twoFactor/organization 等能力经此 catch-all 暴露。
-// 注册在 authRouter 之后，特定路径（unlink-account）优先于通配符。
+// better-auth handler（R4.1）：/api/auth/* 全量委托给 better-auth，
+// 登录/注册/OAuth/magicLink/emailOTP/passkey/twoFactor/organization 等能力经此 catch-all 暴露；
+// 账号解绑的「至少保留一个登录方式」由官方 unlinkAccount 内建（allowUnlinkingAll 默认 false）。
 api.on(["POST", "GET"], "/auth/*", (c) => createAuth().handler(c.req.raw));
 
 // 功能域路由挂载。模块路由使用相对路径，统一经 basePath 添加 /api 前缀。
@@ -75,7 +70,7 @@ const routes = api
   .route("/", aiRouter) // POST/GET /api/ai-tasks, GET /api/ai-tasks/:id
   .route("/", llmRouter) // POST/GET /api/llm/chats, /api/llm/chats/:id/messages
   .route("/", aiModelsRouter) // GET /api/ai/models
-  .route("/", supportRouter) // /api/tickets*, /api/apikeys
+  .route("/", supportRouter) // /api/tickets*
   .route("/", contentRouter) // /api/posts*, /api/blog*, /api/taxonomy*, /api/seo*
   .route("/", referralRouter) // GET/POST /api/referral/*
   .route("/mcp", mcpRouter) // ALL /api/mcp — MCP streamable HTTP 端点（API Key 鉴权）

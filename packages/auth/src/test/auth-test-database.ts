@@ -75,25 +75,6 @@ const CREATE_TABLE_STATEMENTS = [
     activated_at integer not null,
     trial_ends_at integer not null
   )`,
-  `create table role (
-    id text primary key,
-    name text not null unique,
-    title text not null,
-    description text,
-    status text not null,
-    created_at integer not null,
-    updated_at integer not null,
-    sort integer not null default 0
-  )`,
-  `create table user_role (
-    id text primary key,
-    user_id text not null,
-    role_id text not null,
-    created_at integer not null,
-    updated_at integer not null,
-    expires_at integer,
-    unique (user_id, role_id)
-  )`,
   `create table credit (
     id text primary key,
     user_id text not null,
@@ -118,8 +99,6 @@ const CREATE_TABLE_STATEMENTS = [
 
 const DATA_TABLES = [
   "credit",
-  "user_role",
-  "role",
   "user_invite",
   "invite_code",
   "subscription",

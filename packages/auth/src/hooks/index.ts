@@ -12,8 +12,9 @@
 // 钩子结构的基础上**叠加**初始角色与初始积分授予——better-auth 对 OAuth 首登与邮箱注册
 // 两条首次创建路径均触发 `create.after`，故两者一并覆盖。两项授予均受 Config 开关控制
 // （`grant*ForNewUser` 内部判定 `initial_role_enabled` / `initial_credits_enabled`）。并发
-// 幂等由数据库强约束保证：`user_role(user_id, role_id)` 唯一，welcome credit 使用稳定
-// `transaction_no`；授予失败经 `@openstarter/shared/logger` 记录且**不中断用户创建主流程**。
+// 幂等由幂等写入与数据库约束共同保证：初始角色直接覆盖 `user.role`（同值重写无副作用），
+// welcome credit 使用稳定 `transaction_no`；授予失败经 `@openstarter/shared/logger` 记录
+// 且**不中断用户创建主流程**。
 //
 // 依赖方向合法：auth(L3) → billing(L2)（`grantCreditsForNewUser`）、auth 内 `./rbac`
 // （`grantRoleForNewUser`）；billing 不反向依赖 auth，无 import 环。
@@ -54,8 +55,8 @@ type OrganizationHooks = NonNullable<OrganizationOptions["organizationHooks"]>;
 // ─── 新用户初始化（New user initialization，R5.5 / R7.6 / R13.7）──────────────────
 
 /**
- * 为新用户授予初始角色。并发幂等由 `user_role(user_id, role_id)` 唯一约束与原子 upsert
- * 保证，避免“先查再写”的竞态窗口。
+ * 为新用户授予初始角色：写 `user.role`（与 better-auth admin 插件同一字段），
+ * 同值重复写入天然幂等，无需“先查再写”。
  */
 function initializeNewUserRole(userId: string, configs: Record<string, string>): Promise<void> {
   return grantRoleForNewUser({ configs, userId });
