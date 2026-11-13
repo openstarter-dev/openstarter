@@ -33,6 +33,8 @@ app.onError((err, c) => {
   return c.json(respErr("Internal Server Error"), 500);
 });
 
+app.notFound((c) => c.json(respErr("not found"), 404));
+
 const api = app.basePath("/api");
 
 api.on(["POST", "GET"], "/auth/*", (c) => createAuth().handler(c.req.raw));

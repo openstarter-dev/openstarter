@@ -1,7 +1,7 @@
-import { zValidator } from "@hono/zod-validator";
 import { respData, respErr } from "@openstarter/shared";
 import { Hono } from "hono";
 
+import { zValidator } from "../../lib/validator";
 import { requireAuth } from "../../middleware/auth";
 import { createSchema, listQuery } from "../../schema/demo";
 
@@ -22,9 +22,9 @@ export const demoRouter = new Hono()
   .get("/private-data", requireAuth, (c) => {
     const session = c.get("session");
     if (!session) {
-      return c.json({ message: "Unauthorized" }, 401);
+      return c.json(respErr("unauthorized"), 401);
     }
-    return c.json({ message: "This is private", user: session.user });
+    return c.json(respData({ message: "This is private", user: session.user }));
   })
   // Notes endpoints (demo)
   .get("/notes", requireAuth, zValidator("query", listQuery), (c) => {
