@@ -1,5 +1,4 @@
 import type { TranslationKey } from "@openstarter/i18n-web";
-// biome-ignore lint/performance/noNamespaceImport: zod 的 z.infer 等类型助手以命名空间形式导出，具名导入会丢失部分类型推断；沿用 packages/auth/src/env.ts 同款写法。
 import * as z from "zod";
 import type { AuthErrorCode } from "./server";
 
@@ -78,7 +77,6 @@ const ERROR_MESSAGES = {
   ACCESS_DENIED: "auth:error.device.accessDenied",
   ACCOUNT_NOT_FOUND: "auth:error.user.accountNotFound",
   ACCOUNT_TEMPORARILY_LOCKED: "auth:error.user.accountTemporarilyLocked",
-  // API Key 插件（@better-auth/api-key）错误码：语义相近的归到同一文案键。
   INVALID_API_KEY: "auth:error.apiKey.invalid",
   KEY_NOT_FOUND: "auth:error.apiKey.invalid",
   KEY_NOT_RECOVERABLE: "auth:error.apiKey.invalid",
@@ -143,8 +141,6 @@ const ERROR_MESSAGES = {
   FAILED_TO_CREATE_USER: "auth:error.account.creation",
   FAILED_TO_CREATE_VERIFICATION: "auth:error.failedToCreateVerification",
   FAILED_TO_DELETE_ANONYMOUS_USER: "auth:error.user.failedToDeleteAnonymousUser",
-  // 由 anonymous / organization / changeEmail 插件贡献的错误码（随第三方依赖落位后
-  // auth.$ERROR_CODES 完整解析而补全其翻译键映射）。
   FAILED_TO_DELETE_ANONYMOUS_USER_SESSIONS: "auth:error.user.failedToDeleteAnonymousUserSessions",
   FAILED_TO_GET_SESSION: "auth:error.session.retrieval",
   FAILED_TO_GET_USER_INFO: "auth:error.user.infoNotFound",
@@ -158,9 +154,6 @@ const ERROR_MESSAGES = {
   INVALID_BACKUP_CODE: "auth:error.code.invalid",
   INVALID_CALLBACK_URL: "auth:error.url.invalidCallbackUrl",
   INVALID_CODE: "auth:error.code.invalid",
-  // 由 deviceAuthorization 插件（RFC 8628）贡献的错误码：CLI 设备授权流的
-  // 取码/轮询/批准/拒绝端点经此映射到可翻译消息键。注意 USER_NOT_FOUND 与
-  // FAILED_TO_CREATE_SESSION 已在上方由通用 better-auth 错误码覆盖，此处不重复。
   INVALID_DEVICE_CODE: "auth:error.device.invalidDeviceCode",
   INVALID_DEVICE_CODE_STATUS: "auth:error.device.invalidStatus",
   INVALID_EMAIL: "auth:error.credentials.email.invalid",

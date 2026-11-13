@@ -42,30 +42,12 @@ import {
 } from "./rbac";
 import { SocialProvider, VerificationType } from "./types";
 
-// better-auth 的邮件回调契约要求返回 Promise<void>，而 @openstarter/email 的 sendEmail 返回
-// 结构化 EmailSendResult（R22.3，供程序化调用方判断成败）。此轻量适配器丢弃返回值
-// （better-auth 不消费该结果，且投递失败已在 sendEmail 内部经 logger 记录），
-// 使既有 7 处邮件回调无需改写即满足返回类型契约——保留发信能力，叠加而非裁剪。
 const sendEmail = async (params: SendEmailParams): Promise<void> => {
   await deliverEmail(params);
 };
 
 const emailCallbacks = createAuthEmailCallbacks(sendEmail);
 
-// ─── 运行时配置读取（Runtime config-driven enablement）──────────────────────────
-//
-// 此前 OAuth provider 与无密码插件是否注册仅由 `env` 决定（client_id/secret 是否齐备），
-// admin 后台的 `*_auth_enabled` / `magic_link_enabled` / `email_otp_enabled` 开关只用于前端
-// 是否渲染按钮。这导致「开关关闭但 env 已配置」时后端登录通路仍可达，是行为回退。
-//
-// 下面在模块加载期读取 `getAllConfigs()`（环境变量 + DB 合并，带 1h 缓存），与 `env` **共同**
-// 决定是否注册对应 provider / 插件：开关未开启或凭据缺失任一者不满足即跳过注册，
-// 使「开关关闭」在后端真正生效（better-auth 对未注册 provider/plugin 的端点返回 404）。
-//
-// 注意：这是**启动期一次读取 + 单例构造**——与现有 env 驱动语义一致（关闭需重启进程方能解注册）。
-// 管理员后台保存配置会失效 `getAllConfigs` 的缓存（见 `shared/config.ts`），
-// 但已构造的 better-auth 单例不会重建；运行期切换仍由前端按公开配置决定是否展示按钮兜底。
-// 将来如需运行期实时生效，需把 `auth` 改为按请求重建或加守卫中间件拦截已关闭端点。
 const runtimeConfigs = await getAllConfigs();
 const isEnabled = (key: string): boolean => runtimeConfigs[key] === "true";
 const googleEnabled =
@@ -84,31 +66,19 @@ const otpExpiresIn = runtimeConfigs.email_otp_expires_in
   ? Number(runtimeConfigs.email_otp_expires_in)
   : OTP_EXPIRES_IN;
 
-// ─── 部署面推导（Deployment-derived switches）────────────────────────────────
-// 唯一事实源仍是 apps/web/.env 的 `VITE_APP_URL`。与部署环境绑定的开关都从它推导，
-// 不再单独读 `NODE_ENV`：Worker 上 `NODE_ENV` 常常缺省，会把生产当开发处理
-// （trustedOrigins 放开 localhost、better-auth 生产行为不生效）。
 const appUrl = getAppUrl();
 const isHttpsAppUrl = appUrl.startsWith("https://");
 const allowLocalOrigins = isLoopbackAppUrl(appUrl);
 
-// ─── 跨端来源白名单（trustedOrigins）──────────────────────────────────────────
-// 默认只信任：baseURL 自身 origin（better-auth 自动追加）+ 移动端 scheme + Apple 登录域名。
-// 扩展 origin 与自定义域名一律显式配置，不再默认信任 `chrome-extension://` 前缀。
 const mobileOrigin = mobileSchemeOrigin(env.MOBILE_APP_SCHEME);
 const extensionOrigin = env.EXTENSION_ORIGIN.trim();
 const extraTrustedOrigins = parseOriginList(env.TRUSTED_ORIGINS);
 
-// One Tap 的 audience 必须与客户端拿到的 client id 一致：DB 配置优先（它是公开配置的来源），
-// env 仅作兜底。任一缺失或 Google provider 未注册时不挂载插件——否则回调会抛
-// BAD_REQUEST: Google client ID is required。
 const oneTapClientId = runtimeConfigs.google_client_id || env.GOOGLE_CLIENT_ID;
 const oneTapEnabled =
   isEnabled("google_one_tap_enabled") && googleEnabled && Boolean(oneTapClientId);
 
 export const auth = betterAuth({
-  // 显式声明账户关联策略：只允许「provider 邮箱已验证 + 本地邮箱已验证」的隐式关联，
-  // 不额外信任任何第三方 provider（trustedProviders 为空是默认值，此处写死以表达意图）。
   account: {
     accountLinking: {
       enabled: true,
@@ -117,8 +87,6 @@ export const auth = betterAuth({
   },
   advanced: {
     cookiePrefix: "openstarter",
-    // 跨站 state cookie（移动端深链回跳等）只在 https 下启用；http 本地调试保持默认
-    // lax + 非 secure，否则浏览器会直接丢弃该 cookie，OAuth/Magic Link 回调丢 state。
     cookies: {
       state: {
         attributes: isHttpsAppUrl ? { sameSite: "none", secure: true } : {},
@@ -126,10 +94,6 @@ export const auth = betterAuth({
     },
   },
   appName: "OpenStarter",
-  // 显式传入而非依赖 better-auth 内部的 `BETTER_AUTH_URL` 嗅探：唯一事实源是
-  // apps/web/.env 的 `VITE_APP_URL`（Worker 上由 wrangler vars 注入 process.env）。
-  // 显式设置还能把 trustedOrigins 钉在真实域名上——baseURL 为空时 better-auth 会用
-  // 请求自身推导可信来源，CSRF 原点校验形同放开。
   baseURL: appUrl,
   database: drizzleAdapter(db(), {
     provider: getAuthAdapterProvider(),
@@ -145,7 +109,6 @@ export const auth = betterAuth({
   },
   emailVerification: {
     autoSignInAfterVerification: true,
-    // 由后台开关控制（默认发送，显式关闭才停）：开关此前只影响前端展示，改不到发信行为。
     sendOnSignUp: runtimeConfigs.email_verification_enabled !== "false",
     sendVerificationEmail: emailCallbacks.sendVerificationEmail,
   },
@@ -153,8 +116,6 @@ export const auth = betterAuth({
     log: (level, ...args) => logger[level](...args),
   },
   plugins: [
-    // Magic Link 与 Email OTP 插件按 `*_enabled` 开关条件注册——开关关闭时插件不挂载，
-    // 对应端点（/sign-in/magic-link、/sign-in/email-otp）随之不存在，避免「开关关闭后端仍可登录」。
     ...(magicLinkEnabled
       ? [
           magicLink({
@@ -181,8 +142,6 @@ export const auth = betterAuth({
             expiresIn: otpExpiresIn,
             sendVerificationOTP({ email, otp, type }, ctx) {
               if (type !== "sign-in") {
-                /* Handle other types if you want to use OTP verification
-                for other purposes (e.g. change email, delete account, etc.) */
                 return Promise.resolve();
               }
 
@@ -202,13 +161,8 @@ export const auth = betterAuth({
     passkey(),
     twoFactor(),
     anonymous(),
-    // 用户/会话/封禁/冒充/角色管理全部交给 better-auth：`user.role` 是角色唯一载体
-    // （支持逗号分隔多角色）。语句与角色定义在 rbac/access.ts，插件端点鉴权与业务端点
-    // 的 userHasPermission 共用同一组对象，避免两边判定不一致。
-    // API Key：官方插件接管签发 / 哈希存储 / 校验 / 限流 / 过期，UI 走 authClient.apiKey.*
     apiKey({
       defaultPrefix: "sk_",
-      // 与旧 UI 展示一致：sk_ + 8 位，共 11 个字符
       startingCharactersConfig: { charactersLength: 11 },
       requireName: true,
     }),
@@ -245,32 +199,18 @@ export const auth = betterAuth({
       },
       teams: organizationTeams,
     }),
-    // One Tap 依赖 socialProviders.google 提供 audience，故与 Google 登录同条件注册；
-    // 关闭时不挂载，端点 404（此前无条件挂载会在回调时抛 "Google client ID is required"）。
     ...(oneTapEnabled && oneTapClientId ? [oneTap({ clientId: oneTapClientId })] : []),
     expo(),
-    // 设备授权（RFC 8628）：CLI 登录经 POST /api/auth/device/code 取码 → 浏览器 /device 页输入
-    // user_code 并 approve → CLI 轮询 /api/auth/device/token 拿会话 token（即 access_token，
-    // 带 `.` 签名，满足下方 bearer requireSignature:true）。deviceCode 模型经 authSchema 注入。
     deviceAuthorization({
       deviceCodeLength: 32,
       expiresIn: "10m",
       interval: "5s",
       userCodeLength: 8,
     }),
-    // Bearer 转发（浏览器插件端会话桥接，见 docs/superpowers/specs/2026-08-01-browser-extension-app-design.md
-    // §3.2/§4）：插件把 web 端的会话 cookie 值原样作为 Authorization: Bearer 头转发；
-    // requireSignature: true 拒绝未签名的裸 token，正常路径（真实会话 cookie 值本就带签名）不受影响。
     bearer({ requireSignature: true }),
-    // 负责把 Set-Cookie 转发给 TanStack Start 的收尾插件，必须是数组最后一项。
     tanstackStartCookies(),
   ],
-  // 显式开启限流：better-auth 默认仅在 `NODE_ENV === "production"` 时生效，而 Worker 里
-  // NODE_ENV 常常缺省，生产将完全没有频率限制（登录 / OTP / Magic Link / 匿名登录可被爆破）。
-  // 注意默认 `storage: "memory"` 在 Workers 上按 isolate 独立计数；需要跨实例严格限流时，
-  // 接入 secondaryStorage（KV/Upstash）并改为 storage: "secondary-storage"。
   rateLimit: {
-    // 仅测试环境关闭：property test 会在同一 IP 上高并发打认证端点，限流会造成偶发失败。
     enabled: env.NODE_ENV !== NodeEnv.TEST,
     max: 100,
     window: 60,
@@ -278,14 +218,9 @@ export const auth = betterAuth({
   session: {
     cookieCache: {
       enabled: true,
-      // 采样自 cookie 的会话最多缓存 60s：5 分钟会让「注销会话 / 封禁 / 删号」在当前浏览器
-      // 延迟 5 分钟生效，60s 在命中率与撤销时效之间取平衡。
       maxAge: 60,
     },
   },
-  // 条件注册：仅当对应 OAuth 的 admin 开关开启且 env client id/secret 都齐备时才注册该 provider。
-  // 开关关闭即解注册（端点 404），凭据缺失亦跳过，避免给 Better-Auth 传空字符串触发未配置告警。
-  // 使用对象字面量 + 条件 spread，保留 Better-Auth 对 socialProviders 键集合的静态推断。
   socialProviders: {
     ...(googleEnabled
       ? {
@@ -314,21 +249,10 @@ export const auth = betterAuth({
       : {}),
   },
   trustedOrigins: [
-    // 移动端深链回跳（Expo Router scheme，见 apps/mobile/app.config.ts），
-    // 与 expoClient({ scheme }) 及 cookiePrefix 同名；由 MOBILE_APP_SCHEME 配置。
     mobileOrigin,
-    /* Needed only for Apple ID authentication */
     "https://appleid.apple.com",
-    // 扩展页面 origin 与自定义域名一律显式声明（默认「白名单为空」）：
-    // - EXTENSION_ORIGIN：chrome-extension://<id>，仅在扩展直接发起带 cookie 的请求时需要；
-    //   Bearer 桥接不需要它，故默认不配置也不影响扩展登录。
-    // - TRUSTED_ORIGINS：逗号分隔的额外来源，覆盖自建域名、局域网调试等。
     ...(extensionOrigin ? [extensionOrigin] : []),
     ...extraTrustedOrigins,
-    // 本地调试来源只在 baseURL 本身是 loopback 时放开——不能用 NODE_ENV 判断：
-    // auth env 预设把缺省的 NODE_ENV 兜底成 "development"，Worker 上会恒为真，
-    // 生产也会信任 localhost。非 loopback 的来源（含局域网 IP）由 baseURL 自身
-    // 的 origin 自动进入白名单（better-auth 会把 baseURL 的 origin 追加进去）。
     ...(allowLocalOrigins ? ["http://localhost*", "https://localhost*"] : []),
   ],
   user: {
@@ -341,13 +265,6 @@ export const auth = betterAuth({
   },
 });
 
-/**
- * Factory accessor for the configured better-auth instance.
- *
- * Returns the module singleton so `packages/api`'s session middleware and
- * better-auth handler mount cheaply (no per-request re-initialization). This
- * preserves the documented `createAuth` contract consumed by `@openstarter/api`.
- */
 export const createAuth = () => auth;
 
 export type AuthErrorCode = keyof typeof auth.$ERROR_CODES;

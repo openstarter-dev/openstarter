@@ -43,7 +43,6 @@ describe("isLoopbackAppUrl", () => {
     "https://192.168.1.10:3000",
     "https://appleid.apple.com",
     "http://127.0.0.1.evil.com",
-    // 末尾斜杠已由 getAppUrl 归一化，未归一化的值不应被误判为本机
     "http://localhost:3000/",
   ])("does not treat %s as loopback", (url) => {
     expect(isLoopbackAppUrl(url)).toBe(false);

@@ -144,7 +144,6 @@ describe("Task 15.2 new user initialization hook", () => {
 
     await invokeCreateAfterHook();
 
-    // 列默认值为 user（admin 插件的 defaultRole），未知角色名不会写入。
     expect(await readRole()).toBe("user");
   });
 

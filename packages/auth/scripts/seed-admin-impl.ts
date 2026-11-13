@@ -1,10 +1,3 @@
-// packages/auth/scripts/seed-admin-impl.ts
-// 由 seed-admin.ts 在注入 apps/web/.env 后动态加载的实现模块。
-//
-// 密码使用与 Better-Auth 一致的 scrypt 实现（`better-auth/crypto.hashPassword`),
-// 写入 `account` 表的 `password` 字段;后续用该 email/password 在 /login 登录
-// 即可访问 /admin（角色 = `user.role` 字段，权限码见 rbac/access.ts）。
-
 import { PlatformRole } from "@openstarter/auth";
 import { account, user } from "@openstarter/db/schema";
 
@@ -14,7 +7,6 @@ import { getUuid } from "@openstarter/shared/id";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
 
-// ─── 参数解析 ─────────────────────────────────────────────────────────────
 
 interface SeedOptions {
   email: string;
@@ -75,14 +67,12 @@ if (!ADMIN_EMAIL.includes("@") || ADMIN_PASSWORD.length < 8) {
   process.exit(1);
 }
 
-// ─── 主体 ────────────────────────────────────────────────────────────────
 
 async function seedAdmin(options: SeedOptions): Promise<void> {
   const { email, password, name } = options;
   const passwordHash = await hashPassword(password);
   const now = new Date();
 
-  // 1) upsert user（角色即 `user.role`，admin 插件与平台授权共用该字段）
   const [existingUser] = await db().select().from(user).where(eq(user.email, email)).limit(1);
   let userId: string;
   if (existingUser) {
@@ -112,8 +102,6 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
     console.log(`[seed-admin] created user: ${email}`);
   }
 
-  // 2) upsert credential account
-  //   对齐 Better-Auth sign-up:providerId=credential、accountId=userId
   const [existingAccountRow] = await db()
     .select()
     .from(account)
@@ -138,7 +126,6 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
     console.log("[seed-admin] created credential account");
   }
 
-  // 3) 角色已在步骤 1 写入 `user.role`（admin 插件与平台授权共用该字段），此处无额外表操作
   console.log(`[seed-admin] role: ${PlatformRole.ADMIN}`);
 
   const loginUrl = (process.env.VITE_APP_URL ?? DEFAULT_APP_URL).replace(/\/+$/, "");

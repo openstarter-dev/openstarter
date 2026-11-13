@@ -1,6 +1,3 @@
-// packages/auth/src/bearer-session.test.ts —— 验证 bearer() 注册后，Better Auth 会话 cookie
-// 的值可以直接作为 Authorization: Bearer 请求头认证（浏览器插件端会话桥接的前提）。
-// 覆盖 R: docs/superpowers/specs/2026-08-01-browser-extension-app-design.md §3.2/§4。
 import { parseSetCookieHeader } from "better-auth/cookies";
 import { bearer } from "better-auth/plugins/bearer";
 import { getTestInstance } from "better-auth/test";
