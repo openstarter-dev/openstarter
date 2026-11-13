@@ -4,20 +4,10 @@ import postgres from "postgres";
 import { isCloudflareWorker, readCloudflareEnv } from "../utils/runtime";
 import type { Database, DbConfig } from "../types";
 
-// postgres.js singleton (Node only).
 let postgresDbInstance: Database | null = null;
 let postgresClient: ReturnType<typeof postgres> | null = null;
 
-/**
- * Create a postgres.js-backed Drizzle database.
- *
- * On Cloudflare Workers a fresh client is created per call (workerd forbids
- * reusing TCP sockets across requests); a Hyperdrive binding is preferred when
- * present so pooling happens at the edge. In Node the instance is cached when
- * `singleton` is enabled.
- */
 export function createPostgresDb(config: DbConfig): Database {
-  // biome-ignore lint/style/useDestructuring: <explanation>
   let url = config.url;
 
   if (isCloudflareWorker) {
@@ -72,7 +62,6 @@ export function createPostgresDb(config: DbConfig): Database {
   return drizzle({ client: serverlessClient }) as unknown as Database;
 }
 
-/** Close the cached postgres pool (singleton mode). */
 export async function closePostgresDb(): Promise<void> {
   if (postgresClient) {
     await postgresClient.end();

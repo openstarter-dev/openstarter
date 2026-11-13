@@ -1,17 +1,3 @@
-/**
- * PostgreSQL dialect schema definitions.
- *
- * Active when DATABASE_PROVIDER is `postgres`.
- * Exports the same symbol names and `$inferSelect` / `$inferInsert` types as
- * the `schema.sqlite` dialect (D1) so callers and drizzle-kit remain
- * dialect-agnostic.
- *
- * Composite / secondary performance indexes (e.g. the credit FIFO index
- * `idx_credit_consume_fifo`) are declared per table via the table callback and
- * kept equivalent across all three dialects (same index names, same column
- * order). Column-level `.unique()` constraints are part of the data model.
- */
-
 import {
   boolean,
   index,
@@ -24,7 +10,6 @@ import {
 
 const table = pgTable;
 
-// ─── Auth ────────────────────────────────────────────────────────────────────
 
 export const user = table(
   "user",
@@ -41,7 +26,6 @@ export const user = table(
     isAnonymous: boolean("is_anonymous").default(false),
     locale: text("locale").notNull().default(""),
     name: text("name").notNull(),
-    // 平台角色唯一载体（better-auth admin 插件同字段）：默认 user，非空。
     role: text("role").default("user").notNull(),
     twoFactorEnabled: boolean("two_factor_enabled").default(false),
     updatedAt: timestamp("updated_at")
@@ -249,9 +233,6 @@ export const teamMember = table(
   ],
 );
 
-// ─── Device Authorization (RFC 8628) ─────────────────────────────────────────
-// Better Auth deviceAuthorization 插件要求 deviceCode 模型：CLI 登录经设备授权流写于此。
-// 插件字段契约见 better-auth@1.7 dist/plugins/device-authorization/index.d.mts。
 
 export const deviceCode = table(
   "device_code",
@@ -268,13 +249,11 @@ export const deviceCode = table(
     userId: text("user_id"),
   },
   (t) => [
-    // better-auth 1.7 要求 user_code 唯一（1.6 只有普通索引）。
     uniqueIndex("uq_device_code_user_code").on(t.userCode),
     index("idx_device_code_status").on(t.status),
   ],
 );
 
-// ─── Content ─────────────────────────────────────────────────────────────────
 
 export const config = table("config", {
   name: text("name").unique().notNull(),
@@ -335,7 +314,6 @@ export const post = table(
   (t) => [index("idx_post_type_status").on(t.type, t.status)],
 );
 
-// ─── Business ────────────────────────────────────────────────────────────────
 
 export const order = table(
   "order",
@@ -478,8 +456,6 @@ export const credit = table(
   ],
 );
 
-// API Key 模型对齐 better-auth `@better-auth/api-key` 的 `apikey` schema：
-// 字段名与语义直接取自插件（key = 哈希值、start = 可展示前缀、referenceId = 所属用户）。
 export const apikey = table(
   "apikey",
   {
@@ -517,7 +493,6 @@ export const apikey = table(
   ],
 );
 
-// ─── AI ──────────────────────────────────────────────────────────────────────
 
 export const aiModel = table(
   "ai_model",
@@ -624,7 +599,6 @@ export const chatMessage = table(
   ],
 );
 
-// ─── Tickets (support) ─────────────────────────────────────────────────────────
 
 export const ticket = table(
   "ticket",
@@ -659,7 +633,6 @@ export const ticketMessage = table(
   (t) => [index("idx_ticket_message_ticket").on(t.ticketId)],
 );
 
-// ─── Invite Codes ──────────────────────────────────────────────────────────────
 
 export const inviteCode = table(
   "invite_code",
@@ -697,7 +670,6 @@ export const userInvite = table(
   ],
 );
 
-// ─── Referral（分销：推荐码 / 关系 / 佣金） ────────────────────────────────────
 
 export const referral = table(
   "referral",
@@ -766,7 +738,6 @@ export const commission = table(
   ],
 );
 
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 export type User = typeof user.$inferSelect;
 export type NewUser = typeof user.$inferInsert;

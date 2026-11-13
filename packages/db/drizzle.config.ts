@@ -1,19 +1,5 @@
 import { buildConfigFor, loadWebEnv, resolveDbUrl } from "./src/config/drizzle.shared";
 
-/**
- * drizzle-kit config for LOCAL DEVELOPMENT / migration authoring.
- *
- * Environment comes from `apps/web/.env` (the monorepo's single env source of
- * truth), loaded explicitly below because drizzle-kit's cwd is `packages/db`.
- *
- * Dispatches on `DATABASE_PROVIDER` (mirroring `drizzle.config.prod.ts`):
- *
- * - `d1` (default): authors the sqlite migrations shared with the cloud D1
- *   target against a local file database. A `file:` URL from `apps/web/.env`
- *   is honored; anything else is ignored — the cloud target is managed by
- *   `drizzle.config.prod.ts` via the d1-http driver.
- * - `postgres`: uses the `apps/web/.env` `DATABASE_URL` directly.
- */
 
 loadWebEnv();
 

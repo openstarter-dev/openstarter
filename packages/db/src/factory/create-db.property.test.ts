@@ -12,10 +12,6 @@ const invalidProviderArbitrary = fc
 
 const buildConfig = (provider: string): DbConfig => ({
   provider,
-  // postgres elaborates a real driver constructor on the bench against a
-  // non-functional URL (postgres.js connects lazily, so nothing dials out);
-  // d1 outside Workers falls back to a local sqlite database — `:memory:` keeps
-  // the property test from leaving a file behind.
   url: provider === "d1" ? ":memory:" : "postgres://localhost:65535/null",
 });
 
@@ -36,10 +32,6 @@ describe("createDb dialect guard (Property 1)", () => {
       fc.property(validProviderArbitrary, (provider) => {
         const config = buildConfig(provider);
 
-        // postgres reaches its driver constructor and d1 throws on the missing
-        // binding — the contract is that the dialect guard never fires for a
-        // supported literal, so whatever runtime error emerges must NOT be the
-        // unsupported-dialect error.
         try {
           createDb(config);
         } catch (error) {

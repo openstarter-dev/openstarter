@@ -3,13 +3,6 @@ import { closePostgresDb, createPostgresDb } from "../drivers/postgres";
 import type { Database, DbConfig } from "../types";
 import { withSqliteCompat } from "./compat/sqlite";
 
-/**
- * Multi-dialect connection factory. Dispatches on `config.provider` and wraps
- * the D1 driver in the sqlite compat proxy so call sites stay dialect-agnostic
- * (`.for("update")` is a no-op and D1 has no interactive transactions).
- *
- * An unsupported `provider` throws immediately (R1.4).
- */
 export function createDb(config: DbConfig): Database {
   switch (config.provider) {
     case "d1":
@@ -21,7 +14,6 @@ export function createDb(config: DbConfig): Database {
   }
 }
 
-/** Close the cached postgres pool for the configured provider (Node only). */
 export async function closeDb(config: DbConfig): Promise<void> {
   if (config.provider === "postgres") {
     await closePostgresDb();

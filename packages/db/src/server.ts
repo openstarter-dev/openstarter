@@ -1,20 +1,8 @@
-/**
- * Server-only entry point (`@openstarter/db/server`).
- *
- * Central re-export hub for server-side database access: the connection
- * factory, the `db()` singleton accessor and the related types. Additional
- * server-only exports (e.g. the better-auth adapter provider mapping) are
- * appended to the re-export block below.
- */
-
 import { createDb } from "./factory/create-db";
 import { env } from "./config/env";
 import { isCloudflareWorker } from "./utils/runtime";
 import type { Database, DbConfig } from "./types";
 
-// workerd forbids reusing TCP sockets across requests, so the TCP-backed
-// postgres driver must not be cached there — a fresh client is created per
-// call. The D1 binding and the local postgres pool in Node are safe to cache.
 const TCP_PROVIDERS = new Set(["postgres"]);
 
 let cachedDb: Database | null = null;
@@ -29,10 +17,6 @@ function resolveDbConfigFromEnv(): DbConfig {
   };
 }
 
-/**
- * Singleton database accessor. Caches the instance in Node; on Cloudflare
- * Workers the instance is not cached for the TCP-backed postgres driver.
- */
 export function db(): Database {
   if (cachedDb) {
     return cachedDb;

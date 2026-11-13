@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-// drizzle 表对象内部列集合经 symbol 键取值，tsc 严格模式要求先收窄为 symbol 索引记录。
 const columnsOf = (table: unknown): Record<string, unknown> =>
   (table as Record<symbol, unknown>)[Symbol.for("drizzle:Columns")] as Record<string, unknown>;
 
-// 经 barrel 导入：active 方言（默认 sqlite）三表必须同名导出。
 import { commission, referral, referralRelation } from "./schema.sqlite";
 import {
   commission as pgCommission,
@@ -16,7 +14,6 @@ describe("referral schema 表结构", () => {
   it("referral: userId/code 唯一约束存在", () => {
     const sql = columnsOf(referral);
     expect(sql).toBeTruthy();
-    // drizzle 表对象可解构列名集合做存在性断言
     expect(Object.keys(sql)).toEqual(
       expect.arrayContaining([
         "id",

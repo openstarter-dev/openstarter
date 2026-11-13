@@ -1,17 +1,5 @@
-/**
- * D1 / test-harness sqlite compatibility proxy.
- *
- * - `.for('update')` (row locking) is polyfilled as a no-op — sqlite-flavored
- *   stores serialize writes so an explicit lock clause is unnecessary.
- * - D1 has no interactive transactions, so `.transaction(cb)` runs the callback
- *   directly against the (proxied) database; the `sqlite` provider used by the
- *   test harness keeps native transactions.
- */
-
 type UnknownFunction = (...args: unknown[]) => unknown;
 
-// Proxies are cached per underlying instance so repeated wrapping (e.g. nested
-// transactions) reuses the same proxy and preserves identity.
 const sqliteCompatCache = new WeakMap<object, object>();
 
 function withSqliteCompat<T extends object>(dbInstance: T, provider?: string): T {
