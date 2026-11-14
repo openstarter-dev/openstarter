@@ -1,21 +1,17 @@
-import type { PublicConfig } from "@/modules/public-config/lib/api";
+import { getWebConfig, type WebAuthConfig } from "@/config";
 
 export const OAUTH_PROVIDERS = ["google", "github", "apple"] as const;
 
 export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 
-const CONFIG_KEYS: Record<OAuthProvider, string> = {
-  apple: "apple_auth_enabled",
-  github: "github_auth_enabled",
-  google: "google_auth_enabled",
+const AUTH_FLAG_KEYS: Record<OAuthProvider, keyof OAuthSwitchConfig> = {
+  apple: "appleEnabled",
+  github: "githubEnabled",
+  google: "googleEnabled",
 };
 
-export const getEnabledOAuthProviders = (configs: PublicConfig): OAuthProvider[] => {
-  const enabledProviders: OAuthProvider[] = [];
-  for (const provider of OAUTH_PROVIDERS) {
-    if (configs[CONFIG_KEYS[provider]] === "true") {
-      enabledProviders.push(provider);
-    }
-  }
-  return enabledProviders;
-};
+type OAuthSwitchConfig = Pick<WebAuthConfig, "appleEnabled" | "githubEnabled" | "googleEnabled">;
+
+export const getEnabledOAuthProviders = (
+  auth: OAuthSwitchConfig = getWebConfig().auth,
+): OAuthProvider[] => OAUTH_PROVIDERS.filter((provider) => auth[AUTH_FLAG_KEYS[provider]]);

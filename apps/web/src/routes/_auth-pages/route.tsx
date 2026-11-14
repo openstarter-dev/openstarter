@@ -2,7 +2,6 @@ import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { authClient } from "@/lib/auth-client";
 import { BRAND_NAME } from "@/lib/branding";
-import { publicConfig } from "@/modules/public-config/lib/api";
 
 export const Route = createFileRoute("/_auth-pages")({
   ssr: false,
@@ -12,7 +11,6 @@ export const Route = createFileRoute("/_auth-pages")({
       throw redirect({ to: "/dashboard" });
     }
   },
-  loader: ({ context: { queryClient } }) => queryClient.prefetchQuery(publicConfig.queries.get()),
   component: AuthPagesLayout,
 });
 

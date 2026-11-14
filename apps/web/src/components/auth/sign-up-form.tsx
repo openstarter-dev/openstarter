@@ -2,7 +2,6 @@ import { Button } from "@openstarter/ui-web/components/button";
 import { Input } from "@openstarter/ui-web/components/input";
 import { Label } from "@openstarter/ui-web/components/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@openstarter/ui-web/components/tabs";
-import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -12,7 +11,7 @@ import z from "zod";
 import { authClient } from "@/lib/auth-client";
 import { rememberInviteCode } from "@/lib/invite-code";
 import { bindReferralAfterSignup } from "@/lib/referral-attribution";
-import { publicConfig } from "@/modules/public-config/lib/api";
+import { getWebConfig } from "@/config";
 
 import Loader from "../loader";
 import { OAuthButtons } from "./oauth-buttons";
@@ -31,17 +30,16 @@ export default function SignUpForm({
   const navigate = useNavigate({ from: "/" });
   const { isPending } = authClient.useSession();
 
-  const configQuery = useQuery(publicConfig.queries.get());
-  const configs = configQuery.data ?? {};
-  const emailEnabled = configs.email_auth_enabled !== "false";
-  const enabledOAuthProviders = getEnabledOAuthProviders(configs);
+  const { auth } = getWebConfig();
+  const emailEnabled = auth.emailEnabled;
+  const enabledOAuthProviders = getEnabledOAuthProviders(auth);
   const googleEnabled = enabledOAuthProviders.includes("google");
   const githubEnabled = enabledOAuthProviders.includes("github");
   const appleEnabled = enabledOAuthProviders.includes("apple");
-  const magicLinkEnabled = configs.magic_link_enabled === "true";
-  const emailOtpEnabled = configs.email_otp_enabled === "true";
-  const emailVerificationEnabled = configs.email_verification_enabled === "true";
-  const inviteCodeRequired = configs.invite_code_required === "true";
+  const magicLinkEnabled = auth.magicLinkEnabled;
+  const emailOtpEnabled = auth.emailOtpEnabled;
+  const emailVerificationEnabled = auth.emailVerificationEnabled;
+  const inviteCodeRequired = auth.inviteCodeRequired;
   const hasSocial = enabledOAuthProviders.length > 0;
   const signUpModes: SignUpMode[] = [
     ...(emailEnabled ? (["password"] as const) : []),

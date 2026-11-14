@@ -12,7 +12,6 @@ export const adminKeys = {
     all: ["admin", "ai-models"] as const,
     page: (page: number) => ["admin", "ai-models", page] as const,
   },
-  config: () => ["admin", "config"] as const,
   credits: (page: number) => ["admin", "credits", page] as const,
   metrics: () => ["admin", "metrics"] as const,
   orders: (page: number) => ["admin", "orders", page] as const,
@@ -26,7 +25,6 @@ export type AiModelMediaType = (typeof AI_MODEL_MEDIA_TYPES)[number];
 
 const getAiModels = client.api.admin["ai-models"].$get;
 const createAiModel = client.api.admin["ai-models"].$post;
-const getAdminConfig = client.api.admin.config.$get;
 const getCredits = client.api.admin.credits.$get;
 const getMetrics = client.api.admin.analytics.metrics.$get;
 const getOrders = client.api.admin.orders.$get;
@@ -37,7 +35,6 @@ type AiModelListData = NonNullable<InferResponseType<typeof getAiModels, 200>["d
 export type AiModelRow = AiModelListData["items"][number];
 export type AiModelList = AiModelListData;
 
-type AdminConfigData = NonNullable<InferResponseType<typeof getAdminConfig, 200>["data"]>;
 type CreditListData = NonNullable<InferResponseType<typeof getCredits, 200>["data"]>;
 type MetricsData = NonNullable<InferResponseType<typeof getMetrics, 200>["data"]>;
 type OrderListData = NonNullable<InferResponseType<typeof getOrders, 200>["data"]>;
@@ -63,14 +60,6 @@ const queries = {
       },
       queryKey: adminKeys.aiModels.page(page),
       placeholderData: keepPreviousData,
-    }),
-  config: () =>
-    queryOptions({
-      queryFn: async ({ signal }) => {
-        const res = await getAdminConfig(undefined, withAbort(signal));
-        return unwrapQuery<AdminConfigData>(res, "Failed to load settings");
-      },
-      queryKey: adminKeys.config(),
     }),
   credits: (page: number) =>
     queryOptions({
@@ -187,14 +176,6 @@ const mutations = {
           param: { id: input.id },
         });
         await assertOk(res, "Failed to update AI model");
-      },
-    }),
-  saveConfig: () =>
-    mutationOptions({
-      meta: { invalidates: [adminKeys.config()] },
-      mutationFn: async (payload: Record<string, string>) => {
-        const res = await client.api.admin.config.$post({ json: payload });
-        await assertOk(res, "Failed to save");
       },
     }),
 };

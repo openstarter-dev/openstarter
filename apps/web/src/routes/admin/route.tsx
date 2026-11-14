@@ -12,8 +12,7 @@ type AdminPath =
   | "/admin/ai-models"
   | "/admin/orders"
   | "/admin/subscriptions"
-  | "/admin/credits"
-  | "/admin/settings";
+  | "/admin/credits";
 
 interface AdminNavItem {
   label: () => string;
@@ -47,7 +46,6 @@ export const ADMIN_NAV: AdminNavGroup[] = [
     items: [
       { label: () => m["admin.nav.users"](), to: "/admin/users" },
       { label: () => m["admin.nav.ai_models"](), to: "/admin/ai-models" },
-      { label: () => m["admin.nav.settings"](), to: "/admin/settings" },
     ],
   },
   {

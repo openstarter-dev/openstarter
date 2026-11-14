@@ -1,6 +1,6 @@
 import { render, within } from "@testing-library/react";
 import fc from "fast-check";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 const authMocks = vi.hoisted(() => ({
   signInEmail: vi.fn(),
@@ -9,9 +9,6 @@ const authMocks = vi.hoisted(() => ({
   useSession: vi.fn(() => ({ isPending: false })),
 }));
 const navigateMock = vi.hoisted(() => vi.fn());
-const publicConfigResult = vi.hoisted(() => ({
-  current: {} as Record<string, string>,
-}));
 
 vi.mock("@/lib/auth-client", () => ({
   authClient: {
@@ -26,18 +23,12 @@ vi.mock("@/lib/auth-client", () => ({
   },
 }));
 
-vi.mock("@tanstack/react-query", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
-  return {
-    ...actual,
-    useQuery: () => ({ data: publicConfigResult.current }),
-  };
-});
-
 vi.mock("@tanstack/react-router", async (importOriginal) => {
   const router = await importOriginal<typeof import("@tanstack/react-router")>();
   return { ...router, useNavigate: () => navigateMock };
 });
+
+import { getWebConfig } from "@/config";
 
 import { OAuthButtons } from "./oauth-buttons";
 import { getEnabledOAuthProviders } from "./oauth-provider-selection";
@@ -58,13 +49,17 @@ const CONTINUE_WITH_LABEL: Record<string, string> = {
 };
 
 describe("OAuth provider visibility", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("Feature: shipany-feature-parity, Property 7: OAuth 登录入口与启用集合一致", () => {
     fc.assert(
       fc.property(providerConfigArbitrary, ({ apple, google, github }) => {
         const enabledProviders = getEnabledOAuthProviders({
-          apple_auth_enabled: String(apple),
-          github_auth_enabled: String(github),
-          google_auth_enabled: String(google),
+          appleEnabled: apple,
+          githubEnabled: github,
+          googleEnabled: google,
         });
         const view = render(
           <OAuthButtons
@@ -96,17 +91,12 @@ describe("OAuth provider visibility", () => {
     );
   });
 
-  it("P7 SignInForm and SignUpForm map public config to an exact provider list", () => {
+  it("P7 SignInForm and SignUpForm map web env config to an exact provider list", () => {
     fc.assert(
       fc.property(providerConfigArbitrary, ({ apple, google, github }) => {
-        publicConfigResult.current = {
-          apple_auth_enabled: String(apple),
-          github_auth_enabled: String(github),
-          github_auth_enabled_duplicate: "true",
-          google_auth_enabled: String(google),
-          google_auth_enabled_duplicate: "true",
-          oauth_providers: "google,google,github,apple,unknown",
-        };
+        vi.stubEnv("VITE_APPLE_AUTH_ENABLED", String(apple));
+        vi.stubEnv("VITE_GITHUB_AUTH_ENABLED", String(github));
+        vi.stubEnv("VITE_GOOGLE_AUTH_ENABLED", String(google));
         const expectedProviders = [
           ...(google ? ["google"] : []),
           ...(github ? ["github"] : []),
@@ -116,7 +106,7 @@ describe("OAuth provider visibility", () => {
           (provider) => `Continue with ${CONTINUE_WITH_LABEL[provider]}`,
         );
 
-        expect(getEnabledOAuthProviders(publicConfigResult.current)).toEqual(expectedProviders);
+        expect(getEnabledOAuthProviders(getWebConfig().auth)).toEqual(expectedProviders);
 
         const signInView = render(<SignInForm onSwitchToSignUp={() => undefined} />);
         const signInButtons = within(signInView.container);

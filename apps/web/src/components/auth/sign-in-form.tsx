@@ -2,7 +2,6 @@ import { Button } from "@openstarter/ui-web/components/button";
 import { Input } from "@openstarter/ui-web/components/input";
 import { Label } from "@openstarter/ui-web/components/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@openstarter/ui-web/components/tabs";
-import { useQuery } from "@tanstack/react-query";
 import { useForm } from "@tanstack/react-form";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
@@ -10,7 +9,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
-import { publicConfig } from "@/modules/public-config/lib/api";
+import { getWebConfig } from "@/config";
 
 import Loader from "../loader";
 import { AnonymousButton } from "./anonymous-button";
@@ -31,17 +30,16 @@ export default function SignInForm({
   const navigate = useNavigate({ from: "/" });
   const { isPending } = authClient.useSession();
 
-  const configQuery = useQuery(publicConfig.queries.get());
-  const configs = configQuery.data ?? {};
-  const emailEnabled = configs.email_auth_enabled !== "false";
-  const enabledOAuthProviders = getEnabledOAuthProviders(configs);
+  const { auth } = getWebConfig();
+  const emailEnabled = auth.emailEnabled;
+  const enabledOAuthProviders = getEnabledOAuthProviders(auth);
   const googleEnabled = enabledOAuthProviders.includes("google");
   const githubEnabled = enabledOAuthProviders.includes("github");
   const appleEnabled = enabledOAuthProviders.includes("apple");
-  const magicLinkEnabled = configs.magic_link_enabled === "true";
-  const emailOtpEnabled = configs.email_otp_enabled === "true";
-  const passwordResetEnabled = configs.password_reset_enabled === "true";
-  const anonymousEnabled = configs.anonymous_auth_enabled === "true";
+  const magicLinkEnabled = auth.magicLinkEnabled;
+  const emailOtpEnabled = auth.emailOtpEnabled;
+  const passwordResetEnabled = auth.passwordResetEnabled;
+  const anonymousEnabled = auth.anonymousEnabled;
   const hasSocial = enabledOAuthProviders.length > 0;
   const signInModes: SignInMode[] = [
     ...(emailEnabled ? (["password"] as const) : []),

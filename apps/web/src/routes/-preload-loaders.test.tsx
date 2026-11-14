@@ -13,7 +13,6 @@ import { Route as AdminIndexRoute } from "./admin/index";
 import { Route as AdminAiModelsRoute } from "./admin/ai-models";
 import { Route as AdminCreditsRoute } from "./admin/credits";
 import { Route as AdminOrdersRoute } from "./admin/orders";
-import { Route as AdminSettingsRoute } from "./admin/settings";
 import { Route as AdminSubscriptionsRoute } from "./admin/subscriptions";
 import { Route as AdminUsersRoute } from "./admin/users";
 
@@ -61,7 +60,6 @@ const ROUTE_QUERY_KEYS: Record<
     keys: [["admin", "credits", 1]],
     route: AdminCreditsRoute,
   },
-  "/admin/settings": { keys: [["admin", "config"]], route: AdminSettingsRoute },
   "/admin/ai-models": {
     deps: { page: 1 },
     keys: [["admin", "ai-models", 1]],

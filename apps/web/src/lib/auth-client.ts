@@ -14,7 +14,7 @@ import { platformAc, platformRoles } from "@openstarter/auth/rbac/access";
 import { localizeUrl } from "@openstarter/i18n-web/runtime";
 import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 
-import type { PublicConfig } from "@/modules/public-config/lib/api";
+import { getWebConfig, type WebAuthConfig } from "@/config";
 
 const serverBaseURL =
   typeof window === "undefined"
@@ -45,20 +45,16 @@ type AuthClientWithOneTap = AuthClient & { oneTap: OneTapAction };
 
 let oneTapClientInstance: AuthClientWithOneTap | null = null;
 
-export const isOneTapEnabled = (configs: PublicConfig | undefined): boolean =>
-  Boolean(
-    configs?.google_auth_enabled === "true" &&
-    configs?.google_one_tap_enabled === "true" &&
-    configs?.google_client_id,
-  );
+export const isOneTapEnabled = (auth: WebAuthConfig = getWebConfig().auth): boolean =>
+  Boolean(auth.googleEnabled && auth.googleOneTapEnabled && auth.googleClientId);
 
 export const getOneTapAuthClient = (
-  configs: PublicConfig | undefined,
+  auth: WebAuthConfig = getWebConfig().auth,
 ): AuthClientWithOneTap | null => {
-  if (!isOneTapEnabled(configs) || !configs) {
+  if (!isOneTapEnabled(auth)) {
     return null;
   }
-  const clientId: string = configs.google_client_id;
+  const clientId: string = auth.googleClientId;
   if (!oneTapClientInstance) {
     oneTapClientInstance = createAuthClient({
       ...(serverBaseURL ? { baseURL: serverBaseURL } : {}),
