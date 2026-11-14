@@ -15,9 +15,6 @@ export type CommissionStatus = (typeof CommissionStatus)[keyof typeof Commission
 /** 比例上限（万分比）：防配置事故。 */
 export const REFERRAL_RATE_MAX_BPS = 5000;
 
-/** config 表中分销配置的键名。 */
-export const REFERRAL_CONFIG_KEY = "referral";
-
 /** 分销场景键（credit grant 用）。 */
 export const REFERRAL_SCENE = "referral";
 
@@ -27,7 +24,10 @@ export const DEFAULT_REFERRAL_RATE_BPS = 1000;
 /** 结算门槛：低于该积分值的 pending 佣金管理端提示不可结算。 */
 export const DEFAULT_MIN_SETTLE_CREDITS = 100;
 
-/** config 表 `referral` 键的 JSON 值校验（系统边界）。 */
+/**
+ * Validation schema for static/env referral configuration at system boundaries.
+ * 静态/环境变量分销规则配置的系统边界校验。
+ */
 export const referralConfigSchema = z.object({
   enabled: z.boolean().default(true),
   defaultRate: z

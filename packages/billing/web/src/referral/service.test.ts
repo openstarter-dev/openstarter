@@ -4,9 +4,9 @@
 // 查询断言 recordCommission 的记账行为（幂等 / 旁路 / 代理比例 / 关闭开关等）。
 
 import type { Database } from "@openstarter/db/server";
-import { beforeAll, beforeEach, afterAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { commission, config, referral, referralRelation } from "@openstarter/db/schema";
+import { commission, referral, referralRelation } from "@openstarter/db/schema";
 import { getUuid } from "@openstarter/shared/id";
 
 import { recordCommission } from "./service";
@@ -35,10 +35,9 @@ vi.mock("@openstarter/db/server", async (importOriginal) => {
   };
 });
 
-/** 在内存库中插入 userA(referrer) + userB(referred) + 推荐关系 + 默认 enabled 配置。 */
+/** 在内存库中插入 userA(referrer) + userB(referred) + 推荐关系。 */
 async function seedReferralFixture(
   overrides: {
-    config?: { enabled: boolean; defaultRate: number };
     customRate?: number | null;
   } = {},
 ) {
@@ -57,13 +56,6 @@ async function seedReferralFixture(
     referrerId: "userA",
     referredUserId: "userB",
   });
-  // 分销配置
-  await db.insert(config).values({
-    name: "referral",
-    value: JSON.stringify(
-      overrides.config ?? { enabled: true, defaultRate: 1000, minSettleCredits: 100 },
-    ),
-  });
 }
 
 // ─── 套件 ───────────────────────────────────────────────────────────────────────
@@ -74,9 +66,14 @@ describe("recordCommission", () => {
   });
 
   beforeEach(async () => {
+    vi.unstubAllEnvs();
     if (state.database) {
       await resetBillingTestDatabase(state.database);
     }
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("有推荐关系 + 已启用 → 记 pending 佣金", async () => {
@@ -125,8 +122,9 @@ describe("recordCommission", () => {
     expect(await tx.select().from(commission)).toHaveLength(0);
   });
 
-  it("enabled=false → 不记账", async () => {
-    await seedReferralFixture({ config: { enabled: false, defaultRate: 1000 } });
+  it("REFERRAL_ENABLED=false → 不记账", async () => {
+    vi.stubEnv("REFERRAL_ENABLED", "false");
+    await seedReferralFixture();
     const tx = state.database!;
     await recordCommission(tx, {
       orderNo: "ORD3",

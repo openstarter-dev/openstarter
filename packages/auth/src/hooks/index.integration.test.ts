@@ -15,7 +15,6 @@ const INITIAL_CREDITS = 120;
 const INITIAL_ROLE = "admin";
 
 const state = vi.hoisted(() => ({
-  configs: {} as Record<string, string>,
   database: undefined as Database | undefined,
   idSequence: 0,
   snowSequence: 0,
@@ -33,10 +32,6 @@ vi.mock("@openstarter/db/server", async (importOriginal) => {
     },
   };
 });
-
-vi.mock("@openstarter/shared/config", () => ({
-  getAllConfigs: () => Promise.resolve({ ...state.configs }),
-}));
 
 vi.mock("@openstarter/shared/id", () => ({
   getSnowId: () => {
@@ -89,7 +84,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   vi.useFakeTimers();
   vi.setSystemTime(FIXED_NOW);
-  state.configs = {};
+  vi.unstubAllEnvs();
   state.idSequence = 0;
   state.snowSequence = 0;
   if (state.database) {
@@ -99,6 +94,7 @@ beforeEach(async () => {
 });
 
 afterAll(() => {
+  vi.unstubAllEnvs();
   vi.useRealTimers();
   if (state.database) {
     closeAuthTestDatabase(state.database);
@@ -107,14 +103,12 @@ afterAll(() => {
 
 describe("Task 15.2 new user initialization hook", () => {
   it("grants the configured initial role and credits after user creation", async () => {
-    state.configs = {
-      initial_credits_amount: String(INITIAL_CREDITS),
-      initial_credits_description: "Welcome credits",
-      initial_credits_enabled: "true",
-      initial_credits_valid_days: "30",
-      initial_role_enabled: "true",
-      initial_role_name: INITIAL_ROLE,
-    };
+    vi.stubEnv("INITIAL_CREDITS_AMOUNT", String(INITIAL_CREDITS));
+    vi.stubEnv("INITIAL_CREDITS_DESCRIPTION", "Welcome credits");
+    vi.stubEnv("INITIAL_CREDITS_ENABLED", "true");
+    vi.stubEnv("INITIAL_CREDITS_VALID_DAYS", "30");
+    vi.stubEnv("INITIAL_ROLE_ENABLED", "true");
+    vi.stubEnv("INITIAL_ROLE_NAME", INITIAL_ROLE);
 
     await invokeCreateAfterHook();
 
@@ -137,10 +131,8 @@ describe("Task 15.2 new user initialization hook", () => {
   });
 
   it("ignores role names that are not defined in code", async () => {
-    state.configs = {
-      initial_role_enabled: "true",
-      initial_role_name: "member",
-    };
+    vi.stubEnv("INITIAL_ROLE_ENABLED", "true");
+    vi.stubEnv("INITIAL_ROLE_NAME", "member");
 
     await invokeCreateAfterHook();
 
@@ -148,13 +140,11 @@ describe("Task 15.2 new user initialization hook", () => {
   });
 
   it("keeps role and credit grants idempotent when the hook repeats", async () => {
-    state.configs = {
-      initial_credits_amount: String(INITIAL_CREDITS),
-      initial_credits_enabled: "true",
-      initial_credits_valid_days: "0",
-      initial_role_enabled: "true",
-      initial_role_name: INITIAL_ROLE,
-    };
+    vi.stubEnv("INITIAL_CREDITS_AMOUNT", String(INITIAL_CREDITS));
+    vi.stubEnv("INITIAL_CREDITS_ENABLED", "true");
+    vi.stubEnv("INITIAL_CREDITS_VALID_DAYS", "0");
+    vi.stubEnv("INITIAL_ROLE_ENABLED", "true");
+    vi.stubEnv("INITIAL_ROLE_NAME", INITIAL_ROLE);
 
     await invokeCreateAfterHook();
     await invokeCreateAfterHook();
@@ -167,13 +157,11 @@ describe("Task 15.2 new user initialization hook", () => {
   });
 
   it("grants exactly one welcome credit under concurrent hooks", async () => {
-    state.configs = {
-      initial_credits_amount: String(INITIAL_CREDITS),
-      initial_credits_enabled: "true",
-      initial_credits_valid_days: "0",
-      initial_role_enabled: "true",
-      initial_role_name: INITIAL_ROLE,
-    };
+    vi.stubEnv("INITIAL_CREDITS_AMOUNT", String(INITIAL_CREDITS));
+    vi.stubEnv("INITIAL_CREDITS_ENABLED", "true");
+    vi.stubEnv("INITIAL_CREDITS_VALID_DAYS", "0");
+    vi.stubEnv("INITIAL_ROLE_ENABLED", "true");
+    vi.stubEnv("INITIAL_ROLE_NAME", INITIAL_ROLE);
 
     await Promise.all(Array.from({ length: 8 }, () => invokeCreateAfterHook()));
 
@@ -187,12 +175,10 @@ describe("Task 15.2 new user initialization hook", () => {
   });
 
   it("does not grant role or credits when both switches are disabled", async () => {
-    state.configs = {
-      initial_credits_amount: String(INITIAL_CREDITS),
-      initial_credits_enabled: "false",
-      initial_role_enabled: "false",
-      initial_role_name: INITIAL_ROLE,
-    };
+    vi.stubEnv("INITIAL_CREDITS_AMOUNT", String(INITIAL_CREDITS));
+    vi.stubEnv("INITIAL_CREDITS_ENABLED", "false");
+    vi.stubEnv("INITIAL_ROLE_ENABLED", "false");
+    vi.stubEnv("INITIAL_ROLE_NAME", INITIAL_ROLE);
 
     await invokeCreateAfterHook();
 

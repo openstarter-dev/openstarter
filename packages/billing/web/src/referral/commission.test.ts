@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   calcCommissionCredits,
   CommissionStatus,
-  REFERRAL_CONFIG_KEY,
+  DEFAULT_MIN_SETTLE_CREDITS,
+  DEFAULT_REFERRAL_RATE_BPS,
   REFERRAL_RATE_MAX_BPS,
   resolveRate,
 } from "./commission";
@@ -33,11 +34,12 @@ describe("calcCommissionCredits", () => {
 });
 
 describe("constants", () => {
-  it("status 枚举与幂等键", () => {
+  it("status 枚举与默认分销常量", () => {
     expect(CommissionStatus.PENDING).toBe("pending");
     expect(CommissionStatus.SETTLED).toBe("settled");
     expect(CommissionStatus.VOID).toBe("void");
-    expect(REFERRAL_CONFIG_KEY).toBe("referral");
+    expect(DEFAULT_REFERRAL_RATE_BPS).toBe(1000);
+    expect(DEFAULT_MIN_SETTLE_CREDITS).toBe(100);
     expect(REFERRAL_RATE_MAX_BPS).toBe(5000);
   });
 });

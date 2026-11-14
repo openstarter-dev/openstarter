@@ -1,16 +1,7 @@
-// 支付渠道管理器与「按 Config 动态装配」（对齐 ShipAny `core/payment/index.ts`
-// 的 PaymentManager 与 `modules/payment/service.ts` 的 getPaymentManager）。
-//
-// 任务 16.1：
-//  - `PaymentManager`：登记/查取已启用渠道 provider 的容器。
-//  - `getPaymentManager()`：读取 Config，按「渠道已启用且凭证齐备」装配 provider，
-//    并在相关 Config 变化（hash 改变）时重建（缓存于模块级）。
-//
-// 说明：与 ShipAny 不同，本 `getProvider(name)` **不做**「找不到即回退默认渠道」，
-// 而是精确返回同名 provider 或 `undefined`，以便结账编排据此对「未启用/凭证缺失」
-// 的渠道明确拒绝（R10.4）。
+// Payment provider manager with declarative env-driven assembly.
+// 支付渠道管理器与基于环境变量的声明式装配。
 
-import { getAllConfigs } from "@openstarter/shared/config";
+import { readBooleanEnv, readEnv } from "../env";
 import { createAlipayProvider } from "./alipay";
 import { createPayPalProvider } from "./paypal";
 import { createStripeProvider } from "./stripe";
@@ -51,157 +42,145 @@ export class PaymentManager {
   }
 }
 
-// ─── 按 Config 动态装配（含 hash 重建） ───────────────────────────────────────
+// ─── Env-driven provider assembly with hash-based cache / 基于环境变量的渠道装配与缓存 ─
 
 let cachedManager: PaymentManager | null = null;
 let cachedHash = "";
 
-/** 判断渠道是否「已启用」（对应 `{provider}_enabled` 开关）。 */
-function isEnabled(configs: Record<string, string>, provider: string): boolean {
-  return configs[`${provider}_enabled`] === "true";
-}
+type ProviderAssembler = {
+  isDefault: (defaultProvider: string) => boolean;
+  build: () => PaymentProvider | null;
+};
 
-function assembleStripe(
-  manager: PaymentManager,
-  configs: Record<string, string>,
-  defaultProvider: string,
-): void {
-  const secretKey = configs.stripe_secret_key || "";
-  if (!(isEnabled(configs, "stripe") && secretKey)) {
-    return;
-  }
-  manager.addProvider(
-    createStripeProvider({
-      secretKey,
-      publishableKey: configs.stripe_publishable_key || undefined,
-      signingSecret: configs.stripe_signing_secret || undefined,
-      allowPromotionCodes: true,
-      allowedPaymentMethods: ["card", "wechat_pay", "alipay"],
-    }),
-    defaultProvider === "stripe" || defaultProvider === "",
-  );
-}
+// Registry of supported payment providers; each builds only when enabled and credentials are present.
+// 已支持支付渠道的装配注册表；仅当开关未关闭且必需凭证齐备时构造对应实例。
+const PAYMENT_PROVIDER_ASSEMBLERS: readonly ProviderAssembler[] = [
+  {
+    isDefault: (defaultProvider) => defaultProvider === "stripe" || defaultProvider === "",
+    build: () => {
+      const secretKey = readEnv("STRIPE_SECRET_KEY");
+      if (!(readBooleanEnv("STRIPE_ENABLED", true) && secretKey)) {
+        return null;
+      }
+      return createStripeProvider({
+        secretKey,
+        publishableKey: readEnv("STRIPE_PUBLISHABLE_KEY") || undefined,
+        signingSecret: readEnv("STRIPE_SIGNING_SECRET") || undefined,
+        allowPromotionCodes: true,
+        allowedPaymentMethods: ["card", "wechat_pay", "alipay"],
+      });
+    },
+  },
+  {
+    isDefault: (defaultProvider) => defaultProvider === "paypal",
+    build: () => {
+      const clientId = readEnv("PAYPAL_CLIENT_ID");
+      const clientSecret = readEnv("PAYPAL_CLIENT_SECRET");
+      if (!(readBooleanEnv("PAYPAL_ENABLED", true) && clientId && clientSecret)) {
+        return null;
+      }
+      return createPayPalProvider({
+        clientId,
+        clientSecret,
+        webhookId: readEnv("PAYPAL_WEBHOOK_ID") || undefined,
+        environment: readEnv("PAYPAL_ENVIRONMENT") === "live" ? "production" : "sandbox",
+      });
+    },
+  },
+  {
+    isDefault: (defaultProvider) => defaultProvider === "alipay",
+    build: () => {
+      const appId = readEnv("ALIPAY_APP_ID");
+      const privateKey = readEnv("ALIPAY_PRIVATE_KEY");
+      if (!(readBooleanEnv("ALIPAY_ENABLED", true) && appId && privateKey)) {
+        return null;
+      }
+      return createAlipayProvider({
+        appId,
+        privateKey,
+        alipayPublicKey: readEnv("ALIPAY_PUBLIC_KEY"),
+        notifyUrl: readEnv("ALIPAY_NOTIFY_URL") || undefined,
+      });
+    },
+  },
+  {
+    isDefault: (defaultProvider) => defaultProvider === "wechat",
+    build: () => {
+      const appId = readEnv("WECHAT_APP_ID");
+      const mchId = readEnv("WECHAT_MCH_ID");
+      const privateKey = readEnv("WECHAT_PRIVATE_KEY");
+      if (!(readBooleanEnv("WECHAT_ENABLED", true) && appId && mchId && privateKey)) {
+        return null;
+      }
+      return createWechatPayProvider({
+        appId,
+        mchId,
+        privateKey,
+        apiV3Key: readEnv("WECHAT_API_V3_KEY"),
+        serialNo: readEnv("WECHAT_SERIAL_NO"),
+        notifyUrl: readEnv("WECHAT_NOTIFY_URL") || undefined,
+        platformCert: readEnv("WECHAT_PLATFORM_CERT") || undefined,
+      });
+    },
+  },
+];
 
-function assemblePayPal(
-  manager: PaymentManager,
-  configs: Record<string, string>,
-  defaultProvider: string,
-): void {
-  const clientId = configs.paypal_client_id || "";
-  const clientSecret = configs.paypal_client_secret || "";
-  if (!(isEnabled(configs, "paypal") && clientId && clientSecret)) {
-    return;
-  }
-  manager.addProvider(
-    createPayPalProvider({
-      clientId,
-      clientSecret,
-      webhookId: configs.paypal_webhook_id || undefined,
-      environment: configs.paypal_environment === "live" ? "production" : "sandbox",
-    }),
-    defaultProvider === "paypal",
-  );
-}
-
-function assembleAlipay(
-  manager: PaymentManager,
-  configs: Record<string, string>,
-  defaultProvider: string,
-): void {
-  const appId = configs.alipay_app_id || "";
-  const privateKey = configs.alipay_private_key || "";
-  if (!(isEnabled(configs, "alipay") && appId && privateKey)) {
-    return;
-  }
-  manager.addProvider(
-    createAlipayProvider({
-      appId,
-      privateKey,
-      alipayPublicKey: configs.alipay_public_key || "",
-      notifyUrl: configs.alipay_notify_url || undefined,
-    }),
-    defaultProvider === "alipay",
-  );
-}
-
-function assembleWechat(
-  manager: PaymentManager,
-  configs: Record<string, string>,
-  defaultProvider: string,
-): void {
-  const mchId = configs.wechat_mch_id || "";
-  const privateKey = configs.wechat_private_key || "";
-  const appId = configs.wechat_app_id || "";
-  if (!(isEnabled(configs, "wechat") && appId && mchId && privateKey)) {
-    return;
-  }
-  manager.addProvider(
-    createWechatPayProvider({
-      appId,
-      mchId,
-      privateKey,
-      apiV3Key: configs.wechat_api_v3_key || "",
-      serialNo: configs.wechat_serial_no || "",
-      notifyUrl: configs.wechat_notify_url || undefined,
-      platformCert: configs.wechat_platform_cert || undefined,
-    }),
-    defaultProvider === "wechat",
-  );
-}
-
-// Full list of config keys read by assemble* helpers so any credential/webhook update invalidates cache
-// 覆盖全部支付装配配置键，确保任意密钥、回调地址或验签参数变更都能刷新管理器缓存
-const PAYMENT_CONFIG_HASH_KEYS = [
-  "default_payment_provider",
-  "stripe_enabled",
-  "stripe_secret_key",
-  "stripe_publishable_key",
-  "stripe_signing_secret",
-  "paypal_enabled",
-  "paypal_client_id",
-  "paypal_client_secret",
-  "paypal_webhook_id",
-  "paypal_environment",
-  "alipay_enabled",
-  "alipay_app_id",
-  "alipay_private_key",
-  "alipay_public_key",
-  "alipay_notify_url",
-  "wechat_enabled",
-  "wechat_app_id",
-  "wechat_mch_id",
-  "wechat_private_key",
-  "wechat_api_v3_key",
-  "wechat_serial_no",
-  "wechat_notify_url",
-  "wechat_platform_cert",
+// Full list of env keys affecting provider assembly so credential/flag changes invalidate cache.
+// 覆盖全部支付装配环境变量键，确保任意密钥、回调地址或开关变化都能刷新缓存。
+const PAYMENT_ENV_KEYS = [
+  "DEFAULT_PAYMENT_PROVIDER",
+  "STRIPE_ENABLED",
+  "STRIPE_SECRET_KEY",
+  "STRIPE_PUBLISHABLE_KEY",
+  "STRIPE_SIGNING_SECRET",
+  "PAYPAL_ENABLED",
+  "PAYPAL_CLIENT_ID",
+  "PAYPAL_CLIENT_SECRET",
+  "PAYPAL_WEBHOOK_ID",
+  "PAYPAL_ENVIRONMENT",
+  "ALIPAY_ENABLED",
+  "ALIPAY_APP_ID",
+  "ALIPAY_PRIVATE_KEY",
+  "ALIPAY_PUBLIC_KEY",
+  "ALIPAY_NOTIFY_URL",
+  "WECHAT_ENABLED",
+  "WECHAT_APP_ID",
+  "WECHAT_MCH_ID",
+  "WECHAT_PRIVATE_KEY",
+  "WECHAT_API_V3_KEY",
+  "WECHAT_SERIAL_NO",
+  "WECHAT_NOTIFY_URL",
+  "WECHAT_PLATFORM_CERT",
 ] as const;
 
-/** 相关 Config 的指纹：任一支付相关键变化即触发管理器重建。 */
-function computeConfigHash(configs: Record<string, string>): string {
-  return JSON.stringify(PAYMENT_CONFIG_HASH_KEYS.map((key) => configs[key] || ""));
+/**
+ * Compute a fingerprint over payment env variables to detect runtime/test env updates.
+ * 计算支付相关环境变量指纹，用于在测试或运行时环境变量变更时重建管理器。
+ */
+function computeEnvHash(): string {
+  return JSON.stringify(PAYMENT_ENV_KEYS.map((key) => readEnv(key)));
 }
 
 /**
- * 读取 Config 并装配已启用渠道；相关 Config 未变时复用缓存实例，变化时重建。
- * 仅装配「已启用且凭证齐备」的渠道，未启用/凭证缺失的渠道不会被登记
- * （据此结账编排可对其明确拒绝，R10.4）。
+ * Assemble enabled payment providers from Web environment variables and cache by env fingerprint.
+ * 从环境变量读取凭证并装配已启用支付渠道，配置指纹未变时复用缓存实例。
  */
 export async function getPaymentManager(): Promise<PaymentManager> {
-  const configs = await getAllConfigs();
-  const hash = computeConfigHash(configs);
+  const hash = computeEnvHash();
 
   if (cachedManager && hash === cachedHash) {
     return cachedManager;
   }
 
   const manager = new PaymentManager();
-  const defaultProvider = configs.default_payment_provider || "";
+  const defaultProvider = readEnv("DEFAULT_PAYMENT_PROVIDER");
 
-  assembleStripe(manager, configs, defaultProvider);
-  assemblePayPal(manager, configs, defaultProvider);
-  assembleAlipay(manager, configs, defaultProvider);
-  assembleWechat(manager, configs, defaultProvider);
+  for (const assembler of PAYMENT_PROVIDER_ASSEMBLERS) {
+    const provider = assembler.build();
+    if (provider) {
+      manager.addProvider(provider, assembler.isDefault(defaultProvider));
+    }
+  }
 
   cachedManager = manager;
   cachedHash = hash;

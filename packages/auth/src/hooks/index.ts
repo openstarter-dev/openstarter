@@ -1,5 +1,4 @@
 import { grantCreditsForNewUser } from "@openstarter/billing-web";
-import { getAllConfigs } from "@openstarter/shared/config";
 import { logger } from "@openstarter/shared/logger";
 import type { BetterAuthOptions } from "better-auth";
 import type { OrganizationOptions } from "better-auth/plugins/organization";
@@ -18,36 +17,17 @@ type DeleteUserHooks = Pick<DeleteUserOptions, "beforeDelete" | "afterDelete">;
 
 type OrganizationHooks = NonNullable<OrganizationOptions["organizationHooks"]>;
 
-function initializeNewUserRole(userId: string, configs: Record<string, string>): Promise<void> {
-  return grantRoleForNewUser({ configs, userId });
-}
-
-async function initializeNewUserCredits(
-  createdUser: CreatedUser,
-  configs: Record<string, string>,
-): Promise<void> {
-  await grantCreditsForNewUser({
-    configs,
-    userEmail: createdUser.email,
-    userId: createdUser.id,
-  });
-}
-
+/**
+ * Initialize role & welcome credits for newly created users from server environment config.
+ * 注册完成后依环境变量配置为新用户初始化角色与欢迎积分。
+ */
 const runNewUserInitialization: UserCreateAfterHook = async (createdUser) => {
-  let configs: Record<string, string>;
-  try {
-    configs = await getAllConfigs();
-  } catch (error) {
-    logger.error(
-      `[auth] new user initialization: failed to read configs for user ${createdUser.id}`,
-      error,
-    );
-    return;
-  }
-
   const results = await Promise.allSettled([
-    initializeNewUserRole(createdUser.id, configs),
-    initializeNewUserCredits(createdUser, configs),
+    grantRoleForNewUser({ userId: createdUser.id }),
+    grantCreditsForNewUser({
+      userEmail: createdUser.email,
+      userId: createdUser.id,
+    }),
   ]);
 
   for (const result of results) {

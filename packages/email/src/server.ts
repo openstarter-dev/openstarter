@@ -3,12 +3,13 @@
 // 导出 sendEmail / EmailManager / EmailProvider，精确满足 Auth_Service 现有引用
 // （packages/auth/src/server.ts 的 `import { sendEmail } from "@openstarter/email/server"`）。
 //
-// 依赖分层：位于 auth 依赖层之下，仅向下依赖 @openstarter/shared（logger、Config 读取渠道凭证），
+// 依赖分层：位于 auth 依赖层之下，仅向下依赖 @openstarter/shared（logger），
+// 运行时凭证直接读取服务端环境变量（来源于 apps/web/.env 或 Worker bindings），
 // 模板本地化复用本包 ./templates/locale（零外部依赖）。**不依赖 packages/api、packages/auth**，
 // 杜绝环依赖（对应 ultracite「prevent import cycles」）。
 //
 // 渠道：Resend 为主、Cloudflare 邮件通道为备选（R22.1）。两者均以 fetch 调用各自 HTTP API，
-// 不引入 SDK 依赖，Node 与 Cloudflare Workers 运行时通用。渠道文案与凭证完善见阶段 5。
+// 不引入 SDK 依赖，Node 与 Cloudflare Workers 运行时通用。
 //
 // 失败与日志（R22.4）：sendEmail 以结构化 EmailSendResult 回传成功/失败；投递失败经
 // @openstarter/shared/logger 记录、**不抛未捕获异常**（渲染/网络异常一并被捕获转为失败结果）。
@@ -16,8 +17,6 @@
 import { render } from "@react-email/components";
 import { createElement, type ReactElement } from "react";
 
-import type { ConfigMap } from "@openstarter/shared/config";
-import { getAllConfigs } from "@openstarter/shared/config";
 import { logger } from "@openstarter/shared/logger";
 
 import { EmailTemplate } from "./index";
@@ -296,24 +295,40 @@ export class EmailManager {
 }
 
 /**
- * 依 Config 装配渠道管理器：
- * - `email_provider` 选择默认渠道（缺省 resend）；
- * - Resend 需 `resend_api_key` + `resend_sender_email`；
- * - Cloudflare 需 `cloudflare_email_api_token` + `cloudflare_email_sender_email`。
- * 凭证缺失的渠道不注册；两者皆缺时管理器无默认渠道，投递将返回失败结果。
+ * Read a runtime environment variable from `process.env` or Cloudflare Worker bindings.
+ * 从 `process.env` 或 Cloudflare Worker 绑定读取运行时环境变量。
  */
-const buildManagerFromConfig = (configs: ConfigMap): EmailManager => {
-  const manager = new EmailManager();
-  const selected = configs.email_provider ?? "resend";
+const readEnv = (key: string): string => {
+  const fromProcess = typeof process !== "undefined" ? process.env[key] : undefined;
+  if (typeof fromProcess === "string") {
+    return fromProcess.trim();
+  }
+  const cfEnv = (globalThis as { __CF_ENV__?: Record<string, unknown> }).__CF_ENV__;
+  const fromCf = cfEnv?.[key];
+  return typeof fromCf === "string" ? fromCf.trim() : "";
+};
 
-  const resendApiKey = configs.resend_api_key ?? "";
-  const resendFrom = configs.resend_sender_email ?? "";
+/**
+ * Assemble EmailManager directly from runtime environment variables:
+ * - `EMAIL_PROVIDER` selects default provider (defaults to "resend");
+ * - Resend requires `RESEND_API_KEY` + sender (`RESEND_SENDER_EMAIL` / `RESEND_EMAIL_FROM` / `EMAIL_FROM`);
+ * - Cloudflare requires `CLOUDFLARE_EMAIL_API_TOKEN` + sender (`CLOUDFLARE_EMAIL_SENDER_EMAIL` / `EMAIL_FROM`).
+ *
+ * 从环境变量装配邮件渠道管理器：缺省凭证的渠道跳过注册，无可用渠道时返回结构化失败结果。
+ */
+const buildManagerFromEnv = (): EmailManager => {
+  const manager = new EmailManager();
+  const selected = readEnv("EMAIL_PROVIDER") || "resend";
+  const sharedFrom = readEnv("EMAIL_FROM");
+
+  const resendApiKey = readEnv("RESEND_API_KEY");
+  const resendFrom = readEnv("RESEND_SENDER_EMAIL") || readEnv("RESEND_EMAIL_FROM") || sharedFrom;
   if (resendApiKey && resendFrom) {
     manager.addProvider(createResendProvider(resendApiKey, resendFrom), selected === "resend");
   }
 
-  const cloudflareToken = configs.cloudflare_email_api_token ?? "";
-  const cloudflareFrom = configs.cloudflare_email_sender_email ?? "";
+  const cloudflareToken = readEnv("CLOUDFLARE_EMAIL_API_TOKEN");
+  const cloudflareFrom = readEnv("CLOUDFLARE_EMAIL_SENDER_EMAIL") || sharedFrom;
   if (cloudflareToken && cloudflareFrom) {
     manager.addProvider(
       createCloudflareProvider(cloudflareToken, cloudflareFrom),
@@ -327,18 +342,16 @@ const buildManagerFromConfig = (configs: ConfigMap): EmailManager => {
 // ─── 服务端入口（sendEmail，R22.3/R22.4/R22.5）──────────────────────────────
 
 /**
- * 渲染指定模板并经默认渠道投递事务性邮件。
+ * Render the email template and deliver via the configured environment provider.
+ * Reads `VITE_APP_NAME` (or `APP_NAME`) and provider credentials directly from env,
+ * returns structured {@link EmailSendResult}, and never throws uncaught errors.
  *
- * - 读取 Config 获取渠道凭证与 app_name（DB/env 双源，缺失优雅降级）；
- * - 按 locale 渲染对应模板（R22.5）；
- * - 以结构化 EmailSendResult 回传（R22.3）；
- * - 渠道未配置 / 渲染或投递失败：记日志并返回失败结果，**不抛未捕获异常**（R22.4）。
+ * 渲染指定模板并经默认渠道投递事务性邮件；从环境变量读取品牌名与渠道凭证并结构化返回结果。
  */
 export const sendEmail = async (params: SendEmailParams): Promise<EmailSendResult> => {
   try {
-    const configs = await getAllConfigs();
-    const appName = configs.app_name || DEFAULT_APP_NAME;
-    const manager = buildManagerFromConfig(configs);
+    const appName = readEnv("VITE_APP_NAME") || readEnv("APP_NAME") || DEFAULT_APP_NAME;
+    const manager = buildManagerFromEnv();
 
     const element = buildTemplateElement(params.template, params.locale, params.variables, appName);
     const html = await render(element);

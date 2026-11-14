@@ -1,30 +1,22 @@
-// 分销记账服务（对齐 ShipAny `modules/referral/service.ts` 的 recordCommission）。
-//
-// 任务 3：提供 recordCommission(tx, paidOrder) 与 getReferralConfig()。前者在
-// 支付成功编排的事务内调用，依「被推荐人 → 推荐关系 → 推荐人」链路：开关开启且存在有效
-// 推荐关系时记一笔 pending 佣金（rate 优先取推荐人 customRate 否则全局默认），否则旁路
-// 不记账；幂等以 commission.orderNo 唯一约束兜底。后者读取 config 表 `referral` 键的
-// JSON 值并归一化为 ReferralConfig（缺省回退默认值）。
-//
-// 依赖分层：仅依赖 @openstarter/db（referral/referral_relation/commission/config 表 +
-// db()）、@openstarter/shared（id）、同包 commission 数学（纯函数）。不依赖 api/auth。
+// Referral commission ledger service (reads static/env referral rules, no DB config table).
+// 分销记账服务（从静态默认/环境变量读取返佣规则，不依赖数据库 config 表）。
 
 import type { Database } from "@openstarter/db/server";
-import { db } from "@openstarter/db/server";
+import { commission, referral, referralRelation } from "@openstarter/db/schema";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
 import { eq } from "drizzle-orm";
 
+import { readBooleanEnv, readIntEnv } from "../env";
 import {
   calcCommissionCredits,
   CommissionStatus,
+  DEFAULT_MIN_SETTLE_CREDITS,
+  DEFAULT_REFERRAL_RATE_BPS,
   referralConfigSchema,
-  REFERRAL_CONFIG_KEY,
   resolveRate,
   type ReferralConfig,
 } from "./commission";
-
-import { commission, config, referral, referralRelation } from "@openstarter/db/schema";
 
 /** 已支付订单的最小字段（来自 webhook 编排的 {@link NewOrder} 子集，避免硬依赖 payment 模块）。 */
 export interface PaidOrder {
@@ -50,27 +42,27 @@ export type CommissionTx = Pick<Database, "insert" | "select">;
 // ─── 配置读取（getReferralConfig） ─────────────────────────────────────────────
 
 /**
- * 读取分销配置：从 config 表 `referral` 键读取 JSON 值，经 {@link referralConfigSchema}
- * 校验归一化为 {@link ReferralConfig}；缺失或解析失败时回退默认值（enabled=true,
- * defaultRate=1000, minSettleCredits=100）。
+ * Read referral rules from environment variables (`REFERRAL_ENABLED`,
+ * `REFERRAL_DEFAULT_RATE_BPS`, `REFERRAL_MIN_SETTLE_CREDITS`) and validate via
+ * {@link referralConfigSchema}; invalid env overrides fall back to safe defaults.
+ *
+ * 读取分销静态配置（基于环境变量 `REFERRAL_*`，经 {@link referralConfigSchema} 校验）：
+ * 缺失或非法时回退默认值（enabled=true, defaultRate=1000, minSettleCredits=100）。
  */
 export async function getReferralConfig(): Promise<ReferralConfig> {
-  const [row] = await db()
-    .select({ value: config.value })
-    .from(config)
-    .where(eq(config.name, REFERRAL_CONFIG_KEY))
-    .limit(1);
+  const candidate = {
+    enabled: readBooleanEnv("REFERRAL_ENABLED", true),
+    defaultRate: readIntEnv("REFERRAL_DEFAULT_RATE_BPS", DEFAULT_REFERRAL_RATE_BPS),
+    minSettleCredits: readIntEnv("REFERRAL_MIN_SETTLE_CREDITS", DEFAULT_MIN_SETTLE_CREDITS),
+  };
 
-  if (!row?.value) {
-    return referralConfigSchema.parse({});
+  const parsed = referralConfigSchema.safeParse(candidate);
+  if (parsed.success) {
+    return parsed.data;
   }
 
-  try {
-    const parsed = JSON.parse(row.value) as unknown;
-    return referralConfigSchema.parse(parsed);
-  } catch {
-    return referralConfigSchema.parse({});
-  }
+  logger.warn("[referral] invalid referral env config, using defaults:", parsed.error.issues);
+  return referralConfigSchema.parse({});
 }
 
 // ─── 推荐关系查询（纯查询，便于幂等与旁路判定） ───────────────────────────────

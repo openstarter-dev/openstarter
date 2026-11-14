@@ -6,7 +6,6 @@ import { db, getAuthAdapterProvider } from "@openstarter/db/server";
 import { EmailTemplate } from "@openstarter/email";
 import { sendEmail as deliverEmail, type SendEmailParams } from "@openstarter/email/server";
 import { getLocaleFromRequest } from "@openstarter/i18n-web/server";
-import { getAllConfigs } from "@openstarter/shared/config";
 import { NodeEnv } from "@openstarter/shared/constants";
 import { logger } from "@openstarter/shared/logger";
 import { apiKey } from "@better-auth/api-key";
@@ -29,6 +28,7 @@ import { createAuthEmailCallbacks, createChangeEmailOptions } from "./email-call
 import { env } from "./env";
 import { hooks } from "./hooks";
 import { redeemInviteCode, validateInviteCode } from "./invite-codes";
+import { readBooleanEnv, readEnv, readPositiveIntEnv } from "./lib/runtime-env";
 import {
   getAppUrl,
   getUrl,
@@ -52,27 +52,28 @@ const sendEmail = async (params: SendEmailParams): Promise<void> => {
 
 const emailCallbacks = createAuthEmailCallbacks(sendEmail);
 
-const runtimeConfigs = await getAllConfigs();
-const isEnabled = (key: string): boolean => runtimeConfigs[key] === "true";
-const googleEnabled =
-  isEnabled("google_auth_enabled") && Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
-const githubEnabled =
-  isEnabled("github_auth_enabled") && Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
-const appleEnabled =
-  isEnabled("apple_auth_enabled") && Boolean(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET);
-const magicLinkEnabled = isEnabled("magic_link_enabled");
-const emailOtpEnabled = isEnabled("email_otp_enabled");
-const emailAuthEnabled = isEnabled("email_auth_enabled");
-const emailVerificationRequired = isEnabled("email_verification_enabled");
-const inviteCodeRequired = isEnabled("invite_code_required");
-export const anonymousAuthEnabled = isEnabled("anonymous_auth_enabled");
+const hasGoogleCredentials = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
+const hasGithubCredentials = Boolean(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET);
+const hasAppleCredentials = Boolean(env.APPLE_CLIENT_ID && env.APPLE_CLIENT_SECRET);
 
-const magicLinkExpiresIn = runtimeConfigs.magic_link_expires_in
-  ? Number(runtimeConfigs.magic_link_expires_in)
-  : MAGIC_LINK_EXPIRES_IN;
-const otpExpiresIn = runtimeConfigs.email_otp_expires_in
-  ? Number(runtimeConfigs.email_otp_expires_in)
-  : OTP_EXPIRES_IN;
+const googleEnabled =
+  readBooleanEnv("GOOGLE_AUTH_ENABLED", hasGoogleCredentials) && hasGoogleCredentials;
+const githubEnabled =
+  readBooleanEnv("GITHUB_AUTH_ENABLED", hasGithubCredentials) && hasGithubCredentials;
+const appleEnabled =
+  readBooleanEnv("APPLE_AUTH_ENABLED", hasAppleCredentials) && hasAppleCredentials;
+const magicLinkEnabled = readBooleanEnv("MAGIC_LINK_ENABLED", false);
+const emailOtpEnabled = readBooleanEnv("EMAIL_OTP_ENABLED", false);
+const emailAuthEnabled = readBooleanEnv("EMAIL_AUTH_ENABLED", true);
+const emailVerificationRequired = readBooleanEnv(
+  "EMAIL_VERIFICATION_REQUIRED",
+  readBooleanEnv("EMAIL_VERIFICATION_ENABLED", false),
+);
+const inviteCodeRequired = readBooleanEnv("INVITE_CODE_REQUIRED", false);
+export const anonymousAuthEnabled = readBooleanEnv("ANONYMOUS_AUTH_ENABLED", false);
+
+const magicLinkExpiresIn = readPositiveIntEnv("MAGIC_LINK_EXPIRES_IN", MAGIC_LINK_EXPIRES_IN);
+const otpExpiresIn = readPositiveIntEnv("EMAIL_OTP_EXPIRES_IN", OTP_EXPIRES_IN);
 
 const appUrl = getAppUrl();
 const isHttpsAppUrl = appUrl.startsWith("https://");
@@ -82,9 +83,9 @@ const mobileOrigin = mobileSchemeOrigin(env.MOBILE_APP_SCHEME);
 const extensionOrigin = env.EXTENSION_ORIGIN.trim();
 const extraTrustedOrigins = parseOriginList(env.TRUSTED_ORIGINS);
 
-const oneTapClientId = runtimeConfigs.google_client_id || env.GOOGLE_CLIENT_ID;
+const oneTapClientId = readEnv("VITE_GOOGLE_CLIENT_ID") || env.GOOGLE_CLIENT_ID;
 const oneTapEnabled =
-  isEnabled("google_one_tap_enabled") && googleEnabled && Boolean(oneTapClientId);
+  readBooleanEnv("GOOGLE_ONE_TAP_ENABLED", false) && googleEnabled && Boolean(oneTapClientId);
 
 const INVITE_CODE_COOKIE = "openstarter_invite_code";
 const PENDING_INVITE_TTL_MS = 5 * 60 * 1000;

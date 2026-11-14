@@ -14,6 +14,8 @@ import { type Database, db } from "@openstarter/db/server";
 import { getSnowId, getUuid } from "@openstarter/shared/id";
 import { and, asc, desc, eq, gt, gte, isNotNull, isNull, ne, or, sql, sum } from "drizzle-orm";
 
+import { readBooleanEnv, readEnv, readIntEnv } from "./env";
+
 // ─── 领域词汇（Domain vocabulary） ─────────────────────────────────────────────
 
 /**
@@ -425,47 +427,40 @@ export function getHistory(userId: string, options?: GetHistoryOptions): Promise
 
 // ─── 新用户初始积分（Grant for new user，14.4 / R13.7） ───────────────────────
 
-// 初始积分相关 Config 键（与 ShipAny `modules/credits` 对齐）。
-const INITIAL_CREDITS_ENABLED_KEY = "initial_credits_enabled";
-const INITIAL_CREDITS_AMOUNT_KEY = "initial_credits_amount";
-const INITIAL_CREDITS_VALID_DAYS_KEY = "initial_credits_valid_days";
-const INITIAL_CREDITS_DESCRIPTION_KEY = "initial_credits_description";
+// Environment variable keys for initial welcome credits on signup.
+// 新用户注册赠送初始积分的环境变量键。
 const DEFAULT_INITIAL_CREDITS_DESCRIPTION = "Initial credits";
 
 export interface GrantCreditsForNewUserParams {
-  configs: Record<string, string>;
   userEmail?: string;
   userId: string;
 }
 
 /**
- * 新用户初始积分授予（R13.7）。
+ * Grant initial welcome credits when a new user signs up (controlled by env vars).
+ * Reads `INITIAL_CREDITS_ENABLED`, `INITIAL_CREDITS_AMOUNT`, `INITIAL_CREDITS_VALID_DAYS`,
+ * and `INITIAL_CREDITS_DESCRIPTION` directly from the runtime environment.
  *
- * 受 Config 开关控制：`initial_credits_enabled === 'true'` 且 `initial_credits_amount > 0`
- * 时，按配置数量调用 {@link grant} 授予初始积分（到期时间经
- * {@link calculateCreditExpirationTime} 依 `initial_credits_valid_days` 计算，
- * 0 或缺省表示永不过期）；否则不授予并返回 `undefined`。
- *
- * 仅为独立函数——auth `databaseHooks` 的装配（幂等叠加于 `create.after`）属任务 15。
+ * 新用户初始积分授予（由环境变量控制）：
+ * 当 `INITIAL_CREDITS_ENABLED=true` 且 `INITIAL_CREDITS_AMOUNT > 0` 时授予初始积分；
+ * 过期时间依 `INITIAL_CREDITS_VALID_DAYS` 计算（0 或缺省表示永不过期）。
  */
 export async function grantCreditsForNewUser(
   params: GrantCreditsForNewUserParams,
 ): Promise<NewCredit | undefined> {
-  const { userId, configs, userEmail } = params;
+  const { userId, userEmail } = params;
 
-  if (configs[INITIAL_CREDITS_ENABLED_KEY] !== "true") {
+  if (!readBooleanEnv("INITIAL_CREDITS_ENABLED", false)) {
     return;
   }
 
-  const amount = Number.parseInt(configs[INITIAL_CREDITS_AMOUNT_KEY] ?? "", 10);
-  if (Number.isNaN(amount) || amount <= 0) {
+  const amount = readIntEnv("INITIAL_CREDITS_AMOUNT", 0);
+  if (amount <= 0) {
     return;
   }
 
-  const parsedValidDays = Number.parseInt(configs[INITIAL_CREDITS_VALID_DAYS_KEY] ?? "", 10);
-  const creditsValidDays = Number.isNaN(parsedValidDays) ? 0 : parsedValidDays;
-  const description =
-    configs[INITIAL_CREDITS_DESCRIPTION_KEY] ?? DEFAULT_INITIAL_CREDITS_DESCRIPTION;
+  const creditsValidDays = readIntEnv("INITIAL_CREDITS_VALID_DAYS", 0);
+  const description = readEnv("INITIAL_CREDITS_DESCRIPTION") || DEFAULT_INITIAL_CREDITS_DESCRIPTION;
   const expiresAt = calculateCreditExpirationTime({ creditsValidDays });
   const transactionNo = `welcome-credit:${userId}`;
 

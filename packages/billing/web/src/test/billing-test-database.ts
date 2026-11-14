@@ -2,7 +2,7 @@
 //
 // Returns a createDb()-backed handle with the subset of Phase 0-5 tables used
 // by billing service tests (subscription, order, credit, user) plus the
-// referral-domain tables (referral, referral_relation, commission, config).
+// referral-domain tables (referral, referral_relation, commission).
 
 import { rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -164,16 +164,11 @@ const CREATE_TABLE_STATEMENTS: readonly string[] = [
     created_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
     updated_at INTEGER NOT NULL DEFAULT ${NOW_EXPR}
   )`,
-  `CREATE TABLE config (
-    name TEXT NOT NULL UNIQUE,
-    value TEXT
-  )`,
 ];
 
 const DATA_TABLES = [
   '"order"',
   "commission",
-  "config",
   "credit",
   "referral",
   "referral_relation",
