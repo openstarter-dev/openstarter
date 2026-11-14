@@ -1,6 +1,6 @@
 import { View, Text } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuth } from "@/hooks/use-auth";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Button from "@/components/Button";
@@ -8,11 +8,12 @@ import Icon from "@/components/Icon";
 import "./index.scss";
 
 export default function ProfilePage() {
-  const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
+  const { user, logout } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  // Revoke server session as well as clearing local token store
+  // 登出时同步注销服务端会话并清理本地凭据
+  const handleLogout = async () => {
+    await logout();
     Taro.reLaunch({ url: "/pages/index/index" });
   };
 
@@ -42,7 +43,13 @@ export default function ProfilePage() {
           </View>
 
           <View className="profile__logout">
-            <Button variant="secondary" fullWidth onClick={handleLogout}>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={() => {
+                void handleLogout();
+              }}
+            >
               Sign Out
             </Button>
           </View>

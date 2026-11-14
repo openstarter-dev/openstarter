@@ -27,7 +27,8 @@ export function registerProfileCommands(program: Command): void {
         const profile = await client.request<ProfileView>("/api/profile");
         formatOutput(profile, options.json);
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 
@@ -45,7 +46,8 @@ export function registerProfileCommands(program: Command): void {
         });
         console.log("✓ 个人资料已更新");
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 }

@@ -33,7 +33,8 @@ export function registerDataCommands(program: Command): void {
         const data = await client.request<Note[]>(`/api/notes?limit=${limit}`);
         formatOutput(data, options.json);
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 
@@ -49,7 +50,8 @@ export function registerDataCommands(program: Command): void {
         const note = await client.request<Note>(`/api/notes/${id}`);
         formatOutput(note, options.json);
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 
@@ -71,7 +73,8 @@ export function registerDataCommands(program: Command): void {
         });
         console.log(`✓ 已创建笔记: ${note.id}`);
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 }

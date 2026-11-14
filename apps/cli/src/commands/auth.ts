@@ -42,7 +42,8 @@ export function registerAuthCommands(program: Command): void {
 
         console.log("\n✓ 登录成功！");
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 
@@ -54,7 +55,8 @@ export function registerAuthCommands(program: Command): void {
         config.clearAuth();
         console.log("✓ 已登出");
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 
@@ -69,7 +71,8 @@ export function registerAuthCommands(program: Command): void {
         const profile = await client.request<WhoamiProfile>("/api/profile");
         formatOutput(profile, options.json);
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 }

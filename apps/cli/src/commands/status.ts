@@ -43,7 +43,8 @@ export function registerStatusCommands(program: Command): void {
 
         formatOutput(result, options.json);
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 
@@ -64,7 +65,8 @@ export function registerStatusCommands(program: Command): void {
 
         formatOutput(info, false);
       } catch (error) {
-        handleError(error as Error, false);
+        // Forward global --verbose flag / 透传全局 --verbose 开关
+        handleError(error as Error, Boolean(program.opts().verbose));
       }
     });
 }
