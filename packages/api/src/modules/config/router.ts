@@ -22,11 +22,9 @@ const PUBLIC_AUTH_KEYS = [
 function isEmailSendingConfigured(configs: Record<string, string>): boolean {
   const provider = configs.email_provider || "resend";
   if (provider === "cloudflare") {
-    return Boolean(
-      configs.cloudflare_email_api_token &&
-      configs.cloudflare_email_account_id &&
-      configs.cloudflare_email_sender_email,
-    );
+    // MailChannels only requires API token + sender email (aligned with @openstarter/email)
+    // MailChannels 通道仅需 API token 与发件邮箱（与 @openstarter/email 保持一致）
+    return Boolean(configs.cloudflare_email_api_token && configs.cloudflare_email_sender_email);
   }
   return Boolean(configs.resend_api_key && configs.resend_sender_email);
 }

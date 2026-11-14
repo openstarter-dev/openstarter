@@ -148,20 +148,25 @@ function assembleNewAPI(
   );
 }
 
+// Declarative key list ensures every provider toggle/credential invalidates cachedManager
+// 通过统一配置键清单生成指纹，避免新增或漏配开关（如 openai_enabled）导致缓存不失效
+const AI_CONFIG_HASH_KEYS = [
+  "default_ai_provider",
+  "replicate_enabled",
+  "replicate_api_token",
+  "replicate_base_url",
+  "fal_enabled",
+  "fal_api_key",
+  "openai_enabled",
+  "openai_api_key",
+  "openai_base_url",
+  "newapi_enabled",
+  "newapi_base_url",
+  "newapi_api_key",
+] as const;
+
 export function computeConfigHash(configs: Record<string, string>): string {
-  return JSON.stringify([
-    configs.default_ai_provider || "",
-    configs.replicate_enabled || "",
-    configs.replicate_api_token || "",
-    configs.replicate_base_url || "",
-    configs.fal_enabled || "",
-    configs.fal_api_key || "",
-    configs.openai_api_key || "",
-    configs.openai_base_url || "",
-    configs.newapi_enabled || "",
-    configs.newapi_base_url || "",
-    configs.newapi_api_key || "",
-  ]);
+  return JSON.stringify(AI_CONFIG_HASH_KEYS.map((key) => configs[key] || ""));
 }
 
 export async function getAIManager(): Promise<AIManager> {

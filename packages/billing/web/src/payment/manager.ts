@@ -149,22 +149,37 @@ function assembleWechat(
   );
 }
 
+// Full list of config keys read by assemble* helpers so any credential/webhook update invalidates cache
+// 覆盖全部支付装配配置键，确保任意密钥、回调地址或验签参数变更都能刷新管理器缓存
+const PAYMENT_CONFIG_HASH_KEYS = [
+  "default_payment_provider",
+  "stripe_enabled",
+  "stripe_secret_key",
+  "stripe_publishable_key",
+  "stripe_signing_secret",
+  "paypal_enabled",
+  "paypal_client_id",
+  "paypal_client_secret",
+  "paypal_webhook_id",
+  "paypal_environment",
+  "alipay_enabled",
+  "alipay_app_id",
+  "alipay_private_key",
+  "alipay_public_key",
+  "alipay_notify_url",
+  "wechat_enabled",
+  "wechat_app_id",
+  "wechat_mch_id",
+  "wechat_private_key",
+  "wechat_api_v3_key",
+  "wechat_serial_no",
+  "wechat_notify_url",
+  "wechat_platform_cert",
+] as const;
+
 /** 相关 Config 的指纹：任一支付相关键变化即触发管理器重建。 */
 function computeConfigHash(configs: Record<string, string>): string {
-  return JSON.stringify([
-    configs.default_payment_provider || "",
-    configs.stripe_enabled || "",
-    configs.stripe_secret_key || "",
-    configs.paypal_enabled || "",
-    configs.paypal_client_id || "",
-    configs.paypal_client_secret || "",
-    configs.alipay_enabled || "",
-    configs.alipay_app_id || "",
-    configs.alipay_private_key || "",
-    configs.wechat_enabled || "",
-    configs.wechat_mch_id || "",
-    configs.wechat_private_key || "",
-  ]);
+  return JSON.stringify(PAYMENT_CONFIG_HASH_KEYS.map((key) => configs[key] || ""));
 }
 
 /**

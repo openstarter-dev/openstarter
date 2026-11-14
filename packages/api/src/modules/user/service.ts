@@ -1,7 +1,7 @@
 import { CreditStatus, CreditTransactionType } from "@openstarter/billing-web/credits";
 import { apikey, credit, order, user as userTable } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
-import { and, count, desc, eq, gt, gte, isNull, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gt, gte, isNull, or } from "drizzle-orm";
 
 export type UserOrder = typeof order.$inferSelect;
 
@@ -113,6 +113,28 @@ function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+/**
+ * Aggregate 30-day credit grants and consumptions by UTC date in JS to avoid dialect-specific SQL.
+ * 在应用层按 UTC 日期聚合 30 天积分发放与消耗，避免依赖 SQLite 专属时间函数。
+ */
+function aggregateTrendByDay(
+  rows: readonly { createdAt: Date; credits: number; transactionType: string }[],
+): Map<string, { consumed: number; granted: number }> {
+  const byDay = new Map<string, { consumed: number; granted: number }>();
+  for (const row of rows) {
+    const key = toDateKey(row.createdAt instanceof Date ? row.createdAt : new Date(row.createdAt));
+    const entry = byDay.get(key) ?? { consumed: 0, granted: 0 };
+    const amount = Math.abs(row.credits);
+    if (row.transactionType === CreditTransactionType.GRANT) {
+      entry.granted += amount;
+    } else if (row.transactionType === CreditTransactionType.CONSUME) {
+      entry.consumed += amount;
+    }
+    byDay.set(key, entry);
+  }
+  return byDay;
+}
+
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const database = db();
 
@@ -175,26 +197,27 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
         )
     : [];
 
+  // Fetch window rows and bucket in memory so SQLite/D1 and Postgres share one code path
+  // 拉取窗口期流水并在内存按天聚合，保证 SQLite/D1 与 Postgres 行为完全一致
   const trendRows = await database
     .select({
-      bucket: sql<string>`date(${credit.createdAt} / 1000, 'unixepoch')`,
-      granted: sql<number>`coalesce(sum(case when ${credit.transactionType} = 'grant' then abs(${credit.credits}) else 0 end), 0)`,
-      consumed: sql<number>`coalesce(sum(case when ${credit.transactionType} = 'consume' then abs(${credit.credits}) else 0 end), 0)`,
+      createdAt: credit.createdAt,
+      credits: credit.credits,
+      transactionType: credit.transactionType,
     })
     .from(credit)
-    .where(creditWindow)
-    .groupBy(sql`date(${credit.createdAt} / 1000, 'unixepoch')`);
+    .where(creditWindow);
 
-  const byDay = new Map(trendRows.map((row) => [row.bucket, row]));
+  const byDay = aggregateTrendByDay(trendRows);
   const trend: DashboardTrendPoint[] = Array.from({ length: DASHBOARD_WINDOW_DAYS }, (_, index) => {
     const date = toDateKey(
       new Date(Date.now() - (DASHBOARD_WINDOW_DAYS - 1 - index) * 24 * 60 * 60 * 1000),
     );
     const row = byDay.get(date);
     return {
-      consumed: row ? Math.abs(Number(row.consumed)) : 0,
+      consumed: row ? row.consumed : 0,
       date,
-      granted: row ? Math.abs(Number(row.granted)) : 0,
+      granted: row ? row.granted : 0,
     };
   });
 
