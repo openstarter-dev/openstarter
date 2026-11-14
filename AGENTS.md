@@ -9,7 +9,7 @@ openstarter is a production-ready full-stack SaaS starter built with:
 - **Monorepo**: Turborepo + pnpm workspaces
 - **Framework**: TanStack Start + TanStack Router (web)
 - **Backend**: Hono RPC API mounted at `/api/*`
-- **Database**: Drizzle ORM (Postgres / Cloudflare D1; sqlite dialect kept for D1 and the test harness)
+- **Database**: Drizzle ORM (Cloudflare D1; sqlite dialect for D1 and the test harness)
 - **Multi-platform**: Web, Desktop (Electron), Mobile (Expo), Browser Extension (WXT), CLI, Mini-App (Taro)
 - **Auth**: Better-Auth with OAuth, passkey, 2FA, organizations
 - **Billing**: Stripe/PayPal/Alipay/WeChat Pay with credit system
@@ -58,9 +58,8 @@ src/
 ├── schema/                # All Zod validation schemas + domain value vocabularies
 │                          # (mirrors modules/: schema/user.ts, schema/admin/rbac.ts, schema/mcp.ts, ...)
 └── modules/               # Domain modules (routers + services colocated)
-    ├── ai/                # AI domain (media generation + LLM chat + model catalog + tasks)
+    ├── ai/                # AI domain (media generation + model catalog + tasks)
     │   ├── media/         # Image/video providers (Replicate / Fal / OpenAI / New API)
-    │   ├── llm/           # LLM chat (conversations + SSE streaming; providers via @tanstack/ai-*)
     │   ├── catalog/       # Model catalog (CRUD + availability by media type)
     │   └── tasks/         # Generation task lifecycle + credit deduction
     ├── auth/              # Better-Auth passthrough + custom unlink-account
@@ -128,7 +127,7 @@ allowed exception is the zero-dependency type module
 - `schema/{domain}/{subdomain}.ts` — mirrors sub-domain routers
   (`schema/content/posts.ts`, `schema/admin/rbac.ts`, `schema/support/tickets.ts`, ...)
 - `schema/mcp.ts` — MCP tool input schemas (`mcpPaginationSchema`,
-  ticket/chat/order tools; use plain `z.number()` — MCP args are already
+  ticket/order tools; use plain `z.number()` — MCP args are already
   native JSON — and carry `.describe()` strings for the model)
 
 Domain schema files use locally-scoped names (`listQuery`, `createBody`, ...);
@@ -179,11 +178,9 @@ Every entry point loads it itself — there is no global env wrapper:
 
 Required variables:
 
-- `DATABASE_PROVIDER` — `d1` (default) | `postgres`
-- `DATABASE_URL` — only used by `DATABASE_PROVIDER=postgres`. With the default
-  `d1`, Workers reads the `DB` binding and local dev falls back to the sqlite
-  file at this URL (`file:local.db` at the repo root, created by `pnpm db:push`
-  / `pnpm db:migrate`)
+- `DATABASE_URL` — sqlite file path used by local D1 dev (`file:local.db` at the
+  repo root by default, created by `pnpm db:push` / `pnpm db:migrate`); on
+  Cloudflare Workers the `DB` binding is used instead
 - `VITE_APP_URL` — web app origin (also the API origin). Read directly from
   `process.env` by better-auth's `baseURL`, SSR canonical URLs, email links and
   every app's derived API base; missing value falls back to
@@ -284,7 +281,7 @@ Apps share one Hono backend at `/api/*`. Deploy patterns:
 - **CLI**: npm registry or scoped binary
 - **Mini-App**: WeChat MP
 
-Database migrations run via drizzle-kit: `db:migrate` (local, dispatches on `DATABASE_PROVIDER`) and `db:migrate:prod` (cloud, d1-http for D1 / DATABASE_URL for postgres) in `packages/db`.
+Database migrations run via drizzle-kit: `db:migrate` (local sqlite/D1) and `db:migrate:prod` (cloud, d1-http) in `packages/db`.
 
 ## Troubleshooting
 
