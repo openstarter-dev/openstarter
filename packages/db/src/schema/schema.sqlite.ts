@@ -5,7 +5,6 @@ const table = sqliteTable;
 
 const sqliteNowMs = sql`(cast((julianday('now') - 2440587.5)*86400000 as integer))`;
 
-
 export const user = table(
   "user",
   {
@@ -245,7 +244,6 @@ export const teamMember = table(
   ],
 );
 
-
 export const deviceCode = table(
   "device_code",
   {
@@ -265,7 +263,6 @@ export const deviceCode = table(
     index("idx_device_code_status").on(t.status),
   ],
 );
-
 
 export const taxonomy = table(
   "taxonomy",
@@ -322,7 +319,6 @@ export const post = table(
   },
   (t) => [index("idx_post_type_status").on(t.type, t.status)],
 );
-
 
 export const order = table(
   "order",
@@ -508,7 +504,6 @@ export const apikey = table(
   ],
 );
 
-
 export const aiModel = table(
   "ai_model",
   {
@@ -517,7 +512,6 @@ export const aiModel = table(
     displayName: text("display_name").notNull(),
     enabled: integer("enabled", { mode: "boolean" }).default(true).notNull(),
     id: text("id").primaryKey(),
-    maxOutputTokens: integer("max_output_tokens"),
     mediaType: text("media_type").notNull(),
     metadata: text("metadata"),
     modelId: text("model_id").notNull(),
@@ -567,58 +561,6 @@ export const aiTask = table(
   ],
 );
 
-export const chat = table(
-  "chat",
-  {
-    content: text("content"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
-    id: text("id").primaryKey(),
-    metadata: text("metadata"),
-    model: text("model").notNull(),
-    parts: text("parts").notNull(),
-    provider: text("provider").notNull(),
-    status: text("status").notNull(),
-    title: text("title").notNull().default(""),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-  },
-  (t) => [index("idx_chat_user_status").on(t.userId, t.status)],
-);
-
-export const chatMessage = table(
-  "chat_message",
-  {
-    chatId: text("chat_id")
-      .notNull()
-      .references(() => chat.id, { onDelete: "cascade" }),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
-    id: text("id").primaryKey(),
-    metadata: text("metadata"),
-    model: text("model").notNull(),
-    parts: text("parts").notNull(),
-    provider: text("provider").notNull(),
-    role: text("role").notNull(),
-    status: text("status").notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-  },
-  (t) => [
-    index("idx_chat_message_chat_id").on(t.chatId, t.status),
-    index("idx_chat_message_user_id").on(t.userId, t.status),
-  ],
-);
-
-
 export const ticket = table(
   "ticket",
   {
@@ -657,7 +599,6 @@ export const ticketMessage = table(
   },
   (t) => [index("idx_ticket_message_ticket").on(t.ticketId)],
 );
-
 
 export const inviteCode = table(
   "invite_code",
@@ -698,7 +639,6 @@ export const userInvite = table(
     index("idx_user_invite_code").on(t.inviteCodeId),
   ],
 );
-
 
 export const referral = table(
   "referral",
@@ -769,7 +709,6 @@ export const commission = table(
   ],
 );
 
-
 export type User = typeof user.$inferSelect;
 export type NewUser = typeof user.$inferInsert;
 export type Session = typeof session.$inferSelect;
@@ -793,10 +732,6 @@ export type AiModel = typeof aiModel.$inferSelect;
 export type NewAiModel = typeof aiModel.$inferInsert;
 export type AiTask = typeof aiTask.$inferSelect;
 export type NewAiTask = typeof aiTask.$inferInsert;
-export type Chat = typeof chat.$inferSelect;
-export type NewChat = typeof chat.$inferInsert;
-export type ChatMessage = typeof chatMessage.$inferSelect;
-export type NewChatMessage = typeof chatMessage.$inferInsert;
 export type Ticket = typeof ticket.$inferSelect;
 export type NewTicket = typeof ticket.$inferInsert;
 export type TicketMessage = typeof ticketMessage.$inferSelect;

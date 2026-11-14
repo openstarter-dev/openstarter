@@ -542,8 +542,6 @@
   "admin.ai_models.display_name_field": "Display name",
   "admin.ai_models.media_type_field": "Media type",
   "admin.ai_models.credit_price_field": "Credit price",
-  "admin.ai_models.max_output_tokens_field": "Max output tokens",
-  "admin.ai_models.max_tokens_placeholder": "Leave empty for no limit",
   "admin.ai_models.sort_order_field": "Sort order",
   "admin.ai_models.options_schema_field": "Options schema (JSON)",
   "admin.ai_models.metadata_field": "Metadata (JSON)",

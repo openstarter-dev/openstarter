@@ -17,8 +17,6 @@ const TOOL_NAMES = [
   "openstarter_list_credit_history",
   "openstarter_list_orders",
   "openstarter_list_ai_tasks",
-  "openstarter_list_chats",
-  "openstarter_get_chat_messages",
   "openstarter_list_tickets",
   "openstarter_get_ticket_messages",
   "openstarter_create_ticket",
@@ -73,28 +71,6 @@ const insertAiTask = async (
   `);
 };
 
-const insertChat = async (
-  database: Database,
-  overrides: { id: string; userId: string; title: string },
-) => {
-  await database.run(sql`
-    INSERT INTO chat (id, user_id, title, provider, model, status, parts, created_at, updated_at)
-    VALUES (${overrides.id}, ${overrides.userId}, ${overrides.title}, 'openai', 'gpt-5', 'active',
-            '[]', 1700000000000, 1700000001000)
-  `);
-};
-
-const insertChatMessage = async (
-  database: Database,
-  overrides: { id: string; chatId: string; userId: string; role: string; parts: string },
-) => {
-  await database.run(sql`
-    INSERT INTO chat_message (id, chat_id, user_id, role, provider, model, status, parts, created_at, updated_at)
-    VALUES (${overrides.id}, ${overrides.chatId}, ${overrides.userId}, ${overrides.role},
-            'openai', 'gpt-5', 'success', ${overrides.parts}, 1700000002000, 1700000003000)
-  `);
-};
-
 describe("mcp module", () => {
   let harness: McpTestHarness;
 
@@ -126,7 +102,7 @@ describe("mcp module", () => {
       (tool) =>
         tool.name !== "openstarter_create_ticket" && tool.name !== "openstarter_reply_ticket",
     );
-    expect(reads.length).toBe(9);
+    expect(reads.length).toBe(7);
     const write = tools.find((tool) => tool.name === "openstarter_create_ticket");
     expect(write?.description).toContain("support ticket");
   });
@@ -232,45 +208,6 @@ describe("mcp module", () => {
     const payload = parseStructured(result) as { total: number; items: Array<{ status: string }> };
     expect(payload.total).toBe(1);
     expect(payload.items[0]?.status).toBe("success");
-  });
-
-  it("list_chats and get_chat_messages read the caller's conversations", async () => {
-    const database = getDatabase();
-    await insertUser(database, { id: "user-1" });
-    await insertChat(database, { id: "ch1", userId: "user-1", title: "Hello" });
-    await insertChatMessage(database, {
-      id: "m1",
-      chatId: "ch1",
-      userId: "user-1",
-      role: "user",
-      parts: JSON.stringify([{ type: "text", text: "hi there" }]),
-    });
-
-    const chats = await harness.callTool("openstarter_list_chats", {});
-    expect(chats.isError).toBeFalsy();
-    const chatPayload = parseStructured(chats) as {
-      total: number;
-      items: Array<{ title: string }>;
-    };
-    expect(chatPayload.total).toBe(1);
-    expect(chatPayload.items[0]?.title).toBe("Hello");
-
-    const messages = await harness.callTool("openstarter_get_chat_messages", { chatId: "ch1" });
-    expect(messages.isError).toBeFalsy();
-    const messagePayload = parseStructured(messages) as {
-      items: Array<{ role: string; content: string }>;
-    };
-    expect(messagePayload.items[0]?.content).toBe("hi there");
-  });
-
-  it("get_chat_messages rejects chats owned by other users", async () => {
-    const database = getDatabase();
-    await insertUser(database, { id: "user-1" });
-    await insertUser(database, { id: "user-2" });
-    await insertChat(database, { id: "ch-other", userId: "user-2", title: "Not mine" });
-
-    const result = await harness.callTool("openstarter_get_chat_messages", { chatId: "ch-other" });
-    expect(result.isError).toBe(true);
   });
 
   it("ticket write tools persist through the tickets service as role=user", async () => {

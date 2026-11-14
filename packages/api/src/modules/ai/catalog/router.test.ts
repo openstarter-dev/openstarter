@@ -21,10 +21,6 @@ vi.mock("@openstarter/db/server", async (importOriginal) => {
   };
 });
 
-vi.mock("../llm/provider", () => ({
-  getAvailableProviders: () => Promise.resolve(["openai"]),
-}));
-
 vi.mock("../media/manager", () => ({
   getAIManager: () => Promise.resolve({ getProviderNames: () => ["replicate"] }),
 }));
@@ -69,7 +65,6 @@ const CREATE_AI_MODEL = `CREATE TABLE ai_model (
   display_name TEXT NOT NULL,
   media_type TEXT NOT NULL,
   credit_price INTEGER NOT NULL DEFAULT 0,
-  max_output_tokens INTEGER,
   options_schema TEXT,
   enabled INTEGER NOT NULL DEFAULT 1,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -130,14 +125,7 @@ function jsonInit(method: string, body: unknown): RequestInit {
 }
 
 describe("GET /ai/models facade", () => {
-  it("returns the five-key grouped envelope with enabled + available models only", async () => {
-    await createModel({
-      provider: "openai",
-      modelId: "facade-gpt",
-      displayName: "Facade GPT",
-      mediaType: "text",
-      creditPrice: 1,
-    });
+  it("returns the four-key grouped envelope with enabled + available models only", async () => {
     await createModel({
       provider: "replicate",
       modelId: "facade-flux",
@@ -147,9 +135,16 @@ describe("GET /ai/models facade", () => {
     });
     await createModel({
       provider: "openai",
+      modelId: "facade-dalle",
+      displayName: "Facade DALL-E (unavailable provider)",
+      mediaType: "image",
+      creditPrice: 1,
+    });
+    await createModel({
+      provider: "replicate",
       modelId: "facade-disabled",
       displayName: "Facade Disabled",
-      mediaType: "text",
+      mediaType: "image",
       creditPrice: 2,
       enabled: false,
     });
@@ -172,10 +167,13 @@ describe("GET /ai/models facade", () => {
 
     expect(body.code).toBe(0);
     expect(body.message).toBe("ok");
-    expect(Object.keys(body.data).sort()).toEqual(["image", "music", "speech", "text", "video"]);
-    expect(body.data.text?.some((m) => m.modelId === "facade-gpt")).toBe(true);
-    expect(body.data.text?.every((m) => m.modelId !== "facade-disabled")).toBe(true);
+    expect(Object.keys(body.data).sort()).toEqual(["image", "music", "speech", "video"]);
     expect(body.data.image?.some((m) => m.modelId === "facade-flux")).toBe(true);
+    expect(
+      body.data.image?.every(
+        (m) => m.modelId !== "facade-disabled" && m.modelId !== "facade-dalle",
+      ),
+    ).toBe(true);
     expect(body.data.video).toEqual([]);
     expect(body.data.speech).toEqual([]);
   });
@@ -189,7 +187,7 @@ describe("admin AI model CRUD", () => {
         provider: "openai",
         modelId: "admin-gpt",
         displayName: "Admin GPT",
-        mediaType: "text",
+        mediaType: "image",
         creditPrice: 3,
       }),
     );
@@ -217,7 +215,7 @@ describe("admin AI model CRUD", () => {
         provider: "openai",
         modelId: "admin-gpt",
         displayName: "Admin GPT duplicate",
-        mediaType: "text",
+        mediaType: "image",
         creditPrice: 3,
       }),
     );
@@ -287,7 +285,7 @@ describe("admin AI model CRUD", () => {
       provider: "openai",
       modelId: "admin-patch-target",
       displayName: "Patch Target",
-      mediaType: "text",
+      mediaType: "image",
       creditPrice: 7,
     });
 
@@ -321,7 +319,7 @@ describe("admin AI model CRUD", () => {
       provider: "openai",
       modelId: "admin-delete-target",
       displayName: "Delete Target",
-      mediaType: "text",
+      mediaType: "image",
       creditPrice: 1,
     });
 

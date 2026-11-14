@@ -5,7 +5,6 @@ import {
   type McpRequestContext,
 } from "@modelcontextprotocol/server";
 
-import { registerChatTools } from "./tools/chats";
 import { registerCommerceTools } from "./tools/orders";
 import { registerProfileTools } from "./tools/profile";
 import { registerTicketTools } from "./tools/tickets";
@@ -17,7 +16,6 @@ export function buildMcpServer(ctx: McpRequestContext): McpServer {
 
   registerProfileTools(server);
   registerCommerceTools(server);
-  registerChatTools(server);
   registerTicketTools(server);
 
   void ctx;

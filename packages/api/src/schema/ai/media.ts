@@ -7,7 +7,6 @@ const MEDIA_TYPE_VALUES = [
   AIMediaType.MUSIC,
   AIMediaType.IMAGE,
   AIMediaType.VIDEO,
-  AIMediaType.TEXT,
   AIMediaType.SPEECH,
 ] as const;
 

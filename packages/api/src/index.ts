@@ -11,7 +11,6 @@ import { adminRouter } from "./modules/admin/router";
 import { referralRouter } from "./modules/referral";
 import { aiModelsRouter } from "./modules/ai/catalog/router";
 import { aiRouter } from "./modules/ai/media/router";
-import { llmRouter } from "./modules/ai/llm";
 import { billingRouter } from "./modules/billing/router";
 import { contentRouter } from "./modules/content/router";
 import { demoRouter } from "./modules/demo/router";
@@ -53,7 +52,6 @@ const routes = api
   .route("/", billingRouter)
   .route("/", storageRouter)
   .route("/", aiRouter)
-  .route("/", llmRouter)
   .route("/", aiModelsRouter)
   .route("/", supportRouter)
   .route("/", contentRouter)

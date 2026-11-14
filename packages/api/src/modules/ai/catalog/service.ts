@@ -4,7 +4,6 @@ import { getUuid } from "@openstarter/shared/id";
 import { and, asc, eq } from "drizzle-orm";
 
 import { getAIManager } from "../media/manager";
-import { getAvailableProviders } from "../llm/provider";
 import { AI_MEDIA_TYPES, type AIModelMediaType } from "../../../schema/ai/catalog";
 
 export class DuplicateModelError extends Error {
@@ -39,12 +38,11 @@ export async function findModelByProviderAndId(
 export async function listAvailableModelsByMediaType(): Promise<
   Record<AIModelMediaType, AiModel[]>
 > {
-  const [models, llmProviders, mediaManager] = await Promise.all([
+  const [models, mediaManager] = await Promise.all([
     listModels({ enabledOnly: true }),
-    getAvailableProviders(),
     getAIManager(),
   ]);
-  const availableProviders = new Set([...llmProviders, ...mediaManager.getProviderNames()]);
+  const availableProviders = new Set(mediaManager.getProviderNames());
 
   const grouped = Object.fromEntries(
     AI_MEDIA_TYPES.map((mediaType) => [mediaType, [] as AiModel[]]),

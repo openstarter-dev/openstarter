@@ -15,7 +15,6 @@ export const creditHistoryQuerySchema = z.object({
   offset: z.number().int().min(0).default(0),
 });
 
-
 const AI_TASK_STATUSES = ["pending", "processing", "success", "failed", "canceled"] as const;
 
 export const listAiTasksSchema = mcpPaginationSchema.extend({
@@ -27,15 +26,6 @@ export const listAiTasksSchema = mcpPaginationSchema.extend({
     .describe("Filter by media type, e.g. 'image' or 'music'."),
   status: z.enum(AI_TASK_STATUSES).optional().describe("Filter by task status."),
 });
-
-
-export const getChatMessagesSchema = mcpPaginationSchema.extend({
-  chatId: z
-    .string()
-    .min(1)
-    .describe("Id of the chat whose messages to read (from openstarter_list_chats)."),
-});
-
 
 export const listTicketsSchema = mcpPaginationSchema.extend({
   status: z.enum(TICKET_STATUS_VALUES).optional().describe("Filter by ticket status."),

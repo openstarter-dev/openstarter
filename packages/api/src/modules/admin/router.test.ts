@@ -124,7 +124,7 @@ describe("admin router composition (mount regression)", () => {
         provider: "openai",
         modelId: "mount-gpt",
         displayName: "Mount GPT",
-        mediaType: "text",
+        mediaType: "image",
       }),
       method: "POST",
     });

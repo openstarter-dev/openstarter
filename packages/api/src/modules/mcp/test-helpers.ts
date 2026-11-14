@@ -102,36 +102,8 @@ const RESHAPE_TABLES = [
     updated_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
     deleted_at INTEGER
   )`,
-  "DROP TABLE IF EXISTS chat_message",
-  "DROP TABLE IF EXISTS chat",
   "DROP TABLE IF EXISTS ticket_message",
   "DROP TABLE IF EXISTS ticket",
-  `CREATE TABLE chat (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    title TEXT NOT NULL DEFAULT '',
-    provider TEXT NOT NULL,
-    model TEXT NOT NULL,
-    status TEXT NOT NULL,
-    parts TEXT NOT NULL DEFAULT '[]',
-    content TEXT,
-    metadata TEXT,
-    created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL
-  )`,
-  `CREATE TABLE chat_message (
-    id TEXT PRIMARY KEY,
-    chat_id TEXT NOT NULL,
-    user_id TEXT NOT NULL,
-    role TEXT NOT NULL,
-    provider TEXT NOT NULL DEFAULT '',
-    model TEXT NOT NULL DEFAULT '',
-    status TEXT NOT NULL DEFAULT 'success',
-    parts TEXT NOT NULL DEFAULT '[]',
-    metadata TEXT,
-    created_at INTEGER NOT NULL,
-    updated_at INTEGER NOT NULL
-  )`,
   `CREATE TABLE ticket (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,

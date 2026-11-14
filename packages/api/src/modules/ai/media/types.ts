@@ -2,7 +2,6 @@ export const AIMediaType = {
   MUSIC: "music",
   IMAGE: "image",
   VIDEO: "video",
-  TEXT: "text",
   SPEECH: "speech",
 } as const;
 

@@ -67,7 +67,7 @@ const sumRemainingCredits = async (userId: string): Promise<number> => {
 };
 
 const PROVIDERS = ["replicate", "fal", "openai"] as const;
-const MEDIA_TYPES = ["image", "video", "text", "speech"] as const;
+const MEDIA_TYPES = ["image", "video", "music", "speech"] as const;
 const TASK_STATUSES = [
   AITaskStatus.PENDING,
   AITaskStatus.PROCESSING,
@@ -347,8 +347,8 @@ describe("ai tasks (P39, P40, P41, P42, P43)", () => {
 
           const emptyMedia: Record<string, number> = {
             image: 0,
+            music: 0,
             speech: 0,
-            text: 0,
             video: 0,
           };
           const emptyStatus: Record<string, number> = {

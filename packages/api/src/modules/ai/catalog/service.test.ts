@@ -30,10 +30,6 @@ vi.mock("@openstarter/db/server", async (importOriginal) => {
   };
 });
 
-vi.mock("../llm/provider", () => ({
-  getAvailableProviders: () => Promise.resolve(["openai"]),
-}));
-
 vi.mock("../media/manager", () => ({
   getAIManager: () => Promise.resolve({ getProviderNames: () => ["replicate"] }),
 }));
@@ -47,7 +43,6 @@ const CREATE_AI_MODEL = `CREATE TABLE ai_model (
   display_name TEXT NOT NULL,
   media_type TEXT NOT NULL,
   credit_price INTEGER NOT NULL DEFAULT 0,
-  max_output_tokens INTEGER,
   options_schema TEXT,
   enabled INTEGER NOT NULL DEFAULT 1,
   sort_order INTEGER NOT NULL DEFAULT 0,
@@ -89,18 +84,18 @@ describe("AI Catalog Service", () => {
   describe("listAvailableModelsByMediaType", () => {
     it("groups enabled models by media type and filters unavailable providers", async () => {
       await createModel({
-        provider: "openai",
-        modelId: "gpt-4o-mini",
-        displayName: "GPT-4o mini",
-        mediaType: "text",
-        creditPrice: 1,
-      });
-      await createModel({
         provider: "replicate",
         modelId: "flux-pro",
         displayName: "FLUX Pro",
         mediaType: "image",
         creditPrice: 5,
+      });
+      await createModel({
+        provider: "openai",
+        modelId: "dall-e-3",
+        displayName: "DALL-E 3 (unavailable provider)",
+        mediaType: "image",
+        creditPrice: 1,
       });
       await createModel({
         provider: "fal",
@@ -110,22 +105,21 @@ describe("AI Catalog Service", () => {
         creditPrice: 20,
       });
       await createModel({
-        provider: "openai",
-        modelId: "o3-mini",
-        displayName: "o3-mini (disabled)",
-        mediaType: "text",
+        provider: "replicate",
+        modelId: "flux-disabled",
+        displayName: "FLUX (disabled)",
+        mediaType: "image",
         creditPrice: 2,
         enabled: false,
       });
 
       const grouped = await listAvailableModelsByMediaType();
 
-      expect(grouped.text.map((m) => m.modelId)).toEqual(["gpt-4o-mini"]);
       expect(grouped.image.map((m) => m.modelId)).toEqual(["flux-pro"]);
       expect(grouped.video).toEqual([]);
       expect(grouped.music).toEqual([]);
       expect(grouped.speech).toEqual([]);
-      expect(Object.keys(grouped).sort()).toEqual(["image", "music", "speech", "text", "video"]);
+      expect(Object.keys(grouped).sort()).toEqual(["image", "music", "speech", "video"]);
     });
   });
 
@@ -135,7 +129,7 @@ describe("AI Catalog Service", () => {
         provider: "openai",
         modelId: "dup-check",
         displayName: "x",
-        mediaType: "text",
+        mediaType: "image",
         creditPrice: 1,
       });
       await expect(
@@ -143,7 +137,7 @@ describe("AI Catalog Service", () => {
           provider: "openai",
           modelId: "dup-check",
           displayName: "y",
-          mediaType: "text",
+          mediaType: "image",
           creditPrice: 1,
         }),
       ).rejects.toBeInstanceOf(DuplicateModelError);
@@ -154,7 +148,7 @@ describe("AI Catalog Service", () => {
         provider: "anthropic",
         modelId: "claude-sonnet-4-6",
         displayName: "Claude Sonnet 4.6",
-        mediaType: "text",
+        mediaType: "image",
         creditPrice: 3,
       });
 
@@ -173,7 +167,7 @@ describe("AI Catalog Service", () => {
         provider: "openai",
         modelId: "gpt-4o",
         displayName: "GPT-4o",
-        mediaType: "text",
+        mediaType: "image",
         creditPrice: 5,
       });
 

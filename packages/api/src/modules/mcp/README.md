@@ -43,8 +43,6 @@ Claude Desktop / 其他支持 streamable HTTP 的客户端:
 | `openstarter_list_credit_history` | 积分流水（limit/offset）              | R    |
 | `openstarter_list_orders`         | 订单/支付记录（分页）                 | R    |
 | `openstarter_list_ai_tasks`       | AI 生成任务（分页,可按状态/类型过滤） | R    |
-| `openstarter_list_chats`          | LLM 会话列表（分页）                  | R    |
-| `openstarter_get_chat_messages`   | 单会话消息（校验归属）                | R    |
 | `openstarter_list_tickets`        | 本人工单列表（分页/筛选）             | R    |
 | `openstarter_get_ticket_messages` | 工单消息线程（校验归属）              | R    |
 | `openstarter_create_ticket`       | 创建支持工单                          | W    |
@@ -57,7 +55,7 @@ modules/mcp/
 ├── index.ts       # Hono 子路由（apiKeyAuth → handler.fetch + authInfo 注入）
 ├── server.ts      # createMcpHandler 工厂（无状态,每请求新实例）
 ├── shared.ts      # 上下文解析、JSON 信封、错误格式化、分页 schema
-└── tools/         # 按域拆分的工具注册（profile/orders/chats/tickets）
+└── tools/         # 按域拆分的工具注册（profile/orders/tickets）
 ```
 
 新增工具：在对应域文件中 `server.registerTool(...)`（Zod v4 inputSchema + annotations）,

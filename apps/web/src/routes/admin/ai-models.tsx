@@ -68,7 +68,6 @@ interface ModelForm {
   displayName: string;
   mediaType: MediaType;
   creditPrice: string;
-  maxOutputTokens: string;
   optionsSchema: string;
   metadata: string;
   enabled: boolean;
@@ -82,19 +81,10 @@ const EMPTY_FORM: ModelForm = {
   displayName: "",
   mediaType: "image",
   creditPrice: "0",
-  maxOutputTokens: "",
   optionsSchema: "",
   metadata: "",
   enabled: true,
   sortOrder: "0",
-};
-
-const parseIntOrNull = (value: string): number | null | undefined => {
-  if (value.trim() === "") {
-    return null;
-  }
-  const parsed = Number.parseInt(value, 10);
-  return Number.isFinite(parsed) ? parsed : undefined;
 };
 
 function AdminAiModelsPage() {
@@ -155,8 +145,7 @@ function AdminAiModelsPage() {
       return;
     }
     const creditPrice = Number.parseInt(form.creditPrice, 10);
-    const maxOutputTokens = parseIntOrNull(form.maxOutputTokens);
-    if (!Number.isFinite(creditPrice) || creditPrice < 0 || maxOutputTokens === undefined) {
+    if (!Number.isFinite(creditPrice) || creditPrice < 0) {
       toast.error(m["admin.ai_models.validation_error"]());
       return;
     }
@@ -167,7 +156,6 @@ function AdminAiModelsPage() {
       displayName: form.displayName.trim(),
       mediaType: form.mediaType,
       creditPrice,
-      maxOutputTokens,
       optionsSchema: form.optionsSchema.trim() === "" ? null : form.optionsSchema.trim(),
       metadata: form.metadata.trim() === "" ? null : form.metadata.trim(),
       enabled: form.enabled,
@@ -239,8 +227,6 @@ function AdminAiModelsPage() {
                             ? (model.mediaType as MediaType)
                             : "image",
                           creditPrice: String(model.creditPrice),
-                          maxOutputTokens:
-                            model.maxOutputTokens === null ? "" : String(model.maxOutputTokens),
                           optionsSchema: model.optionsSchema ?? "",
                           metadata: model.metadata ?? "",
                           enabled: model.enabled,
@@ -353,18 +339,6 @@ function AdminAiModelsPage() {
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="ai-model-max-tokens">
-                    {m["admin.ai_models.max_output_tokens_field"]()}
-                  </Label>
-                  <Input
-                    id="ai-model-max-tokens"
-                    inputMode="numeric"
-                    onChange={(e) => setForm({ ...form, maxOutputTokens: e.target.value })}
-                    placeholder={m["admin.ai_models.max_tokens_placeholder"]()}
-                    value={form.maxOutputTokens}
-                  />
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="ai-model-sort-order">
                     {m["admin.ai_models.sort_order_field"]()}

@@ -19,7 +19,7 @@ export const adminKeys = {
   users: (page: number, search: string) => ["admin", "users", page, search] as const,
 } as const;
 
-export const AI_MODEL_MEDIA_TYPES = ["text", "image", "video", "music", "speech"] as const;
+export const AI_MODEL_MEDIA_TYPES = ["image", "video", "music", "speech"] as const;
 
 export type AiModelMediaType = (typeof AI_MODEL_MEDIA_TYPES)[number];
 
@@ -154,7 +154,6 @@ const mutations = {
             displayName: input.displayName,
             mediaType: input.mediaType,
             creditPrice: input.creditPrice,
-            maxOutputTokens: input.maxOutputTokens,
             optionsSchema: input.optionsSchema,
             metadata: input.metadata ?? null,
             enabled: input.enabled,

@@ -542,8 +542,6 @@
   "admin.ai_models.display_name_field": "显示名称",
   "admin.ai_models.media_type_field": "媒体类型",
   "admin.ai_models.credit_price_field": "额度价格",
-  "admin.ai_models.max_output_tokens_field": "最大输出 Token",
-  "admin.ai_models.max_tokens_placeholder": "留空表示无限制",
   "admin.ai_models.sort_order_field": "排序",
   "admin.ai_models.options_schema_field": "选项 Schema (JSON)",
   "admin.ai_models.metadata_field": "元数据 (JSON)",
