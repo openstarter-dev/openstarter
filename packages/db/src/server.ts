@@ -7,11 +7,7 @@ let cachedDb: Database | null = null;
 
 function resolveDbConfigFromEnv(): DbConfig {
   return {
-    provider: env.DATABASE_PROVIDER,
     url: env.DATABASE_URL,
-    schema: env.DB_SCHEMA,
-    singleton: env.DB_SINGLETON_ENABLED === "true",
-    maxConnections: Number(env.DB_MAX_CONNECTIONS) || 1,
   };
 }
 
@@ -32,7 +28,5 @@ export function db(): Database {
   return instance;
 }
 
-export { getAuthAdapterProvider } from "./config/adapter";
-export type { AuthAdapterProvider } from "./config/adapter";
-export { closeDb, createDb } from "./factory/create-db";
+export { createDb } from "./factory/create-db";
 export type { Database, DbConfig, DbProvider } from "./types";

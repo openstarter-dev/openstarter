@@ -1,5 +1,4 @@
 import { fileURLToPath } from "node:url";
-import { readFileSync } from "node:fs";
 
 import { createParaglidePlugin } from "@openstarter/i18n-web/paraglide";
 import mdx from "@mdx-js/rollup";
@@ -14,22 +13,6 @@ const driverStub = fileURLToPath(new URL("./src/db-driver-stub.ts", import.meta.
 
 const tslibEsm = "tslib/tslib.es6.js";
 
-function workersDbProvider(): string {
-  try {
-    const raw = readFileSync(fileURLToPath(new URL("./wrangler.jsonc", import.meta.url)), "utf8");
-    const cleaned = raw.replace(/\/\/.*$/gm, "");
-    const match = cleaned.match(/"DATABASE_PROVIDER"\s*:\s*"([^"]+)"/);
-    if (match) {
-      return match[1];
-    }
-  } catch {
-  }
-  return process.env.DATABASE_PROVIDER || "d1";
-}
-
-const workersDb = isCloudflareBuild ? workersDbProvider() : "";
-const keepPostgres = workersDb === "postgresql" || workersDb === "postgres";
-
 export default defineConfig({
   server: {
     port: 3000,
@@ -41,7 +24,6 @@ export default defineConfig({
           mysql2: driverStub,
           "@libsql/client": driverStub,
           "drizzle-orm/libsql": driverStub,
-          ...(keepPostgres ? {} : { postgres: driverStub }),
           tslib: tslibEsm,
         }
       : {

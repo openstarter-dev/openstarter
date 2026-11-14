@@ -10,7 +10,6 @@ export const isCloudflareWorker =
 
 export type CloudflareEnv = {
   DB?: unknown;
-  HYPERDRIVE?: { connectionString?: string };
 };
 
 export function readCloudflareEnv(): CloudflareEnv | undefined {

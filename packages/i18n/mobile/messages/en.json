@@ -793,7 +793,7 @@
   "landing.faq.payment.question": "Which payment providers are supported?",
   "landing.faq.payment.answer": "Stripe, PayPal, Creem, Alipay, and WeChat Pay out of the box. The PaymentManager abstraction makes it straightforward to add more providers by implementing a single interface.",
   "landing.faq.database.question": "Which databases can I use?",
-  "landing.faq.database.answer": "Drizzle ORM handles PostgreSQL, MySQL, SQLite, Turso, and Cloudflare D1. Switch providers by editing DATABASE_PROVIDER in your .env — the schema templates and drizzle config adapt automatically.",
+  "landing.faq.database.answer": "Drizzle ORM runs on Cloudflare D1 (sqlite locally in dev), so you need no external database to get started — schema, migrations and the drizzle config are all wired up.",
   "landing.faq.customize.question": "How customizable is the landing page?",
   "landing.faq.customize.answer": "The src/blocks/ directory ships with demo sections — they're designed to be rewritten per project. The durable primitives live in src/components/, so your rebrand touches blocks and translations, not the chassis.",
   "landing.faq.license.question": "Can I use this for commercial projects?",

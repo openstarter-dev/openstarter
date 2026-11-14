@@ -20,8 +20,8 @@ describe("resolveFileUrl", () => {
   });
 
   it("passes through non-file connection URLs untouched", () => {
-    expect(resolveFileUrl("postgres://user@host:5432/app", "/repo")).toBe(
-      "postgres://user@host:5432/app",
+    expect(resolveFileUrl("libsql://user-host.turso.io", "/repo")).toBe(
+      "libsql://user-host.turso.io",
     );
   });
 });

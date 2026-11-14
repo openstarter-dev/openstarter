@@ -22,15 +22,11 @@
     }
   },
   "scripts": {
-    "db:setup": "node scripts/setup-schema.mjs",
-    "db:push": "node scripts/setup-schema.mjs && drizzle-kit push",
-    "db:generate": "node scripts/setup-schema.mjs && drizzle-kit generate",
-    "db:studio": "node scripts/setup-schema.mjs && drizzle-kit studio",
-    "db:migrate": "node scripts/setup-schema.mjs && drizzle-kit migrate",
-    "db:generate:prod": "drizzle-kit generate --config=drizzle.config.prod.ts",
-    "db:push:prod": "drizzle-kit push --config=drizzle.config.prod.ts",
+    "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio",
+    "db:migrate": "drizzle-kit migrate",
     "db:migrate:prod": "drizzle-kit migrate --config=drizzle.config.prod.ts",
-    "db:studio:prod": "drizzle-kit studio --config=drizzle.config.prod.ts",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
@@ -40,7 +36,6 @@
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
     "envin": "catalog:",
-    "postgres": "^3.4.7",
     "zod": "catalog:"
   },
   "devDependencies": {

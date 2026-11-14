@@ -197,8 +197,8 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
         )
     : [];
 
-  // Fetch window rows and bucket in memory so SQLite/D1 and Postgres share one code path
-  // 拉取窗口期流水并在内存按天聚合，保证 SQLite/D1 与 Postgres 行为完全一致
+  // Fetch window rows and bucket in memory so every sqlite/D1 code path stays identical
+  // 拉取窗口期流水并在内存按天聚合，保证各 sqlite/D1 代码路径行为完全一致
   const trendRows = await database
     .select({
       createdAt: credit.createdAt,

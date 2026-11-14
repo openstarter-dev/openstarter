@@ -36,8 +36,8 @@ function resolveIdentity(userId: string | undefined, headers: Headers): string |
 }
 
 /**
- * Atomically count one request in the fixed window (single upsert; works on sqlite and Postgres).
- * 单条 upsert 原子计数一次请求（固定窗口，sqlite / Postgres 通用）
+ * Atomically count one request in the fixed window (single upsert; works on sqlite).
+ * 单条 upsert 原子计数一次请求（固定窗口，sqlite / D1 通用）
  */
 async function hit(key: string, windowMs: number) {
   const now = Date.now();

@@ -4,11 +4,6 @@ const columnsOf = (table: unknown): Record<string, unknown> =>
   (table as Record<symbol, unknown>)[Symbol.for("drizzle:Columns")] as Record<string, unknown>;
 
 import { commission, referral, referralRelation } from "./schema.sqlite";
-import {
-  commission as pgCommission,
-  referral as pgReferral,
-  referralRelation as pgReferralRelation,
-} from "./schema.postgres";
 
 describe("referral schema 表结构", () => {
   it("referral: userId/code 唯一约束存在", () => {
@@ -58,53 +53,3 @@ describe("referral schema 表结构", () => {
     );
   });
 });
-
-describe("referral schema 表结构（postgres）", () => {
-  it("referral: userId/code 唯一约束存在", () => {
-    const sql = columnsOf(pgReferral);
-    expect(sql).toBeTruthy();
-    expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining([
-        "id",
-        "userId",
-        "code",
-        "customRate",
-        "note",
-        "createdAt",
-        "updatedAt",
-      ]),
-    );
-  });
-
-  it("referralRelation: 一人一条关系（referredUserId 唯一）", () => {
-    const sql = columnsOf(pgReferralRelation);
-    expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining(["id", "referrerId", "referredUserId", "code", "createdAt"]),
-    );
-  });
-
-  it("commission: 幂等键 orderNo 与状态字段存在", () => {
-    const sql = columnsOf(pgCommission);
-    expect(Object.keys(sql)).toEqual(
-      expect.arrayContaining([
-        "id",
-        "orderNo",
-        "referrerId",
-        "referredUserId",
-        "baseAmount",
-        "baseCurrency",
-        "rate",
-        "commissionCredits",
-        "cashAmount",
-        "status",
-        "settledAt",
-        "settledBy",
-        "transactionNo",
-        "note",
-        "createdAt",
-        "updatedAt",
-      ]),
-    );
-  });
-});
-

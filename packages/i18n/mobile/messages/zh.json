@@ -793,7 +793,7 @@
   "landing.faq.payment.question": "支持哪些支付方式？",
   "landing.faq.payment.answer": "开箱即用支持 Stripe、PayPal、Creem、支付宝和微信支付。通过 PaymentManager 抽象层，只需实现一个接口就能接入新的支付渠道。",
   "landing.faq.database.question": "支持哪些数据库？",
-  "landing.faq.database.answer": "Drizzle ORM 支持 PostgreSQL、MySQL、SQLite、Turso 和 Cloudflare D1。只需修改 .env 中的 DATABASE_PROVIDER——schema 模板和 drizzle 配置会自动适配。",
+  "landing.faq.database.answer": "Drizzle ORM 跑在 Cloudflare D1 上（本地开发用 sqlite），无需外部数据库即可启动——schema、迁移与 drizzle 配置全部就绪。",
   "landing.faq.customize.question": "落地页可以自定义到什么程度？",
   "landing.faq.customize.answer": "src/blocks/ 下的 section 都是示例内容，本来就是要每个项目自己重写的。src/components/ 里才是长期沉淀的基础组件——换品牌只动 blocks 和翻译，底层架构不变。",
   "landing.faq.license.question": "可以用于商业项目吗？",

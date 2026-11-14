@@ -34,7 +34,6 @@ const state = vi.hoisted(() => ({
   codeByte: 0,
   database: undefined as Database | undefined,
   idSequence: 0,
-  provider: "d1" as string,
   uniformCodeBytes: false,
 }));
 
@@ -68,15 +67,6 @@ vi.mock("@openstarter/shared/id", () => ({
     state.idSequence += 1;
     return `test-id-${state.idSequence}`;
   },
-}));
-
-vi.mock("@openstarter/db/env", () => ({
-  env: new Proxy(
-    {},
-    {
-      get: (_target, property) => (property === "DATABASE_PROVIDER" ? state.provider : undefined),
-    },
-  ),
 }));
 
 vi.mock("@openstarter/db/server", async (importOriginal) => {
@@ -118,7 +108,6 @@ beforeEach(async () => {
   state.caseSequence = 0;
   state.codeByte = 0;
   state.idSequence = 0;
-  state.provider = "d1";
   state.uniformCodeBytes = false;
   if (state.database) {
     await resetAuthTestDatabase(state.database);
@@ -400,7 +389,6 @@ describe("invite code concurrency", () => {
     if (!state.database) {
       throw new Error("Test database is not initialized");
     }
-    state.provider = "d1";
     const userId = "same-user-race";
     const firstCode = "RACEFIRST001";
     const secondCode = "RACESECON002";

@@ -49,8 +49,7 @@ boring 80% that every SaaS needs but nobody wants to build:
   browser extension, or a mini-app eventually. They're already in the monorepo,
   sharing auth and API.
 - **Batteries included, swappable** — Cloudflare D1 by default (sqlite locally,
-  no external database needed), Postgres when you scale, pluggable analytics and
-  email providers.
+  no external database needed), pluggable analytics and email providers.
 - **Indie-hacker friendly** — One `.env` (`apps/web/.env`) for the shared API URL,
   one command to run everything, deploy anywhere Node runs.
 
@@ -61,7 +60,7 @@ boring 80% that every SaaS needs but nobody wants to build:
 | Framework | TanStack Start + TanStack Router (file-based, SSR)                    |
 | Backend   | Hono (mounted at `/api/*`, RPC client)                                |
 | Auth      | Better-Auth (sessions, OAuth, 2FA, passkey, orgs)                     |
-| Database  | Drizzle ORM — Cloudflare D1 (default, local sqlite in dev) / Postgres |
+| Database  | Drizzle ORM — Cloudflare D1 (default, local sqlite in dev)            |
 | UI        | shadcn + Base UI primitives, Tailwind CSS v4, next-themes             |
 | Monorepo  | Turborepo + pnpm workspaces                                           |
 | Desktop   | Electron (electron-builder + auto-update)                             |

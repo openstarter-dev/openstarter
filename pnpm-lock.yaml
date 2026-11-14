@@ -733,12 +733,6 @@ importers:
       '@openstarter/analytics':
         specifier: workspace:*
         version: link:../shared
-      '@openstarter/api':
-        specifier: workspace:*
-        version: link:../../api
-      hono:
-        specifier: 'catalog:'
-        version: 4.13.8
     devDependencies:
       typescript:
         specifier: 'catalog:'
@@ -960,9 +954,6 @@ importers:
       envin:
         specifier: 'catalog:'
         version: 1.2.0(arktype@2.2.3)(typescript@6.0.3)(zod@4.4.3)
-      postgres:
-        specifier: ^3.4.7
-        version: 3.4.9
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -1054,9 +1045,6 @@ importers:
 
   packages/shared:
     dependencies:
-      '@openstarter/db':
-        specifier: workspace:*
-        version: link:../db
       simple-flakeid:
         specifier: ^0.0.5
         version: 0.0.5
@@ -32309,7 +32297,8 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postgres@3.4.9: {}
+  postgres@3.4.9:
+    optional: true
 
   postject@1.0.0-alpha.6:
     dependencies:

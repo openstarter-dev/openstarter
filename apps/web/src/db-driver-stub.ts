@@ -1,9 +1,8 @@
 function unavailable(): never {
   throw new Error(
-    "This DB driver was stubbed out of the Cloudflare Workers build because it " +
-      "does not match vars.DATABASE_PROVIDER in wrangler.jsonc. Make sure " +
-      "DATABASE_PROVIDER there matches the database you intend to use (d1, or " +
-      "postgresql with a Hyperdrive binding), then rebuild.",
+    "This DB driver was stubbed out of the Cloudflare Workers build because it is not " +
+      "used by the D1 runtime. If you see this error, a dependency is importing a " +
+      "database driver that the openstarter Workers build does not ship.",
   );
 }
 

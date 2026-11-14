@@ -36,7 +36,7 @@ export function createD1Db(config: DbConfig): Database {
   if (!binding) {
     if (isCloudflareWorker) {
       throw new Error(
-        'D1 binding "DB" not found. DATABASE_PROVIDER=d1 only works on Cloudflare Workers with a d1_databases binding named "DB".',
+        'D1 binding "DB" not found. The db package only supports Cloudflare Workers with a d1_databases binding named "DB".',
       );
     }
 

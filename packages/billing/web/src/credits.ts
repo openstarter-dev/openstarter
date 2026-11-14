@@ -282,7 +282,7 @@ async function consumeWithinTransaction(
 
   // 4. 逐批条件扣减：`remaining = remaining - take` 且要求余额仍足够。
   //    并发消费者若先提交，后者的 affected rows 为 0，抛冲突并回滚整个事务。
-  //    D1 下 `transaction` 不提供回滚，故失败时手动返还已扣批次（Postgres 下回滚同样无副作用）。
+  //    D1 下 `transaction` 不提供回滚，故失败时手动返还已扣批次。
   const applied: ConsumedDetailItem[] = [];
   try {
     for (const item of plan) {
@@ -316,8 +316,8 @@ async function consumeWithinTransaction(
 
     return { consumedCredit, success: true };
   } catch (error) {
-    // Best-effort compensation; ignore secondary errors (e.g. aborted Postgres tx) to keep the original one
-    // 尽力补偿；忽略二次错误（如 Postgres 事务已中止），保留原始错误
+    // Best-effort compensation; ignore secondary errors to keep the original one
+    // 尽力补偿；忽略二次错误，保留原始错误
     await refundBatches(tx, applied).catch(() => undefined);
     throw error;
   }

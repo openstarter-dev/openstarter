@@ -2,7 +2,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { expo } from "@better-auth/expo";
 import { passkey } from "@better-auth/passkey";
 import { user as userTable } from "@openstarter/db/schema";
-import { db, getAuthAdapterProvider } from "@openstarter/db/server";
+import { db } from "@openstarter/db/server";
 import { EmailTemplate } from "@openstarter/email";
 import { sendEmail as deliverEmail, type SendEmailParams } from "@openstarter/email/server";
 import { getLocaleFromRequest } from "@openstarter/i18n-web/server";
@@ -197,7 +197,7 @@ export const auth = betterAuth({
   appName: "OpenStarter",
   baseURL: appUrl,
   database: drizzleAdapter(db(), {
-    provider: getAuthAdapterProvider(),
+    provider: "sqlite",
     schema: authSchema,
   }),
   databaseHooks: {

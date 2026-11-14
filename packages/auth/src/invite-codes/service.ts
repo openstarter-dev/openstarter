@@ -1,10 +1,9 @@
 import { randomBytes } from "node:crypto";
-import { env as databaseEnv } from "@openstarter/db/env";
 import type { InviteCode } from "@openstarter/db/schema";
 import { inviteCode, subscription, userInvite } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
-import { and, asc, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 12;
@@ -183,72 +182,6 @@ async function redeemWithSqliteBatch(params: {
   return { error: "Invite code has been fully used", ok: false };
 }
 
-async function redeemWithLockedTransaction(params: {
-  code: string;
-  userId: string;
-  now: Date;
-}): Promise<RedeemResult> {
-  const database = db();
-  try {
-    return await database.transaction(async (tx) => {
-      const [existing] = await tx
-        .select()
-        .from(userInvite)
-        .where(eq(userInvite.userId, params.userId))
-        .limit(1);
-      if (existing) {
-        return { ok: true, trialEndsAt: existing.trialEndsAt };
-      }
-
-      const query = tx.select().from(inviteCode).where(eq(inviteCode.code, params.code)).limit(1);
-      const lockableQuery = query as typeof query & {
-        for: (strength: "update") => typeof query;
-      };
-      const [row] = await lockableQuery.for("update");
-      if (!row) {
-        return { error: "Invalid invite code", ok: false };
-      }
-      if (row.expiresAt && row.expiresAt.getTime() <= params.now.getTime()) {
-        return { error: "Invite code has expired", ok: false };
-      }
-      if (row.usedCount >= row.maxUses) {
-        return { error: "Invite code has been fully used", ok: false };
-      }
-
-      const trialEndsAt = new Date(params.now.getTime() + row.trialDays * MS_PER_DAY);
-      await tx
-        .update(inviteCode)
-        .set({ usedCount: sql`${inviteCode.usedCount} + 1` })
-        .where(
-          and(
-            eq(inviteCode.id, row.id),
-            lt(inviteCode.usedCount, inviteCode.maxUses),
-            or(isNull(inviteCode.expiresAt), gt(inviteCode.expiresAt, params.now)),
-          ),
-        );
-      await tx.insert(userInvite).values({
-        activatedAt: params.now,
-        id: getUuid(),
-        inviteCodeId: row.id,
-        trialEndsAt,
-        userId: params.userId,
-      });
-
-      return { ok: true, trialEndsAt };
-    });
-  } catch (error) {
-    const [existing] = await database
-      .select()
-      .from(userInvite)
-      .where(eq(userInvite.userId, params.userId))
-      .limit(1);
-    if (existing) {
-      return { ok: true, trialEndsAt: existing.trialEndsAt };
-    }
-    throw error;
-  }
-}
-
 export async function redeemInviteCode(params: {
   userId: string;
   code: string;
@@ -279,11 +212,7 @@ export async function redeemInviteCode(params: {
     return { error: "Invite code has been fully used", ok: false };
   }
 
-  const provider = databaseEnv.DATABASE_PROVIDER;
-  if (provider === "d1") {
-    return redeemWithSqliteBatch({ ...params, now, row });
-  }
-  return redeemWithLockedTransaction({ ...params, now });
+  return redeemWithSqliteBatch({ ...params, now, row });
 }
 
 export type UserPlan = "none" | "trial" | "expired" | "member";
