@@ -2,27 +2,10 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { apiClient } from "./api";
 import { type ApiResult, runRequest } from "./api-error";
-import type { PublicConfig } from "./public-config";
-
-const PUBLIC_CONFIG_STALE_MS = 5 * 60 * 1000;
 
 export interface UserPlanView {
   plan: string;
   trialEndsAt: string | null;
-}
-
-export function usePublicConfig() {
-  return useQuery({
-    queryFn: async (): Promise<PublicConfig> => {
-      const result = await runRequest(
-        () => apiClient.api.config.public.$get(),
-        (body) => (body as { data?: PublicConfig }).data ?? {},
-      );
-      return result.status === "success" ? result.data : {};
-    },
-    queryKey: ["public-config"],
-    staleTime: PUBLIC_CONFIG_STALE_MS,
-  });
 }
 
 export function useUserPlan() {

@@ -11,7 +11,6 @@ import { SocialButtons } from "@/components/auth/social-buttons";
 import { Screen } from "@/components/ui/screen";
 import { authClient } from "@/lib/auth-client";
 import { resolveEnabledProviders, resolvePasswordlessModes } from "@/lib/public-config";
-import { usePublicConfig } from "@/lib/queries";
 
 const MIN_PASSWORD_LENGTH = 8;
 
@@ -19,9 +18,8 @@ export default function SignInScreen() {
   const { t } = useTranslation();
   const router = useRouter();
   const [error, setError] = useState("");
-  const configQuery = usePublicConfig();
-  const methods = resolveEnabledProviders(configQuery.data ?? {});
-  const passwordless = resolvePasswordlessModes(configQuery.data ?? {});
+  const methods = resolveEnabledProviders();
+  const passwordless = resolvePasswordlessModes();
   const hasPasswordless = passwordless.magicLink || passwordless.emailOtp;
 
   const form = useForm({

@@ -1,8 +1,18 @@
-export const MOBILE_SOCIAL_PROVIDERS = ["google", "apple"] as const;
+// Mobile authentication UI switches resolved from Expo build-time environment variables.
+// 移动端认证方式展示开关：直接从 Expo 客户端环境变量（EXPO_PUBLIC_*）读取，不再请求服务端 config 接口。
 
-export type MobileSocialProvider = (typeof MOBILE_SOCIAL_PROVIDERS)[number];
+export type MobileSocialProvider = "google" | "apple";
 
-export type PublicConfig = Record<string, string>;
+export type PasswordlessMode = "magic-link" | "email-otp";
+
+export interface MobileAuthEnv {
+  EXPO_PUBLIC_APPLE_AUTH_ENABLED?: string;
+  EXPO_PUBLIC_EMAIL_AUTH_ENABLED?: string;
+  EXPO_PUBLIC_EMAIL_OTP_ENABLED?: string;
+  EXPO_PUBLIC_GOOGLE_AUTH_ENABLED?: string;
+  EXPO_PUBLIC_MAGIC_LINK_ENABLED?: string;
+  EXPO_PUBLIC_PASSWORD_RESET_ENABLED?: string;
+}
 
 export interface EnabledAuthMethods {
   emailPassword: boolean;
@@ -10,41 +20,55 @@ export interface EnabledAuthMethods {
   socialProviders: MobileSocialProvider[];
 }
 
-const SWITCH_KEYS: Record<MobileSocialProvider, string> = {
-  apple: "apple_auth_enabled",
-  google: "google_auth_enabled",
-};
-
-export function resolveEnabledProviders(config: PublicConfig): EnabledAuthMethods {
-  const socialProviders: MobileSocialProvider[] = [];
-  for (const provider of MOBILE_SOCIAL_PROVIDERS) {
-    if (config[SWITCH_KEYS[provider]] === "true") {
-      socialProviders.push(provider);
-    }
-  }
-
-  return {
-    emailPassword: config.email_auth_enabled !== "false",
-    passwordReset: config.password_reset_enabled === "true",
-    socialProviders,
-  };
-}
-
-/** 无密码登录模式：magic link（点邮件里的链接）或 email OTP（回填验证码）。 */
-export type PasswordlessMode = "email-otp" | "magic-link";
-
 export interface EnabledPasswordlessModes {
   emailOtp: boolean;
   magicLink: boolean;
 }
 
 /**
- * 由公开配置解析可用的无密码模式（严格 === "true"，对齐服务端 isEnabled）。
- * 两个开关都关时返回空集合 —— 调用方据此不渲染无密码入口。
+ * Read Expo client auth flags using static property access so Metro can inline them at build time.
+ * 使用静态属性访问读取 Expo 客户端环境变量，确保 Metro 构建期正确内联。
  */
-export function resolvePasswordlessModes(config: PublicConfig): EnabledPasswordlessModes {
+export function readMobileAuthEnv(): MobileAuthEnv {
   return {
-    emailOtp: config.email_otp_enabled === "true",
-    magicLink: config.magic_link_enabled === "true",
+    EXPO_PUBLIC_APPLE_AUTH_ENABLED: process.env.EXPO_PUBLIC_APPLE_AUTH_ENABLED,
+    EXPO_PUBLIC_EMAIL_AUTH_ENABLED: process.env.EXPO_PUBLIC_EMAIL_AUTH_ENABLED,
+    EXPO_PUBLIC_EMAIL_OTP_ENABLED: process.env.EXPO_PUBLIC_EMAIL_OTP_ENABLED,
+    EXPO_PUBLIC_GOOGLE_AUTH_ENABLED: process.env.EXPO_PUBLIC_GOOGLE_AUTH_ENABLED,
+    EXPO_PUBLIC_MAGIC_LINK_ENABLED: process.env.EXPO_PUBLIC_MAGIC_LINK_ENABLED,
+    EXPO_PUBLIC_PASSWORD_RESET_ENABLED: process.env.EXPO_PUBLIC_PASSWORD_RESET_ENABLED,
+  };
+}
+
+/**
+ * Resolve enabled email/password, password reset, and social providers for mobile sign-in.
+ * 解析移动端启用的邮箱密码、找回密码及第三方 OAuth 登录方式（默认仅开启邮箱密码）。
+ */
+export function resolveEnabledProviders(env: MobileAuthEnv = readMobileAuthEnv()): EnabledAuthMethods {
+  const socialProviders: MobileSocialProvider[] = [];
+  if (env.EXPO_PUBLIC_GOOGLE_AUTH_ENABLED === "true") {
+    socialProviders.push("google");
+  }
+  if (env.EXPO_PUBLIC_APPLE_AUTH_ENABLED === "true") {
+    socialProviders.push("apple");
+  }
+
+  return {
+    emailPassword: env.EXPO_PUBLIC_EMAIL_AUTH_ENABLED !== "false",
+    passwordReset: env.EXPO_PUBLIC_PASSWORD_RESET_ENABLED === "true",
+    socialProviders,
+  };
+}
+
+/**
+ * Resolve enabled passwordless authentication modes for mobile sign-in.
+ * 解析移动端启用的无密码登录方式（Magic Link 与 Email OTP 默认关闭）。
+ */
+export function resolvePasswordlessModes(
+  env: MobileAuthEnv = readMobileAuthEnv(),
+): EnabledPasswordlessModes {
+  return {
+    emailOtp: env.EXPO_PUBLIC_EMAIL_OTP_ENABLED === "true",
+    magicLink: env.EXPO_PUBLIC_MAGIC_LINK_ENABLED === "true",
   };
 }

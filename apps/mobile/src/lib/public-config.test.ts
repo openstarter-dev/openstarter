@@ -1,9 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { resolveEnabledProviders, resolvePasswordlessModes } from "./public-config";
 
 describe("resolveEnabledProviders", () => {
-  it("treats an empty config as email-only with no social providers", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("defaults to email/password only when no env flags are set", () => {
     expect(resolveEnabledProviders({})).toEqual({
       emailPassword: true,
       passwordReset: false,
@@ -11,56 +15,76 @@ describe("resolveEnabledProviders", () => {
     });
   });
 
-  it("disables email/password only on an explicit false", () => {
-    expect(resolveEnabledProviders({ email_auth_enabled: "false" }).emailPassword).toBe(false);
-    expect(resolveEnabledProviders({ email_auth_enabled: "true" }).emailPassword).toBe(true);
+  it("reads process.env EXPO_PUBLIC flags by default", () => {
+    vi.stubEnv("EXPO_PUBLIC_EMAIL_AUTH_ENABLED", "false");
+    vi.stubEnv("EXPO_PUBLIC_GOOGLE_AUTH_ENABLED", "true");
+    vi.stubEnv("EXPO_PUBLIC_APPLE_AUTH_ENABLED", "true");
+    vi.stubEnv("EXPO_PUBLIC_PASSWORD_RESET_ENABLED", "true");
+
+    expect(resolveEnabledProviders()).toEqual({
+      emailPassword: false,
+      passwordReset: true,
+      socialProviders: ["google", "apple"],
+    });
   });
 
-  it('enables google when its switch is exactly "true"', () => {
-    expect(resolveEnabledProviders({ google_auth_enabled: "true" }).socialProviders).toEqual([
-      "google",
-    ]);
+  it("gates email/password only when explicitly false", () => {
+    expect(
+      resolveEnabledProviders({ EXPO_PUBLIC_EMAIL_AUTH_ENABLED: "false" }).emailPassword,
+    ).toBe(false);
+    expect(resolveEnabledProviders({ EXPO_PUBLIC_EMAIL_AUTH_ENABLED: "true" }).emailPassword).toBe(
+      true,
+    );
   });
 
-  it("does not enable google for any other value", () => {
-    for (const value of ["false", "1", "TRUE", ""]) {
-      expect(resolveEnabledProviders({ google_auth_enabled: value }).socialProviders).toEqual([]);
+  it("enables social providers only for exact string 'true'", () => {
+    expect(
+      resolveEnabledProviders({ EXPO_PUBLIC_GOOGLE_AUTH_ENABLED: "true" }).socialProviders,
+    ).toEqual(["google"]);
+    for (const value of ["1", "yes", "false", "", "TRUE"]) {
+      expect(
+        resolveEnabledProviders({ EXPO_PUBLIC_GOOGLE_AUTH_ENABLED: value }).socialProviders,
+      ).toEqual([]);
     }
-  });
-
-  it("returns providers in a stable order regardless of config key order", () => {
     expect(
       resolveEnabledProviders({
-        apple_auth_enabled: "true",
-        google_auth_enabled: "true",
+        EXPO_PUBLIC_APPLE_AUTH_ENABLED: "true",
+        EXPO_PUBLIC_GOOGLE_AUTH_ENABLED: "true",
       }).socialProviders,
     ).toEqual(["google", "apple"]);
   });
 
-  it("ignores github even when the server reports it enabled", () => {
-    expect(resolveEnabledProviders({ github_auth_enabled: "true" }).socialProviders).toEqual([]);
-  });
-
-  it("reads password reset straight from the derived server flag", () => {
-    expect(resolveEnabledProviders({ password_reset_enabled: "true" }).passwordReset).toBe(true);
-    expect(resolveEnabledProviders({ password_reset_enabled: "false" }).passwordReset).toBe(false);
+  it("toggles password reset visibility via explicit 'true'", () => {
+    expect(
+      resolveEnabledProviders({ EXPO_PUBLIC_PASSWORD_RESET_ENABLED: "true" }).passwordReset,
+    ).toBe(true);
+    expect(
+      resolveEnabledProviders({ EXPO_PUBLIC_PASSWORD_RESET_ENABLED: "false" }).passwordReset,
+    ).toBe(false);
   });
 });
 
 describe("resolvePasswordlessModes", () => {
-  it("returns both modes off for an empty config", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("disables all passwordless modes by default", () => {
     expect(resolvePasswordlessModes({})).toEqual({ emailOtp: false, magicLink: false });
   });
 
-  it('enables each mode only on the exact "true" value', () => {
-    expect(resolvePasswordlessModes({ magic_link_enabled: "true" }).magicLink).toBe(true);
-    expect(resolvePasswordlessModes({ email_otp_enabled: "true" }).emailOtp).toBe(true);
-  });
-
-  it("rejects loose truthy values", () => {
-    for (const value of ["false", "1", "TRUE", "on", ""]) {
-      expect(resolvePasswordlessModes({ magic_link_enabled: value }).magicLink).toBe(false);
-      expect(resolvePasswordlessModes({ email_otp_enabled: value }).emailOtp).toBe(false);
+  it("enables magic link or email otp only for exact string 'true'", () => {
+    expect(resolvePasswordlessModes({ EXPO_PUBLIC_MAGIC_LINK_ENABLED: "true" }).magicLink).toBe(
+      true,
+    );
+    expect(resolvePasswordlessModes({ EXPO_PUBLIC_EMAIL_OTP_ENABLED: "true" }).emailOtp).toBe(true);
+    for (const value of ["1", "false", "", "TRUE"]) {
+      expect(resolvePasswordlessModes({ EXPO_PUBLIC_MAGIC_LINK_ENABLED: value }).magicLink).toBe(
+        false,
+      );
+      expect(resolvePasswordlessModes({ EXPO_PUBLIC_EMAIL_OTP_ENABLED: value }).emailOtp).toBe(
+        false,
+      );
     }
   });
 });
