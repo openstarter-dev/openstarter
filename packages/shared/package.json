@@ -15,7 +15,6 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@openstarter/db": "workspace:*",
     "simple-flakeid": "^0.0.5",
     "uuid": "^13.0.0"
   },
