@@ -69,7 +69,8 @@ export function TicketsPage() {
     ...tickets.mutations.reply(),
     onSuccess: () => {
       setReply("");
-      toast.success(m["settings.tickets.close_success"]());
+      // Use reply_success instead of close_success / 修复回复成功时误用关闭工单文案
+      toast.success(m["admin.tickets.reply_success"]());
     },
   });
 

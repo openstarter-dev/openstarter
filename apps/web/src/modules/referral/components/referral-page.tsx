@@ -102,6 +102,8 @@ export function ReferralPage() {
               <TableHead>{m["referral_status_pending"]()}</TableHead>
               <TableHead>{m["referral_status_settled"]()}</TableHead>
               <TableHead>{m["referral_status_void"]()}</TableHead>
+              {/* Align header column count with 4 cells per row / 补齐第 4 列表头与行单元格对齐 */}
+              <TableHead>{m["settings.tickets.created_col"]()}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

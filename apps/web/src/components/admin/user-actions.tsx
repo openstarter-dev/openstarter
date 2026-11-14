@@ -131,7 +131,8 @@ export function UserActions({ user }: { user: UserActionsTarget }) {
     if (!ok) {
       return;
     }
-    setSessions((current) => current ?? []);
+    // Clear rendered session list once all sessions are revoked / 撤销全部会话后清空界面列表
+    setSessions([]);
     toast.success(m["admin.users.sessions_revoked"]());
   };
 

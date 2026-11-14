@@ -131,7 +131,8 @@ export function AccountsPage() {
                       type="button"
                       variant="ghost"
                     >
-                      {unlinking === account.accountId
+                      {/* Match against account.id because handleUnlink stores row id / 按行 ID 匹配解绑态 */}
+                      {unlinking === account.id
                         ? m["settings.accounts.unlinking"]()
                         : m["settings.accounts.unlink"]()}
                     </Button>
