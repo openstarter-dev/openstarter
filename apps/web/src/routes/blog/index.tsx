@@ -3,9 +3,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 
 import { BlogCard } from "@/components/blog/blog-card";
 import { BlogShell } from "@/components/blog/blog-shell";
-import { getBlogPostsFn } from "@/functions/blog";
-import { collectCategories } from "@/lib/blog";
-import { formatBlogDate } from "@/lib/blog-i18n";
+import { collectCategories, formatBlogDate, getBlogPostsFn } from "@/functions/blog";
 import { buildPageHead } from "@/lib/page-head";
 
 type BlogSearch = {

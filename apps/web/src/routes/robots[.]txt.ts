@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { buildRobotsTxt, getSiteOrigin, SEO_CACHE_CONTROL } from "@/lib/seo";
+import { buildRobotsTxt, getSiteOrigin, SEO_CACHE_CONTROL } from "@/lib/marketing/seo";
 
 export const Route = createFileRoute("/robots.txt")({
   server: {

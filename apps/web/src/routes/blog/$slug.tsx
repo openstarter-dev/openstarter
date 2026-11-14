@@ -4,8 +4,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { BlogShell } from "@/components/blog/blog-shell";
 import { NotFound } from "@/components/system/not-found";
-import { getBlogPostFn } from "@/functions/blog";
-import { formatBlogDate } from "@/lib/blog-i18n";
+import { formatBlogDate, getBlogPostFn } from "@/functions/blog";
 import { Markdown } from "@/lib/markdown";
 import { buildPageHead } from "@/lib/page-head";
 

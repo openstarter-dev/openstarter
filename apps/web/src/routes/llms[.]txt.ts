@@ -1,6 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { buildLlmsTxt, fetchSeoArticles, getSiteOrigin, SEO_CACHE_CONTROL } from "@/lib/seo";
+import {
+  buildLlmsTxt,
+  fetchSeoArticles,
+  getSiteOrigin,
+  SEO_CACHE_CONTROL,
+} from "@/lib/marketing/seo";
 
 export const Route = createFileRoute("/llms.txt")({
   server: {

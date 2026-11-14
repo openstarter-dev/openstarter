@@ -5,7 +5,7 @@ import {
   fetchSeoArticlesWithContent,
   getSiteOrigin,
   SEO_CACHE_CONTROL,
-} from "@/lib/seo";
+} from "@/lib/marketing/seo";
 
 export const Route = createFileRoute("/llms-full.txt")({
   server: {
