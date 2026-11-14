@@ -49,6 +49,7 @@ export const session = table(
     ipAddress: text("ip_address"),
     token: text("token").notNull().unique(),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userAgent: text("user_agent"),
@@ -74,6 +75,7 @@ export const account = table(
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scope: text("scope"),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userId: text("user_id")
@@ -276,6 +278,7 @@ export const taxonomy = table(
     title: text("title").notNull(),
     type: text("type").notNull(),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userId: text("user_id")
@@ -305,6 +308,7 @@ export const post = table(
     title: text("title"),
     type: text("type").notNull(),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userId: text("user_id")
@@ -357,6 +361,7 @@ export const order = table(
     subscriptionResult: text("subscription_result"),
     transactionId: text("transaction_id"),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userEmail: text("user_email"),
@@ -403,6 +408,7 @@ export const subscription = table(
     subscriptionResult: text("subscription_result"),
     trialPeriodDays: integer("trial_period_days"),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userEmail: text("user_email"),
@@ -436,6 +442,7 @@ export const credit = table(
     transactionScene: text("transaction_scene"),
     transactionType: text("transaction_type").notNull(),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userEmail: text("user_email"),
@@ -483,6 +490,7 @@ export const apikey = table(
     requestCount: integer("request_count").default(0).notNull(),
     start: text("start"),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
   },
@@ -510,6 +518,7 @@ export const aiModel = table(
     provider: text("provider").notNull(),
     sortOrder: integer("sort_order").notNull().default(0),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
   },
@@ -538,6 +547,7 @@ export const aiTask = table(
     taskInfo: text("task_info"),
     taskResult: text("task_result"),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userId: text("user_id")
@@ -563,6 +573,7 @@ export const chat = table(
     status: text("status").notNull(),
     title: text("title").notNull().default(""),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userId: text("user_id")
@@ -587,6 +598,7 @@ export const chatMessage = table(
     role: text("role").notNull(),
     status: text("status").notNull(),
     updatedAt: timestamp("updated_at")
+      .defaultNow()
       .$onUpdate(() => new Date())
       .notNull(),
     userId: text("user_id")

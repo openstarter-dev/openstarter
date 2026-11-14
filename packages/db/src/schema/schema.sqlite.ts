@@ -700,11 +700,12 @@ export const referral = table(
   "referral",
   {
     code: text("code").notNull().unique(),
-    createdAt: integer("created_at", { mode: "timestamp" }).default(sqliteNowMs).notNull(),
+    // Align timestamp_ms with sqliteNowMs (milliseconds) / 毫秒时间戳对齐 sqliteNowMs
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
     customRate: integer("custom_rate"),
     id: text("id").primaryKey(),
     note: text("note").default(""),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).default(sqliteNowMs).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
     userId: text("user_id")
       .notNull()
       .unique()
@@ -717,7 +718,8 @@ export const referralRelation = table(
   "referral_relation",
   {
     code: text("code").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" }).default(sqliteNowMs).notNull(),
+    // Align timestamp_ms with sqliteNowMs (milliseconds) / 毫秒时间戳对齐 sqliteNowMs
+    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
     id: text("id").primaryKey(),
     referrerId: text("referrer_id")
       .notNull()

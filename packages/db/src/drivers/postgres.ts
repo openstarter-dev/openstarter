@@ -1,11 +1,20 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 
+import * as schema from "../schema";
 import { isCloudflareWorker, readCloudflareEnv } from "../utils/runtime";
 import type { Database, DbConfig } from "../types";
 
 let postgresDbInstance: Database | null = null;
 let postgresClient: ReturnType<typeof postgres> | null = null;
+
+/**
+ * Bind schema so Drizzle relational queries (`db().query.*`) work in Postgres mode.
+ * 绑定 schema 以确保 Postgres 模式下 Drizzle 关联查询可用。
+ */
+function createDrizzlePostgres(client: ReturnType<typeof postgres>): Database {
+  return drizzle({ client, schema }) as unknown as Database;
+}
 
 export function createPostgresDb(config: DbConfig): Database {
   let url = config.url;
@@ -35,7 +44,7 @@ export function createPostgresDb(config: DbConfig): Database {
       connect_timeout: 5,
       ...connectionOptions,
     });
-    return drizzle({ client: workerClient }) as unknown as Database;
+    return createDrizzlePostgres(workerClient);
   }
 
   if (config.singleton) {
@@ -47,7 +56,7 @@ export function createPostgresDb(config: DbConfig): Database {
         connect_timeout: 10,
         ...connectionOptions,
       });
-      postgresDbInstance = drizzle({ client: postgresClient }) as unknown as Database;
+      postgresDbInstance = createDrizzlePostgres(postgresClient);
     }
     return postgresDbInstance;
   }
@@ -59,7 +68,7 @@ export function createPostgresDb(config: DbConfig): Database {
     connect_timeout: 10,
     ...connectionOptions,
   });
-  return drizzle({ client: serverlessClient }) as unknown as Database;
+  return createDrizzlePostgres(serverlessClient);
 }
 
 export async function closePostgresDb(): Promise<void> {

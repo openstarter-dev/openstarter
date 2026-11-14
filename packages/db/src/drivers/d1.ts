@@ -8,6 +8,9 @@ import type { Database, DbConfig } from "../types";
 import { isCloudflareWorker, readCloudflareEnv } from "../utils/runtime";
 
 let d1DbInstance: Database | null = null;
+// Track the active D1 binding reference so Workers reloads never reuse a stale binding
+// 记录当前 D1 binding 引用，避免 Workers 环境下跨请求复用旧实例
+let cachedD1Binding: D1Binding | null = null;
 
 type D1Binding = {
   prepare(query: string): unknown;
@@ -28,10 +31,6 @@ function resolveLocalD1Url(configured: string | undefined): string {
 }
 
 export function createD1Db(config: DbConfig): Database {
-  if (d1DbInstance) {
-    return d1DbInstance;
-  }
-
   const binding = readCloudflareEnv()?.DB as D1Binding | undefined;
 
   if (!binding) {
@@ -41,10 +40,19 @@ export function createD1Db(config: DbConfig): Database {
       );
     }
 
+    if (d1DbInstance && cachedD1Binding === null) {
+      return d1DbInstance;
+    }
+
     d1DbInstance = drizzleLibsql({
       client: createClient({ url: resolveLocalD1Url(config.url) }),
       schema,
     }) as unknown as Database;
+    cachedD1Binding = null;
+    return d1DbInstance;
+  }
+
+  if (d1DbInstance && cachedD1Binding === binding) {
     return d1DbInstance;
   }
 
@@ -52,5 +60,6 @@ export function createD1Db(config: DbConfig): Database {
     schema,
   });
   d1DbInstance = instance as unknown as Database;
+  cachedD1Binding = binding;
   return d1DbInstance;
 }
