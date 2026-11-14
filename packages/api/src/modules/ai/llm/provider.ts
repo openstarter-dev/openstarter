@@ -128,14 +128,24 @@ export function resolveAdapterSpec(
   if (!isOpenAICompatibleProvider(providerName)) {
     throw new Error(`Unknown LLM provider: ${providerName}`);
   }
-  const { apiKeyEnv, baseURLEnv, defaultBaseURL, maxTokensKey } =
-    OPENAI_COMPATIBLE_PROVIDERS[providerName];
+  const { baseURLEnv, defaultBaseURL, maxTokensKey } = OPENAI_COMPATIBLE_PROVIDERS[providerName];
   const baseURL = configs[baseURLEnv] || defaultBaseURL;
   if (!baseURL) {
     throw new Error(`${providerName} base URL not configured (${baseURLEnv})`);
   }
-  const apiKey = providerName === "ollama" ? OLLAMA_PLACEHOLDER_KEY : configs[apiKeyEnv] || "";
-  if (providerName !== "ollama" && !apiKey) {
+  if (providerName === "ollama") {
+    return {
+      kind: "compat",
+      name: providerName,
+      model,
+      baseURL,
+      apiKey: OLLAMA_PLACEHOLDER_KEY,
+      maxTokensKey,
+    };
+  }
+  const { apiKeyEnv } = OPENAI_COMPATIBLE_PROVIDERS[providerName];
+  const apiKey = configs[apiKeyEnv] || "";
+  if (!apiKey) {
     throw new Error(`${providerName} API key not configured (${apiKeyEnv})`);
   }
   return {

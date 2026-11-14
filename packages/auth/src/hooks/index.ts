@@ -9,8 +9,6 @@ type DatabaseUserHooks = NonNullable<NonNullable<BetterAuthOptions["databaseHook
 
 type UserCreateAfterHook = NonNullable<NonNullable<DatabaseUserHooks["create"]>["after"]>;
 
-type CreatedUser = Parameters<UserCreateAfterHook>[0];
-
 type DeleteUserOptions = NonNullable<NonNullable<BetterAuthOptions["user"]>["deleteUser"]>;
 
 type DeleteUserHooks = Pick<DeleteUserOptions, "beforeDelete" | "afterDelete">;
