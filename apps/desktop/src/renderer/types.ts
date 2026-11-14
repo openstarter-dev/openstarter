@@ -47,8 +47,6 @@ export interface ElectronAPI {
     filters?: { name: string; extensions: string[] }[];
   }) => Promise<string | null>;
   saveFile: (data: string, options?: { defaultName?: string }) => Promise<string | null>;
-  readFile: (path: string) => Promise<string | null>;
-  writeFile: (path: string, data: string) => Promise<boolean>;
 
   getSettings: () => Promise<AppSettings>;
   setSettings: (settings: Partial<AppSettings>) => Promise<AppSettings>;

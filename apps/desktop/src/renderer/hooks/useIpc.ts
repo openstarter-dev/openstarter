@@ -14,14 +14,6 @@ export function useIpc() {
       api?.saveFile(data, options) ?? Promise.resolve(null),
     [api],
   );
-  const readFile = useCallback(
-    (path: string) => api?.readFile(path) ?? Promise.resolve(null),
-    [api],
-  );
-  const writeFile = useCallback(
-    (path: string, data: string) => api?.writeFile(path, data) ?? Promise.resolve(false),
-    [api],
-  );
 
-  return { getVersion, openFile, saveFile, readFile, writeFile };
+  return { getVersion, openFile, saveFile };
 }

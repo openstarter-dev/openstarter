@@ -117,9 +117,11 @@ async function main(): Promise<void> {
 
   let currentWindow = createMainWindow({ resolvedUrl, windowStateStore });
 
-  createTray(currentWindow);
+  // Pass a getter so tray and global shortcuts always reach the active window after recreation
+  // 传入窗口 getter，确保重建窗口后托盘与全局快捷键仍指向最新窗口
+  createTray(() => currentWindow);
 
-  registerShortcuts(currentWindow);
+  registerShortcuts(() => currentWindow);
 
   app.on("before-quit", () => {
     destroyTray();

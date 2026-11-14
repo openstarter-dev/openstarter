@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createHashRouter } from "react-router-dom";
 import { RootLayout } from "./layouts/RootLayout";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { LoginPage } from "./pages/login";
@@ -7,7 +7,9 @@ import { SettingsPage } from "./pages/settings";
 import { AboutPage } from "./pages/about";
 import { RequireAuth } from "./components/RequireAuth";
 
-export const router = createBrowserRouter([
+// Use hash router so packaged file:// URLs match routes reliably
+// 使用 Hash 路由以兼容生产包 file:// 协议加载
+export const router = createHashRouter([
   {
     path: "/login",
     element: <AuthLayout />,

@@ -59,7 +59,13 @@ export function createAuthService(options: AuthServiceOptions): AuthService {
         if (setCookie) cookies.push(setCookie);
       }
 
-      const sessionCookie = cookies.find((c) => c.startsWith("openstarter.session_token="));
+      // Support both plain and HTTPS __Secure- session cookie prefixes
+      // 同时兼容开发环境明文与生产环境 __Secure- 前缀的会话 Cookie
+      const sessionCookie = cookies.find(
+        (c) =>
+          c.startsWith("openstarter.session_token=") ||
+          c.startsWith("__Secure-openstarter.session_token="),
+      );
       if (!sessionCookie) {
         throw new Error("No session token in response");
       }

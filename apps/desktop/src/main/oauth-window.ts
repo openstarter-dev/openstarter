@@ -37,8 +37,13 @@ export interface ElectronCookie {
   path?: string;
 }
 
+const SESSION_COOKIE_NAMES = new Set([
+  "openstarter.session_token",
+  "__Secure-openstarter.session_token",
+]);
+
 export function extractTokenFromCookies(cookies: ElectronCookie[]): string | null {
-  const sessionCookie = cookies.find((c) => c.name === "openstarter.session_token");
+  const sessionCookie = cookies.find((c) => SESSION_COOKIE_NAMES.has(c.name));
   return sessionCookie?.value ?? null;
 }
 
@@ -73,42 +78,54 @@ export async function openOAuthWindow(
       },
     });
 
+    // Guard against closed event rejecting while async callback resolution is in flight
+    // 防止回调处理期间窗口关闭事件触发导致 Promise 被提前 reject
+    let settled = false;
+
     const handleNavigation = async (event: { preventDefault: () => void }, url: string) => {
-      if (url.startsWith(callbackUrl)) {
-        event.preventDefault();
-        win.close();
+      if (!url.startsWith(callbackUrl) || settled) {
+        return;
+      }
 
-        try {
-          const cookies = await win.webContents.session.cookies.get({
-            name: "openstarter.session_token",
-          });
-          const token = extractTokenFromCookies(cookies);
-          if (token) {
-            tokenStore.set(token);
-          }
+      settled = true;
+      event.preventDefault();
+      win.hide();
 
-          const session = await getSession();
-          if (session?.user) {
-            resolve({ user: session.user });
-          } else {
-            reject(new Error("Failed to get session after OAuth"));
-          }
-        } catch (err) {
-          reject(err);
+      try {
+        const cookies = await win.webContents.session.cookies.get({});
+        const token = extractTokenFromCookies(cookies);
+        if (token) {
+          tokenStore.set(token);
+        }
+
+        const session = await getSession();
+        if (session?.user) {
+          resolve({ user: session.user });
+        } else {
+          reject(new Error("Failed to get session after OAuth"));
+        }
+      } catch (err) {
+        reject(err);
+      } finally {
+        if (!win.isDestroyed()) {
+          win.close();
         }
       }
     };
 
     win.webContents.on("will-navigate", (event, url) => {
-      handleNavigation(event, url);
+      void handleNavigation(event, url);
     });
 
     win.webContents.on("will-redirect", (event, url) => {
-      handleNavigation(event, url);
+      void handleNavigation(event, url);
     });
 
     win.on("closed", () => {
-      reject(new Error("OAuth window closed by user"));
+      if (!settled) {
+        settled = true;
+        reject(new Error("OAuth window closed by user"));
+      }
     });
 
     win.loadURL(oauthUrl);

@@ -23,8 +23,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("desktop:open-file", options),
   saveFile: (data: string, options?: { defaultName?: string }) =>
     ipcRenderer.invoke("desktop:save-file", data, options),
-  readFile: (path: string) => ipcRenderer.invoke("desktop:read-file", path),
-  writeFile: (path: string, data: string) => ipcRenderer.invoke("desktop:write-file", path, data),
 
   getSettings: () => ipcRenderer.invoke("desktop:get-settings"),
   setSettings: (settings: Record<string, unknown>) =>

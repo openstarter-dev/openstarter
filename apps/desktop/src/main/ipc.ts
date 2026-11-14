@@ -1,7 +1,7 @@
 import { ipcMain, app, dialog, BrowserWindow } from "electron";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { logError, logInfo } from "./log";
+import { logInfo } from "./log";
 
 export interface AppSettings {
   launchOnStart: boolean;
@@ -102,25 +102,8 @@ export function registerIpcHandlers(userDataPath: string): void {
     },
   );
 
-  ipcMain.handle("desktop:read-file", (_event, filePath: string) => {
-    try {
-      return readFileSync(filePath, "utf8");
-    } catch (error) {
-      logError("failed to read file", filePath, error);
-      return null;
-    }
-  });
-
-  ipcMain.handle("desktop:write-file", (_event, filePath: string, data: string) => {
-    try {
-      writeFileSync(filePath, data, "utf8");
-      return true;
-    } catch (error) {
-      logError("failed to write file", filePath, error);
-      return false;
-    }
-  });
-
+  // Arbitrary read-file/write-file IPC removed for security; keep user-confirmed dialog flows only
+  // 出于安全移除任意路径读写 IPC，仅保留需用户确认的系统文件对话框能力
   logInfo("IPC handlers registered");
 }
 
@@ -133,8 +116,6 @@ export function cleanupIpcHandlers(): void {
     "desktop:minimize-to-tray",
     "desktop:open-file",
     "desktop:save-file",
-    "desktop:read-file",
-    "desktop:write-file",
   ];
   for (const channel of channels) {
     ipcMain.removeHandler(channel);
