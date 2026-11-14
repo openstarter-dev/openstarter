@@ -19,7 +19,11 @@ export function buildPageCacheControl(policy: PageCachePolicy): string {
   return `public, max-age=0, must-revalidate, s-maxage=${sMaxage}, stale-while-revalidate=${STALE_WHILE_REVALIDATE}`;
 }
 
-export function applyPageCacheHeaders(pathname: string, method: string, response: Response): Response {
+export function applyPageCacheHeaders(
+  pathname: string,
+  method: string,
+  response: Response,
+): Response {
   const policy = pageCachePolicy(pathname);
   if (!policy || method !== "GET") {
     return response;

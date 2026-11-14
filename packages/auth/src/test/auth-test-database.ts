@@ -97,13 +97,7 @@ const CREATE_TABLE_STATEMENTS = [
   )`,
 ] as const;
 
-const DATA_TABLES = [
-  "credit",
-  "user_invite",
-  "invite_code",
-  "subscription",
-  "user",
-] as const;
+const DATA_TABLES = ["credit", "user_invite", "invite_code", "subscription", "user"] as const;
 
 const runStatements = (
   database: ReturnType<typeof createSqliteTestDb>,

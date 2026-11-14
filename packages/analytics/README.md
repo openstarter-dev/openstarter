@@ -44,7 +44,12 @@ await serverAnalytics.track(ANALYTICS_EVENTS.PURCHASE, { clientId: userId, value
 ### mobile（Expo）
 
 ```ts
-import { configureAnalyticsErrors, initAnalytics, resolveMobileAnalyticsConfig, track } from "@openstarter/analytics-mobile";
+import {
+  configureAnalyticsErrors,
+  initAnalytics,
+  resolveMobileAnalyticsConfig,
+  track,
+} from "@openstarter/analytics-mobile";
 
 configureAnalyticsErrors({ debug: __DEV__ }); // 可选：接 Sentry 用 onError
 await initAnalytics(resolveMobileAnalyticsConfig(process.env));
@@ -54,7 +59,11 @@ await track(ANALYTICS_EVENTS.LOGIN);
 ### extension（WXT）
 
 ```ts
-import { initAnalytics, resolveExtensionAnalyticsConfig, track } from "@openstarter/analytics-extension";
+import {
+  initAnalytics,
+  resolveExtensionAnalyticsConfig,
+  track,
+} from "@openstarter/analytics-extension";
 
 initAnalytics(resolveExtensionAnalyticsConfig(import.meta.env));
 await track(ANALYTICS_EVENTS.SIGNUP);
@@ -62,27 +71,27 @@ await track(ANALYTICS_EVENTS.SIGNUP);
 
 ## 环境变量
 
-| 平台 | 变量 | 说明 |
-|---|---|---|
-| web | 后台配置（`google_analytics_id` / `plausible_domain` / `plausible_src`） | 运行时生效，改完最多 30s 生效，无需重新部署 |
-| web（服务端） | `GOOGLE_ANALYTICS_SECRET` | GA4 Measurement Protocol 密钥，仅服务端 |
-| mobile | `EXPO_PUBLIC_ANALYTICS_GA_ENABLED` | `"true"` 才启用 Firebase |
-| mobile | `EXPO_PUBLIC_ANALYTICS_OPENPANEL_CLIENT_ID` / `_SECRET` | 两者都非空才启用 OpenPanel |
-| extension | `VITE_ANALYTICS_PLAUSIBLE_DOMAIN` | 不配则整体 noop |
-| extension | `VITE_ANALYTICS_PLAUSIBLE_HOST` | 留空回退 `https://plausible.io` |
-| extension | `VITE_APP_URL` | 事件归属的站点 URL（扩展页面自身无域名） |
+| 平台          | 变量                                                                     | 说明                                        |
+| ------------- | ------------------------------------------------------------------------ | ------------------------------------------- |
+| web           | 后台配置（`google_analytics_id` / `plausible_domain` / `plausible_src`） | 运行时生效，改完最多 30s 生效，无需重新部署 |
+| web（服务端） | `GOOGLE_ANALYTICS_SECRET`                                                | GA4 Measurement Protocol 密钥，仅服务端     |
+| mobile        | `EXPO_PUBLIC_ANALYTICS_GA_ENABLED`                                       | `"true"` 才启用 Firebase                    |
+| mobile        | `EXPO_PUBLIC_ANALYTICS_OPENPANEL_CLIENT_ID` / `_SECRET`                  | 两者都非空才启用 OpenPanel                  |
+| extension     | `VITE_ANALYTICS_PLAUSIBLE_DOMAIN`                                        | 不配则整体 noop                             |
+| extension     | `VITE_ANALYTICS_PLAUSIBLE_HOST`                                          | 留空回退 `https://plausible.io`             |
+| extension     | `VITE_APP_URL`                                                           | 事件归属的站点 URL（扩展页面自身无域名）    |
 
 构建期变量随包固化：App 与扩展是静态产物，后台改配置触达不到已安装版本。
 
 ## 能力矩阵
 
-| | GA4（web） | Plausible（web/扩展） | OpenPanel（mobile） | Firebase（mobile） |
-|---|---|---|---|---|
-| track | 是 | 是 | 是 | 是 |
-| identify | `user_id` + `user_properties` | 仅低基数画像（plan/role） | profile + 顶层画像字段 | user properties |
-| reset | 清 `user_id` + `user_properties` | 清内存画像 | `userId=null` | 清 id + properties |
-| setScreenName | `page_view` | `pageview` | `screen_view` | `screen_view` |
-| 服务端上报 | 是（`server-track`） | — | — | — |
+|               | GA4（web）                       | Plausible（web/扩展）     | OpenPanel（mobile）    | Firebase（mobile） |
+| ------------- | -------------------------------- | ------------------------- | ---------------------- | ------------------ |
+| track         | 是                               | 是                        | 是                     | 是                 |
+| identify      | `user_id` + `user_properties`    | 仅低基数画像（plan/role） | profile + 顶层画像字段 | user properties    |
+| reset         | 清 `user_id` + `user_properties` | 清内存画像                | `userId=null`          | 清 id + properties |
+| setScreenName | `page_view`                      | `pageview`                | `screen_view`          | `screen_view`      |
+| 服务端上报    | 是（`server-track`）             | —                         | —                      | —                  |
 
 跨端对齐请按**语义**（`ANALYTICS_EVENTS`）而不是字符串：GA4 用 `page_view`、Plausible 用 `pageview`、Firebase/OpenPanel 用 `screen_view`，这是各供应商的原生规范名，不可强行统一。
 
@@ -91,7 +100,7 @@ await track(ANALYTICS_EVENTS.SIGNUP);
 所有实现都不向业务层抛错。默认静默，需要排查时：
 
 ```ts
-configureAnalyticsErrors({ debug: true });            // console.warn
+configureAnalyticsErrors({ debug: true }); // console.warn
 configureAnalyticsErrors({ onError: reportToSentry }); // 接监控
 ```
 

@@ -44,7 +44,9 @@ export function readMobileAuthEnv(): MobileAuthEnv {
  * Resolve enabled email/password, password reset, and social providers for mobile sign-in.
  * 解析移动端启用的邮箱密码、找回密码及第三方 OAuth 登录方式（默认仅开启邮箱密码）。
  */
-export function resolveEnabledProviders(env: MobileAuthEnv = readMobileAuthEnv()): EnabledAuthMethods {
+export function resolveEnabledProviders(
+  env: MobileAuthEnv = readMobileAuthEnv(),
+): EnabledAuthMethods {
   const socialProviders: MobileSocialProvider[] = [];
   if (env.EXPO_PUBLIC_GOOGLE_AUTH_ENABLED === "true") {
     socialProviders.push("google");

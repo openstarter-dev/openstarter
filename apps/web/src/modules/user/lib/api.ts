@@ -85,10 +85,7 @@ const mutations = {
     mutationOptions({
       mutationFn: async () => {
         const res = await client.api.user["billing-portal"].$post();
-        return unwrapMutation<BillingPortalData>(
-          res,
-          "Failed to create billing portal session",
-        );
+        return unwrapMutation<BillingPortalData>(res, "Failed to create billing portal session");
       },
     }),
 };

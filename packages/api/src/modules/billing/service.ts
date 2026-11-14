@@ -37,7 +37,6 @@ configureRevenueCatProducts((iapProductId) => {
   };
 });
 
-
 export interface StartCheckoutParams {
   origin: string;
   productId: string;

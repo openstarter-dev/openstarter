@@ -12,9 +12,7 @@ const SITE_PROTOCOLS = new Set(["http:", "https:"]);
 /** 校验 Plausible 域名：非空、长度受限、仅含允许字符集（支持逗号分隔多域）。 */
 export function isValidPlausibleDomain(domain: string): boolean {
   return (
-    domain.length > 0 &&
-    domain.length <= MAX_DOMAIN_LENGTH &&
-    PLAUSIBLE_DOMAIN_PATTERN.test(domain)
+    domain.length > 0 && domain.length <= MAX_DOMAIN_LENGTH && PLAUSIBLE_DOMAIN_PATTERN.test(domain)
   );
 }
 

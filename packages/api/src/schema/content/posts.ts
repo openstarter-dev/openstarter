@@ -28,7 +28,6 @@ export const POST_STATUS_VALUES = [
   PostStatus.ARCHIVED,
 ] as const;
 
-
 export const listQuery = createPaginationSchema(100, 10).extend({
   type: z.enum(POST_TYPE_VALUES).optional(),
   status: z.enum(POST_STATUS_VALUES).optional(),

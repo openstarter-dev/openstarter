@@ -33,14 +33,12 @@ export function registerShortcuts(windowTarget: ShortcutWindowTarget): void {
         logWarn(`failed to register shortcut: ${shortcut.accelerator}`);
       }
     }
-  } catch {
-  }
+  } catch {}
 }
 
 export function unregisterShortcuts(): void {
   try {
     globalShortcut.unregisterAll();
     logInfo("all shortcuts unregistered");
-  } catch {
-  }
+  } catch {}
 }

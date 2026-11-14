@@ -15,7 +15,12 @@ import { createErrorReporter, errorContext, runSafely } from "@openstarter/analy
 
 import { createNoopProvider, EXTENSION_ANALYTICS_PROVIDERS } from "./providers";
 
-import type { AnalyticsMethod, AnalyticsProvider, EventProperties, UserTraits } from "@openstarter/analytics";
+import type {
+  AnalyticsMethod,
+  AnalyticsProvider,
+  EventProperties,
+  UserTraits,
+} from "@openstarter/analytics";
 import type { ErrorReporterOptions, ReportError } from "@openstarter/analytics/runtime";
 
 import type { ExtensionAnalyticsConfig, ExtensionAnalyticsPorts } from "./internal/types";

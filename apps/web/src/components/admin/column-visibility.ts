@@ -26,8 +26,7 @@ function writePersisted(map: ColumnVisibilityMap): void {
   }
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
-  } catch {
-  }
+  } catch {}
 }
 
 export function restoreColumnVisibility(tableKey: string): void {

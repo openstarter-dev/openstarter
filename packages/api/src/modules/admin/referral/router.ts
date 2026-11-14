@@ -3,11 +3,7 @@ import { Hono } from "hono";
 
 import { zValidator } from "../../../lib/validator";
 import { idParam, paginationSchema } from "../../../schema";
-import {
-  commissionsQuery,
-  manualCreateBody,
-  rateBody,
-} from "../../../schema/admin/referral";
+import { commissionsQuery, manualCreateBody, rateBody } from "../../../schema/admin/referral";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
 

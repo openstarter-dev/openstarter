@@ -4,9 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "node:path";
 
 const API_BASE_URL =
-  process.env.OPENSTARTER_API_URL ||
-  process.env.VITE_APP_URL ||
-  "http://localhost:3000";
+  process.env.OPENSTARTER_API_URL || process.env.VITE_APP_URL || "http://localhost:3000";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],

@@ -48,12 +48,10 @@ export async function resolveTaskCostCredits(
     }
   }
 
-  const raw =
-    readEnv(`AI_CREDITS_COST_${mediaType.toUpperCase()}`) || readEnv("AI_CREDITS_COST");
+  const raw = readEnv(`AI_CREDITS_COST_${mediaType.toUpperCase()}`) || readEnv("AI_CREDITS_COST");
   const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
-
 
 function markTaskFailed(id: string, errorMessage: string): Promise<void> {
   return updateTask({
@@ -101,7 +99,6 @@ async function runGeneration(
   await persistDispatchData(taskId, dispatch.data);
   return { ok: true };
 }
-
 
 export type StartTaskFailure = DispatchFailure | "insufficient_credits";
 

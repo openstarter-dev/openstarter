@@ -56,14 +56,23 @@ describe("applyPageCacheHeaders", () => {
   });
 
   it("非 GET / 非策略路径 / 非 2xx / 非 HTML → 响应原样（无 Cache-Control）", () => {
-    expect(applyPageCacheHeaders("/pricing", "POST", htmlResponse()).headers.has("cache-control")).toBe(false);
-    expect(applyPageCacheHeaders("/login", "GET", htmlResponse()).headers.has("cache-control")).toBe(false);
     expect(
-      applyPageCacheHeaders("/pricing", "GET", htmlResponse({ status: 404 })).headers.has("cache-control"),
+      applyPageCacheHeaders("/pricing", "POST", htmlResponse()).headers.has("cache-control"),
     ).toBe(false);
     expect(
-      applyPageCacheHeaders("/pricing", "GET", new Response("ok", { headers: { "content-type": "text/plain" } }))
-        .headers.has("cache-control"),
+      applyPageCacheHeaders("/login", "GET", htmlResponse()).headers.has("cache-control"),
+    ).toBe(false);
+    expect(
+      applyPageCacheHeaders("/pricing", "GET", htmlResponse({ status: 404 })).headers.has(
+        "cache-control",
+      ),
+    ).toBe(false);
+    expect(
+      applyPageCacheHeaders(
+        "/pricing",
+        "GET",
+        new Response("ok", { headers: { "content-type": "text/plain" } }),
+      ).headers.has("cache-control"),
     ).toBe(false);
   });
 

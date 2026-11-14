@@ -15,8 +15,7 @@ export function captureReferralAttribution(code: string): void {
   if (!store) return;
   try {
     store.setItem(STORAGE_KEY, JSON.stringify({ at: Date.now(), code } satisfies StoredReferral));
-  } catch {
-  }
+  } catch {}
 }
 
 export function readStoredReferralCode(): string | null {
@@ -49,6 +48,5 @@ export async function bindReferralAfterSignup(): Promise<void> {
     });
     if (res.ok) clearReferralAttribution();
     else if (res.status === 409 || res.status === 422) clearReferralAttribution();
-  } catch {
-  }
+  } catch {}
 }

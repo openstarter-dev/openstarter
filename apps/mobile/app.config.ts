@@ -18,19 +18,12 @@ const config: ExpoConfig = {
   runtimeVersion: {
     policy: "appVersion",
   },
-  plugins: [
-    "expo-router",
-    "expo-secure-store",
-    "expo-image",
-    "expo-video",
-    "expo-sharing",
-  ],
+  plugins: ["expo-router", "expo-secure-store", "expo-image", "expo-video", "expo-sharing"],
   scheme: "openstarter",
   slug: "openstarter",
   userInterfaceStyle: "automatic",
   version: "0.1.0",
-  extra: {
-  },
+  extra: {},
 };
 
 export default config;

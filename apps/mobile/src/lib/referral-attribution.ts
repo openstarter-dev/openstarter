@@ -14,8 +14,7 @@ interface StoredReferral {
 export function captureReferralAttribution(code: string): void {
   try {
     setItem(STORAGE_KEY, JSON.stringify({ at: Date.now(), code } satisfies StoredReferral));
-  } catch {
-  }
+  } catch {}
 }
 
 /** 读有效归因码；过期/损坏/null 环境一律 null。 */
@@ -36,8 +35,7 @@ export function readStoredReferralCode(): string | null {
 export async function clearReferralAttribution(): Promise<void> {
   try {
     await deleteItemAsync(STORAGE_KEY);
-  } catch {
-  }
+  } catch {}
 }
 
 /** 注册成功后调用：有归因码则 POST /api/referral/bind（失败静默），成功后清除。 */
@@ -51,6 +49,5 @@ export async function bindReferralAfterSignup(): Promise<void> {
     if (res.ok || res.status === 409 || res.status === 422) {
       await clearReferralAttribution();
     }
-  } catch {
-  }
+  } catch {}
 }

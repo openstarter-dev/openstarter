@@ -37,9 +37,7 @@ async function main(): Promise<void> {
   registerIpcHandlers(app.getPath("userData"));
 
   const API_BASE_URL =
-    process.env.OPENSTARTER_API_URL ||
-    process.env.VITE_APP_URL ||
-    "http://localhost:3000";
+    process.env.OPENSTARTER_API_URL || process.env.VITE_APP_URL || "http://localhost:3000";
   const tokenStore = createTokenStore(join(app.getPath("userData"), "auth-token.enc"));
   const apiProxy = createApiProxy({
     baseUrl: API_BASE_URL,

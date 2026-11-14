@@ -195,8 +195,14 @@ export function buildSupportHeadScripts(support: WebSupportConfig | undefined): 
  */
 export function getWebConfig(): WebConfig {
   const emailVerificationRaw =
-    resolveEnv("VITE_EMAIL_VERIFICATION_ENABLED", import.meta.env.VITE_EMAIL_VERIFICATION_ENABLED) ||
-    resolveEnv("VITE_EMAIL_VERIFICATION_REQUIRED", import.meta.env.VITE_EMAIL_VERIFICATION_REQUIRED);
+    resolveEnv(
+      "VITE_EMAIL_VERIFICATION_ENABLED",
+      import.meta.env.VITE_EMAIL_VERIFICATION_ENABLED,
+    ) ||
+    resolveEnv(
+      "VITE_EMAIL_VERIFICATION_REQUIRED",
+      import.meta.env.VITE_EMAIL_VERIFICATION_REQUIRED,
+    );
 
   const crispWebsiteId = resolveEnv("VITE_CRISP_WEBSITE_ID", import.meta.env.VITE_CRISP_WEBSITE_ID);
   const crispFlag = resolveEnv("VITE_CRISP_ENABLED", import.meta.env.VITE_CRISP_ENABLED);

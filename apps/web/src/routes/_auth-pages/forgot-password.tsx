@@ -61,7 +61,9 @@ function ForgotPasswordPage() {
             ? m["common.sign.reset_link_sent_title"]()
             : m["common.sign.forgot_password_title"]()}
         </CardTitle>
-        {!sent && <CardDescription>{m["common.sign.forgot_password_description"]()}</CardDescription>}
+        {!sent && (
+          <CardDescription>{m["common.sign.forgot_password_description"]()}</CardDescription>
+        )}
       </CardHeader>
       <CardContent>
         {sent ? (

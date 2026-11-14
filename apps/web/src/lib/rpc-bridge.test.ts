@@ -26,9 +26,8 @@ describe("SSR RPC 桥接", () => {
   });
 
   it("未装桥接（浏览器侧）时回落到全局 fetch，仍是同源相对路径", async () => {
-    const fetchMock = vi.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit) =>
-        jsonResponse({ code: 0, message: "ok" }),
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) =>
+      jsonResponse({ code: 0, message: "ok" }),
     );
     vi.stubGlobal("fetch", fetchMock);
     setRpcFetchBridge(undefined);

@@ -110,8 +110,7 @@ export default function ReferralScreen() {
     if (!me.link) return;
     try {
       await Share.share({ message: me.link });
-    } catch {
-    }
+    } catch {}
   };
 
   return (

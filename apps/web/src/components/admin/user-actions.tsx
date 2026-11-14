@@ -234,14 +234,14 @@ export function UserActions({ user }: { user: UserActionsTarget }) {
               {sessions === null ? (
                 <p className="text-muted-foreground text-sm">{m["admin.loading"]()}</p>
               ) : sessions.length === 0 ? (
-                <p className="text-muted-foreground text-sm">
-                  {m["admin.users.sessions_empty"]()}
-                </p>
+                <p className="text-muted-foreground text-sm">{m["admin.users.sessions_empty"]()}</p>
               ) : (
                 <ul className="max-h-64 space-y-2 overflow-y-auto">
                   {sessions.map((session) => (
                     <li className="rounded-md border p-2 text-sm" key={session.id}>
-                      <p className="truncate">{session.userAgent ?? m["admin.users.unknown_device"]()}</p>
+                      <p className="truncate">
+                        {session.userAgent ?? m["admin.users.unknown_device"]()}
+                      </p>
                       <p className="text-muted-foreground text-xs">
                         {new Date(session.createdAt).toLocaleString()}
                       </p>

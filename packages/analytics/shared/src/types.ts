@@ -21,11 +21,7 @@ export type UserTraits = Record<string, unknown>;
  * 真实供应商（可配置的第三方服务）。闭集合而非 string：新增供应商必须同时更新契约，
  * 避免各平台静默接受拼错的标识。
  */
-export type AnalyticsProviderName =
-  | "google-analytics"
-  | "plausible"
-  | "openpanel"
-  | "firebase";
+export type AnalyticsProviderName = "google-analytics" | "plausible" | "openpanel" | "firebase";
 
 /**
  * 策略名 = 真实供应商 + 两个内置策略：

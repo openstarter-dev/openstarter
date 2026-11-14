@@ -14,7 +14,12 @@
 // provider 统一实现 @openstarter/analytics 的跨平台契约（AnalyticsProvider），
 // 移动端在此之上多 setUserId（见 ./internal/types.ts）。
 
-import { createCompositeProvider, createErrorReporter, errorContext, runSafely } from "@openstarter/analytics/runtime";
+import {
+  createCompositeProvider,
+  createErrorReporter,
+  errorContext,
+  runSafely,
+} from "@openstarter/analytics/runtime";
 
 import { createFirebaseProvider } from "./providers/firebase";
 import { createNoopProvider } from "./providers/noop";

@@ -2,9 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "openstarter",
 
-  "routes": [
-    { "pattern": "<your-domain.com>", "custom_domain": true },
-  ],
+  "routes": [{ "pattern": "<your-domain.com>", "custom_domain": true }],
 
   "workers_dev": false,
   "preview_urls": false,
@@ -64,5 +62,4 @@
       "migrations_dir": "../../packages/db/src/migrations/sqlite",
     },
   ],
-
 }

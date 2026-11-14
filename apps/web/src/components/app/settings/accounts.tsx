@@ -116,11 +116,9 @@ export function AccountsPage() {
                     <Button
                       disabled={unlinking !== null || accounts.length <= 1}
                       onClick={() => {
-                        handleUnlink(account.id).catch(
-                          (error: Error) => {
-                            toast.error(error.message);
-                          },
-                        );
+                        handleUnlink(account.id).catch((error: Error) => {
+                          toast.error(error.message);
+                        });
                       }}
                       size="sm"
                       title={

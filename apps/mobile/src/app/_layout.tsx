@@ -37,8 +37,7 @@ export default function RootLayout() {
         if (typeof ref === "string" && ref.length > 0) {
           captureReferralAttribution(ref);
         }
-      } catch {
-      }
+      } catch {}
     })();
   }, []);
 

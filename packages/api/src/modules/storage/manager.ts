@@ -60,7 +60,6 @@ export class StorageManager {
   }
 }
 
-
 let cachedManager: StorageManager | null = null;
 let cachedHash = "";
 let hasCache = false;

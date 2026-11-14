@@ -80,7 +80,18 @@ describe("resolveExtensionAnalyticsConfig — unit", () => {
 });
 
 describe("resolveExtensionAnalyticsConfig — robustness", () => {
-  const weirdValues: unknown[] = [0, 1, true, false, null, undefined, [], {}, () => {}, Symbol("x")];
+  const weirdValues: unknown[] = [
+    0,
+    1,
+    true,
+    false,
+    null,
+    undefined,
+    [],
+    {},
+    () => {},
+    Symbol("x"),
+  ];
 
   it("never throws and always returns parseable string fields for arbitrary values", () => {
     for (const value of weirdValues) {

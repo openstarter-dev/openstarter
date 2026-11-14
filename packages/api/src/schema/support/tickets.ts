@@ -23,10 +23,8 @@ export const TICKET_STATUS_VALUES = [
   TICKET_STATUS.CLOSED,
 ] as const;
 
-
 export const MAX_TITLE_LENGTH = 200;
 export const MAX_CONTENT_LENGTH = 5000;
-
 
 export const listQuery = paginationSchema.extend({
   status: z.enum(TICKET_STATUS_VALUES).optional(),

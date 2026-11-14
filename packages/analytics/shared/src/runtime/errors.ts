@@ -3,11 +3,7 @@
 // 默认行为仍是静默（契约要求），但接上 `onError` 后可以把错误转发到 Sentry 等；
 // `debug` 打开时额外打 console.warn，用于「为什么没数据」的现场排查。
 
-import type {
-  AnalyticsErrorContext,
-  AnalyticsErrorHandler,
-  AnalyticsStrategyName,
-} from "../types";
+import type { AnalyticsErrorContext, AnalyticsErrorHandler, AnalyticsStrategyName } from "../types";
 
 export interface ErrorReporterOptions {
   /** 排障模式：错误一律 console.warn（生产默认关闭，避免污染控制台）。 */

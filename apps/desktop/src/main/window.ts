@@ -105,8 +105,7 @@ export async function waitForDevServer(
       if (res.ok || res.status === 404) {
         return true;
       }
-    } catch {
-    }
+    } catch {}
     await delay(intervalMs);
   }
   return false;

@@ -54,7 +54,6 @@ export function setSaveFiles(fn: SaveFilesFunction): void {
   cachedHash = "";
 }
 
-
 let cachedManager: AIManager | null = null;
 let cachedHash = "";
 

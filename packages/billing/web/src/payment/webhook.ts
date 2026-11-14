@@ -164,135 +164,137 @@ export async function handleCheckoutSuccess(
   // 记录已抢占的订单：结算失败时恢复其状态，使渠道重试可再次处理（D1 事务不回滚）
   let claimed: { id: string; previousStatus: typeof order.$inferSelect.status } | undefined;
 
-  await db().transaction(async (tx) => {
-    const [existingOrder] = await tx.select().from(order).where(condition).limit(1);
-    if (!existingOrder) {
-      return;
-    }
-    // 幂等（R12.5）：仅处理待支付订单；已 paid/failed 等终态直接跳过。
-    if (
-      existingOrder.status !== OrderStatus.CREATED &&
-      existingOrder.status !== OrderStatus.PENDING
-    ) {
-      return;
-    }
+  await db()
+    .transaction(async (tx) => {
+      const [existingOrder] = await tx.select().from(order).where(condition).limit(1);
+      if (!existingOrder) {
+        return;
+      }
+      // 幂等（R12.5）：仅处理待支付订单；已 paid/failed 等终态直接跳过。
+      if (
+        existingOrder.status !== OrderStatus.CREATED &&
+        existingOrder.status !== OrderStatus.PENDING
+      ) {
+        return;
+      }
 
-    // Atomically claim the order (created/pending -> paid) so concurrent duplicate deliveries
-    // cannot both settle it; only the winner proceeds.
-    // 原子抢占订单（created/pending -> paid）：并发重复投递仅有一个能继续结算
-    const [won] = await tx
-      .update(order)
-      .set({ status: OrderStatus.PAID })
-      .where(
-        and(
-          eq(order.id, existingOrder.id),
-          inArray(order.status, [OrderStatus.CREATED, OrderStatus.PENDING]),
-        ),
-      )
-      .returning({ id: order.id });
-    if (!won) {
-      return;
-    }
-    claimed = { id: existingOrder.id, previousStatus: existingOrder.status };
+      // Atomically claim the order (created/pending -> paid) so concurrent duplicate deliveries
+      // cannot both settle it; only the winner proceeds.
+      // 原子抢占订单（created/pending -> paid）：并发重复投递仅有一个能继续结算
+      const [won] = await tx
+        .update(order)
+        .set({ status: OrderStatus.PAID })
+        .where(
+          and(
+            eq(order.id, existingOrder.id),
+            inArray(order.status, [OrderStatus.CREATED, OrderStatus.PENDING]),
+          ),
+        )
+        .returning({ id: order.id });
+      if (!won) {
+        return;
+      }
+      claimed = { id: existingOrder.id, previousStatus: existingOrder.status };
 
-    const { paymentInfo, subscriptionInfo } = session;
+      const { paymentInfo, subscriptionInfo } = session;
 
-    // 1. 按需建订阅（订阅类结账）。
-    let subscriptionNo: string | undefined;
-    if (subscriptionInfo && session.subscriptionId) {
-      const created = await createSubscription({
-        userId: existingOrder.userId,
-        userEmail: existingOrder.userEmail ?? existingOrder.paymentEmail ?? undefined,
-        paymentProvider: provider,
-        subscriptionId: session.subscriptionId,
-        status: subscriptionInfo.status ?? SubscriptionStatus.ACTIVE,
-        subscriptionResult: JSON.stringify(session.subscriptionResult),
-        productId: existingOrder.productId ?? undefined,
-        description: subscriptionInfo.description ?? undefined,
-        amount: subscriptionInfo.amount ?? undefined,
-        currency: subscriptionInfo.currency ?? undefined,
-        interval: subscriptionInfo.interval ?? undefined,
-        intervalCount: subscriptionInfo.intervalCount ?? undefined,
-        trialPeriodDays: subscriptionInfo.trialPeriodDays ?? undefined,
-        currentPeriodStart: subscriptionInfo.currentPeriodStart,
-        currentPeriodEnd: subscriptionInfo.currentPeriodEnd,
-        billingUrl: subscriptionInfo.billingUrl ?? undefined,
-        planName: existingOrder.planName ?? existingOrder.productName ?? undefined,
-        productName: existingOrder.productName ?? undefined,
-        creditsAmount: existingOrder.creditsAmount ?? undefined,
-        creditsValidDays: existingOrder.creditsValidDays ?? undefined,
-        paymentProductId: existingOrder.paymentProductId ?? undefined,
-        paymentUserId: paymentInfo?.paymentUserId ?? undefined,
-        tx,
-      });
-      subscriptionNo = created.subscriptionNo;
-    }
+      // 1. 按需建订阅（订阅类结账）。
+      let subscriptionNo: string | undefined;
+      if (subscriptionInfo && session.subscriptionId) {
+        const created = await createSubscription({
+          userId: existingOrder.userId,
+          userEmail: existingOrder.userEmail ?? existingOrder.paymentEmail ?? undefined,
+          paymentProvider: provider,
+          subscriptionId: session.subscriptionId,
+          status: subscriptionInfo.status ?? SubscriptionStatus.ACTIVE,
+          subscriptionResult: JSON.stringify(session.subscriptionResult),
+          productId: existingOrder.productId ?? undefined,
+          description: subscriptionInfo.description ?? undefined,
+          amount: subscriptionInfo.amount ?? undefined,
+          currency: subscriptionInfo.currency ?? undefined,
+          interval: subscriptionInfo.interval ?? undefined,
+          intervalCount: subscriptionInfo.intervalCount ?? undefined,
+          trialPeriodDays: subscriptionInfo.trialPeriodDays ?? undefined,
+          currentPeriodStart: subscriptionInfo.currentPeriodStart,
+          currentPeriodEnd: subscriptionInfo.currentPeriodEnd,
+          billingUrl: subscriptionInfo.billingUrl ?? undefined,
+          planName: existingOrder.planName ?? existingOrder.productName ?? undefined,
+          productName: existingOrder.productName ?? undefined,
+          creditsAmount: existingOrder.creditsAmount ?? undefined,
+          creditsValidDays: existingOrder.creditsValidDays ?? undefined,
+          paymentProductId: existingOrder.paymentProductId ?? undefined,
+          paymentUserId: paymentInfo?.paymentUserId ?? undefined,
+          tx,
+        });
+        subscriptionNo = created.subscriptionNo;
+      }
 
-    // 2. 按订单积分配置授予积分（到期随订阅周期或按有效天数，R13.1/R13.2）。
-    if (existingOrder.creditsAmount && existingOrder.creditsAmount > 0) {
-      const expiresAt = calculateCreditExpirationTime({
-        creditsValidDays: existingOrder.creditsValidDays ?? 0,
-        currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
-      });
-      await grant({
-        userId: existingOrder.userId,
-        userEmail: existingOrder.userEmail ?? undefined,
-        credits: existingOrder.creditsAmount,
-        scene:
-          existingOrder.paymentType === PaymentType.SUBSCRIPTION
-            ? CreditTransactionScene.SUBSCRIPTION
-            : CreditTransactionScene.PAYMENT,
+      // 2. 按订单积分配置授予积分（到期随订阅周期或按有效天数，R13.1/R13.2）。
+      if (existingOrder.creditsAmount && existingOrder.creditsAmount > 0) {
+        const expiresAt = calculateCreditExpirationTime({
+          creditsValidDays: existingOrder.creditsValidDays ?? 0,
+          currentPeriodEnd: subscriptionInfo?.currentPeriodEnd,
+        });
+        await grant({
+          userId: existingOrder.userId,
+          userEmail: existingOrder.userEmail ?? undefined,
+          credits: existingOrder.creditsAmount,
+          scene:
+            existingOrder.paymentType === PaymentType.SUBSCRIPTION
+              ? CreditTransactionScene.SUBSCRIPTION
+              : CreditTransactionScene.PAYMENT,
+          orderNo: existingOrder.orderNo,
+          subscriptionNo,
+          expiresAt,
+          tx,
+        });
+      }
+
+      // 3. 置订单 paid，并回填支付/订阅结果。
+      await tx
+        .update(order)
+        .set({
+          status: OrderStatus.PAID,
+          paymentResult: JSON.stringify(session.paymentResult),
+          paymentAmount: paymentInfo?.paymentAmount ?? null,
+          paymentCurrency: paymentInfo?.paymentCurrency ?? null,
+          paymentEmail: paymentInfo?.paymentEmail ?? null,
+          paidAt: paymentInfo?.paidAt ?? new Date(),
+          transactionId: paymentInfo?.transactionId ?? null,
+          invoiceId: paymentInfo?.invoiceId ?? null,
+          invoiceUrl: paymentInfo?.invoiceUrl ?? null,
+          paymentUserName: paymentInfo?.paymentUserName ?? null,
+          paymentUserId: paymentInfo?.paymentUserId ?? null,
+          discountCode: paymentInfo?.discountCode ?? null,
+          discountAmount: paymentInfo?.discountAmount ?? null,
+          subscriptionNo: subscriptionNo ?? null,
+          subscriptionId: session.subscriptionId ?? null,
+          subscriptionResult: session.subscriptionResult
+            ? JSON.stringify(session.subscriptionResult)
+            : null,
+        })
+        .where(eq(order.id, existingOrder.id));
+
+      // 分销记账（旁路）：支付事务末尾记 pending 佣金；失败不影响支付。
+      await recordCommission(tx, {
         orderNo: existingOrder.orderNo,
-        subscriptionNo,
-        expiresAt,
-        tx,
-      });
-    }
-
-    // 3. 置订单 paid，并回填支付/订阅结果。
-    await tx
-      .update(order)
-      .set({
-        status: OrderStatus.PAID,
-        paymentResult: JSON.stringify(session.paymentResult),
         paymentAmount: paymentInfo?.paymentAmount ?? null,
         paymentCurrency: paymentInfo?.paymentCurrency ?? null,
-        paymentEmail: paymentInfo?.paymentEmail ?? null,
-        paidAt: paymentInfo?.paidAt ?? new Date(),
-        transactionId: paymentInfo?.transactionId ?? null,
-        invoiceId: paymentInfo?.invoiceId ?? null,
-        invoiceUrl: paymentInfo?.invoiceUrl ?? null,
-        paymentUserName: paymentInfo?.paymentUserName ?? null,
-        paymentUserId: paymentInfo?.paymentUserId ?? null,
-        discountCode: paymentInfo?.discountCode ?? null,
-        discountAmount: paymentInfo?.discountAmount ?? null,
-        subscriptionNo: subscriptionNo ?? null,
-        subscriptionId: session.subscriptionId ?? null,
-        subscriptionResult: session.subscriptionResult
-          ? JSON.stringify(session.subscriptionResult)
-          : null,
-      })
-      .where(eq(order.id, existingOrder.id));
-
-    // 分销记账（旁路）：支付事务末尾记 pending 佣金；失败不影响支付。
-    await recordCommission(tx, {
-      orderNo: existingOrder.orderNo,
-      paymentAmount: paymentInfo?.paymentAmount ?? null,
-      paymentCurrency: paymentInfo?.paymentCurrency ?? null,
-      userId: existingOrder.userId,
+        userId: existingOrder.userId,
+      });
+    })
+    .catch(async (error: unknown) => {
+      // Reopen the order (no-op after a real rollback) so the provider's retry can settle it again.
+      // 重新开放订单（真实回滚后为空操作），以便渠道重试再次结算
+      if (claimed) {
+        await db()
+          .update(order)
+          .set({ status: claimed.previousStatus })
+          .where(eq(order.id, claimed.id))
+          .catch(() => undefined);
+      }
+      throw error;
     });
-  }).catch(async (error: unknown) => {
-    // Reopen the order (no-op after a real rollback) so the provider's retry can settle it again.
-    // 重新开放订单（真实回滚后为空操作），以便渠道重试再次结算
-    if (claimed) {
-      await db()
-        .update(order)
-        .set({ status: claimed.previousStatus })
-        .where(eq(order.id, claimed.id))
-        .catch(() => undefined);
-    }
-    throw error;
-  });
 }
 
 /** 失败/取消：将仍处 `created`/`pending` 的订单置为 `failed`（不建订阅/不授分）。 */

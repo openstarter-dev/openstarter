@@ -69,13 +69,9 @@ const withPodfileDisableFirebaseSPM = (config) =>
   withPodfile(config, (config) => {
     try {
       config.modResults.contents = setPodfileDisableSPM(config.modResults.contents);
-      config.modResults.contents = setPodfileStaticFramework(
-        config.modResults.contents,
-      );
+      config.modResults.contents = setPodfileStaticFramework(config.modResults.contents);
     } catch (error) {
-      console.warn(
-        `[with-firebase-config] could not insert ${DISABLE_SPM_FLAG}: ${error.message}`,
-      );
+      console.warn(`[with-firebase-config] could not insert ${DISABLE_SPM_FLAG}: ${error.message}`);
     }
     return config;
   });

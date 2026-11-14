@@ -7,7 +7,6 @@ import { getUuid } from "@openstarter/shared/id";
 import { hashPassword } from "better-auth/crypto";
 import { and, eq } from "drizzle-orm";
 
-
 interface SeedOptions {
   email: string;
   name: string;
@@ -66,7 +65,6 @@ if (!ADMIN_EMAIL.includes("@") || ADMIN_PASSWORD.length < 8) {
   console.error(`  password: ${"*".repeat(ADMIN_PASSWORD.length)}`);
   process.exit(1);
 }
-
 
 async function seedAdmin(options: SeedOptions): Promise<void> {
   const { email, password, name } = options;

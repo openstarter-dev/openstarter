@@ -18,7 +18,6 @@ export const TAXONOMY_STATUS_VALUES = [
   TaxonomyStatus.ARCHIVED,
 ] as const;
 
-
 export const listQuery = createPaginationSchema(100, 50).extend({
   type: z.string().min(1).optional(),
   status: z.enum(TAXONOMY_STATUS_VALUES).optional(),

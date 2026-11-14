@@ -1,10 +1,6 @@
 import { and, count, desc, eq } from "drizzle-orm";
 
-import {
-  CommissionStatus,
-  getReferralConfig,
-  type ReferralConfig,
-} from "@openstarter/billing-web";
+import { CommissionStatus, getReferralConfig, type ReferralConfig } from "@openstarter/billing-web";
 import { grant } from "@openstarter/billing-web";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
@@ -13,7 +9,6 @@ import { commission, referral, referralRelation } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 
 import { manualCreateBody } from "../../../schema/admin/referral";
-
 
 export async function settleCommission(params: {
   adminUserId: string;
@@ -64,7 +59,6 @@ export async function settleCommission(params: {
   }
 }
 
-
 export async function voidCommission(params: {
   commissionId: string;
 }): Promise<{ error?: "NOT_FOUND" | "NOT_PENDING"; ok: boolean }> {
@@ -86,7 +80,6 @@ export async function voidCommission(params: {
   }
   return { ok: true };
 }
-
 
 export async function manualCreateCommission(
   input: unknown,
@@ -123,7 +116,6 @@ export async function manualCreateCommission(
   return { ok: true, data: { id: existing!.id } };
 }
 
-
 export async function setCustomRate(params: {
   userId: string;
   customRate: number | null;
@@ -153,7 +145,6 @@ function generateReferralCode(): string {
   }
   return code;
 }
-
 
 export interface ListCommissionsParams {
   page: number;
@@ -211,7 +202,6 @@ export async function listRelations(params: ListRelationsParams): Promise<ListRe
 
   return { items, total: Number(totalRows[0]?.value ?? 0) };
 }
-
 
 /**
  * Read active static/env referral configuration for admin inspection.

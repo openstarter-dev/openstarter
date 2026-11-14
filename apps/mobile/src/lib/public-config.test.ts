@@ -29,9 +29,9 @@ describe("resolveEnabledProviders", () => {
   });
 
   it("gates email/password only when explicitly false", () => {
-    expect(
-      resolveEnabledProviders({ EXPO_PUBLIC_EMAIL_AUTH_ENABLED: "false" }).emailPassword,
-    ).toBe(false);
+    expect(resolveEnabledProviders({ EXPO_PUBLIC_EMAIL_AUTH_ENABLED: "false" }).emailPassword).toBe(
+      false,
+    );
     expect(resolveEnabledProviders({ EXPO_PUBLIC_EMAIL_AUTH_ENABLED: "true" }).emailPassword).toBe(
       true,
     );

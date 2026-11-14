@@ -15,33 +15,29 @@ describe("RBAC middleware properties", () => {
 
   it("P6 insufficient permission rejects with 403", async () => {
     await fc.assert(
-      fc.asyncProperty(
-        segmentArbitrary,
-        segmentArbitrary,
-        async (resource, action) => {
-          const requiredPermission = `${resource}.${action}`;
-          const routeHandler = vi.fn((context) => context.json({ ok: true }));
-          const app = new Hono<{ Variables: { userId: string } }>();
+      fc.asyncProperty(segmentArbitrary, segmentArbitrary, async (resource, action) => {
+        const requiredPermission = `${resource}.${action}`;
+        const routeHandler = vi.fn((context) => context.json({ ok: true }));
+        const app = new Hono<{ Variables: { userId: string } }>();
 
-          app.use(
-            "*",
-            createMiddleware<{ Variables: { userId: string } }>(async (context, next) => {
-              context.set("userId", "user-1");
-              await next();
-            }),
-          );
-          app.get(
-            "/protected",
-            createRequirePermission(requiredPermission, async () => false),
-            routeHandler,
-          );
+        app.use(
+          "*",
+          createMiddleware<{ Variables: { userId: string } }>(async (context, next) => {
+            context.set("userId", "user-1");
+            await next();
+          }),
+        );
+        app.get(
+          "/protected",
+          createRequirePermission(requiredPermission, async () => false),
+          routeHandler,
+        );
 
-          const response = await app.request("/protected");
+        const response = await app.request("/protected");
 
-          expect(response.status).toBe(403);
-          expect(routeHandler).not.toHaveBeenCalled();
-        },
-      ),
+        expect(response.status).toBe(403);
+        expect(routeHandler).not.toHaveBeenCalled();
+      }),
       { numRuns: 100 },
     );
   });

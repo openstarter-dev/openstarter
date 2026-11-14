@@ -27,8 +27,7 @@ function ensureCloudflareEnv(): Promise<void> {
       .then((mod) => {
         (globalThis as unknown as { __CF_ENV__?: unknown }).__CF_ENV__ = mod.env;
       })
-      .catch(() => {
-      });
+      .catch(() => {});
   }
   return cfEnvPromise;
 }

@@ -40,7 +40,9 @@ function warnOnce(message: string): void {
   console.warn(`[analytics-mobile] ${message}`);
 }
 
-export async function createFirebaseProvider(report?: ReportError): Promise<MobileAnalyticsProvider> {
+export async function createFirebaseProvider(
+  report?: ReportError,
+): Promise<MobileAnalyticsProvider> {
   /** 统一失败出口：上报给上层 + 一次性 warn，绝不向上抛。 */
   const fail = (method: AnalyticsMethod, error: unknown): void => {
     report?.(error, errorContext("firebase", method));
@@ -110,10 +112,7 @@ export async function createFirebaseProvider(report?: ReportError): Promise<Mobi
       },
       async track(event: string, properties?: EventProperties): Promise<void> {
         try {
-          await getAnalytics().logEvent(
-            sanitizeGaEventName(event),
-            sanitizeProperties(properties),
-          );
+          await getAnalytics().logEvent(sanitizeGaEventName(event), sanitizeProperties(properties));
         } catch (error) {
           fail("track", error);
         }

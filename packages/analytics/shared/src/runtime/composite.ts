@@ -8,9 +8,7 @@ import type { AnalyticsProvider } from "../types";
 export function createCompositeProvider(
   providers: readonly AnalyticsProvider[],
 ): AnalyticsProvider {
-  const forward = async (
-    action: (provider: AnalyticsProvider) => Promise<void>,
-  ): Promise<void> => {
+  const forward = async (action: (provider: AnalyticsProvider) => Promise<void>): Promise<void> => {
     for (const provider of providers) {
       await action(provider);
     }

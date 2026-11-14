@@ -21,8 +21,7 @@ const HARDCODED_FALLBACK_URL = "https://app.openstarter.dev";
  * 取值在 ConfigManager 实例化时计算一次，避免每次读取都访问 process.env。
  */
 function resolveDefaultApiUrl(): string {
-  const fromEnv =
-    process.env.OPENSTARTER_API_URL?.trim() || process.env.VITE_APP_URL?.trim();
+  const fromEnv = process.env.OPENSTARTER_API_URL?.trim() || process.env.VITE_APP_URL?.trim();
   if (fromEnv) {
     return fromEnv;
   }

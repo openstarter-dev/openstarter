@@ -117,7 +117,9 @@ describe("createErrorReporter", () => {
 describe("runSafely", () => {
   it("returns the action result on success", async () => {
     const report = vi.fn();
-    await expect(runSafely(async () => 42, report, errorContext("noop", "track"))).resolves.toBe(42);
+    await expect(runSafely(async () => 42, report, errorContext("noop", "track"))).resolves.toBe(
+      42,
+    );
     expect(report).not.toHaveBeenCalled();
   });
 
