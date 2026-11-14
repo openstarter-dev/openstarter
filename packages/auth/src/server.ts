@@ -88,18 +88,6 @@ const oneTapEnabled =
   readBooleanEnv("GOOGLE_ONE_TAP_ENABLED", false) && googleEnabled && Boolean(oneTapClientId);
 
 const INVITE_CODE_COOKIE = "openstarter_invite_code";
-const PENDING_INVITE_TTL_MS = 5 * 60 * 1000;
-// Bound pending invite entries with a TTL so aborted signups cannot leak memory
-// 为暂存邀请码增加 TTL 清理，防止注册中途失败导致内存泄漏
-const pendingInviteCodes = new Map<string, { code: string; expiresAt: number }>();
-
-function pruneExpiredPendingInvites(now: number): void {
-  for (const [key, entry] of pendingInviteCodes) {
-    if (entry.expiresAt <= now) {
-      pendingInviteCodes.delete(key);
-    }
-  }
-}
 
 type UserCreateAfter = NonNullable<NonNullable<typeof hooks.user.create>["after"]>;
 type CreatedUser = Parameters<UserCreateAfter>[0];
@@ -149,7 +137,7 @@ async function deleteCreatedUser(userId: string): Promise<void> {
   await db().delete(userTable).where(eq(userTable.id, userId));
 }
 
-const userCreateBefore = async (createdUser: CreatedUser, context: HookContext) => {
+const userCreateBefore = async (_createdUser: CreatedUser, context: HookContext) => {
   if (!inviteCodeRequired) {
     return;
   }
@@ -165,23 +153,14 @@ const userCreateBefore = async (createdUser: CreatedUser, context: HookContext) 
       message: validation.error ?? "Invalid invite code",
     });
   }
-
-  // The before hook runs before the user id is generated, so key by email.
-  // before 钩子执行时尚未生成 userId，按小写邮箱暂存并清理过期记录
-  const now = Date.now();
-  pruneExpiredPendingInvites(now);
-  pendingInviteCodes.set(createdUser.email.toLowerCase(), {
-    code,
-    expiresAt: now + PENDING_INVITE_TTL_MS,
-  });
 };
 
 const userCreateAfter: UserCreateAfter = async (createdUser, context) => {
   if (inviteCodeRequired) {
-    const emailKey = createdUser.email.toLowerCase();
-    const pending = pendingInviteCodes.get(emailKey);
-    pendingInviteCodes.delete(emailKey);
-    const code = pending?.code ?? readInviteCode(context);
+    // Re-read from the same request (header/body/cookie); no in-memory state, so it is safe
+    // across Workers isolates and serverless instances.
+    // 从同一请求重新读取邀请码（header/body/cookie），不依赖内存状态，适用于多实例/Workers
+    const code = readInviteCode(context);
 
     if (!code) {
       await deleteCreatedUser(createdUser.id);
