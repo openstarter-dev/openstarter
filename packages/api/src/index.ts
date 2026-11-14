@@ -3,6 +3,8 @@ import { respErr } from "@openstarter/shared";
 import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { requestId } from "hono/request-id";
+import { secureHeaders } from "hono/secure-headers";
 
 import { registerAiSaveFiles } from "./modules/ai/tasks";
 import { adminRouter } from "./modules/admin/router";
@@ -35,6 +37,12 @@ app.onError((err, c) => {
 app.notFound((c) => c.json(respErr("not found"), 404));
 
 const api = app.basePath("/api");
+
+// Baseline hardening for every API response: request id for tracing + standard security headers.
+// CORP/COOP are disabled so cross-origin clients (extension, mobile webviews) keep working.
+// 所有 API 响应的基础加固：请求 id 便于追踪 + 标准安全头；关闭 CORP/COOP 以兼容跨域客户端
+api.use("*", requestId());
+api.use("*", secureHeaders({ crossOriginOpenerPolicy: false, crossOriginResourcePolicy: false }));
 
 api.on(["POST", "GET"], "/auth/*", (c) => createAuth().handler(c.req.raw));
 
