@@ -5,6 +5,18 @@
     ".": {
       "default": "./src/index.ts"
     },
+    "./client/web": {
+      "default": "./src/client/web.ts"
+    },
+    "./client/native": {
+      "default": "./src/client/native.ts"
+    },
+    "./client/taro": {
+      "default": "./src/client/taro.ts"
+    },
+    "./rbac/access": {
+      "default": "./src/rbac/access.ts"
+    },
     "./*": {
       "default": "./src/*.ts"
     }
