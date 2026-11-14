@@ -1,17 +1,10 @@
 import { createInviteCodesBatch, deleteInviteCode, listInviteCodes } from "@openstarter/auth";
 import { respData, respOk, respPage } from "@openstarter/shared";
-import {
-  getAdminConfigs,
-  getSettingGroups,
-  getSettings,
-  getSettingTabs,
-  saveConfigs,
-} from "@openstarter/shared/config";
 import { Hono } from "hono";
 
 import { zValidator } from "../../../lib/validator";
 import { idParam } from "../../../schema";
-import { inviteBatchBody, listQuery, saveConfigBody } from "../../../schema/admin/overview";
+import { inviteBatchBody, listQuery } from "../../../schema/admin/overview";
 import { listCredits, listOrders, listSubscriptions, listUsers } from "../index";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
@@ -64,20 +57,5 @@ export const overviewRouter = new Hono()
   .delete("/invite-codes/:id", zValidator("param", idParam), async (c) => {
     const { id } = c.req.valid("param");
     await deleteInviteCode(id);
-    return c.json(respOk());
-  })
-  // ── 站点设置（Config_Service） ────────────────────────────────────────────────
-  .get("/config", async (c) => {
-    const configs = await getAdminConfigs();
-    const settings = getSettings().filter((setting) => !setting.envOnly);
-    const groups = getSettingGroups().filter((group) =>
-      settings.some((setting) => setting.group === group.name),
-    );
-    const tabs = getSettingTabs().filter((tab) => groups.some((group) => group.tab === tab.name));
-    return c.json(respData({ configs, groups, settings, tabs }));
-  })
-  .post("/config", zValidator("json", saveConfigBody), async (c) => {
-    const body = c.req.valid("json");
-    await saveConfigs(body);
     return c.json(respOk());
   });

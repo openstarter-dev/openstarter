@@ -1,18 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({
-  configs: {} as Record<string, string>,
   findModelByProviderAndId: vi.fn(),
   createTask: vi.fn(),
   findTask: vi.fn(),
   updateTask: vi.fn(),
   dispatchGenerate: vi.fn(),
   getAIManager: vi.fn(),
-}));
-
-vi.mock("@openstarter/shared/config", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@openstarter/shared/config")>()),
-  getAllConfigs: () => Promise.resolve(state.configs),
 }));
 
 vi.mock("../catalog/service", async (importOriginal) => ({
@@ -80,7 +74,9 @@ function createTaskRequest(body: unknown) {
 }
 
 beforeEach(() => {
-  state.configs = { ai_credits_cost_image: "5", ai_credits_cost_video: "20" };
+  vi.unstubAllEnvs();
+  vi.stubEnv("AI_CREDITS_COST_IMAGE", "5");
+  vi.stubEnv("AI_CREDITS_COST_VIDEO", "20");
 
   state.getAIManager.mockReset();
   state.getAIManager.mockResolvedValue(STUB_MANAGER);
@@ -107,6 +103,10 @@ beforeEach(() => {
     status: "processing",
     taskId: "provider-task-1",
   });
+});
+
+afterEach(() => {
+  vi.unstubAllEnvs();
 });
 
 describe("POST /ai-tasks — catalog-first credit pricing", () => {
@@ -212,17 +212,17 @@ describe("POST /ai-tasks — catalog-first credit pricing", () => {
 });
 
 describe("computeConfigHash", () => {
-  it("changes when only openai_api_key changes (key rotation invalidates the manager cache)", () => {
+  it("changes when only OPENAI_API_KEY changes (key rotation invalidates the manager cache)", () => {
     const base = {
-      default_ai_provider: "replicate",
-      replicate_enabled: "1",
-      replicate_api_token: "tok",
+      DEFAULT_AI_PROVIDER: "replicate",
+      REPLICATE_ENABLED: "1",
+      REPLICATE_API_TOKEN: "tok",
     };
 
-    const withKeyA = computeConfigHash({ ...base, openai_api_key: "key-a" });
-    const withKeyB = computeConfigHash({ ...base, openai_api_key: "key-b" });
+    const withKeyA = computeConfigHash({ ...base, OPENAI_API_KEY: "key-a" });
+    const withKeyB = computeConfigHash({ ...base, OPENAI_API_KEY: "key-b" });
 
     expect(withKeyA).not.toBe(withKeyB);
-    expect(computeConfigHash({ ...base, openai_api_key: "key-a" })).toBe(withKeyA);
+    expect(computeConfigHash({ ...base, OPENAI_API_KEY: "key-a" })).toBe(withKeyA);
   });
 });

@@ -1,52 +1,44 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const state = vi.hoisted(() => ({ configs: {} as Record<string, string> }));
-
-vi.mock("@openstarter/shared/config", () => ({
-  getAllConfigs: async () => state.configs,
-}));
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getAIManager, setSaveFiles } from "./manager";
 
 describe("getAIManager — New API 装配", () => {
   beforeEach(() => {
-    state.configs = {};
+    vi.unstubAllEnvs();
     setSaveFiles(async () => []);
   });
 
-  it("base_url + api_key 齐备时注册 newapi", async () => {
-    state.configs = {
-      newapi_base_url: "https://newapi.example.com/v1",
-      newapi_api_key: "sk-newapi",
-    };
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("NEWAPI_BASE_URL + NEWAPI_API_KEY 齐备时注册 newapi", async () => {
+    vi.stubEnv("NEWAPI_BASE_URL", "https://newapi.example.com/v1");
+    vi.stubEnv("NEWAPI_API_KEY", "sk-newapi");
 
     const manager = await getAIManager();
     expect(manager.getProviderNames()).toContain("newapi");
     expect(manager.getProvider("newapi")?.name).toBe("newapi");
   });
 
-  it("缺少 api_key 时不注册", async () => {
-    state.configs = { newapi_base_url: "https://newapi.example.com/v1" };
+  it("缺少 NEWAPI_API_KEY 时不注册", async () => {
+    vi.stubEnv("NEWAPI_BASE_URL", "https://newapi.example.com/v1");
     const manager = await getAIManager();
     expect(manager.getProviderNames()).not.toContain("newapi");
   });
 
-  it("newapi_enabled=false 时不注册", async () => {
-    state.configs = {
-      newapi_base_url: "https://newapi.example.com/v1",
-      newapi_api_key: "sk-newapi",
-      newapi_enabled: "false",
-    };
+  it("NEWAPI_ENABLED=false 时不注册", async () => {
+    vi.stubEnv("NEWAPI_BASE_URL", "https://newapi.example.com/v1");
+    vi.stubEnv("NEWAPI_API_KEY", "sk-newapi");
+    vi.stubEnv("NEWAPI_ENABLED", "false");
     const manager = await getAIManager();
     expect(manager.getProviderNames()).not.toContain("newapi");
   });
 
-  it("default_ai_provider=newapi 时作为默认渠道", async () => {
-    state.configs = {
-      default_ai_provider: "newapi",
-      newapi_base_url: "https://newapi.example.com/v1",
-      newapi_api_key: "sk-newapi",
-    };
+  it("DEFAULT_AI_PROVIDER=newapi 时作为默认渠道", async () => {
+    vi.stubEnv("DEFAULT_AI_PROVIDER", "newapi");
+    vi.stubEnv("NEWAPI_BASE_URL", "https://newapi.example.com/v1");
+    vi.stubEnv("NEWAPI_API_KEY", "sk-newapi");
     const manager = await getAIManager();
     expect(manager.getDefaultProvider()?.name).toBe("newapi");
   });

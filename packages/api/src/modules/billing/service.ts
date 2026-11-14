@@ -12,9 +12,9 @@ import {
   SIGNATURE_HEADER,
   verifyRevenueCatWebhook,
 } from "@openstarter/billing-web/payment/revenuecat";
-import { getAllConfigs } from "@openstarter/shared/config";
 import { logger } from "@openstarter/shared/logger";
 
+import { readBooleanEnv, readEnv } from "../../lib/env";
 import { type ProductEntry, resolveProduct, resolveProductByIapId } from "./products";
 
 export const REVENUECAT_PROVIDER = "revenuecat";
@@ -138,9 +138,8 @@ export async function processRevenueCatWebhook(request: Request): Promise<Webhoo
   const rawBody = await request.text();
   const signature = request.headers.get(SIGNATURE_HEADER) || "";
 
-  const configs = await getAllConfigs();
-  const secret = configs.revenuecat_webhook_secret || "";
-  if (!(configs.revenuecat_enabled === "true" && secret)) {
+  const secret = readEnv("REVENUECAT_WEBHOOK_SECRET");
+  if (!(readBooleanEnv("REVENUECAT_ENABLED", false) && secret)) {
     logger.warn("[webhook] revenuecat disabled or secret missing, rejecting callback");
     return { message: "unauthorized", ok: false };
   }

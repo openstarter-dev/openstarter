@@ -1,22 +1,9 @@
 import { createHmac } from "node:crypto";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../middleware/auth", () => ({
   requireAuth: (_c: unknown, next: () => Promise<void>) => next(),
 }));
-
-const configsState = vi.hoisted(() => ({
-  map: {} as Record<string, string>,
-}));
-vi.mock("@openstarter/shared/config", async () => {
-  const actual = await vi.importActual<typeof import("@openstarter/shared/config")>(
-    "@openstarter/shared/config",
-  );
-  return {
-    ...actual,
-    getAllConfigs: () => Promise.resolve(configsState.map),
-  };
-});
 
 const mapRevenueCatEventMock = vi.hoisted(() => vi.fn());
 vi.mock("@openstarter/billing-web/payment/revenuecat", async () => {
@@ -58,12 +45,16 @@ function enabledHeaders() {
 }
 
 beforeEach(() => {
-  configsState.map = {};
+  vi.unstubAllEnvs();
   mapRevenueCatEventMock.mockReset();
 });
 
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
+
 describe("POST /payment/webhook/revenuecat", () => {
-  it("returns 401 when revenuecat_enabled is not true (fail-closed)", async () => {
+  it("returns 401 when REVENUECAT_ENABLED is not true (fail-closed)", async () => {
     const response = await postWebhook(enabledHeaders(), RAW_BODY);
 
     expect(response.status).toBe(401);
@@ -71,7 +62,7 @@ describe("POST /payment/webhook/revenuecat", () => {
   });
 
   it("returns 401 when webhook secret is missing even if enabled", async () => {
-    configsState.map = { revenuecat_enabled: "true" };
+    vi.stubEnv("REVENUECAT_ENABLED", "true");
     const response = await postWebhook(enabledHeaders(), RAW_BODY);
 
     expect(response.status).toBe(401);
@@ -79,10 +70,8 @@ describe("POST /payment/webhook/revenuecat", () => {
   });
 
   it("returns 401 on an invalid signature", async () => {
-    configsState.map = {
-      revenuecat_enabled: "true",
-      revenuecat_webhook_secret: SECRET,
-    };
+    vi.stubEnv("REVENUECAT_ENABLED", "true");
+    vi.stubEnv("REVENUECAT_WEBHOOK_SECRET", SECRET);
     const response = await postWebhook(
       { "x-revenuecat-webhook-signature": "t=1,v1=deadbeef" },
       RAW_BODY,
@@ -93,10 +82,8 @@ describe("POST /payment/webhook/revenuecat", () => {
   });
 
   it("returns 401 when the signature header is absent", async () => {
-    configsState.map = {
-      revenuecat_enabled: "true",
-      revenuecat_webhook_secret: SECRET,
-    };
+    vi.stubEnv("REVENUECAT_ENABLED", "true");
+    vi.stubEnv("REVENUECAT_WEBHOOK_SECRET", SECRET);
     const response = await postWebhook({ "content-type": "application/json" }, RAW_BODY);
 
     expect(response.status).toBe(401);
@@ -104,10 +91,8 @@ describe("POST /payment/webhook/revenuecat", () => {
   });
 
   it("delegates to mapRevenueCatEvent and returns received:true on a valid webhook", async () => {
-    configsState.map = {
-      revenuecat_enabled: "true",
-      revenuecat_webhook_secret: SECRET,
-    };
+    vi.stubEnv("REVENUECAT_ENABLED", "true");
+    vi.stubEnv("REVENUECAT_WEBHOOK_SECRET", SECRET);
     const response = await postWebhook(enabledHeaders(), RAW_BODY);
 
     expect(response.status).toBe(200);

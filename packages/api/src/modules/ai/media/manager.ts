@@ -1,4 +1,4 @@
-import { getAllConfigs } from "@openstarter/shared/config";
+import { readBooleanEnv, readEnv } from "../../../lib/env";
 import { FalProvider } from "./fal";
 import { NewAPIProvider } from "./newapi";
 import { OpenAIImageProvider } from "./openai-image";
@@ -58,120 +58,115 @@ export function setSaveFiles(fn: SaveFilesFunction): void {
 let cachedManager: AIManager | null = null;
 let cachedHash = "";
 
-function isAvailable(
-  configs: Record<string, string>,
-  provider: string,
-  credentialKeys: readonly string[],
-): boolean {
-  if (configs[`${provider}_enabled`] === "false") {
+type MediaEnvValues = Partial<Record<(typeof AI_ENV_KEYS)[number], string>>;
+
+interface MediaProviderDescriptor {
+  isDefault: (defaultProvider: string) => boolean;
+  build: (saveFiles: SaveFilesFunction | undefined) => AIProvider | null;
+}
+
+/**
+ * Check whether an AI media provider is enabled (`*_ENABLED !== false`) and has all credentials.
+ * 校验 AI 媒体渠道是否启用（未设为 false）且必需环境变量均已填写。
+ */
+function isAvailable(enabledKey: string, requiredKeys: readonly string[]): boolean {
+  if (!readBooleanEnv(enabledKey, true)) {
     return false;
   }
-  return credentialKeys.every((key) => Boolean(configs[key]));
+  return requiredKeys.every((key) => Boolean(readEnv(key)));
 }
 
-function assembleReplicate(
-  manager: AIManager,
-  configs: Record<string, string>,
-  saveFiles: SaveFilesFunction | undefined,
-  defaultProvider: string,
-): void {
-  if (!isAvailable(configs, "replicate", ["replicate_api_token"])) {
-    return;
-  }
-  manager.addProvider(
-    new ReplicateProvider({
-      apiToken: configs.replicate_api_token || "",
-      baseUrl: configs.replicate_base_url || undefined,
-      saveFiles,
-      customStorage: Boolean(saveFiles),
-    }),
-    defaultProvider === "replicate" || defaultProvider === "",
-  );
-}
+// Registry of supported AI media providers, constructed cleanly without repeated conditionals.
+// AI 媒体渠道装配注册表，避免分散的重复分支判断。
+const MEDIA_PROVIDER_ASSEMBLERS: readonly MediaProviderDescriptor[] = [
+  {
+    isDefault: (defaultProvider) => defaultProvider === "replicate" || defaultProvider === "",
+    build: (saveFiles) => {
+      if (!isAvailable("REPLICATE_ENABLED", ["REPLICATE_API_TOKEN"])) {
+        return null;
+      }
+      return new ReplicateProvider({
+        apiToken: readEnv("REPLICATE_API_TOKEN"),
+        baseUrl: readEnv("REPLICATE_BASE_URL") || undefined,
+        saveFiles,
+        customStorage: Boolean(saveFiles),
+      });
+    },
+  },
+  {
+    isDefault: (defaultProvider) => defaultProvider === "openai",
+    build: (saveFiles) => {
+      if (!isAvailable("OPENAI_ENABLED", ["OPENAI_API_KEY"])) {
+        return null;
+      }
+      return new OpenAIImageProvider({
+        apiKey: readEnv("OPENAI_API_KEY"),
+        baseUrl: readEnv("OPENAI_BASE_URL") || undefined,
+        saveFiles,
+        customStorage: Boolean(saveFiles),
+      });
+    },
+  },
+  {
+    isDefault: (defaultProvider) => defaultProvider === "fal",
+    build: (saveFiles) => {
+      if (!isAvailable("FAL_ENABLED", ["FAL_API_KEY"])) {
+        return null;
+      }
+      return new FalProvider({
+        apiKey: readEnv("FAL_API_KEY"),
+        saveFiles,
+        customStorage: Boolean(saveFiles),
+      });
+    },
+  },
+  {
+    isDefault: (defaultProvider) => defaultProvider === "newapi",
+    build: (saveFiles) => {
+      if (!isAvailable("NEWAPI_ENABLED", ["NEWAPI_BASE_URL", "NEWAPI_API_KEY"])) {
+        return null;
+      }
+      return new NewAPIProvider({
+        apiKey: readEnv("NEWAPI_API_KEY"),
+        baseUrl: readEnv("NEWAPI_BASE_URL"),
+        saveFiles,
+        customStorage: Boolean(saveFiles),
+      });
+    },
+  },
+];
 
-function assembleOpenAIImage(
-  manager: AIManager,
-  configs: Record<string, string>,
-  saveFiles: SaveFilesFunction | undefined,
-  defaultProvider: string,
-): void {
-  if (!isAvailable(configs, "openai", ["openai_api_key"])) {
-    return;
-  }
-  manager.addProvider(
-    new OpenAIImageProvider({
-      apiKey: configs.openai_api_key || "",
-      baseUrl: configs.openai_base_url || undefined,
-      saveFiles,
-      customStorage: Boolean(saveFiles),
-    }),
-    defaultProvider === "openai",
-  );
-}
-
-function assembleFal(
-  manager: AIManager,
-  configs: Record<string, string>,
-  saveFiles: SaveFilesFunction | undefined,
-  defaultProvider: string,
-): void {
-  if (!isAvailable(configs, "fal", ["fal_api_key"])) {
-    return;
-  }
-  manager.addProvider(
-    new FalProvider({
-      apiKey: configs.fal_api_key || "",
-      saveFiles,
-      customStorage: Boolean(saveFiles),
-    }),
-    defaultProvider === "fal",
-  );
-}
-
-function assembleNewAPI(
-  manager: AIManager,
-  configs: Record<string, string>,
-  saveFiles: SaveFilesFunction | undefined,
-  defaultProvider: string,
-): void {
-  if (!isAvailable(configs, "newapi", ["newapi_base_url", "newapi_api_key"])) {
-    return;
-  }
-  manager.addProvider(
-    new NewAPIProvider({
-      apiKey: configs.newapi_api_key || "",
-      baseUrl: configs.newapi_base_url || "",
-      saveFiles,
-      customStorage: Boolean(saveFiles),
-    }),
-    defaultProvider === "newapi",
-  );
-}
-
-// Declarative key list ensures every provider toggle/credential invalidates cachedManager
-// 通过统一配置键清单生成指纹，避免新增或漏配开关（如 openai_enabled）导致缓存不失效
-const AI_CONFIG_HASH_KEYS = [
-  "default_ai_provider",
-  "replicate_enabled",
-  "replicate_api_token",
-  "replicate_base_url",
-  "fal_enabled",
-  "fal_api_key",
-  "openai_enabled",
-  "openai_api_key",
-  "openai_base_url",
-  "newapi_enabled",
-  "newapi_base_url",
-  "newapi_api_key",
+// Declarative env key list ensures any provider toggle/credential rotation invalidates cachedManager.
+// 声明式环境变量键清单，确保任意开关变更或密钥轮换使缓存失效。
+const AI_ENV_KEYS = [
+  "DEFAULT_AI_PROVIDER",
+  "REPLICATE_ENABLED",
+  "REPLICATE_API_TOKEN",
+  "REPLICATE_BASE_URL",
+  "FAL_ENABLED",
+  "FAL_API_KEY",
+  "OPENAI_ENABLED",
+  "OPENAI_API_KEY",
+  "OPENAI_BASE_URL",
+  "NEWAPI_ENABLED",
+  "NEWAPI_BASE_URL",
+  "NEWAPI_API_KEY",
 ] as const;
 
-export function computeConfigHash(configs: Record<string, string>): string {
-  return JSON.stringify(AI_CONFIG_HASH_KEYS.map((key) => configs[key] || ""));
+/**
+ * Snapshot relevant AI media env values for cache fingerprinting (accepts overrides for testing).
+ * 读取当前 AI 媒体相关环境变量快照（测试可直接传入覆盖对象计算缓存指纹）。
+ */
+export function computeConfigHash(values?: MediaEnvValues): string {
+  return JSON.stringify(AI_ENV_KEYS.map((key) => (values ? values[key] || "" : readEnv(key))));
 }
 
+/**
+ * Assemble configured AI media providers from runtime environment variables and cache by fingerprint.
+ * 从环境变量装配已启用的 AI 媒体供应商，并按配置指纹复用实例。
+ */
 export async function getAIManager(): Promise<AIManager> {
-  const configs = await getAllConfigs();
-  const hash = computeConfigHash(configs);
+  const hash = computeConfigHash();
 
   if (cachedManager && hash === cachedHash) {
     return cachedManager;
@@ -181,12 +176,14 @@ export async function getAIManager(): Promise<AIManager> {
   if (registeredSaveFiles) {
     manager.setSaveFiles(registeredSaveFiles);
   }
-  const defaultProvider = configs.default_ai_provider || "";
+  const defaultProvider = readEnv("DEFAULT_AI_PROVIDER");
 
-  assembleReplicate(manager, configs, registeredSaveFiles, defaultProvider);
-  assembleOpenAIImage(manager, configs, registeredSaveFiles, defaultProvider);
-  assembleFal(manager, configs, registeredSaveFiles, defaultProvider);
-  assembleNewAPI(manager, configs, registeredSaveFiles, defaultProvider);
+  for (const assembler of MEDIA_PROVIDER_ASSEMBLERS) {
+    const provider = assembler.build(registeredSaveFiles);
+    if (provider) {
+      manager.addProvider(provider, assembler.isDefault(defaultProvider));
+    }
+  }
 
   cachedManager = manager;
   cachedHash = hash;

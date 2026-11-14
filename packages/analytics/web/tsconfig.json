@@ -2,10 +2,8 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    // server.ts 动态导入 @openstarter/api（其传递依赖含 React Email 的 .tsx 模板与 Web 类型），
-    // 源码互引架构下消费方需具备 jsx 与 DOM lib 才能编译依赖侧源码
-    //（与 packages/api、packages/auth 保持一致）。
-    "jsx": "react-jsx",
+    // Cross-package source references require DOM libs for browser script/strategy helpers.
+    // 源码互引架构下需具备 DOM lib 以类型检查浏览器脚本与策略工具。
     "lib": ["ESNext", "DOM", "DOM.Iterable"]
   }
 }

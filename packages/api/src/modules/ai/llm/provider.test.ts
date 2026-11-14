@@ -1,22 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const state = vi.hoisted(() => ({
-  configs: {} as Record<string, string | undefined>,
-}));
+import { getAdapter, getAvailableProviders, type LlmEnvConfig, resolveAdapterSpec } from "./provider";
 
-vi.mock("@openstarter/shared/config", () => ({
-  getAllConfigs: async () => state.configs,
-}));
-
-import { getAdapter, getAvailableProviders, resolveAdapterSpec } from "./provider";
-
-type Configs = Awaited<ReturnType<typeof import("@openstarter/shared/config").getAllConfigs>>;
-
-const cfg = (overrides: Record<string, string | undefined> = {}) => overrides as Configs;
+const cfg = (overrides: LlmEnvConfig = {}): LlmEnvConfig => overrides;
 
 describe("resolveAdapterSpec", () => {
   it("openai：显式密钥 + max_tokens（Chat Completions 端点）", () => {
-    const spec = resolveAdapterSpec("openai", "gpt-4o-mini", cfg({ openai_api_key: "sk-test" }));
+    const spec = resolveAdapterSpec("openai", "gpt-4o-mini", cfg({ OPENAI_API_KEY: "sk-test" }));
     expect(spec).toMatchObject({
       kind: "openai",
       model: "gpt-4o-mini",
@@ -29,13 +19,13 @@ describe("resolveAdapterSpec", () => {
     expect(() => resolveAdapterSpec("openai", "gpt-4o-mini", cfg())).toThrow(/not configured/);
   });
 
-  it("缺 provider 时取 default_llm_provider，缺 model 时用 gpt-4o-mini", () => {
+  it("缺 provider 时取 DEFAULT_LLM_PROVIDER，缺 model 时用 gpt-4o-mini", () => {
     const spec = resolveAdapterSpec(
       undefined,
       undefined,
       cfg({
-        default_llm_provider: "anthropic",
-        anthropic_api_key: "sk-ant",
+        DEFAULT_LLM_PROVIDER: "anthropic",
+        ANTHROPIC_API_KEY: "sk-ant",
       }),
     );
     expect(spec).toMatchObject({
@@ -46,7 +36,7 @@ describe("resolveAdapterSpec", () => {
   });
 
   it("google → gemini，maxOutputTokens", () => {
-    const spec = resolveAdapterSpec("google", "gemini-2.5-flash", cfg({ google_api_key: "g-key" }));
+    const spec = resolveAdapterSpec("google", "gemini-2.5-flash", cfg({ GOOGLE_API_KEY: "g-key" }));
     expect(spec).toMatchObject({ kind: "gemini", maxTokensKey: "maxOutputTokens" });
   });
 
@@ -54,7 +44,7 @@ describe("resolveAdapterSpec", () => {
     const spec = resolveAdapterSpec(
       "openrouter",
       "anthropic/claude",
-      cfg({ openrouter_api_key: "or-key" }),
+      cfg({ OPENROUTER_API_KEY: "or-key" }),
     );
     expect(spec).toMatchObject({
       kind: "compat",
@@ -70,7 +60,7 @@ describe("resolveAdapterSpec", () => {
     const spec = resolveAdapterSpec(
       "ollama",
       "mistral:7b",
-      cfg({ ollama_base_url: "http://gpu:11434/v1" }),
+      cfg({ OLLAMA_BASE_URL: "http://gpu:11434/v1" }),
     );
     expect(spec).toMatchObject({
       kind: "compat",
@@ -91,8 +81,8 @@ describe("resolveAdapterSpec", () => {
       "newapi",
       "gpt-4o",
       cfg({
-        newapi_base_url: "https://newapi.example.com/v1",
-        newapi_api_key: "sk-newapi",
+        NEWAPI_BASE_URL: "https://newapi.example.com/v1",
+        NEWAPI_API_KEY: "sk-newapi",
       }),
     );
     expect(spec).toMatchObject({
@@ -106,13 +96,13 @@ describe("resolveAdapterSpec", () => {
 
   it("newapi 缺 baseURL 或密钥分别抛错", () => {
     expect(() =>
-      resolveAdapterSpec("newapi", "gpt-4o", cfg({ newapi_api_key: "sk-newapi" })),
+      resolveAdapterSpec("newapi", "gpt-4o", cfg({ NEWAPI_API_KEY: "sk-newapi" })),
     ).toThrow(/base URL not configured/);
     expect(() =>
       resolveAdapterSpec(
         "newapi",
         "gpt-4o",
-        cfg({ newapi_base_url: "https://newapi.example.com/v1" }),
+        cfg({ NEWAPI_BASE_URL: "https://newapi.example.com/v1" }),
       ),
     ).toThrow(/not configured/);
   });
@@ -123,26 +113,37 @@ describe("resolveAdapterSpec", () => {
 });
 
 describe("getAvailableProviders", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("newapi 需要 base_url + api_key 同时存在", async () => {
-    state.configs = { newapi_base_url: "https://newapi.example.com/v1" };
+    vi.stubEnv("NEWAPI_BASE_URL", "https://newapi.example.com/v1");
     expect(await getAvailableProviders()).not.toContain("newapi");
 
-    state.configs = {
-      newapi_base_url: "https://newapi.example.com/v1",
-      newapi_api_key: "sk-newapi",
-    };
+    vi.stubEnv("NEWAPI_API_KEY", "sk-newapi");
     expect(await getAvailableProviders()).toContain("newapi");
   });
 });
 
 describe("getAdapter", () => {
+  beforeEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("各供应商均返回 adapter 实例与 maxTokensKey（冒烟）", async () => {
-    state.configs = {
-      openai_api_key: "k",
-      anthropic_api_key: "k",
-      google_api_key: "k",
-      openrouter_api_key: "k",
-    };
+    vi.stubEnv("OPENAI_API_KEY", "k");
+    vi.stubEnv("ANTHROPIC_API_KEY", "k");
+    vi.stubEnv("GOOGLE_API_KEY", "k");
+    vi.stubEnv("OPENROUTER_API_KEY", "k");
     for (const [provider, model] of [
       ["openai", "gpt-4o-mini"],
       ["anthropic", "claude-sonnet-4-5"],

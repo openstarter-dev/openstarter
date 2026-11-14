@@ -1,6 +1,6 @@
 import type { AiTask } from "@openstarter/db/schema";
-import { getAllConfigs } from "@openstarter/shared/config";
 
+import { readEnv } from "../../../lib/env";
 import { findModelByProviderAndId } from "../catalog/service";
 import {
   type AIDispatchResult,
@@ -48,9 +48,9 @@ export async function resolveTaskCostCredits(
     }
   }
 
-  const configs = await getAllConfigs();
-  const raw = configs[`ai_credits_cost_${mediaType}`] ?? configs.ai_credits_cost;
-  const parsed = Number.parseInt(raw ?? "", 10);
+  const raw =
+    readEnv(`AI_CREDITS_COST_${mediaType.toUpperCase()}`) || readEnv("AI_CREDITS_COST");
+  const parsed = Number.parseInt(raw, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 

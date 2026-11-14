@@ -66,17 +66,6 @@ vi.mock("@openstarter/billing-web", () => {
     grant: state.mockGrant,
     CommissionStatus: { PENDING: "pending", SETTLED: "settled", VOID: "void" },
     REFERRAL_SCENE: "referral",
-    REFERRAL_CONFIG_KEY: "referral",
-    referralConfigSchema: {
-      parse: (data: unknown) => {
-        const d = data as Record<string, unknown>;
-        return {
-          enabled: d.enabled ?? true,
-          defaultRate: typeof d.defaultRate === "number" ? d.defaultRate : 1000,
-          minSettleCredits: typeof d.minSettleCredits === "number" ? d.minSettleCredits : 100,
-        };
-      },
-    },
     getReferralConfig: vi.fn(async () => state.savedConfig),
     resolveRate: (custom: number | null | undefined, def: number) => custom ?? def,
     calcCommissionCredits: (base: number, rate: number) => Math.round((base * rate) / 10000),
@@ -144,11 +133,6 @@ const CREATE_COMMISSION_TABLE = `CREATE TABLE commission (
   updated_at INTEGER NOT NULL DEFAULT ${NOW_MS}
 )`;
 
-const CREATE_CONFIG_TABLE = `CREATE TABLE config (
-  name TEXT PRIMARY KEY,
-  value TEXT
-)`;
-
 const CREATE_CREDIT_TABLE = `CREATE TABLE credit (
   id TEXT PRIMARY KEY,
   credits INTEGER NOT NULL,
@@ -183,7 +167,6 @@ beforeAll(async () => {
   await database.run(sql.raw(CREATE_REFERRAL_TABLE));
   await database.run(sql.raw(CREATE_RELATION_TABLE));
   await database.run(sql.raw(CREATE_COMMISSION_TABLE));
-  await database.run(sql.raw(CREATE_CONFIG_TABLE));
   await database.run(sql.raw(CREATE_CREDIT_TABLE));
 
   state.database = database;
@@ -201,7 +184,6 @@ beforeEach(async () => {
   if (state.database) {
     const drizzleSql = (await import("drizzle-orm")).sql;
     await state.database.run(drizzleSql.raw("DELETE FROM credit"));
-    await state.database.run(drizzleSql.raw("DELETE FROM config"));
     await state.database.run(drizzleSql.raw("DELETE FROM commission"));
     await state.database.run(drizzleSql.raw("DELETE FROM referral_relation"));
     await state.database.run(drizzleSql.raw("DELETE FROM referral"));
@@ -229,26 +211,7 @@ async function insertTestUser(userId: string, email: string) {
 }
 
 describe("admin referral", () => {
-  it("PUT config defaultRate=6000 → 400 (上限 5000)", async () => {
-    const res = await request("/config", {
-      method: "PUT",
-      body: JSON.stringify({ enabled: true, defaultRate: 6000, minSettleCredits: 100 }),
-    });
-    expect(res.status).toBe(400);
-  });
-
-  it("PUT config valid → 200", async () => {
-    const res = await request("/config", {
-      method: "PUT",
-      body: JSON.stringify({ enabled: true, defaultRate: 1500, minSettleCredits: 100 }),
-    });
-    expect(res.status).toBe(200);
-    const body = (await res.json()) as { code: number };
-    expect(body.code).toBe(0);
-    state.savedConfig = { enabled: true, defaultRate: 1500, minSettleCredits: 100 };
-  });
-
-  it("GET config → 返回当前配置", async () => {
+  it("GET config → 返回当前静态/环境变量配置", async () => {
     const res = await request("/config");
     expect(res.status).toBe(200);
     const body = (await res.json()) as {

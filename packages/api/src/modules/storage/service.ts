@@ -1,6 +1,6 @@
 import { Buffer } from "node:buffer";
-import { getAllConfigs } from "@openstarter/shared/config";
 import { md5 } from "@openstarter/shared/hash";
+import { readPositiveNumberEnv } from "../../lib/env";
 import { StorageUploadError, UploadLimitError } from "./errors";
 import { getStorage } from "./manager";
 
@@ -102,10 +102,12 @@ export interface UploadBatchResult {
   urls: string[];
 }
 
+/**
+ * Resolve maximum inline-image upload size in KB from `INLINE_IMAGE_MAX_KB` env var.
+ * 从环境变量 `INLINE_IMAGE_MAX_KB` 解析内联图片体积上限（KB），默认 2048 KB。
+ */
 export async function resolveUploadLimitKb(): Promise<number> {
-  const configs = await getAllConfigs();
-  const raw = Number(configs.inline_image_max_kb);
-  return Number.isFinite(raw) && raw > 0 ? raw : DEFAULT_MAX_KB;
+  return readPositiveNumberEnv("INLINE_IMAGE_MAX_KB", DEFAULT_MAX_KB);
 }
 
 export async function uploadImages(inputs: UploadInput[]): Promise<UploadBatchResult> {

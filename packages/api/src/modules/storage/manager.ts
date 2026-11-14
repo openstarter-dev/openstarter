@@ -1,4 +1,4 @@
-import { getAllConfigs } from "@openstarter/shared/config";
+import { readEnv } from "../../lib/env";
 import { createR2Provider } from "./r2";
 import { createS3Provider } from "./s3";
 import type {
@@ -65,82 +65,86 @@ let cachedManager: StorageManager | null = null;
 let cachedHash = "";
 let hasCache = false;
 
-function isS3Configured(configs: Record<string, string>): boolean {
-  return Boolean(
-    configs.storage_endpoint &&
-    configs.storage_access_key &&
-    configs.storage_secret_key &&
-    configs.storage_bucket,
-  );
-}
+const STORAGE_ENV_KEYS = [
+  "STORAGE_ENDPOINT",
+  "STORAGE_REGION",
+  "STORAGE_ACCESS_KEY",
+  "STORAGE_SECRET_KEY",
+  "STORAGE_BUCKET",
+  "STORAGE_PUBLIC_DOMAIN",
+  "R2_ACCOUNT_ID",
+  "R2_ACCESS_KEY",
+  "R2_SECRET_KEY",
+  "R2_BUCKET_NAME",
+  "R2_UPLOAD_PATH",
+  "R2_ENDPOINT",
+  "R2_DOMAIN",
+] as const;
 
-function isR2Configured(configs: Record<string, string>): boolean {
-  return Boolean(configs.r2_access_key && configs.r2_secret_key && configs.r2_bucket_name);
-}
+type StorageAssembler = () => StorageProvider | null;
 
-function assembleS3(manager: StorageManager, configs: Record<string, string>): void {
-  if (!isS3Configured(configs)) {
-    return;
-  }
-  manager.addProvider(
-    createS3Provider({
-      endpoint: configs.storage_endpoint || "",
-      region: configs.storage_region || DEFAULT_R2_REGION,
-      accessKeyId: configs.storage_access_key || "",
-      secretAccessKey: configs.storage_secret_key || "",
-      bucket: configs.storage_bucket || "",
-      publicDomain: configs.storage_public_domain || undefined,
-    }),
-  );
-}
-
-function assembleR2(manager: StorageManager, configs: Record<string, string>): void {
-  if (!isR2Configured(configs)) {
-    return;
-  }
-  manager.addProvider(
-    createR2Provider({
-      accountId: configs.r2_account_id || undefined,
-      accessKeyId: configs.r2_access_key || "",
-      secretAccessKey: configs.r2_secret_key || "",
-      bucket: configs.r2_bucket_name || "",
-      uploadPath: configs.r2_upload_path || undefined,
+// Declarative storage provider registry; builds S3/R2 only when required credentials are present.
+// 存储渠道注册表；仅当必需凭证环境变量齐备时装配 S3/R2 实例。
+const STORAGE_ASSEMBLERS: readonly StorageAssembler[] = [
+  () => {
+    const endpoint = readEnv("STORAGE_ENDPOINT");
+    const accessKeyId = readEnv("STORAGE_ACCESS_KEY");
+    const secretAccessKey = readEnv("STORAGE_SECRET_KEY");
+    const bucket = readEnv("STORAGE_BUCKET");
+    if (!(endpoint && accessKeyId && secretAccessKey && bucket)) {
+      return null;
+    }
+    return createS3Provider({
+      endpoint,
+      region: readEnv("STORAGE_REGION") || DEFAULT_R2_REGION,
+      accessKeyId,
+      secretAccessKey,
+      bucket,
+      publicDomain: readEnv("STORAGE_PUBLIC_DOMAIN") || undefined,
+    });
+  },
+  () => {
+    const accessKeyId = readEnv("R2_ACCESS_KEY");
+    const secretAccessKey = readEnv("R2_SECRET_KEY");
+    const bucket = readEnv("R2_BUCKET_NAME");
+    if (!(accessKeyId && secretAccessKey && bucket)) {
+      return null;
+    }
+    return createR2Provider({
+      accountId: readEnv("R2_ACCOUNT_ID") || undefined,
+      accessKeyId,
+      secretAccessKey,
+      bucket,
+      uploadPath: readEnv("R2_UPLOAD_PATH") || undefined,
       region: DEFAULT_R2_REGION,
-      endpoint: configs.r2_endpoint || undefined,
-      publicDomain: configs.r2_domain || undefined,
-    }),
-  );
+      endpoint: readEnv("R2_ENDPOINT") || undefined,
+      publicDomain: readEnv("R2_DOMAIN") || undefined,
+    });
+  },
+];
+
+function computeEnvHash(): string {
+  return JSON.stringify(STORAGE_ENV_KEYS.map((key) => readEnv(key)));
 }
 
-function computeConfigHash(configs: Record<string, string>): string {
-  return JSON.stringify([
-    configs.storage_endpoint || "",
-    configs.storage_region || "",
-    configs.storage_access_key || "",
-    configs.storage_secret_key || "",
-    configs.storage_bucket || "",
-    configs.storage_public_domain || "",
-    configs.r2_account_id || "",
-    configs.r2_access_key || "",
-    configs.r2_secret_key || "",
-    configs.r2_bucket_name || "",
-    configs.r2_upload_path || "",
-    configs.r2_endpoint || "",
-    configs.r2_domain || "",
-  ]);
-}
-
+/**
+ * Assemble configured storage providers from runtime environment variables with fingerprint cache.
+ * 从运行时环境变量装配存储渠道，并按配置指纹缓存管理器实例。
+ */
 export async function getStorage(): Promise<StorageManager | null> {
-  const configs = await getAllConfigs();
-  const hash = computeConfigHash(configs);
+  const hash = computeEnvHash();
 
   if (hasCache && hash === cachedHash) {
     return cachedManager;
   }
 
   const manager = new StorageManager();
-  assembleS3(manager, configs);
-  assembleR2(manager, configs);
+  for (const build of STORAGE_ASSEMBLERS) {
+    const provider = build();
+    if (provider) {
+      manager.addProvider(provider);
+    }
+  }
   const result = manager.getProviderNames().length > 0 ? manager : null;
 
   cachedManager = result;

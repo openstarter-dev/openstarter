@@ -15,5 +15,3 @@ export const inviteBatchBody = z.object({
   note: z.string().optional(),
   trialDays: z.number().int().min(0).optional(),
 });
-
-export const saveConfigBody = z.record(z.string(), z.string());

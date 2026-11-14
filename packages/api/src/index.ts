@@ -11,7 +11,6 @@ import { aiModelsRouter } from "./modules/ai/catalog/router";
 import { aiRouter } from "./modules/ai/media/router";
 import { llmRouter } from "./modules/ai/llm";
 import { billingRouter } from "./modules/billing/router";
-import { configRouter } from "./modules/config/router";
 import { contentRouter } from "./modules/content/router";
 import { demoRouter } from "./modules/demo/router";
 import { mcpRouter } from "./modules/mcp";
@@ -41,7 +40,6 @@ api.on(["POST", "GET"], "/auth/*", (c) => createAuth().handler(c.req.raw));
 
 const routes = api
   .route("/", statusRouter)
-  .route("/", configRouter)
   .route("/", userRouter)
   .route("/", demoRouter)
   .route("/", billingRouter)

@@ -8,9 +8,6 @@
     "./scripts": {
       "default": "./src/scripts.ts"
     },
-    "./server": {
-      "default": "./src/server.ts"
-    },
     "./server-track": {
       "default": "./src/server-track.ts"
     }
@@ -21,9 +18,7 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@openstarter/analytics": "workspace:*",
-    "@openstarter/api": "workspace:*",
-    "hono": "catalog:"
+    "@openstarter/analytics": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:",

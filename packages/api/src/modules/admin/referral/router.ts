@@ -7,7 +7,6 @@ import {
   commissionsQuery,
   manualCreateBody,
   rateBody,
-  referralConfigBody,
 } from "../../../schema/admin/referral";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePermission } from "../../../middleware/rbac";
@@ -17,7 +16,6 @@ import {
   listCommissions,
   listRelations,
   manualCreateCommission,
-  saveReferralConfig,
   setCustomRate,
   settleCommission,
   voidCommission,
@@ -28,18 +26,10 @@ const PERMISSION_ADMIN = "admin.*";
 export const referralAdminRouter = new Hono()
   .use(requireAuth)
   .use(requirePermission(PERMISSION_ADMIN))
-  // ── 配置 ─────────────────────────────────────────────────────────────────────
+  // ── 静态分销规则配置读取 ──────────────────────────────────────────────────────
   .get("/config", async (c) => {
     const result = await getReferralConfigForAdmin();
     return c.json(respData(result.data));
-  })
-  .put("/config", zValidator("json", referralConfigBody), async (c) => {
-    const body = c.req.valid("json");
-    const result = await saveReferralConfig(body);
-    if (!result.ok) {
-      return c.json(respErr(result.error ?? "save_failed"), 422);
-    }
-    return c.json(respOk());
   })
   // ── 佣金管理 ────────────────────────────────────────────────────────────────
   .get("/commissions", zValidator("query", commissionsQuery), async (c) => {

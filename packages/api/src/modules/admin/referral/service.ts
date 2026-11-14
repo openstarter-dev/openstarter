@@ -1,17 +1,15 @@
 import { and, count, desc, eq } from "drizzle-orm";
-import type { z } from "zod";
 
 import {
   CommissionStatus,
   getReferralConfig,
-  REFERRAL_CONFIG_KEY,
-  referralConfigSchema,
+  type ReferralConfig,
 } from "@openstarter/billing-web";
 import { grant } from "@openstarter/billing-web";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
 
-import { commission, config, referral, referralRelation } from "@openstarter/db/schema";
+import { commission, referral, referralRelation } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 
 import { manualCreateBody } from "../../../schema/admin/referral";
@@ -215,26 +213,16 @@ export async function listRelations(params: ListRelationsParams): Promise<ListRe
 }
 
 
+/**
+ * Read active static/env referral configuration for admin inspection.
+ * 读取当前生效的静态/环境变量分销规则配置供管理端查看。
+ */
 export async function getReferralConfigForAdmin(): Promise<ReferralConfigResult> {
   const cfg = await getReferralConfig();
   return { ok: true, data: cfg };
 }
 
-export async function saveReferralConfig(input: unknown): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const parsed = referralConfigSchema.parse(input);
-    const value = JSON.stringify(parsed);
-    await db()
-      .insert(config)
-      .values({ name: REFERRAL_CONFIG_KEY, value })
-      .onConflictDoUpdate({ target: config.name, set: { value } });
-    return { ok: true };
-  } catch (err) {
-    return { ok: false, error: err instanceof Error ? err.message : "validation_failed" };
-  }
-}
-
 export interface ReferralConfigResult {
   ok: boolean;
-  data: z.infer<typeof referralConfigSchema>;
+  data: ReferralConfig;
 }
