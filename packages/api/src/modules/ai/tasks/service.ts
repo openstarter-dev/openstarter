@@ -93,8 +93,10 @@ export async function createTask(params: CreateTaskParams): Promise<AiTask> {
   for (let attempt = 1; attempt <= MAX_CREATE_TASK_ATTEMPTS; attempt += 1) {
     try {
       return await db().transaction(async (tx) => {
-        await tx.insert(aiTask).values(record);
-
+        // Consume credits first so a rejected charge never leaves an orphan task row
+        // (D1 transactions cannot roll back).
+        // 先扣积分再建任务：扣费被拒时不会遗留孤儿任务（D1 事务无法回滚）
+        let creditId: string | null = null;
         if (costCredits > 0) {
           const result = await consume({
             credits: costCredits,
@@ -108,12 +110,10 @@ export async function createTask(params: CreateTaskParams): Promise<AiTask> {
           if (!(result.success && result.consumedCredit)) {
             throw new InsufficientCreditsError();
           }
-
-          await tx
-            .update(aiTask)
-            .set({ creditId: result.consumedCredit.id })
-            .where(eq(aiTask.id, id));
+          creditId = result.consumedCredit.id;
         }
+
+        await tx.insert(aiTask).values({ ...record, creditId });
 
         const [created] = await tx.select().from(aiTask).where(eq(aiTask.id, id)).limit(1);
         if (!created) {
@@ -150,11 +150,10 @@ export async function updateTask(params: UpdateTaskParams): Promise<void> {
 
   await db().update(aiTask).set(patch).where(eq(aiTask.id, params.id));
 
-  if (
-    params.status === AITaskStatus.FAILED &&
-    existing.status !== AITaskStatus.FAILED &&
-    existing.creditId
-  ) {
+  // revoke() is idempotent (atomic claim), so always call it for failed tasks;
+  // this lets a retry recover when a previous revoke threw after the status was persisted.
+  // revoke() 本身幂等，失败任务总是调用，使上次退款抛错后的重试仍可补退
+  if (params.status === AITaskStatus.FAILED && existing.creditId) {
     await revoke({ consumeCreditId: existing.creditId });
   }
 }

@@ -32,6 +32,9 @@ function withSqliteCompat<T extends object>(dbInstance: T, provider?: string): T
     get(target, prop, receiver) {
       if (prop === "transaction") {
         if (provider === "d1") {
+          // NOTE: D1 has no interactive transactions, so this runs the callback WITHOUT atomicity
+          // or rollback. Callers must stay idempotent / compensate on failure (see billing credits).
+          // 注意：D1 不支持交互式事务，此处不具备原子性与回滚，调用方须自行保证幂等或补偿
           return (callback: unknown): unknown => (callback as (tx: unknown) => unknown)(proxied);
         }
         const original = Reflect.get(target, prop, receiver) as unknown;

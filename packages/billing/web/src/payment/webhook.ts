@@ -160,6 +160,10 @@ export async function handleCheckoutSuccess(
     return;
   }
 
+  // Track the claimed order so a failed settlement can reopen it for provider retries.
+  // 记录已抢占的订单：结算失败时恢复其状态，使渠道重试可再次处理（D1 事务不回滚）
+  let claimed: { id: string; previousStatus: typeof order.$inferSelect.status } | undefined;
+
   await db().transaction(async (tx) => {
     const [existingOrder] = await tx.select().from(order).where(condition).limit(1);
     if (!existingOrder) {
@@ -172,6 +176,24 @@ export async function handleCheckoutSuccess(
     ) {
       return;
     }
+
+    // Atomically claim the order (created/pending -> paid) so concurrent duplicate deliveries
+    // cannot both settle it; only the winner proceeds.
+    // 原子抢占订单（created/pending -> paid）：并发重复投递仅有一个能继续结算
+    const [won] = await tx
+      .update(order)
+      .set({ status: OrderStatus.PAID })
+      .where(
+        and(
+          eq(order.id, existingOrder.id),
+          inArray(order.status, [OrderStatus.CREATED, OrderStatus.PENDING]),
+        ),
+      )
+      .returning({ id: order.id });
+    if (!won) {
+      return;
+    }
+    claimed = { id: existingOrder.id, previousStatus: existingOrder.status };
 
     const { paymentInfo, subscriptionInfo } = session;
 
@@ -259,6 +281,17 @@ export async function handleCheckoutSuccess(
       paymentCurrency: paymentInfo?.paymentCurrency ?? null,
       userId: existingOrder.userId,
     });
+  }).catch(async (error: unknown) => {
+    // Reopen the order (no-op after a real rollback) so the provider's retry can settle it again.
+    // 重新开放订单（真实回滚后为空操作），以便渠道重试再次结算
+    if (claimed) {
+      await db()
+        .update(order)
+        .set({ status: claimed.previousStatus })
+        .where(eq(order.id, claimed.id))
+        .catch(() => undefined);
+    }
+    throw error;
   });
 }
 
