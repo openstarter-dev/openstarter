@@ -257,11 +257,6 @@ export const deviceCode = table(
 );
 
 
-export const config = table("config", {
-  name: text("name").unique().notNull(),
-  value: text("value"),
-});
-
 export const taxonomy = table(
   "taxonomy",
   {
@@ -758,7 +753,6 @@ export type NewSession = typeof session.$inferInsert;
 export type Account = typeof account.$inferSelect;
 export type NewAccount = typeof account.$inferInsert;
 export type Verification = typeof verification.$inferSelect;
-export type Config = typeof config.$inferSelect;
 export type Taxonomy = typeof taxonomy.$inferSelect;
 export type NewTaxonomy = typeof taxonomy.$inferInsert;
 export type Post = typeof post.$inferSelect;
