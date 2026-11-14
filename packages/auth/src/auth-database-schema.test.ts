@@ -17,6 +17,7 @@ const EXPECTED_AUTH_MODELS = [
   "member",
   "organization",
   "passkey",
+  "rateLimit",
   "session",
   "team",
   "teamMember",

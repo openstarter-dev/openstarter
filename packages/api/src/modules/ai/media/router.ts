@@ -4,6 +4,7 @@ import { Hono } from "hono";
 import { zValidator } from "../../../lib/validator";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
+import { rateLimit } from "../../../middleware/rate-limit";
 import { createBody, listQuery } from "../../../schema/ai/media";
 import {
   findTask,
@@ -28,6 +29,7 @@ export const aiRouter = new Hono()
   .post(
     "/ai-tasks",
     requireAuth,
+    rateLimit({ max: 20, scope: "ai-tasks", windowSec: 60 }),
     requirePlan("member"),
     zValidator("json", createBody),
     async (c) => {
@@ -43,6 +45,7 @@ export const aiRouter = new Hono()
   .get(
     "/ai-tasks",
     requireAuth,
+    rateLimit({ max: 20, scope: "ai-tasks", windowSec: 60 }),
     requirePlan("member"),
     zValidator("query", listQuery),
     async (c) => {

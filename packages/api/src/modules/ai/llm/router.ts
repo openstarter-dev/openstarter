@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { zValidator } from "../../../lib/validator";
 import { requireAuth } from "../../../middleware/auth";
 import { requirePlan } from "../../../middleware/plan-gate";
+import { rateLimit } from "../../../middleware/rate-limit";
 import { paginationSchema } from "../../../schema";
 import { createChatBody, sendMessageBody } from "../../../schema/ai/llm";
 
@@ -112,6 +113,7 @@ export const llmRouter = new Hono()
   .get(
     "/llm/chats/:id/messages",
     requireAuth,
+    rateLimit({ max: 30, scope: "llm-messages", windowSec: 60 }),
     requirePlan("member"),
     zValidator("query", paginationSchema),
     async (c) => {
@@ -138,6 +140,7 @@ export const llmRouter = new Hono()
   .post(
     "/llm/chats/:id/messages",
     requireAuth,
+    rateLimit({ max: 30, scope: "llm-messages", windowSec: 60 }),
     requirePlan("member"),
     zValidator("json", sendMessageBody),
     async (c) => {

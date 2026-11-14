@@ -342,6 +342,9 @@ export const auth = betterAuth({
   rateLimit: {
     enabled: env.NODE_ENV !== NodeEnv.TEST,
     max: 100,
+    // Persist counters in the DB (rate_limit table) so limits hold across isolates/instances
+    // 计数持久化到数据库（rate_limit 表），多实例/Workers 下限流仍然有效
+    storage: "database",
     window: 60,
   },
   session: {

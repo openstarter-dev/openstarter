@@ -3,6 +3,7 @@ import { Hono } from "hono";
 
 import { zValidator } from "../../../lib/validator";
 import { requireAuth } from "../../../middleware/auth";
+import { rateLimit } from "../../../middleware/rate-limit";
 import { idParam } from "../../../schema";
 import {
   createBody,
@@ -24,27 +25,33 @@ const BAD_REQUEST_STATUS = 400;
 const NOT_FOUND_STATUS = 404;
 
 export const ticketsRouter = new Hono()
-  .post("/", requireAuth, zValidator("json", createBody), async (c) => {
-    const body = c.req.valid("json");
-    const title = body.title.trim();
-    const content = body.content.trim();
-    if (title === "" || content === "") {
-      return c.json(respErr("title and content are required"), BAD_REQUEST_STATUS);
-    }
+  .post(
+    "/",
+    requireAuth,
+    rateLimit({ max: 5, scope: "tickets-create", windowSec: 60 }),
+    zValidator("json", createBody),
+    async (c) => {
+      const body = c.req.valid("json");
+      const title = body.title.trim();
+      const content = body.content.trim();
+      if (title === "" || content === "") {
+        return c.json(respErr("title and content are required"), BAD_REQUEST_STATUS);
+      }
 
-    const attachments = sanitizeAttachments(body.attachments);
-    if (attachments === null) {
-      return c.json(respErr("invalid attachments"), BAD_REQUEST_STATUS);
-    }
+      const attachments = sanitizeAttachments(body.attachments);
+      if (attachments === null) {
+        return c.json(respErr("invalid attachments"), BAD_REQUEST_STATUS);
+      }
 
-    const created = await createTicket({
-      userId: c.get("userId"),
-      title,
-      content,
-      attachments,
-    });
-    return c.json(respData(created));
-  })
+      const created = await createTicket({
+        userId: c.get("userId"),
+        title,
+        content,
+        attachments,
+      });
+      return c.json(respData(created));
+    },
+  )
   .get("/", requireAuth, zValidator("query", listQuery), async (c) => {
     const { page, pageSize, status, keyword } = c.req.valid("query");
     const { items, total } = await listUserTickets({
@@ -68,6 +75,7 @@ export const ticketsRouter = new Hono()
   .post(
     "/:id/messages",
     requireAuth,
+    rateLimit({ max: 20, scope: "tickets-reply", windowSec: 60 }),
     zValidator("param", idParam),
     zValidator("json", replyBody),
     async (c) => {
