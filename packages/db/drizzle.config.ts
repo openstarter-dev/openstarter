@@ -1,4 +1,4 @@
-import { buildConfigFor, loadWebEnv, resolveDbUrl } from "./src/config/drizzle.shared";
+import { buildConfigFor, loadWebEnv, resolveDbUrl } from "./drizzle.shared";
 
 loadWebEnv();
 

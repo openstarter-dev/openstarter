@@ -11,12 +11,6 @@
     "./server": {
       "default": "./src/server.ts"
     },
-    "./types": {
-      "default": "./src/types.ts"
-    },
-    "./env": {
-      "default": "./src/config/env.ts"
-    },
     "./testing": {
       "default": "./src/testing/index.ts"
     }
@@ -34,13 +28,10 @@
   "dependencies": {
     "@libsql/client": "0.15.15",
     "dotenv": "catalog:",
-    "drizzle-orm": "catalog:",
-    "envin": "catalog:",
-    "zod": "catalog:"
+    "drizzle-orm": "catalog:"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.8",
-    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "4.1.10"
   }

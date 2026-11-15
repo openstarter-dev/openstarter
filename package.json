@@ -38,7 +38,6 @@
     "db:studio": "turbo -F @openstarter/db db:studio",
     "db:generate": "turbo -F @openstarter/db db:generate",
     "db:migrate": "turbo -F @openstarter/db db:migrate",
-    "db:local": "turbo -F @openstarter/db db:local",
     "seed:admin": "turbo -F @openstarter/auth seed:admin",
     "gen:package": "node scripts/gen-package.mjs",
     "with-env": "dotenv -e apps/web/.env --"

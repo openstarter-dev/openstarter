@@ -64,9 +64,6 @@
       "cache": false,
       "persistent": true
     },
-    "db:setup": {
-      "cache": false
-    },
     "db:push": {
       "cache": false
     },
@@ -80,21 +77,8 @@
       "cache": false,
       "persistent": true
     },
-    "db:local": {
-      "cache": false
-    },
-    "db:generate:prod": {
-      "cache": false
-    },
-    "db:push:prod": {
-      "cache": false
-    },
     "db:migrate:prod": {
       "cache": false
-    },
-    "db:studio:prod": {
-      "cache": false,
-      "persistent": true
     },
     "seed:admin": {
       "cache": false
@@ -114,8 +98,6 @@
   "globalDependencies": ["apps/web/.env*"],
   "globalEnv": [
     "DATABASE_URL",
-    "DATABASE_PROVIDER",
-    "DATABASE_AUTH_TOKEN",
     "VITE_APP_URL",
     "VITE_GOOGLE_CLIENT_ID",
     "VITE_GITHUB_ENABLED",

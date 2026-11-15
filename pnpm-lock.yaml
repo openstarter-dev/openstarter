@@ -939,19 +939,10 @@ importers:
       drizzle-orm:
         specifier: 'catalog:'
         version: 0.45.2(@cloudflare/workers-types@4.20260628.1)(@libsql/client@0.15.15)(@opentelemetry/api@1.9.1)(kysely@0.28.17)(mysql2@3.22.6(@types/node@26.0.1))(postgres@3.4.9)
-      envin:
-        specifier: 'catalog:'
-        version: 1.2.0(arktype@2.2.3)(typescript@6.0.3)(zod@4.4.3)
-      zod:
-        specifier: 'catalog:'
-        version: 4.4.3
     devDependencies:
       drizzle-kit:
         specifier: ^0.31.8
         version: 0.31.10
-      fast-check:
-        specifier: 'catalog:'
-        version: 4.9.0
       typescript:
         specifier: 'catalog:'
         version: 6.0.3

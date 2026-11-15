@@ -158,10 +158,10 @@ is the production counterpart (same keys, production values): a checklist for
 are intentionally unused — the server runtime and the other apps only read `.env`.
 Every entry point loads it itself — there is no global env wrapper:
 
-- `apps/web` — Vite for the client + `dotenv/config` in `packages/db` (cwd =
-  `apps/web`) for the server runtime
-- `packages/db` — `drizzle.shared.ts` (`loadWebEnv`) for drizzle-kit, and
-  `scripts/setup-schema.mjs` for the active schema dialect
+- `apps/web` — Vite for the client + `dotenv/config` in `packages/db`
+  (`src/server.ts`, cwd = `apps/web`) for the server runtime
+- `packages/db` — `drizzle.shared.ts` (`loadWebEnv`) for drizzle-kit; the
+  runtime client in `src/server.ts` reads `DATABASE_URL` directly
 - `packages/auth` — `scripts/seed-admin.ts`
 - extension / mobile / mini-app — their build entries (`wxt.config.ts`,
   `scripts/env.mjs`, `config/index.ts`)

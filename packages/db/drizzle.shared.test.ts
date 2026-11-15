@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveFileUrl } from "./resolve-file-url";
+import { resolveFileUrl } from "./drizzle.shared";
 
 describe("resolveFileUrl", () => {
   it("resolves a relative file: URL against the given root", () => {

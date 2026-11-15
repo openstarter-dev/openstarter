@@ -1,2 +1,1 @@
-export { createDb } from "./factory/create-db";
-export type { Database, DbConfig, DbProvider } from "./types";
+export type { Database } from "./server";
