@@ -32,7 +32,6 @@
     "@tanstack/react-store": "^0.11.1",
     "@tanstack/react-table": "^9.2.4",
     "@tanstack/react-virtual": "^3.14.12",
-    "lucide-react": "catalog:",
     "next-themes": "catalog:",
     "qrcode.react": "4.2.0",
     "react": "catalog:",

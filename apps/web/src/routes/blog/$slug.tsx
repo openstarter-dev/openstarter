@@ -1,6 +1,6 @@
 import { m } from "@openstarter/i18n-web/messages";
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@openstarter/ui-web/icons";
 
 import { BlogShell } from "@/components/blog/blog-shell";
 import { NotFound } from "@/components/system/not-found";

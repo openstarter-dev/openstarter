@@ -12,7 +12,7 @@ import {
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { LogOut, Settings, User, UserCog } from "lucide-react";
+import { LogOut, Settings, User, UserCog } from "@openstarter/ui-web/icons";
 import { useState } from "react";
 
 import { ManageAccountDialog } from "@/components/app/manage-account-dialog";

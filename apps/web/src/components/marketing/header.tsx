@@ -1,7 +1,7 @@
 import { Button } from "@openstarter/ui-web/components/button";
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 import { Link } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
+import { Menu, X } from "@openstarter/ui-web/icons";
 import { useCallback, useState } from "react";
 
 import { Drawer } from "@/components/drawer";

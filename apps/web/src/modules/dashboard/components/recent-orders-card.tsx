@@ -20,7 +20,7 @@ import {
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "@openstarter/ui-web/icons";
 
 import { user } from "@/modules/user/lib/api";
 

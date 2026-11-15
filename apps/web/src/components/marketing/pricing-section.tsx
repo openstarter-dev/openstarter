@@ -10,7 +10,7 @@ import {
 import { cn } from "@openstarter/ui-web/lib/utils";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Check } from "lucide-react";
+import { Check } from "@openstarter/ui-web/icons";
 import { lazy, Suspense, useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";

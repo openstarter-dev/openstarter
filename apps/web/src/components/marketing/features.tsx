@@ -1,6 +1,6 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@openstarter/ui-web/components/card";
-import type { LucideIcon } from "lucide-react";
-import { ShieldCheck, Sparkles, Zap } from "lucide-react";
+import type { LucideIcon } from "@openstarter/ui-web/icons";
+import { ShieldCheck, Sparkles, Zap } from "@openstarter/ui-web/icons";
 
 interface Feature {
   description: string;

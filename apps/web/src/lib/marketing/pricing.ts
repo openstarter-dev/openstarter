@@ -1,5 +1,5 @@
-import { Building2, Rocket, Sparkles } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { Building2, Rocket, Sparkles } from "@openstarter/ui-web/icons";
+import type { LucideIcon } from "@openstarter/ui-web/icons";
 
 export type PricingCheckout = {
   productId: string;

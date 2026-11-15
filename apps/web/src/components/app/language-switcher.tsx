@@ -6,7 +6,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@openstarter/ui-web/components/dropdown-menu";
-import { Globe } from "lucide-react";
+import { Globe } from "@openstarter/ui-web/icons";
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "English" },

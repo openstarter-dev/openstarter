@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Github, MessageCircle, Twitter } from "lucide-react";
+import { Github, MessageCircle, Twitter } from "@openstarter/ui-web/icons";
 
 import { BRAND_NAME, BRAND_TAGLINE, COPYRIGHT_YEAR_START, SOCIAL_LINKS } from "@/lib/branding";
 

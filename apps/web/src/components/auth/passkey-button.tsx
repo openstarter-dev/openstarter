@@ -1,6 +1,6 @@
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
-import { Fingerprint } from "lucide-react";
+import { Fingerprint } from "@openstarter/ui-web/icons";
 import { useState } from "react";
 import { toast } from "sonner";
 

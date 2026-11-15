@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./globals.css": "./src/styles/globals.css",
+    "./icons": "./src/icons.ts",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
@@ -24,7 +25,7 @@
     "cmdk": "^1.1.1",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
-    "lucide-react": "catalog:",
+    "lucide-react": "0.546.0",
     "next-themes": "catalog:",
     "radix-ui": "^1.6.7",
     "react": "catalog:",

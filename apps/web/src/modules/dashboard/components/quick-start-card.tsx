@@ -8,8 +8,8 @@ import {
   CardTitle,
 } from "@openstarter/ui-web/components/card";
 import { Link } from "@tanstack/react-router";
-import { ChevronRight, KeyRound, Settings, Sparkles } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ChevronRight, KeyRound, Settings, Sparkles } from "@openstarter/ui-web/icons";
+import type { LucideIcon } from "@openstarter/ui-web/icons";
 
 interface QuickLink {
   href: "/settings" | "/settings/apikeys" | "/pricing";

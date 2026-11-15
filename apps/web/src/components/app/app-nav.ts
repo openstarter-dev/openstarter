@@ -1,6 +1,6 @@
 import { m } from "@openstarter/i18n-web/messages";
-import { LayoutDashboard, Settings, Share2 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { LayoutDashboard, Settings, Share2 } from "@openstarter/ui-web/icons";
+import type { LucideIcon } from "@openstarter/ui-web/icons";
 
 type NavItem = {
   to: "/dashboard" | "/settings" | "/referral";

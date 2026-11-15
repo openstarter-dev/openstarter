@@ -48,9 +48,6 @@ catalogs:
     fast-check:
       specifier: 4.9.0
       version: 4.9.0
-    lucide-react:
-      specifier: 0.546.0
-      version: 0.546.0
     next-themes:
       specifier: 0.4.6
       version: 0.4.6
@@ -577,9 +574,6 @@ importers:
       '@tanstack/react-virtual':
         specifier: ^3.14.12
         version: 3.14.12(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
-      lucide-react:
-        specifier: 'catalog:'
-        version: 0.546.0(react@19.2.7)
       next-themes:
         specifier: 'catalog:'
         version: 0.4.6(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -1162,7 +1156,7 @@ importers:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       lucide-react:
-        specifier: 'catalog:'
+        specifier: 0.546.0
         version: 0.546.0(react@19.2.7)
       next-themes:
         specifier: 'catalog:'

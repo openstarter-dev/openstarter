@@ -1,4 +1,4 @@
-import { ChevronDown } from "lucide-react";
+import { ChevronDown } from "@openstarter/ui-web/icons";
 
 import { FAQ_ENTRIES } from "@/lib/marketing/faq";
 

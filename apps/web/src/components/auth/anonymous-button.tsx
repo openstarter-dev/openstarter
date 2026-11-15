@@ -1,7 +1,7 @@
 import { m } from "@openstarter/i18n-web/messages";
 import { Button } from "@openstarter/ui-web/components/button";
 import { useNavigate } from "@tanstack/react-router";
-import { Ghost } from "lucide-react";
+import { Ghost } from "@openstarter/ui-web/icons";
 import { useState } from "react";
 import { toast } from "sonner";
 

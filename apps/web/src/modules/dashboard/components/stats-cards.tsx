@@ -1,8 +1,15 @@
 import { m } from "@openstarter/i18n-web/messages";
 import { Card, CardContent } from "@openstarter/ui-web/components/card";
 import { Skeleton } from "@openstarter/ui-web/components/skeleton";
-import { Activity, CreditCard, KeyRound, Coins, TrendingUp, Wallet } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import {
+  Activity,
+  CreditCard,
+  KeyRound,
+  Coins,
+  TrendingUp,
+  Wallet,
+} from "@openstarter/ui-web/icons";
+import type { LucideIcon } from "@openstarter/ui-web/icons";
 
 import type { DashboardStats } from "./stats-view";
 

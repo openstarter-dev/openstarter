@@ -2,7 +2,7 @@ import { m } from "@openstarter/i18n-web/messages";
 import { Alert, AlertDescription, AlertTitle } from "@openstarter/ui-web/components/alert";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle } from "@openstarter/ui-web/icons";
 
 import { buildPageTitle } from "@/lib/page-head";
 import { CreditActivityChart } from "@/modules/dashboard/components/credit-activity-chart";
