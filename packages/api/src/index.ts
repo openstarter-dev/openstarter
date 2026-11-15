@@ -1,4 +1,4 @@
-import { createAuth } from "@openstarter/auth";
+import { createAuth } from "./modules/auth/server";
 import { respErr } from "@openstarter/shared";
 import { logger } from "@openstarter/shared/logger";
 import { Hono } from "hono";

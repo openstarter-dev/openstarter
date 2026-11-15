@@ -1,4 +1,4 @@
-import { createInviteCodesBatch, deleteInviteCode, listInviteCodes } from "@openstarter/auth";
+import { createInviteCodesBatch, deleteInviteCode, listInviteCodes } from "../../auth";
 import { respData, respOk, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 

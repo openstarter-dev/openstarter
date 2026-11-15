@@ -4,7 +4,7 @@ import { logger } from "@openstarter/shared/logger";
 import { eq } from "@openstarter/db/orm";
 
 import { readBooleanEnv, readEnv } from "../lib/runtime-env";
-import { isKnownRole } from "./access";
+import { isKnownRole } from "@openstarter/auth/rbac/access";
 
 /**
  * Grant a default RBAC role to a newly registered user when `INITIAL_ROLE_ENABLED=true`.

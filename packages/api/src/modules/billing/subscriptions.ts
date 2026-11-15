@@ -1,4 +1,4 @@
-// @openstarter/billing-web/subscriptions 子域（对齐 ShipAny `modules/subscriptions`）。
+// @openstarter/api/modules/billing/subscriptions 子域（对齐 ShipAny `modules/subscriptions`）。
 //
 // 订阅生命周期管理（R11）。业务侧只依赖此处的服务函数与 `./payment/types` 的
 // 归一化 `SubscriptionStatus`，数据访问统一走 `@openstarter/db`。续费周期的积分

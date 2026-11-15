@@ -6,7 +6,7 @@ import {
   closeBillingTestDatabase,
   createBillingTestDatabase,
   resetBillingTestDatabase,
-} from "./test/billing-test-database";
+} from "../../test/billing-test-database";
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,

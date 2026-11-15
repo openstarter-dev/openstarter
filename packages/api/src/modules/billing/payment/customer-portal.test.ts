@@ -1,4 +1,4 @@
-// @openstarter/billing-web/payment/customer-portal —— Stripe 账单门户测试。
+// @openstarter/api/modules/billing/payment/customer-portal —— Stripe 账单门户测试。
 //
 // 验证 StripeProvider.getPaymentBilling 正确调用 billingPortal.sessions.create
 // 并返回归一化 { billingUrl }。

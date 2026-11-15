@@ -6,10 +6,10 @@ vi.mock("../../middleware/auth", () => ({
 }));
 
 const mapRevenueCatEventMock = vi.hoisted(() => vi.fn());
-vi.mock("@openstarter/billing-web/payment/revenuecat", async () => {
-  const actual = await vi.importActual<
-    typeof import("@openstarter/billing-web/payment/revenuecat")
-  >("@openstarter/billing-web/payment/revenuecat");
+vi.mock("./payment/revenuecat", async () => {
+  const actual = await vi.importActual<typeof import("./payment/revenuecat")>(
+    "./payment/revenuecat",
+  );
   return {
     ...actual,
     mapRevenueCatEvent: (...args: unknown[]) => mapRevenueCatEventMock(...args),

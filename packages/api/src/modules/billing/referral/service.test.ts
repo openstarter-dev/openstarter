@@ -14,7 +14,7 @@ import {
   closeBillingTestDatabase,
   createBillingTestDatabase,
   resetBillingTestDatabase,
-} from "../test/billing-test-database";
+} from "../../../test/billing-test-database";
 
 // ─── 测试夹具状态 ────────────────────────────────────────────────────────────────
 

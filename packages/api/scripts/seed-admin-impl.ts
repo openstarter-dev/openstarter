@@ -1,4 +1,4 @@
-import { PlatformRole } from "@openstarter/auth";
+import { PlatformRole } from "@openstarter/auth/rbac/access";
 import { account, user } from "@openstarter/db/schema";
 
 import { db } from "@openstarter/db/server";

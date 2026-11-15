@@ -13,7 +13,7 @@ export type PermissionChecker = (input: PermissionCheckInput) => Promise<boolean
 // better-auth call, no session re-resolution.
 // 直接用 userId（requireAuth 已从 session 或 API key 解析）判定 —— 单次 better-auth 调用。
 export const checkPlatformPermission: PermissionChecker = async ({ code, userId }) => {
-  const { createAuth } = await import("@openstarter/auth/server");
+  const { createAuth } = await import("../modules/auth/server");
   const permissions = toPermissionRequest(code);
 
   const { success } = await createAuth().api.userHasPermission({

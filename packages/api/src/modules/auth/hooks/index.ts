@@ -1,4 +1,4 @@
-import { grantCreditsForNewUser } from "@openstarter/billing-web";
+import { grantCreditsForNewUser } from "../../billing";
 import { logger } from "@openstarter/shared/logger";
 import type { BetterAuthOptions } from "better-auth";
 import type { OrganizationOptions } from "better-auth/plugins/organization";

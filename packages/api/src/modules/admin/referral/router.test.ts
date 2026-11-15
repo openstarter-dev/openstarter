@@ -9,23 +9,6 @@ const state = vi.hoisted(() => ({
   savedConfig: { enabled: true, defaultRate: 1000, minSettleCredits: 100 },
 }));
 
-vi.mock("@openstarter/auth", () => ({
-  rbac: {
-    matcher: { matchPermission: (_code: string, _codes: string[]) => true },
-    service: { getUserPermissionCodes: async () => ["admin.*"] },
-  },
-  server: {
-    createAuth: () => ({
-      api: {
-        getSession: async (_headers: unknown) => ({ user: { id: "admin-user" } }),
-      },
-    }),
-  },
-  apikeys: {
-    service: { validateApiKey: async () => null },
-  },
-}));
-
 vi.mock("../../../middleware/auth", () => {
   const requireAuth = async (
     c: { set: (k: string, v: unknown) => void; req: { header: (h: string) => string | null } },
@@ -61,7 +44,7 @@ vi.mock("@openstarter/db/server", () => {
   };
 });
 
-vi.mock("@openstarter/billing-web", () => {
+vi.mock("../../billing", () => {
   return {
     grant: state.mockGrant,
     CommissionStatus: { PENDING: "pending", SETTLED: "settled", VOID: "void" },

@@ -4,11 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { requirePlan } from "./plan-gate";
 
-vi.mock("@openstarter/auth", () => ({
+vi.mock("../modules/auth", () => ({
   getUserPlan: vi.fn(),
 }));
 
-import { getUserPlan } from "@openstarter/auth";
+import { getUserPlan } from "../modules/auth";
 const mockGetUserPlan = vi.mocked(getUserPlan);
 
 function buildApp(

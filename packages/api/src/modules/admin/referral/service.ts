@@ -1,7 +1,6 @@
 import { and, count, desc, eq } from "@openstarter/db/orm";
 
-import { CommissionStatus, getReferralConfig, type ReferralConfig } from "@openstarter/billing-web";
-import { grant } from "@openstarter/billing-web";
+import { CommissionStatus, getReferralConfig, grant, type ReferralConfig } from "../../billing";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
 

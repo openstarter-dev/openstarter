@@ -6,7 +6,7 @@
 //   pnpm gen:package storage --tag core      # 显式指定 boundaries 标签
 //   pnpm gen:package storage --dry           # 只打印将生成的文件，不落盘
 //
-// 生成的包遵循仓库既有约定（JIT 包，对齐 packages/shared、packages/billing/web）：
+// 生成的包遵循仓库既有约定（JIT 包，对齐 packages/shared、packages/billing/mobile）：
 //   - exports 以 TS 源码直出（"./*" 通配），由消费方 bundler 编译
 //   - scripts 仅 test / test:coverage / check-types
 //   - devDependencies: typescript（catalog:）

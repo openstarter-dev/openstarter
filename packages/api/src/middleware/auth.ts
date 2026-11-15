@@ -1,4 +1,4 @@
-import { anonymousAuthEnabled, createAuth } from "@openstarter/auth/server";
+import { anonymousAuthEnabled, createAuth } from "../modules/auth/server";
 
 import { type AuthDependencies, createAuthMiddlewares } from "./auth-core";
 

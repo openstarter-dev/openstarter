@@ -46,3 +46,16 @@ export function readPositiveNumberEnv(key: string, defaultValue: number): number
   const parsed = Number(raw);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : defaultValue;
 }
+
+/**
+ * Parse an integer environment variable, falling back when unset or non-numeric.
+ * 解析整型环境变量，未设置或非数字时回退到默认值。
+ */
+export function readIntEnv(key: string, defaultValue: number): number {
+  const raw = readEnv(key);
+  if (raw === "") {
+    return defaultValue;
+  }
+  const parsed = Number.parseInt(raw, 10);
+  return Number.isNaN(parsed) ? defaultValue : parsed;
+}

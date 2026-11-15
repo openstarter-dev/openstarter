@@ -20,7 +20,7 @@ import {
   closeBillingTestDatabase,
   createBillingTestDatabase,
   resetBillingTestDatabase,
-} from "../test/billing-test-database";
+} from "../../../test/billing-test-database";
 import { OrderStatus } from "./checkout";
 import { PaymentEventType, SubscriptionCycleType } from "./types";
 

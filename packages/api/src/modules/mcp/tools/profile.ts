@@ -1,5 +1,5 @@
-import { getUserPlan } from "@openstarter/auth";
-import { getBalance, getHistory, getSubscriptionStatusView } from "@openstarter/billing-web";
+import { getUserPlan } from "../../auth";
+import { getBalance, getHistory, getSubscriptionStatusView } from "../../billing";
 import { user as userTable } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import type { McpServer } from "@modelcontextprotocol/server";

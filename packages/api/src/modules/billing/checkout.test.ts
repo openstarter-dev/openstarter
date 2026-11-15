@@ -13,10 +13,8 @@ vi.mock("../../middleware/auth", async () => {
 });
 
 const createCheckoutMock = vi.hoisted(() => vi.fn());
-vi.mock("@openstarter/billing-web/payment", async () => {
-  const actual = await vi.importActual<typeof import("@openstarter/billing-web/payment")>(
-    "@openstarter/billing-web/payment",
-  );
+vi.mock("./payment", async () => {
+  const actual = await vi.importActual<typeof import("./payment")>("./payment");
   return {
     ...actual,
     createCheckout: (...args: unknown[]) => createCheckoutMock(...args),
@@ -105,7 +103,7 @@ describe("POST /checkout", () => {
   });
 
   it("maps PaymentProviderUnavailableError to a 400 response", async () => {
-    const { PaymentProviderUnavailableError } = await import("@openstarter/billing-web/payment");
+    const { PaymentProviderUnavailableError } = await import("./payment");
     createCheckoutMock.mockRejectedValue(
       new PaymentProviderUnavailableError("stripe credentials missing"),
     );

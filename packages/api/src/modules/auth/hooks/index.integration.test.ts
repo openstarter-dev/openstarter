@@ -7,7 +7,7 @@ import {
   closeAuthTestDatabase,
   createAuthTestDatabase,
   resetAuthTestDatabase,
-} from "../test/auth-test-database";
+} from "../../../test/auth-test-database";
 import { hooks } from "./index";
 
 const FIXED_NOW = new Date("2026-07-24T00:00:00.000Z");

@@ -2,9 +2,6 @@
   "name": "@openstarter/auth",
   "type": "module",
   "exports": {
-    ".": {
-      "default": "./src/index.ts"
-    },
     "./client/web": {
       "default": "./src/client/web.ts"
     },
@@ -16,29 +13,18 @@
     },
     "./rbac/access": {
       "default": "./src/rbac/access.ts"
-    },
-    "./*": {
-      "default": "./src/*.ts"
     }
   },
   "scripts": {
-    "seed:admin": "pnpm dlx tsx scripts/seed-admin.ts",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@better-auth/api-key": "1.7.22",
-    "@better-auth/drizzle-adapter": "1.7.22",
     "@better-auth/expo": "1.7.22",
     "@better-auth/passkey": "1.7.22",
-    "@openstarter/billing-web": "workspace:*",
-    "@openstarter/db": "workspace:*",
-    "@openstarter/email": "workspace:*",
-    "@openstarter/i18n-web": "workspace:*",
-    "@openstarter/shared": "workspace:*",
-    "better-auth": "1.7.22",
-    "zod": "catalog:"
+    "better-auth": "1.7.22"
   },
   "devDependencies": {
     "typescript": "catalog:",

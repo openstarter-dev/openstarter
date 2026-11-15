@@ -7,7 +7,7 @@ import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
 import { eq } from "@openstarter/db/orm";
 
-import { readBooleanEnv, readIntEnv } from "../env";
+import { readBooleanEnv, readIntEnv } from "../../../lib/env";
 import {
   calcCommissionCredits,
   CommissionStatus,

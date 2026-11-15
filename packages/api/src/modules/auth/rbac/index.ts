@@ -14,5 +14,5 @@ export const roles = {
   member: memberAc,
 } as const;
 
-export * from "./access";
+export * from "@openstarter/auth/rbac/access";
 export * from "./service";

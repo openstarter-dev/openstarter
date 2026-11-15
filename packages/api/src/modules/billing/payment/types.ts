@@ -1,4 +1,4 @@
-// @openstarter/billing-web/payment 渠道抽象与归一化类型（对齐 ShipAny `core/payment/types.ts`）。
+// @openstarter/api/modules/billing/payment 渠道抽象与归一化类型（对齐 ShipAny `core/payment/types.ts`）。
 //
 // 任务 16.1：定义统一的支付渠道抽象接口 `PaymentProvider`、归一化事件枚举
 // `PaymentEventType`，以及结账/会话/订阅等归一化数据结构。所有枚举均以

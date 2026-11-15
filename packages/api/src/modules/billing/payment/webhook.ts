@@ -1,4 +1,4 @@
-// @openstarter/billing-web/payment Webhook 成功编排（对齐 ShipAny `modules/payment/service.ts`
+// @openstarter/api/modules/billing/payment Webhook 成功编排（对齐 ShipAny `modules/payment/service.ts`
 // 的 handleWebhook / handleCheckoutSuccess / handleSubscription*）。
 //
 // 任务 18.2：由 Webhook 路由（packages/api，任务 18.1）在**验签通过后**调用，依归一化

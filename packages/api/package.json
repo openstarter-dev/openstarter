@@ -5,6 +5,9 @@
     ".": {
       "default": "./src/index.ts"
     },
+    "./auth": {
+      "default": "./src/modules/auth/index.ts"
+    },
     "./client": {
       "default": "./src/client/index.ts"
     },
@@ -16,21 +19,29 @@
     }
   },
   "scripts": {
+    "seed:admin": "pnpm dlx tsx scripts/seed-admin.ts",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@better-auth/api-key": "1.7.22",
+    "@better-auth/drizzle-adapter": "1.7.22",
+    "@better-auth/expo": "1.7.22",
+    "@better-auth/passkey": "1.7.22",
     "@hono/zod-validator": "^0.8.0",
     "@modelcontextprotocol/client": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0",
     "@openstarter/auth": "workspace:*",
-    "@openstarter/billing-web": "workspace:*",
     "@openstarter/db": "workspace:*",
+    "@openstarter/email": "workspace:*",
+    "@openstarter/i18n-web": "workspace:*",
     "@openstarter/shared": "workspace:*",
     "@tanstack/query-core": "^5.101.2",
     "aws4fetch": "1.0.20",
+    "better-auth": "1.7.22",
     "hono": "4.13.8",
+    "stripe": "^18.5.0",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -1,4 +1,4 @@
-// @openstarter/billing-web/credits 子域（对齐 ShipAny `modules/credits`）。
+// @openstarter/api/modules/billing/credits 子域（对齐 ShipAny `modules/credits`）。
 //
 // 本文件按阶段 2 任务 14 增量填充。任务 14.1 提供：
 //   - 积分领域词汇（状态 / 交易类型 / 交易场景，均以 `as const` + 联合类型表达，遵循 ultracite 不使用 enum）
@@ -27,7 +27,7 @@ import {
   sum,
 } from "@openstarter/db/orm";
 
-import { readBooleanEnv, readEnv, readIntEnv } from "./env";
+import { readBooleanEnv, readEnv, readIntEnv } from "../../lib/env";
 
 // ─── 领域词汇（Domain vocabulary） ─────────────────────────────────────────────
 

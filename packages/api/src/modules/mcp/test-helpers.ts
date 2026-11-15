@@ -16,7 +16,7 @@ const state = vi.hoisted(() => ({
   currentUserId: "user-1" as string,
 }));
 
-vi.mock("@openstarter/auth", () => ({
+vi.mock("../auth", () => ({
   getUserPlan: vi.fn(async (userId: string) => ({ plan: "none" as const, userId })),
 }));
 

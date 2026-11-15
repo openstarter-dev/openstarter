@@ -5,13 +5,13 @@ import {
   type PaymentEvent,
   type PaymentOrder,
   PaymentProviderUnavailableError,
-} from "@openstarter/billing-web/payment";
+} from "./payment";
 import {
   configureRevenueCatProducts,
   mapRevenueCatEvent,
   SIGNATURE_HEADER,
   verifyRevenueCatWebhook,
-} from "@openstarter/billing-web/payment/revenuecat";
+} from "./payment/revenuecat";
 import { logger } from "@openstarter/shared/logger";
 
 import { readBooleanEnv, readEnv } from "../../lib/env";

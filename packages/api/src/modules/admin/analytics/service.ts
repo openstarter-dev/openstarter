@@ -1,4 +1,4 @@
-import { CreditStatus, CreditTransactionType } from "@openstarter/billing-web/credits";
+import { CreditStatus, CreditTransactionType } from "../../billing/credits";
 import { credit, order, subscription, user } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { and, count, eq, sum } from "@openstarter/db/orm";

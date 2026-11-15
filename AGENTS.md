@@ -30,9 +30,11 @@ openstarter/
 │   └── mini-app/          # Taro (WeChat Mini App)
 │
 ├── packages/              # Shared libraries (published as @openstarter/*)
-│   ├── api/               # Hono RPC backend (see API Architecture below)
-│   ├── auth/              # Better-Auth server + clients (web.ts, mobile.ts)
-│   ├── billing/           # Billing; split by platform into billing/{web,mobile}
+│   ├── api/               # Hono RPC backend — the ONLY package that touches @openstarter/db
+│   │                      # (hosts better-auth server, credits, payment, subscriptions, referral)
+│   ├── auth/              # Better-Auth clients only (client/{web,native,taro}) + rbac/access
+│   ├── billing/           # billing/mobile (Expo RevenueCat/Superwall client); server-side
+│   │                      # billing lives in packages/api (modules/billing)
 │   ├── db/                # Drizzle schema, migrations, seed scripts
 │   ├── email/             # React Email templates + providers (Resend, Cloudflare)
 │   ├── i18n/              # Per-platform i18n
@@ -57,8 +59,11 @@ src/
 ├── schema/                # All Zod validation schemas + domain value vocabularies
 │                          # (mirrors modules/: schema/user.ts, schema/admin/rbac.ts, schema/mcp.ts, ...)
 └── modules/               # Domain modules (routers + services colocated)
-    ├── auth/              # Better-Auth passthrough + custom unlink-account
-    ├── billing/           # Checkout, payment webhooks
+    ├── auth/              # Better-Auth engine (server.ts, env, email callbacks, hooks,
+    │                      # invite codes, rbac service, types) mounted at /api/auth/*
+    ├── billing/           # Checkout + payment providers/webhooks, credits (FIFO),
+    │                      # subscriptions, referral commissioning (billing/referral —
+    │                      # distinct from user-facing modules/referral)
     ├── config/            # Public config endpoint
     ├── storage/           # Image upload (S3/R2)
     ├── mcp/               # MCP server mounted at /api/mcp (read-only + ticket writes)
@@ -162,15 +167,16 @@ build-time `VITE_*` still come from `.env` via Vite. Vite's `.env.development` /
 - `apps/web` — Vite for the client; the server entry (`src/server.ts`, built
   via `@cloudflare/vite-plugin` with `main: @tanstack/react-start/server-entry`)
   sets `__CF_ENV__` from the official `import { env } from "cloudflare:workers"`
-  module BEFORE dynamically importing `@openstarter/api`, because auth
-  initializes its db adapter at module top level. Vite `.env` is loaded for
+  module BEFORE dynamically importing `@openstarter/api`, because the
+  better-auth server (`packages/api/src/modules/auth/server.ts`) initializes
+  its db adapter at module top level. Vite `.env` is loaded for
   `VITE_*` at build time; runtime vars come from wrangler `vars`/secrets and
   `.dev.vars` in dev
 - `packages/db` — `drizzle.shared.ts` (`loadWebEnv`) for drizzle-kit configs;
   the runtime client (`src/server.ts`) is D1-only: it reads the `DB` binding
   from `__CF_ENV__` (workerd request env, or the local one set by
   `initLocalD1()` via wrangler `getPlatformProxy`)
-- `packages/auth` — `scripts/seed-admin.ts` (pure Node; calls `initLocalD1()`)
+- `packages/api` — `scripts/seed-admin.ts` (pure Node; calls `initLocalD1()`)
 - extension / mobile / mini-app — their build entries (`wxt.config.ts`,
   `scripts/env.mjs`, `config/index.ts`)
 
@@ -196,8 +202,9 @@ against in-memory miniflare D1 (`@openstarter/db/testing`). D1 rejects SQL
 
 Extension / mobile / mini-app / cli / desktop read the web app address from
 `apps/web/.env` at build time; `OPENSTARTER_API_URL`
-stays available as an explicit override for CI/deployments. See apps/web and
-packages/auth for app-specific env vars.
+stays available as an explicit override for CI/deployments. See apps/web,
+packages/api (server-side: better-auth, payment providers, credits, referral)
+and packages/auth (client-side) for app-specific env vars.
 
 ## Code Conventions
 
@@ -236,9 +243,14 @@ relative base (`/`) and falls back to an in-process `app.fetch` bridge on the se
 
 ### Better-Auth
 
-- Server setup in `packages/auth/src/auth.ts`
-- Web client in `packages/auth/src/web.ts` (uses fetch/cookies)
-- Mobile client in `packages/auth/src/mobile.ts` (handles RefreshToken lifecycle)
+- Server setup in `packages/api/src/modules/auth/server.ts` (betterAuth() runs
+  at module top level; the api package is the sole db consumer)
+- Web client in `packages/auth/src/client/web.ts` (uses fetch/cookies)
+- Mobile client in `packages/auth/src/client/native.ts` (@better-auth/expo);
+  Taro client in `packages/auth/src/client/taro.ts`
+- Shared access-control definitions in `packages/auth/src/rbac/access.ts`
+  (`@openstarter/auth/rbac/access` — imported by both the api rbac middleware
+  and the web admin client)
 - All OAuth, passkey, 2FA configured at init time
 
 ### Billing Lifecycle
@@ -246,7 +258,7 @@ relative base (`/`) and falls back to an in-process `app.fetch` bridge on the se
 - `order` — one-time purchases
 - `subscription` — recurring (lifecycle: active → canceled → expired)
 - `credit` — points with expiration + consumption history (FIFO)
-- Webhook handlers in `packages/api/src/modules/billing/`
+- Webhook handlers in `packages/api/src/modules/billing/payment/`
 
 ## Recent Optimizations (Phase 2 & 3)
 
@@ -269,7 +281,7 @@ relative base (`/`) and falls back to an in-process `app.fetch` bridge on the se
 
 - **Unit tests** — colocated as `.test.ts` next to source
 - **Property tests** — property tests are colocated as `*.property.test.ts` next to the source they cover, written as plain parameterized tests (no extra libraries)
-- **Coverage** — CI runs `turbo run test:coverage` (single pass, no separate test job). Repo-level thresholds live in the root `vitest.config.ts` and are intentionally low today (they gate against gross regressions, not a quality bar); the long-term goal is 80%+ for critical paths (auth, billing, api). UI-component packages (e.g. `packages/ui/web`) are included in the aggregate but largely untested — exclude or test before raising thresholds.
+- **Coverage** — CI runs `turbo run test:coverage` (single pass, no separate test job). Repo-level thresholds live in the root `vitest.config.ts` and are intentionally low today (they gate against gross regressions, not a quality bar); the long-term goal is 80%+ for critical paths (auth, billing, api — all three suites run in the `packages/api` vitest project since the auth-server/billing-web merge). UI-component packages (e.g. `packages/ui/web`) are included in the aggregate but largely untested — exclude or test before raising thresholds.
 - **docs/** is git-ignored (local-only notes; operations plans included). Do not expect it in CI or a fresh clone.
 
 Run specific test:

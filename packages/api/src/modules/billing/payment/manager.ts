@@ -1,7 +1,7 @@
 // Payment provider manager with declarative env-driven assembly.
 // 支付渠道管理器与基于环境变量的声明式装配。
 
-import { readBooleanEnv, readEnv } from "../env";
+import { readBooleanEnv, readEnv } from "../../../lib/env";
 import { createAlipayProvider } from "./alipay";
 import { createPayPalProvider } from "./paypal";
 import { createStripeProvider } from "./stripe";

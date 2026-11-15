@@ -1,4 +1,4 @@
-import { getUserPlan } from "@openstarter/auth";
+import { getUserPlan } from "../auth";
 import { respData, respErr, respPage } from "@openstarter/shared";
 import { Hono } from "hono";
 
@@ -12,8 +12,8 @@ import {
   getCurrentSubscription,
   getHistory,
   getSubscriptionStatusView,
-} from "@openstarter/billing-web";
-import { getPaymentManager } from "@openstarter/billing-web/payment";
+} from "../billing";
+import { getPaymentManager } from "../billing/payment";
 
 const NOT_FOUND_STATUS = 404;
 const UNPROCESSABLE_STATUS = 422;

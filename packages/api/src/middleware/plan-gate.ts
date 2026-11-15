@@ -1,4 +1,4 @@
-import { getUserPlan, type UserPlan } from "@openstarter/auth";
+import { getUserPlan, type UserPlan } from "../modules/auth";
 import { respErr } from "@openstarter/shared";
 import { createMiddleware } from "hono/factory";
 

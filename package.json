@@ -36,7 +36,7 @@
     "env:init": "node scripts/setup-env.mjs",
     "db:generate": "turbo -F @openstarter/db db:generate",
     "db:migrate": "pnpm --filter web exec wrangler d1 migrations apply DB --local --persist-to .wrangler/state",
-    "seed:admin": "turbo -F @openstarter/auth seed:admin",
+    "seed:admin": "turbo -F @openstarter/api seed:admin",
     "gen:package": "node scripts/gen-package.mjs"
   },
   "devDependencies": {

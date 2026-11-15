@@ -1,5 +1,5 @@
-// Runtime environment readers for @openstarter/auth (Node & Cloudflare Workers).
-// @openstarter/auth 运行时环境变量读取工具（兼容 Node 与 Cloudflare Workers）。
+// Runtime environment readers for the api auth module (Node & Cloudflare Workers).
+// @openstarter/api auth 模块运行时环境变量读取工具（兼容 Node 与 Cloudflare Workers）。
 
 /**
  * Read a runtime environment variable from `process.env` or Cloudflare Worker bindings.

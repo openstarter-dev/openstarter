@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 
 export const getServerSessionFn = createServerFn({ method: "GET" }).handler(async () => {
   const [{ auth }, { getRequestHeaders }] = await Promise.all([
-    import("@openstarter/auth/server"),
+    import("@openstarter/api/auth"),
     import("@tanstack/react-start/server"),
   ]);
 
