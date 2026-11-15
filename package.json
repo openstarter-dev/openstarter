@@ -39,13 +39,11 @@
     "db:generate": "turbo -F @openstarter/db db:generate",
     "db:migrate": "turbo -F @openstarter/db db:migrate",
     "seed:admin": "turbo -F @openstarter/auth seed:admin",
-    "gen:package": "node scripts/gen-package.mjs",
-    "with-env": "dotenv -e apps/web/.env --"
+    "gen:package": "node scripts/gen-package.mjs"
   },
   "devDependencies": {
     "@types/node": "catalog:",
     "@vitest/coverage-v8": "4.1.10",
-    "dotenv-cli": "^11.0.0",
     "jsdom": "29.1.1",
     "oxfmt": "^0.64.0",
     "oxlint": "^1.79.0",

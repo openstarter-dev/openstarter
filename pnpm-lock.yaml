@@ -18,9 +18,6 @@ catalogs:
     dotenv:
       specifier: ^17.2.2
       version: 17.4.2
-    drizzle-orm:
-      specifier: ^0.45.1
-      version: 0.45.2
     react:
       specifier: 19.2.7
       version: 19.2.7
@@ -44,9 +41,6 @@ importers:
       '@vitest/coverage-v8':
         specifier: 4.1.10
         version: 4.1.10(vitest@4.1.10)
-      dotenv-cli:
-        specifier: ^11.0.0
-        version: 11.0.0
       jsdom:
         specifier: 29.1.1
         version: 29.1.1(@noble/hashes@2.2.0)
@@ -744,9 +738,6 @@ importers:
       dotenv:
         specifier: 'catalog:'
         version: 17.4.2
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.45.2(@cloudflare/workers-types@4.20260628.1)(@libsql/client@0.15.15)(@opentelemetry/api@1.9.1)(kysely@0.28.17)(mysql2@3.22.6(@types/node@26.0.1))(postgres@3.4.9)
       zod:
         specifier: 'catalog:'
         version: 4.4.3
@@ -841,7 +832,7 @@ importers:
         specifier: 'catalog:'
         version: 17.4.2
       drizzle-orm:
-        specifier: 'catalog:'
+        specifier: ^0.45.1
         version: 0.45.2(@cloudflare/workers-types@4.20260628.1)(@libsql/client@0.15.15)(@opentelemetry/api@1.9.1)(kysely@0.28.17)(mysql2@3.22.6(@types/node@26.0.1))(postgres@3.4.9)
     devDependencies:
       drizzle-kit:
@@ -9402,16 +9393,8 @@ packages:
     resolution: {integrity: sha512-1gxPBJpI/pcjQhKgIU91II6Wkay+dLcN3M6rf2uwP8hRur3HtQXjVrdAK3sjC0piaEuxzMwjXChcETiJl47lAQ==}
     engines: {node: '>=18'}
 
-  dotenv-cli@11.0.0:
-    resolution: {integrity: sha512-r5pA8idbk7GFWuHEU7trSTflWcdBpQEK+Aw17UrSHjS6CReuhrrPcyC3zcQBPQvhArRHnBo/h6eLH1fkCvNlww==}
-    hasBin: true
-
   dotenv-expand@11.0.7:
     resolution: {integrity: sha512-zIHwmZPRshsCdpMDyVsqGmgyP0yT8GAgXUnkdAoJisxvf33k7yO6OuoKmcTGuXPWSsm8Oh88nZicRLA9Y0rUeA==}
-    engines: {node: '>=12'}
-
-  dotenv-expand@12.0.3:
-    resolution: {integrity: sha512-uc47g4b+4k/M/SeaW1y4OApx+mtLWl92l5LMPP0GNXctZqELk+YGgOPIIC5elYmUH4OuoK3JLhuRUYegeySiFA==}
     engines: {node: '>=12'}
 
   dotenv-expand@13.0.0:
@@ -26234,18 +26217,7 @@ snapshots:
     dependencies:
       type-fest: 4.41.0
 
-  dotenv-cli@11.0.0:
-    dependencies:
-      cross-spawn: 7.0.6
-      dotenv: 17.4.2
-      dotenv-expand: 12.0.3
-      minimist: 1.2.8
-
   dotenv-expand@11.0.7:
-    dependencies:
-      dotenv: 16.6.1
-
-  dotenv-expand@12.0.3:
     dependencies:
       dotenv: 16.6.1
 

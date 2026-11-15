@@ -39,7 +39,6 @@
     "@openstarter/shared": "workspace:*",
     "better-auth": "1.7.22",
     "dotenv": "catalog:",
-    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
