@@ -1,4 +1,10 @@
-import "dotenv/config";
+// Load apps/web/.env (cwd) into process.env for the Node runtime (dev SSR,
+// self-hosted Node); no-op on Cloudflare Workers where env comes from bindings.
+try {
+  process.loadEnvFile();
+} catch {
+  // .env missing or runtime without fs (Workers) — env must come from the real environment.
+}
 
 import { createClient } from "@libsql/client";
 import { drizzle as drizzleD1 } from "drizzle-orm/d1";

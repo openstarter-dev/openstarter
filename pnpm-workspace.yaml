@@ -16,7 +16,6 @@ catalog:
   react-dom: 19.2.7
 
   "@types/node": ^22.13.14
-  dotenv: ^17.2.2
   typescript: ^6
   zod: ^4.1.13
 

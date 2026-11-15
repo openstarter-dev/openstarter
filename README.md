@@ -104,7 +104,6 @@ openstarter/
 │   ├── email/       # React Email templates (7 templates, bilingual)
 │   ├── billing/     # Subscriptions, credits, payment providers
 │   ├── analytics/   # Analytics provider abstraction (web + mobile)
-│   └── ai/          # AI features (scaffold)
 ```
 
 ## Quick Start
@@ -119,11 +118,11 @@ pnpm dev
 ```
 
 `apps/web/.env` is the single environment source for the whole monorepo.
-Every entry point reads it directly — Vite and `dotenv` for the web app,
+Every entry point reads it directly — Vite for the web app, Node's built-in
 `packages/db` for migrations, each app's own build entry for the rest — so no
-global env wrapper is needed. `pnpm with-env <cmd>` is available for manual
-injection, and every app derives its API base URL from `VITE_APP_URL` (falling
-back to `http://localhost:3000`, so local dev needs no value). Better-auth's
+global env wrapper is needed. Every app derives its API base URL from
+`VITE_APP_URL` (falling back to `http://localhost:3000`, so local dev needs no
+value). Better-auth's
 `baseURL`, SSR canonical URLs and email links read that same variable directly
 from `process.env` — there are no aliases.
 

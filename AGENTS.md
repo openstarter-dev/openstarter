@@ -158,16 +158,16 @@ is the production counterpart (same keys, production values): a checklist for
 are intentionally unused — the server runtime and the other apps only read `.env`.
 Every entry point loads it itself — there is no global env wrapper:
 
-- `apps/web` — Vite for the client + `dotenv/config` in `packages/db`
-  (`src/server.ts`, cwd = `apps/web`) for the server runtime
+- `apps/web` — Vite for the client + Node's built-in `process.loadEnvFile()`
+  in `packages/db` (`src/server.ts`, cwd = `apps/web`) for the server runtime;
 - `packages/db` — `drizzle.shared.ts` (`loadWebEnv`) for drizzle-kit; the
   runtime client in `src/server.ts` reads `DATABASE_URL` directly
 - `packages/auth` — `scripts/seed-admin.ts`
 - extension / mobile / mini-app — their build entries (`wxt.config.ts`,
   `scripts/env.mjs`, `config/index.ts`)
-- `pnpm with-env <cmd>` — optional manual injection for ad-hoc commands; no
-  script depends on it. The CLI is a standalone package: pass
-  `OPENSTARTER_API_URL=http://localhost:3000` when running `dev:cli` locally.
+
+The CLI is a standalone package: pass
+`OPENSTARTER_API_URL=http://localhost:3000` when running `dev:cli` locally.
 
 Required variables:
 

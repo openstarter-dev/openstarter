@@ -1,4 +1,6 @@
-import "dotenv/config";
+import { loadWebEnv } from "./drizzle.shared";
+
+loadWebEnv();
 
 function requireEnv(name: string): string {
   const value = process.env[name]?.trim();

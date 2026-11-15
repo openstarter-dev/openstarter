@@ -14,26 +14,31 @@
 // 选中 3 时仅当 mobile 本地未覆盖；真机调试仍应在本机 apps/mobile/.env 填局域网 IP。
 
 import { spawn } from "node:child_process";
-import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { parseEnv } from "node:util";
 
 const mobileDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const monorepoRoot = resolve(mobileDir, "..", "..");
 
-// 用根 hoist 的 dotenv（pnpm catalog: dotenv ^17）。从 mobile 起解析，
-// 走 pnpm 的 .pnpm 链接能命中根的 dotenv，无需在 mobile package.json 显式声明依赖。
-const require = createRequire(import.meta.url);
-// 先取模块文件再动态 import，确保拿到的是同一份 dotenv 实现。
-const dotenvModulePath = require.resolve("dotenv", { paths: [mobileDir] });
-const { config: loadDotenv } = await import(dotenvModulePath);
+function readEnvFile(path) {
+  try {
+    return parseEnv(readFileSync(path, "utf8"));
+  } catch {
+    return {};
+  }
+}
 
-// dotenv v17 的 config() 只在返回对象里给 parsed，不会把键展开到返回对象顶层，
-// 但会把解析到的键写入 process.env（override 默认 false，不覆盖已存在的）。
-// 这里统一从 parsed 取显式来源，避免依赖 process.env 的副作用顺序。
-const mobileParsed = loadDotenv({ path: resolve(mobileDir, ".env"), quiet: true })?.parsed ?? {};
-const webParsed =
-  loadDotenv({ path: resolve(monorepoRoot, "apps", "web", ".env"), quiet: true })?.parsed ?? {};
+const mobileParsed = readEnvFile(resolve(mobileDir, ".env"));
+const webParsed = readEnvFile(resolve(monorepoRoot, "apps", "web", ".env"));
+
+// shell 已有变量与 mobile 的键不会被 web 覆盖。
+for (const parsed of [mobileParsed, webParsed]) {
+  for (const [key, value] of Object.entries(parsed)) {
+    if (!(key in process.env)) process.env[key] = value;
+  }
+}
 
 // process.argv 形如 [nodeBin, /path/to/env.mjs, ...透传参数]，前两项不是用户传入的子命令，
 // 必须 drop 两位。用 [, , ...args] 而非 [, ...args]——后者会误把 env.mjs 自身当子命令 spawn。

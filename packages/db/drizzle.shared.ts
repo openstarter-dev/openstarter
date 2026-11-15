@@ -1,6 +1,5 @@
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { config as loadDotenv } from "dotenv";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { defineConfig, type Config } from "drizzle-kit";
 
@@ -12,7 +11,7 @@ export const webEnvFile = resolve(repoRoot, "apps/web/.env");
 
 export function loadWebEnv(): void {
   if (existsSync(webEnvFile)) {
-    loadDotenv({ path: webEnvFile, quiet: true });
+    process.loadEnvFile(webEnvFile);
   }
 }
 

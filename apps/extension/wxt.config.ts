@@ -1,4 +1,4 @@
-import { createRequire } from "node:module";
+import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
@@ -10,10 +10,9 @@ import { EXTENSION_DEFAULT_LOCALE } from "@openstarter/i18n-extension";
 
 const extensionDir = resolve(fileURLToPath(import.meta.url), "..");
 const webEnvFile = resolve(extensionDir, "..", "web", ".env");
-const require = createRequire(import.meta.url);
-const dotenvPath = require.resolve("dotenv", { paths: [extensionDir] });
-const { config: loadDotenv } = await import(dotenvPath);
-loadDotenv({ path: webEnvFile, quiet: true });
+if (existsSync(webEnvFile)) {
+  process.loadEnvFile(webEnvFile);
+}
 
 const APP_URL_FALLBACK = "http://localhost:3000";
 
