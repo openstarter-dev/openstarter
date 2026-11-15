@@ -1,9 +1,11 @@
 import {
+  createAuthClient,
+  emailOTPClient,
   expoClient,
+  magicLinkClient,
   setupExpoFocusManager,
   setupExpoOnlineManager,
-} from "@better-auth/expo/client";
-import { createAuthClient, emailOTPClient, magicLinkClient } from "@openstarter/auth/client/native";
+} from "@openstarter/auth/client/native";
 import { getItem, getItemAsync, setItem, setItemAsync } from "expo-secure-store";
 
 import { getEnv } from "./env";
