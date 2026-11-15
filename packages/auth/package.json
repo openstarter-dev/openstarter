@@ -40,7 +40,6 @@
     "better-auth": "1.7.22",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
-    "envin": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

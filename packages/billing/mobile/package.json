@@ -19,7 +19,6 @@
     "@openstarter/shared": "workspace:*",
     "@tanstack/react-query": "^5.99.0",
     "dayjs": "^1.11.13",
-    "envin": "catalog:",
     "expo-iap": "4.2.3",
     "expo-linking": "~55.0.17",
     "expo-superwall": "1.0.11",
