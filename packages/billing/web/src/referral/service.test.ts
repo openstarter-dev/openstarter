@@ -1,4 +1,4 @@
-// 分销记账服务测试（db-backed，对齐同包 subscriptions.property.test.ts 的内存库注入模式）。
+// 分销记账服务测试（db-backed，采用内存库注入模式）。
 //
 // 通过 vi.mock("@openstarter/db/server") 将 db() 重定向到内存 sqlite，再走正常 drizzle
 // 查询断言 recordCommission 的记账行为（幂等 / 旁路 / 代理比例 / 关闭开关等）。
