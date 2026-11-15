@@ -34,7 +34,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "fast-check": "catalog:",
     "typescript": "catalog:",
     "vitest": "4.1.10"
   }

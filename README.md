@@ -70,7 +70,7 @@ boring 80% that every SaaS needs but nobody wants to build:
 | Email     | Resend + Cloudflare, React Email                                      |
 | Payments  | Stripe, PayPal, Alipay, WeChat Pay                                    |
 | i18n      | inlang / Paraglide (web, extension)、i18next + react-i18next (mobile) |
-| Testing   | Vitest + fast-check                                                   |
+| Testing   | Vitest                                                   |
 | Linting   | oxlint + oxfmt                                                        |
 
 ## Project Structure

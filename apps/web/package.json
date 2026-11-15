@@ -49,7 +49,6 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^6.0.1",
-    "fast-check": "catalog:",
     "jsdom": "^29.0.2",
     "nitro": "3.0.260603-beta",
     "typescript": "catalog:",

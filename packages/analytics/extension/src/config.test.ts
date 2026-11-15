@@ -1,6 +1,5 @@
 // config 解析测试：构建期 env（VITE_*）→ ExtensionAnalyticsConfig。
-// 键组合语义由单元用例锁定；「任意 shape 不抛错」用参数化用例覆盖（与 mobile 的
-// property 测试同目标，本包不引入 fast-check 依赖）。
+// 键组合语义由单元用例锁定；「任意 shape 不抛错」用参数化用例覆盖。
 
 import { describe, expect, it } from "vitest";
 

@@ -14,7 +14,7 @@ openstarter is a production-ready full-stack SaaS starter built with:
 - **Auth**: Better-Auth with OAuth, passkey, 2FA, organizations
 - **Billing**: Stripe/PayPal/Alipay/WeChat Pay with credit system
 - **i18n**: inlang/Paraglide (web)、@wxt-dev/i18n (extension)、i18next + react-i18next (mobile)
-- **Testing**: Vitest + fast-check
+- **Testing**: Vitest
 - **Linting**: oxlint + oxfmt (Oxc toolchain)
 
 ## Monorepo Structure
@@ -253,7 +253,7 @@ relative base (`/`) and falls back to an in-process `app.fetch` bridge on the se
 ## Testing
 
 - **Unit tests** — colocated as `.test.ts` next to source
-- **Property tests** — use fast-check for complex logic; property tests are colocated as `*.property.test.ts` next to the source they cover
+- **Property tests** — property tests are colocated as `*.property.test.ts` next to the source they cover, written as plain parameterized tests (no extra libraries)
 - **Coverage** — CI runs `turbo run test:coverage` (single pass, no separate test job). Repo-level thresholds live in the root `vitest.config.ts` and are intentionally low today (they gate against gross regressions, not a quality bar); the long-term goal is 80%+ for critical paths (auth, billing, api). UI-component packages (e.g. `packages/ui/web`) are included in the aggregate but largely untested — exclude or test before raising thresholds.
 - **docs/** is git-ignored (local-only notes; operations plans included). Do not expect it in CI or a fresh clone.
 
