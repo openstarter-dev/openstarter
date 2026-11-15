@@ -102,25 +102,6 @@ const CREATE_TABLE_STATEMENTS: readonly string[] = [
     consumed_detail TEXT,
     metadata TEXT
   )`,
-  `CREATE TABLE ai_task (
-    id TEXT PRIMARY KEY,
-    task_no TEXT NOT NULL UNIQUE,
-    user_id TEXT NOT NULL,
-    user_email TEXT,
-    provider TEXT NOT NULL,
-    model TEXT NOT NULL,
-    media_type TEXT NOT NULL,
-    prompt TEXT NOT NULL,
-    options TEXT,
-    status TEXT NOT NULL,
-    result_url TEXT,
-    error TEXT,
-    cost_credits INTEGER NOT NULL DEFAULT 0,
-    credit_id TEXT,
-    created_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
-    updated_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
-    deleted_at INTEGER
-  )`,
   `CREATE TABLE ticket (
     id TEXT PRIMARY KEY,
     ticket_no TEXT NOT NULL UNIQUE,
@@ -205,7 +186,6 @@ const ALL_TABLES = [
   "apikey",
   "ticket_message",
   "ticket",
-  "ai_task",
   "credit",
   "order",
   "subscription",

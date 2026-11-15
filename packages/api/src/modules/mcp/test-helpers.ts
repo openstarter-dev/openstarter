@@ -82,26 +82,6 @@ const RESHAPE_TABLES = [
     updated_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
     deleted_at INTEGER
   )`,
-  `DROP TABLE IF EXISTS ai_task`,
-  `CREATE TABLE ai_task (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    provider TEXT NOT NULL,
-    model TEXT NOT NULL,
-    media_type TEXT NOT NULL,
-    prompt TEXT NOT NULL,
-    status TEXT NOT NULL,
-    scene TEXT NOT NULL DEFAULT '',
-    task_id TEXT,
-    task_info TEXT,
-    task_result TEXT,
-    options TEXT,
-    cost_credits INTEGER NOT NULL DEFAULT 0,
-    credit_id TEXT,
-    created_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
-    updated_at INTEGER NOT NULL DEFAULT ${NOW_EXPR},
-    deleted_at INTEGER
-  )`,
   "DROP TABLE IF EXISTS ticket_message",
   "DROP TABLE IF EXISTS ticket",
   `CREATE TABLE ticket (

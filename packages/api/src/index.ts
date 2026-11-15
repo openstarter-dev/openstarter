@@ -6,11 +6,8 @@ import { HTTPException } from "hono/http-exception";
 import { requestId } from "hono/request-id";
 import { secureHeaders } from "hono/secure-headers";
 
-import { registerAiSaveFiles } from "./modules/ai/tasks";
 import { adminRouter } from "./modules/admin/router";
 import { referralRouter } from "./modules/referral";
-import { aiModelsRouter } from "./modules/ai/catalog/router";
-import { aiRouter } from "./modules/ai/media/router";
 import { billingRouter } from "./modules/billing/router";
 import { contentRouter } from "./modules/content/router";
 import { demoRouter } from "./modules/demo/router";
@@ -19,8 +16,6 @@ import { statusRouter } from "./modules/status/router";
 import { storageRouter } from "./modules/storage/router";
 import { supportRouter } from "./modules/support/router";
 import { userRouter } from "./modules/user/router";
-
-registerAiSaveFiles();
 
 const app = new Hono();
 
@@ -51,8 +46,6 @@ const routes = api
   .route("/", demoRouter)
   .route("/", billingRouter)
   .route("/", storageRouter)
-  .route("/", aiRouter)
-  .route("/", aiModelsRouter)
   .route("/", supportRouter)
   .route("/", contentRouter)
   .route("/", referralRouter)

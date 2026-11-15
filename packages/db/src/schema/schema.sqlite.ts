@@ -504,63 +504,6 @@ export const apikey = table(
   ],
 );
 
-export const aiModel = table(
-  "ai_model",
-  {
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
-    creditPrice: integer("credit_price").notNull().default(0),
-    displayName: text("display_name").notNull(),
-    enabled: integer("enabled", { mode: "boolean" }).default(true).notNull(),
-    id: text("id").primaryKey(),
-    mediaType: text("media_type").notNull(),
-    metadata: text("metadata"),
-    modelId: text("model_id").notNull(),
-    optionsSchema: text("options_schema"),
-    provider: text("provider").notNull(),
-    sortOrder: integer("sort_order").notNull().default(0),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-  },
-  (t) => [
-    index("idx_ai_model_enabled_media").on(t.enabled, t.mediaType, t.sortOrder),
-    uniqueIndex("uq_ai_model_provider_model").on(t.provider, t.modelId),
-  ],
-);
-
-export const aiTask = table(
-  "ai_task",
-  {
-    costCredits: integer("cost_credits").notNull().default(0),
-    createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
-    creditId: text("credit_id"),
-    deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-    id: text("id").primaryKey(),
-    mediaType: text("media_type").notNull(),
-    model: text("model").notNull(),
-    options: text("options"),
-    prompt: text("prompt").notNull(),
-    provider: text("provider").notNull(),
-    scene: text("scene").notNull().default(""),
-    status: text("status").notNull(),
-    taskId: text("task_id"),
-    taskInfo: text("task_info"),
-    taskResult: text("task_result"),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sqliteNowMs)
-      .$onUpdate(() => new Date())
-      .notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
-  },
-  (t) => [
-    index("idx_ai_task_user_media_type").on(t.userId, t.mediaType),
-    index("idx_ai_task_media_type_status").on(t.mediaType, t.status),
-  ],
-);
-
 export const ticket = table(
   "ticket",
   {
@@ -728,10 +671,6 @@ export type Credit = typeof credit.$inferSelect;
 export type NewCredit = typeof credit.$inferInsert;
 export type Apikey = typeof apikey.$inferSelect;
 export type NewApikey = typeof apikey.$inferInsert;
-export type AiModel = typeof aiModel.$inferSelect;
-export type NewAiModel = typeof aiModel.$inferInsert;
-export type AiTask = typeof aiTask.$inferSelect;
-export type NewAiTask = typeof aiTask.$inferInsert;
 export type Ticket = typeof ticket.$inferSelect;
 export type NewTicket = typeof ticket.$inferInsert;
 export type TicketMessage = typeof ticketMessage.$inferSelect;

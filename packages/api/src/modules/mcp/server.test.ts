@@ -16,7 +16,6 @@ const TOOL_NAMES = [
   "openstarter_get_subscription",
   "openstarter_list_credit_history",
   "openstarter_list_orders",
-  "openstarter_list_ai_tasks",
   "openstarter_list_tickets",
   "openstarter_get_ticket_messages",
   "openstarter_create_ticket",
@@ -60,17 +59,6 @@ const insertCredit = async (
   `);
 };
 
-const insertAiTask = async (
-  database: Database,
-  overrides: { id: string; userId: string; status: string; mediaType: string; prompt: string },
-) => {
-  await database.run(sql`
-    INSERT INTO ai_task (id, user_id, provider, model, media_type, prompt, status, cost_credits)
-    VALUES (${overrides.id}, ${overrides.userId}, 'replicate', 'flux-1',
-            ${overrides.mediaType}, ${overrides.prompt}, ${overrides.status}, 10)
-  `);
-};
-
 describe("mcp module", () => {
   let harness: McpTestHarness;
 
@@ -102,7 +90,7 @@ describe("mcp module", () => {
       (tool) =>
         tool.name !== "openstarter_create_ticket" && tool.name !== "openstarter_reply_ticket",
     );
-    expect(reads.length).toBe(7);
+    expect(reads.length).toBe(6);
     const write = tools.find((tool) => tool.name === "openstarter_create_ticket");
     expect(write?.description).toContain("support ticket");
   });
@@ -183,31 +171,6 @@ describe("mcp module", () => {
     expect(result.isError).toBeFalsy();
     const payload = parseStructured(result) as { items: Array<{ credits: number }> };
     expect(payload.items).toHaveLength(2);
-  });
-
-  it("list_ai_tasks filters by status", async () => {
-    const database = getDatabase();
-    await insertUser(database, { id: "user-1" });
-    await insertAiTask(database, {
-      id: "t1",
-      userId: "user-1",
-      status: "success",
-      mediaType: "image",
-      prompt: "a cat",
-    });
-    await insertAiTask(database, {
-      id: "t2",
-      userId: "user-1",
-      status: "failed",
-      mediaType: "image",
-      prompt: "a dog",
-    });
-
-    const result = await harness.callTool("openstarter_list_ai_tasks", { status: "success" });
-    expect(result.isError).toBeFalsy();
-    const payload = parseStructured(result) as { total: number; items: Array<{ status: string }> };
-    expect(payload.total).toBe(1);
-    expect(payload.items[0]?.status).toBe("success");
   });
 
   it("ticket write tools persist through the tickets service as role=user", async () => {

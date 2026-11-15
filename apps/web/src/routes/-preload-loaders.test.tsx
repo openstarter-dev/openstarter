@@ -10,7 +10,6 @@ import { Route as PaymentsRoute } from "./_app/settings/payments";
 import { Route as SessionsRoute } from "./_app/settings/sessions";
 import { Route as TicketsRoute } from "./_app/settings/tickets";
 import { Route as AdminIndexRoute } from "./admin/index";
-import { Route as AdminAiModelsRoute } from "./admin/ai-models";
 import { Route as AdminCreditsRoute } from "./admin/credits";
 import { Route as AdminOrdersRoute } from "./admin/orders";
 import { Route as AdminSubscriptionsRoute } from "./admin/subscriptions";
@@ -59,11 +58,6 @@ const ROUTE_QUERY_KEYS: Record<
     deps: { page: 1 },
     keys: [["admin", "credits", 1]],
     route: AdminCreditsRoute,
-  },
-  "/admin/ai-models": {
-    deps: { page: 1 },
-    keys: [["admin", "ai-models", 1]],
-    route: AdminAiModelsRoute,
   },
 };
 

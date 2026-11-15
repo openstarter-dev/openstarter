@@ -1,8 +1,7 @@
 import type { McpServer } from "@modelcontextprotocol/server";
 
-import { getTasks } from "../../ai/tasks/service";
 import { listUserOrders } from "../../user/service";
-import { listAiTasksSchema, mcpPaginationSchema } from "../../../schema/mcp";
+import { mcpPaginationSchema } from "../../../schema/mcp";
 import { jsonContent, resolveUserId, toIsoString, withToolError } from "../shared";
 
 const READ_ONLY = {
@@ -37,42 +36,6 @@ export function registerCommerceTools(server: McpServer): void {
             orderNo: item.orderNo,
             paymentProvider: item.paymentProvider,
             productName: item.productName,
-            status: item.status,
-          })),
-          page: args.page,
-          pageSize: args.pageSize,
-          total,
-        });
-      }),
-  );
-
-  server.registerTool(
-    "openstarter_list_ai_tasks",
-    {
-      description:
-        "List the authenticated user's AI generation tasks, newest first, with optional mediaType/status filters and pagination. Each entry includes prompt, model, status, and cost in credits.",
-      inputSchema: listAiTasksSchema,
-      annotations: READ_ONLY,
-    },
-    (args, extra) =>
-      withToolError(async () => {
-        const userId = resolveUserId(extra);
-        const { items, total } = await getTasks({
-          mediaType: args.mediaType,
-          page: args.page,
-          pageSize: args.pageSize,
-          status: args.status,
-          userId,
-        });
-        return jsonContent({
-          items: items.map((item) => ({
-            costCredits: item.costCredits,
-            createdAt: toIsoString(item.createdAt),
-            id: item.id,
-            mediaType: item.mediaType,
-            model: item.model,
-            prompt: item.prompt,
-            provider: item.provider,
             status: item.status,
           })),
           page: args.page,

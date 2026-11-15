@@ -40,7 +40,6 @@ openstarter/
 │   │   ├── extension/     # @openstarter/i18n-extension (extension, @wxt-dev/i18n)
 │   │   └── mobile/        # @openstarter/i18n-mobile (mobile-specific, i18next)
 │   ├── shared/            # Constants, validators, utilities, logger, config
-│   ├── ai/                # AI providers; split by platform into ai/{web,mobile}
 │   ├── analytics/         # Event tracking; one type contract (shared) + per-platform impls analytics/{web,mobile,extension} (mobile: OpenPanel + GA4 Firebase; web: gtag + Plausible; extension: Plausible HTTP)
 │   └── ui/                # shadcn components + Tailwind; split by platform into ui/{web,mobile}
 │
@@ -58,10 +57,6 @@ src/
 ├── schema/                # All Zod validation schemas + domain value vocabularies
 │                          # (mirrors modules/: schema/user.ts, schema/admin/rbac.ts, schema/mcp.ts, ...)
 └── modules/               # Domain modules (routers + services colocated)
-    ├── ai/                # AI domain (media generation + model catalog + tasks)
-    │   ├── media/         # Image/video providers (Replicate / Fal / OpenAI / New API)
-    │   ├── catalog/       # Model catalog (CRUD + availability by media type)
-    │   └── tasks/         # Generation task lifecycle + credit deduction
     ├── auth/              # Better-Auth passthrough + custom unlink-account
     ├── billing/           # Checkout, payment webhooks
     ├── config/            # Public config endpoint
@@ -112,9 +107,7 @@ modules/{domain}/
 
 All Zod validation schemas (and the domain value vocabularies they consume)
 live in `src/schema/`, mirroring the `modules/` layout. Routers and services
-import from there; `schema/` never imports back from `modules/` (the single
-allowed exception is the zero-dependency type module
-`modules/ai/media/types.ts`):
+import from there; `schema/` never imports back from `modules/`:
 
 - `schema/shared.ts` — cross-domain schemas exported via the `schema` barrel:
   - `idParam` — standard ID parameter schema
@@ -123,7 +116,7 @@ allowed exception is the zero-dependency type module
 - `schema/{domain}.ts` — domain-specific schemas (`schema/user.ts`,
   `schema/billing.ts`, `schema/referral.ts`, ...), including domain
   vocabularies born for validation (`PostType`/`POST_TYPE_VALUES`,
-  `TICKET_STATUS`/`TICKET_STATUS_VALUES`, `AI_MEDIA_TYPES`, ...)
+  `TICKET_STATUS`/`TICKET_STATUS_VALUES`, ...)
 - `schema/{domain}/{subdomain}.ts` — mirrors sub-domain routers
   (`schema/content/posts.ts`, `schema/admin/rbac.ts`, `schema/support/tickets.ts`, ...)
 - `schema/mcp.ts` — MCP tool input schemas (`mcpPaginationSchema`,
@@ -260,7 +253,7 @@ relative base (`/`) and falls back to an in-process `app.fetch` bridge on the se
 ## Testing
 
 - **Unit tests** — colocated as `.test.ts` next to source
-- **Property tests** — use fast-check for complex logic; see `ai-tasks/service.property.test.ts`
+- **Property tests** — use fast-check for complex logic; property tests are colocated as `*.property.test.ts` next to the source they cover
 - **Coverage** — CI runs `turbo run test:coverage` (single pass, no separate test job). Repo-level thresholds live in the root `vitest.config.ts` and are intentionally low today (they gate against gross regressions, not a quality bar); the long-term goal is 80%+ for critical paths (auth, billing, api). UI-component packages (e.g. `packages/ui/web`) are included in the aggregate but largely untested — exclude or test before raising thresholds.
 - **docs/** is git-ignored (local-only notes; operations plans included). Do not expect it in CI or a fresh clone.
 

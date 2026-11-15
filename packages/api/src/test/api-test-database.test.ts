@@ -52,13 +52,12 @@ describe("api-test-database harness smoke", () => {
     expect(rows).toHaveLength(0);
   });
 
-  it("subscription, order, credit, ai_task, ticket, ticket_message, post, taxonomy tables exist", async () => {
+  it("subscription, order, credit, ticket, ticket_message, post, taxonomy tables exist", async () => {
     const database = getDatabase();
     const TABLES = [
       "subscription",
       '"order"',
       "credit",
-      "ai_task",
       "ticket",
       "ticket_message",
       "post",

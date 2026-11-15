@@ -15,18 +15,6 @@ export const creditHistoryQuerySchema = z.object({
   offset: z.number().int().min(0).default(0),
 });
 
-const AI_TASK_STATUSES = ["pending", "processing", "success", "failed", "canceled"] as const;
-
-export const listAiTasksSchema = mcpPaginationSchema.extend({
-  mediaType: z
-    .string()
-    .min(1)
-    .max(50)
-    .optional()
-    .describe("Filter by media type, e.g. 'image' or 'music'."),
-  status: z.enum(AI_TASK_STATUSES).optional().describe("Filter by task status."),
-});
-
 export const listTicketsSchema = mcpPaginationSchema.extend({
   status: z.enum(TICKET_STATUS_VALUES).optional().describe("Filter by ticket status."),
   search: z.string().min(1).max(200).optional().describe("Search within ticket titles."),

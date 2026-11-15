@@ -36,17 +36,16 @@ Claude Desktop / 其他支持 streamable HTTP 的客户端:
 
 ## 工具清单
 
-| 工具                              | 说明                                  | 读写 |
-| --------------------------------- | ------------------------------------- | ---- |
-| `openstarter_get_profile`         | 本人资料、套餐、积分余额              | R    |
-| `openstarter_get_subscription`    | 订阅状态/套餐/下次计费日              | R    |
-| `openstarter_list_credit_history` | 积分流水（limit/offset）              | R    |
-| `openstarter_list_orders`         | 订单/支付记录（分页）                 | R    |
-| `openstarter_list_ai_tasks`       | AI 生成任务（分页,可按状态/类型过滤） | R    |
-| `openstarter_list_tickets`        | 本人工单列表（分页/筛选）             | R    |
-| `openstarter_get_ticket_messages` | 工单消息线程（校验归属）              | R    |
-| `openstarter_create_ticket`       | 创建支持工单                          | W    |
-| `openstarter_reply_ticket`        | 回复本人工单（role 固定为 user）      | W    |
+| 工具                              | 说明                             | 读写 |
+| --------------------------------- | -------------------------------- | ---- |
+| `openstarter_get_profile`         | 本人资料、套餐、积分余额         | R    |
+| `openstarter_get_subscription`    | 订阅状态/套餐/下次计费日         | R    |
+| `openstarter_list_credit_history` | 积分流水（limit/offset）         | R    |
+| `openstarter_list_orders`         | 订单/支付记录（分页）            | R    |
+| `openstarter_list_tickets`        | 本人工单列表（分页/筛选）        | R    |
+| `openstarter_get_ticket_messages` | 工单消息线程（校验归属）         | R    |
+| `openstarter_create_ticket`       | 创建支持工单                     | W    |
+| `openstarter_reply_ticket`        | 回复本人工单（role 固定为 user） | W    |
 
 ## 结构
 

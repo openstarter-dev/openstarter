@@ -1,17 +1,13 @@
-import { keepPreviousData, mutationOptions, queryOptions } from "@tanstack/react-query";
-import type { InferRequestType, InferResponseType } from "hono/client";
+import { keepPreviousData, queryOptions } from "@tanstack/react-query";
+import type { InferResponseType } from "hono/client";
 
-import { assertOk, client, unwrapQuery, withAbort } from "@/lib/api";
+import { client, unwrapQuery, withAbort } from "@/lib/api";
 import { LIST_PAGE_SIZE } from "@/lib/list-search";
 
 const PAGE_SIZE = LIST_PAGE_SIZE;
 
 export const adminKeys = {
   all: ["admin"] as const,
-  aiModels: {
-    all: ["admin", "ai-models"] as const,
-    page: (page: number) => ["admin", "ai-models", page] as const,
-  },
   credits: (page: number) => ["admin", "credits", page] as const,
   metrics: () => ["admin", "metrics"] as const,
   orders: (page: number) => ["admin", "orders", page] as const,
@@ -19,21 +15,11 @@ export const adminKeys = {
   users: (page: number, search: string) => ["admin", "users", page, search] as const,
 } as const;
 
-export const AI_MODEL_MEDIA_TYPES = ["image", "video", "music", "speech"] as const;
-
-export type AiModelMediaType = (typeof AI_MODEL_MEDIA_TYPES)[number];
-
-const getAiModels = client.api.admin["ai-models"].$get;
-const createAiModel = client.api.admin["ai-models"].$post;
 const getCredits = client.api.admin.credits.$get;
 const getMetrics = client.api.admin.analytics.metrics.$get;
 const getOrders = client.api.admin.orders.$get;
 const getSubscriptions = client.api.admin.subscriptions.$get;
 const getUsers = client.api.admin.users.$get;
-
-type AiModelListData = NonNullable<InferResponseType<typeof getAiModels, 200>["data"]>;
-export type AiModelRow = AiModelListData["items"][number];
-export type AiModelList = AiModelListData;
 
 type CreditListData = NonNullable<InferResponseType<typeof getCredits, 200>["data"]>;
 type MetricsData = NonNullable<InferResponseType<typeof getMetrics, 200>["data"]>;
@@ -46,21 +32,7 @@ export type AdminOrderRow = OrderListData["items"][number];
 export type AdminSubscriptionRow = SubscriptionListData["items"][number];
 export type AdminUserRow = UserListData["items"][number];
 
-export type AiModelPayload = InferRequestType<typeof createAiModel>["json"];
-
 const queries = {
-  aiModels: (page: number) =>
-    queryOptions({
-      queryFn: async ({ signal }) => {
-        const res = await getAiModels(
-          { query: { page: String(page), pageSize: String(PAGE_SIZE) } },
-          withAbort(signal),
-        );
-        return unwrapQuery<AiModelListData>(res, "Failed to load AI models");
-      },
-      queryKey: adminKeys.aiModels.page(page),
-      placeholderData: keepPreviousData,
-    }),
   credits: (page: number) =>
     queryOptions({
       queryFn: async ({ signal }) => {
@@ -125,58 +97,4 @@ const queries = {
     }),
 };
 
-const mutations = {
-  deleteAiModel: () =>
-    mutationOptions({
-      meta: { invalidates: [adminKeys.aiModels.all] },
-      mutationFn: async (id: string) => {
-        const res = await client.api.admin["ai-models"][":id"].$delete({ param: { id } });
-        await assertOk(res, "Failed to delete AI model");
-      },
-    }),
-  saveAiModel: () =>
-    mutationOptions({
-      meta: { invalidates: [adminKeys.aiModels.all] },
-      mutationFn: async (input: AiModelPayload & { id: string | null }) => {
-        if (input.id) {
-          const { id, ...body } = input;
-          const res = await client.api.admin["ai-models"][":id"].$patch({
-            json: body,
-            param: { id },
-          });
-          await assertOk(res, "Failed to update AI model");
-          return;
-        }
-        const res = await createAiModel({
-          json: {
-            provider: input.provider,
-            modelId: input.modelId,
-            displayName: input.displayName,
-            mediaType: input.mediaType,
-            creditPrice: input.creditPrice,
-            optionsSchema: input.optionsSchema,
-            metadata: input.metadata ?? null,
-            enabled: input.enabled,
-            sortOrder: input.sortOrder,
-          },
-        });
-        if (res.status === 409) {
-          throw new Error("Model already exists for this provider");
-        }
-        await assertOk(res, "Failed to create AI model");
-      },
-    }),
-  toggleAiModel: () =>
-    mutationOptions({
-      meta: { invalidates: [adminKeys.aiModels.all] },
-      mutationFn: async (input: { id: string; enabled: boolean }) => {
-        const res = await client.api.admin["ai-models"][":id"].$patch({
-          json: { enabled: input.enabled },
-          param: { id: input.id },
-        });
-        await assertOk(res, "Failed to update AI model");
-      },
-    }),
-};
-
-export const admin = { mutations, queries } as const;
+export const admin = { queries } as const;

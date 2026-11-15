@@ -9,7 +9,6 @@ import { buildPageTitle } from "@/lib/page-head";
 type AdminPath =
   | "/admin"
   | "/admin/users"
-  | "/admin/ai-models"
   | "/admin/orders"
   | "/admin/subscriptions"
   | "/admin/credits";
@@ -43,10 +42,7 @@ export const ADMIN_NAV: AdminNavGroup[] = [
   },
   {
     group: () => m["admin.nav.access_control"](),
-    items: [
-      { label: () => m["admin.nav.users"](), to: "/admin/users" },
-      { label: () => m["admin.nav.ai_models"](), to: "/admin/ai-models" },
-    ],
+    items: [{ label: () => m["admin.nav.users"](), to: "/admin/users" }],
   },
   {
     group: () => m["admin.nav.billing"](),
