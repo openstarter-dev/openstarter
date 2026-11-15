@@ -23,7 +23,9 @@ WHERE `user`.`role` IS NULL
   AND EXISTS (
     SELECT 1 FROM `user_role` `ur2` WHERE `ur2`.`user_id` = `user`.`id`
   );--> statement-breakpoint
-DROP TABLE `permission`;--> statement-breakpoint
-DROP TABLE `role`;--> statement-breakpoint
+-- D1 强制外键：先删引用他人（子表）的 role_permission / user_role，
+-- 再删被引用（父表）的 permission / role，否则 DROP 父表报错。
+DROP TABLE `user_role`;--> statement-breakpoint
 DROP TABLE `role_permission`;--> statement-breakpoint
-DROP TABLE `user_role`;
+DROP TABLE `permission`;--> statement-breakpoint
+DROP TABLE `role`;

@@ -14,27 +14,28 @@
     "./orm": {
       "default": "./src/orm.ts"
     },
+    "./local": {
+      "default": "./src/local.ts"
+    },
     "./testing": {
       "default": "./src/testing/index.ts"
     }
   },
   "scripts": {
-    "db:push": "drizzle-kit push",
     "db:generate": "drizzle-kit generate",
-    "db:studio": "drizzle-kit studio",
-    "db:migrate": "drizzle-kit migrate",
     "db:migrate:prod": "drizzle-kit migrate --config=drizzle.config.prod.ts",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@libsql/client": "0.15.15",
     "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.8",
+    "miniflare": "4.20260714.0",
     "typescript": "catalog:",
-    "vitest": "4.1.10"
+    "vitest": "4.1.10",
+    "wrangler": "^4.98.0"
   }
 }

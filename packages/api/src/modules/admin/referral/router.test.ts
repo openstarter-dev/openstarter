@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { sql } from "@openstarter/db/orm";
 import type { Database } from "@openstarter/db";
-import { createSqliteTestDb } from "@openstarter/db/testing";
+import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
@@ -154,14 +154,8 @@ const CREATE_CREDIT_TABLE = `CREATE TABLE credit (
   deleted_at INTEGER
 )`;
 
-let dbPath: string | undefined;
-
 beforeAll(async () => {
-  const tmpDir = await import("node:os").then((os) => os.tmpdir());
-  const { join } = await import("node:path");
-  dbPath = join(tmpDir, `admin-referral-test-${Date.now()}.db`);
-
-  const database = createSqliteTestDb(`file://${dbPath}`);
+  const database = await createSqliteTestDb();
 
   await database.run(sql.raw(CREATE_USER_TABLE));
   await database.run(sql.raw(CREATE_REFERRAL_TABLE));
@@ -172,10 +166,8 @@ beforeAll(async () => {
   state.database = database;
 });
 
-afterAll(() => {
-  if (dbPath) {
-    import("node:fs").then((fs) => fs.rmSync(dbPath!, { force: true }));
-  }
+afterAll(async () => {
+  await disposeSqliteTestDb(state.database!);
   state.database = undefined;
 });
 

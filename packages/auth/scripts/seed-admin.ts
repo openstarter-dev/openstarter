@@ -1,12 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
+import { initLocalD1 } from "@openstarter/db/local";
+
 const ENV_FILE = fileURLToPath(new URL("../../../apps/web/.env", import.meta.url));
 if (!existsSync(ENV_FILE)) {
   console.error(`[seed-admin] 未找到环境文件:${ENV_FILE}`);
-  console.error(
-    "请先复制 apps/web/.env.example 为 apps/web/.env 并填写 BETTER_AUTH_SECRET / DATABASE_URL。",
-  );
+  console.error("请先复制 apps/web/.env.example 为 apps/web/.env 并填写 BETTER_AUTH_SECRET。");
   process.exit(1);
 }
 
@@ -36,4 +36,7 @@ for (const line of content.split("\n")) {
   }
 }
 
+// seed 写入的是本地 D1（与 dev 同一份数据），先取 binding 再加载业务实现
+// （seed-admin-impl 顶层经 @openstarter/db/server 拿 db）。
+await initLocalD1();
 await import("./seed-admin-impl");

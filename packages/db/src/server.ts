@@ -6,34 +6,41 @@ try {
   // .env missing or runtime without fs (Workers) — env must come from the real environment.
 }
 
-import { createClient } from "@libsql/client";
-import { drizzle as drizzleD1 } from "drizzle-orm/d1";
-import { type LibSQLDatabase, drizzle as drizzleLibsql } from "drizzle-orm/libsql";
+// Self-wiring the Cloudflare env: in workerd (dev via @cloudflare/vite-plugin and
+// deployed Workers alike) the official `cloudflare:workers` module exposes the
+// request env at module scope — grab it here so EVERY consumer (auth's top-level
+// db() included) sees the binding regardless of import order. On Node runtimes
+// the module does not exist: initLocalD1() (@openstarter/db/local, used by
+// seed-admin) or the test harness supplies the binding instead. The dynamic
+// import lives in cloudflare-env.mjs (see its header for why).
+// 自接线 Cloudflare env：workerd（dev 插件与线上）里官方 cloudflare:workers 模块在
+// 模块作用域暴露 env，在此处统一捕获，任何消费方（含 auth 顶层 db()）不依赖入口
+// 的 import 顺序。Node 侧无该模块，由 initLocalD1()（seed-admin 用）或测试基建提供。
+// 动态 import 放在 cloudflare-env.mjs（原因见其文件头注释）。
+const cloudflareEnv = await tryGetCloudflareEnv();
+if (cloudflareEnv) {
+  (globalThis as unknown as { __CF_ENV__?: unknown }).__CF_ENV__ = cloudflareEnv;
+}
 
-import { repoRoot, resolveFileUrl } from "../drizzle.shared";
+import { type DrizzleD1Database, drizzle } from "drizzle-orm/d1";
+
+import { tryGetCloudflareEnv } from "./cloudflare-env.mjs";
 import * as schema from "./schema";
-import { withSqliteCompat } from "./sqlite-compat";
 
-// The libsql-typed drizzle view is the shared Database type: local dev runs libsql directly,
-// and the D1 driver is cast into it so every consumer sees one identical query-builder type.
-// 统一以 libsql 视角作为 Database 类型：本地开发直连 libsql，D1 驱动运行时转型，消费方类型完全一致。
-export type Database = LibSQLDatabase<typeof schema>;
+// One database engine everywhere: Drizzle's D1 driver. Workers get the binding
+// from the request env (set as __CF_ENV__ by the app entry); local dev,
+// self-hosted Node and seed scripts get a real local D1 via initLocalD1()
+// (@openstarter/db/local) BEFORE anything imports this module.
+// 统一使用 D1 驱动：Workers 从请求 env 拿 binding；本地/自托管/seed 必须先调用
+// initLocalD1()（@openstarter/db/local）再加载本模块。
+export type Database = DrizzleD1Database<typeof schema>;
 
-type DbConfig = {
-  url: string;
+type D1Binding = {
+  prepare(query: string): unknown;
+  batch(statements: unknown[]): Promise<unknown[]>;
+  exec(query: string): Promise<unknown>;
+  dump(): Promise<ArrayBuffer>;
 };
-
-// ─── Cloudflare runtime detection（原 utils/runtime.ts，仅此处使用） ──────────
-
-type CloudflareGlobal = {
-  navigator?: { userAgent?: string };
-  Cloudflare?: unknown;
-};
-
-const cloudflareGlobal = globalThis as CloudflareGlobal;
-
-const isCloudflareWorker =
-  cloudflareGlobal.navigator?.userAgent === "Cloudflare-Workers" || "Cloudflare" in globalThis;
 
 type CloudflareEnv = {
   DB?: unknown;
@@ -47,71 +54,46 @@ function readCloudflareEnv(): CloudflareEnv | undefined {
   return scope.__CF_ENV__ ?? scope.__env__;
 }
 
-// ─── D1 binding identity cache（原 drivers/d1.ts） ───────────────────────────
-
-type D1Binding = {
-  prepare(query: string): unknown;
-  batch(statements: unknown[]): Promise<unknown[]>;
-  exec(query: string): Promise<unknown>;
-  dump(): Promise<ArrayBuffer>;
-};
-
 let cachedInstance: Database | null = null;
 // Track the active D1 binding reference so Workers reloads never reuse a stale binding
 // 记录当前 D1 binding 引用，避免 Workers 环境下跨请求复用旧实例
 let cachedBinding: D1Binding | null = null;
 
-const LOCAL_D1_FILE_URL = "file:local.db";
-
-function resolveLocalD1Url(configured: string | undefined): string {
-  const raw = configured?.trim();
-  if (raw === ":memory:") {
-    return raw;
-  }
-  const url = raw?.startsWith("file:") ? raw : LOCAL_D1_FILE_URL;
-  return resolveFileUrl(url, repoRoot);
-}
-
-function createDb(config: DbConfig): Database {
+function createDb(): Database {
   const binding = readCloudflareEnv()?.DB as D1Binding | undefined;
 
   if (!binding) {
-    if (isCloudflareWorker) {
-      throw new Error(
-        'D1 binding "DB" not found. The db package only supports Cloudflare Workers with a d1_databases binding named "DB".',
-      );
-    }
-
-    if (cachedInstance && cachedBinding === null) {
-      return cachedInstance;
-    }
-
-    cachedInstance = withSqliteCompat(
-      drizzleLibsql({
-        client: createClient({ url: resolveLocalD1Url(config.url) }),
-        schema,
-      }),
-      "sqlite",
+    throw new Error(
+      'D1 binding "DB" not found. Node runtimes (seed scripts) must call initLocalD1() from "@openstarter/db/local" before importing the db server module; Cloudflare Workers require a d1_databases binding named "DB".',
     );
-    cachedBinding = null;
-    return cachedInstance;
   }
 
   if (cachedInstance && cachedBinding === binding) {
     return cachedInstance;
   }
 
-  const instance = drizzleD1(binding as unknown as Parameters<typeof drizzleD1>[0], {
-    schema,
-  });
-  cachedInstance = withSqliteCompat(instance as unknown as Database, "d1");
+  cachedInstance = drizzle(binding as unknown as Parameters<typeof drizzle>[0], { schema });
   cachedBinding = binding;
   return cachedInstance;
 }
 
-// Instance caching above is keyed by the active D1 binding identity so Workers reloads
-// never reuse a stale binding; local dev caches the libsql client.
-// 实例缓存按当前 D1 binding 身份生效（Workers 热重载不会复用旧实例），本地开发缓存 libsql client。
+// Instance caching is keyed by the active D1 binding identity so Workers reloads
+// never reuse a stale binding.
+// 实例缓存按当前 D1 binding 身份生效（Workers 热重载不会复用旧实例）。
 export function db(): Database {
-  return createDb({ url: process.env.DATABASE_URL?.trim() ?? "" });
+  return createDb();
+}
+
+// D1 (and its local miniflare twin) rejects SQL BEGIN/SAVEPOINT, so drizzle's
+// native db.transaction() cannot run. batch() is the atomic multi-statement
+// primitive; for interactive read-then-write logic use this helper, which runs
+// the callback WITHOUT atomicity/rollback — callers must stay idempotent or
+// compensate on failure.
+// D1 拒绝 BEGIN/SAVEPOINT，drizzle 原生 transaction 不可用；原子多语句用 batch()，
+// 交互式读写逻辑用本 helper（无原子性与回滚，调用方须自行保证幂等或补偿）。
+export function d1Transaction<T>(
+  database: Database,
+  callback: (tx: Database) => Promise<T>,
+): Promise<T> {
+  return callback(database);
 }

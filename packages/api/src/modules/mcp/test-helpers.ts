@@ -125,10 +125,9 @@ export const setCurrentUserId = (userId: string): void => {
 export const getDatabase = (): Database => state.database as Database;
 
 export const createMcpTestHarness = async (
-  suiteName: string,
   buildFetch: () => (request: Request) => Promise<Response>,
 ): Promise<McpTestHarness> => {
-  state.database = await createApiTestDatabase(suiteName);
+  state.database = await createApiTestDatabase();
   await RESHAPE_TABLES.reduce(async (previous, statement) => {
     await previous;
     await (state.database as Database).run(sql.raw(statement));
@@ -153,7 +152,7 @@ export const createMcpTestHarness = async (
     close: async () => {
       await client.close();
       if (state.database) {
-        closeApiTestDatabase(state.database);
+        await closeApiTestDatabase(state.database);
       }
     },
   };

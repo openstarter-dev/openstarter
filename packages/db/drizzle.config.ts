@@ -1,10 +1,12 @@
-import { buildConfigFor, loadWebEnv, resolveDbUrl } from "./drizzle.shared";
+import { loadWebEnv } from "./drizzle.shared";
 
 loadWebEnv();
 
-// Local dev falls back to the sqlite file at the repo root when DATABASE_URL is unset
-// or not a file: URL (mirrors createD1Db's local resolution).
-const envUrl = process.env.DATABASE_URL;
-const localUrl = envUrl?.startsWith("file:") ? envUrl : "file:local.db";
-
-export default buildConfigFor(resolveDbUrl(localUrl));
+// drizzle-kit is only used for SQL generation (db:generate); applying migrations
+// happens via wrangler d1 migrations apply (local) and d1-http (prod).
+// drizzle-kit 只负责生成 SQL（db:generate）；迁移应用走 wrangler（本地）与 d1-http（生产）。
+export default {
+  schema: "./src/schema/index.ts",
+  out: "./src/migrations/sqlite",
+  dialect: "sqlite",
+};

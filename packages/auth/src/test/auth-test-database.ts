@@ -1,8 +1,5 @@
-import { rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-
-import { createSqliteTestDb } from "@openstarter/db/testing";
+import type { Database } from "@openstarter/db";
+import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
 import { sql } from "@openstarter/db/orm";
 
 const CREATE_TABLE_STATEMENTS = [
@@ -99,10 +96,7 @@ const CREATE_TABLE_STATEMENTS = [
 
 const DATA_TABLES = ["credit", "user_invite", "invite_code", "subscription", "user"] as const;
 
-const runStatements = (
-  database: ReturnType<typeof createSqliteTestDb>,
-  statements: readonly string[],
-) =>
+const runStatements = (database: Database, statements: readonly string[]) =>
   statements.reduce<Promise<void>>(
     (pending, statement) =>
       pending.then(async () => {
@@ -111,31 +105,14 @@ const runStatements = (
     Promise.resolve(),
   );
 
-const databasePaths = new WeakMap<object, string>();
-
-const removeDatabaseFiles = (databasePath: string) => {
-  rmSync(databasePath, { force: true });
-  rmSync(`${databasePath}-shm`, { force: true });
-  rmSync(`${databasePath}-wal`, { force: true });
-};
-
-export const createAuthTestDatabase = async (suiteName: string) => {
-  const databasePath = join(tmpdir(), `openstarter-auth-${process.pid}-${suiteName}.sqlite`);
-  removeDatabaseFiles(databasePath);
-  const database = createSqliteTestDb(`file:${databasePath}`);
-  databasePaths.set(database, databasePath);
+export const createAuthTestDatabase = async () => {
+  const database = await createSqliteTestDb();
   await runStatements(database, CREATE_TABLE_STATEMENTS);
   return database;
 };
 
-export const closeAuthTestDatabase = (
-  database: Awaited<ReturnType<typeof createAuthTestDatabase>>,
-) => {
-  const databasePath = databasePaths.get(database);
-  if (databasePath) {
-    removeDatabaseFiles(databasePath);
-    databasePaths.delete(database);
-  }
+export const closeAuthTestDatabase = async (database: Database) => {
+  await disposeSqliteTestDb(database);
 };
 
 export const resetAuthTestDatabase = (

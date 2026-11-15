@@ -113,26 +113,28 @@ pnpm install
 cp apps/web/.env.example apps/web/.env
 # Set a strong BETTER_AUTH_SECRET in apps/web/.env:
 #   openssl rand -hex 32
-pnpm db:push
+# Also copy apps/web/wrangler.example.jsonc to apps/web/wrangler.jsonc
+# (local dev runs against a real D1 via wrangler getPlatformProxy).
+pnpm db:migrate
 pnpm dev
 ```
 
 `apps/web/.env` is the single environment source for the whole monorepo.
 Every entry point reads it directly — Vite for the web app, Node's built-in
-`packages/db` for migrations, each app's own build entry for the rest — so no
-global env wrapper is needed. Every app derives its API base URL from
-`VITE_APP_URL` (falling back to `http://localhost:3000`, so local dev needs no
-value). Better-auth's
+`process.loadEnvFile()` (in `packages/db`) for the server runtime, and each
+app's own build entry for the rest — so no global env wrapper is needed. Every
+app derives its API base URL from `VITE_APP_URL` (falling back to
+`http://localhost:3000`, so local dev needs no value). Better-auth's
 `baseURL`, SSR canonical URLs and email links read that same variable directly
 from `process.env` — there are no aliases.
 
 Two templates are kept in sync key-by-key: `apps/web/.env.example` (local dev)
 and `apps/web/.env.production.example` (production). On Cloudflare Workers the
 production file is a checklist — copy the plain values into `wrangler.jsonc`
-`vars` and the secrets via `wrangler secret put`; on self-hosted Node copy it to
-`apps/web/.env`. The repo deliberately avoids Vite's `.env.development` /
-`.env.production`, because the server runtime and the other five apps only read
-`.env`.
+`vars` and the secrets via `wrangler secret put`. `apps/web` deploys as a
+Cloudflare Worker via the official `@cloudflare/vite-plugin` (dev runs workerd
+with bindings from `wrangler.jsonc`), so runtime server vars in dev come from
+`apps/web/.dev.vars` (copy `.dev.vars.example`) instead of `.env`.
 
 Open [http://localhost:3000](http://localhost:3000). The API is served from the
 same origin under `/api/*`. Product branding starts in
@@ -141,9 +143,10 @@ commands.
 
 ## Deploy to Cloudflare Workers
 
-`apps/web` builds a Workers bundle via Nitro (`NITRO_PRESET=cloudflare_module`).
-`wrangler.jsonc` is git-ignored because it carries production bindings, so start
-from the committed template:
+`apps/web` is a TanStack Start app built through the official
+`@cloudflare/vite-plugin` (dev and build both run in workerd; bindings are read
+from `wrangler.jsonc`). `wrangler.jsonc` is git-ignored because it carries
+production bindings, so start from the committed template:
 
 ```bash
 cd apps/web
@@ -162,7 +165,7 @@ Fill in the placeholders:
 Then deploy and finish the one-time setup:
 
 ```bash
-pnpm --filter web cf:deploy   # build + wrangler deploy
+pnpm --filter web deploy     # vite build + wrangler deploy
 cd apps/web && wrangler secret put BETTER_AUTH_SECRET
 cd apps/web && wrangler secret put CONFIG_ENCRYPTION_KEY
 cd apps/web && wrangler d1 migrations apply openstarter-db --remote
@@ -170,7 +173,7 @@ cd apps/web && wrangler d1 migrations apply openstarter-db --remote
 
 - The custom-domain zone must be active in the same Cloudflare account. Wrangler
   creates the proxied DNS record and certificate itself — don't pre-create one.
-- `cf:build` emits `.output/server/wrangler.json` (entry + assets) and wrangler
+- `vite build` emits `dist/` plus a generated output `wrangler.json`; wrangler
   loads it through `.wrangler/deploy/config.json`. Both are generated — don't edit.
 - `wrangler d1 migrations apply` without `--remote` only touches local D1.
 - Only the template is committed. For CI, generate `wrangler.jsonc` from

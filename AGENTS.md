@@ -145,7 +145,7 @@ import { inviteBatchBody, listQuery } from "../../../schema/admin/overview";
 | **Test (all/specific)**   | `pnpm test` / `pnpm --filter @openstarter/api test`        |
 | **Test coverage**         | `pnpm test:coverage`                                       |
 | **Type check**            | `pnpm check-types`                                         |
-| **Database**              | `pnpm -F @openstarter/db db:migrate`                       |
+| **Database**              | `pnpm db:migrate` (local D1) / `pnpm -F @openstarter/db db:migrate:prod` |
 | **Services**              | `pnpm services:setup` / `services:start` / `services:stop` |
 
 ## Environment
@@ -153,16 +153,24 @@ import { inviteBatchBody, listQuery } from "../../../schema/admin/overview";
 `apps/web/.env` is the single environment source for the whole monorepo
 (copy `apps/web/.env.example`; there is no root `.env`). `apps/web/.env.production.example`
 is the production counterpart (same keys, production values): a checklist for
-`wrangler.jsonc` vars + `wrangler secret put` on Cloudflare, or a file to copy to
-`apps/web/.env` on self-hosted Node. Vite's `.env.development` / `.env.production`
-are intentionally unused — the server runtime and the other apps only read `.env`.
-Every entry point loads it itself — there is no global env wrapper:
+`wrangler.jsonc` vars + `wrangler secret put` on Cloudflare. The web app runs
+in workerd everywhere (official `@cloudflare/vite-plugin`), so dev runtime
+server vars come from `apps/web/.dev.vars` (copy `.dev.vars.example`), while
+build-time `VITE_*` still come from `.env` via Vite. Vite's `.env.development` /
+`.env.production` are intentionally unused. Every entry point loads env itself:
 
-- `apps/web` — Vite for the client + Node's built-in `process.loadEnvFile()`
-  in `packages/db` (`src/server.ts`, cwd = `apps/web`) for the server runtime;
-- `packages/db` — `drizzle.shared.ts` (`loadWebEnv`) for drizzle-kit; the
-  runtime client in `src/server.ts` reads `DATABASE_URL` directly
-- `packages/auth` — `scripts/seed-admin.ts`
+- `apps/web` — Vite for the client; the server entry (`src/server.ts`, built
+  via `@cloudflare/vite-plugin` with `main: @tanstack/react-start/server-entry`)
+  sets `__CF_ENV__` from the official `import { env } from "cloudflare:workers"`
+  module BEFORE dynamically importing `@openstarter/api`, because auth
+  initializes its db adapter at module top level. Vite `.env` is loaded for
+  `VITE_*` at build time; runtime vars come from wrangler `vars`/secrets and
+  `.dev.vars` in dev
+- `packages/db` — `drizzle.shared.ts` (`loadWebEnv`) for drizzle-kit configs;
+  the runtime client (`src/server.ts`) is D1-only: it reads the `DB` binding
+  from `__CF_ENV__` (workerd request env, or the local one set by
+  `initLocalD1()` via wrangler `getPlatformProxy`)
+- `packages/auth` — `scripts/seed-admin.ts` (pure Node; calls `initLocalD1()`)
 - extension / mobile / mini-app — their build entries (`wxt.config.ts`,
   `scripts/env.mjs`, `config/index.ts`)
 
@@ -171,13 +179,20 @@ The CLI is a standalone package: pass
 
 Required variables:
 
-- `DATABASE_URL` — sqlite file path used by local D1 dev (`file:local.db` at the
-  repo root by default, created by `pnpm db:push` / `pnpm db:migrate`); on
-  Cloudflare Workers the `DB` binding is used instead
 - `VITE_APP_URL` — web app origin (also the API origin). Read directly from
   `process.env` by better-auth's `baseURL`, SSR canonical URLs, email links and
   every app's derived API base; missing value falls back to
   `http://localhost:3000` locally. There are no aliases — this is the only key
+
+Database: one D1 binding (`DB`) everywhere — web runs in workerd for dev, build
+and deploy (official `@cloudflare/vite-plugin`), so bindings come from
+`wrangler.jsonc` directly; only seed scripts (pure Node) spin up a local D1 via
+`wrangler.getPlatformProxy` reading `apps/web/wrangler.jsonc` (state in
+`apps/web/.wrangler/state/v3`). There is no connection-string env key; tests run
+against in-memory miniflare D1 (`@openstarter/db/testing`). D1 rejects SQL
+`BEGIN`/`SAVEPOINT`, so `db.transaction()` is unavailable — use `db.batch()`
+(atomic) or the `d1Transaction` helper from `@openstarter/db/server`
+(non-atomic callback, callers stay idempotent).
 
 Extension / mobile / mini-app / cli / desktop read the web app address from
 `apps/web/.env` at build time; `OPENSTARTER_API_URL`
@@ -267,14 +282,17 @@ pnpm --filter @openstarter/api test -- path/to/test.test.ts
 
 Apps share one Hono backend at `/api/*`. Deploy patterns:
 
-- **Web**: Vercel (Next.js App Router via TanStack Start), Cloudflare Workers, self-hosted Node
+- **Web**: Cloudflare Workers via `@cloudflare/vite-plugin` (`pnpm --filter web deploy`)
 - **Desktop**: electron-builder auto-update
 - **Mobile**: EAS (Expo Application Services)
 - **Extension**: CRX3 (Chrome Web Store)
 - **CLI**: npm registry or scoped binary
 - **Mini-App**: WeChat MP
 
-Database migrations run via drizzle-kit: `db:migrate` (local sqlite/D1) and `db:migrate:prod` (cloud, d1-http) in `packages/db`.
+Database migrations: drizzle-kit only generates SQL (`db:generate`); applying
+runs through wrangler — `pnpm db:migrate` (`wrangler d1 migrations apply DB
+--local`) locally and `db:migrate:prod` (drizzle-kit d1-http) against the
+cloud database in `packages/db`.
 
 ## Troubleshooting
 

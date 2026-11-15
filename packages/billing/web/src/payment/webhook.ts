@@ -18,7 +18,7 @@
 // 本模块只消费归一化事件（不感知渠道原生标识差异）。
 
 import { type NewOrder, order } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import { d1Transaction, db } from "@openstarter/db/server";
 import { getUniSeq, getUuid } from "@openstarter/shared/id";
 import { and, eq, inArray, isNull, or, type SQL } from "@openstarter/db/orm";
 import { calculateCreditExpirationTime, CreditTransactionScene, grant } from "../credits";
@@ -164,8 +164,7 @@ export async function handleCheckoutSuccess(
   // 记录已抢占的订单：结算失败时恢复其状态，使渠道重试可再次处理（D1 事务不回滚）
   let claimed: { id: string; previousStatus: typeof order.$inferSelect.status } | undefined;
 
-  await db()
-    .transaction(async (tx) => {
+  await d1Transaction(db(), async (tx) => {
       const [existingOrder] = await tx.select().from(order).where(condition).limit(1);
       if (!existingOrder) {
         return;

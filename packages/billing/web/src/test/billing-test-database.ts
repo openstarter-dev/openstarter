@@ -4,11 +4,8 @@
 // by billing service tests (subscription, order, credit, user) plus the
 // referral-domain tables (referral, referral_relation, commission).
 
-import { rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import type { Database } from "@openstarter/db";
-import { createSqliteTestDb } from "@openstarter/db/testing";
+import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
 import { sql } from "@openstarter/db/orm";
 
 const NOW_EXPR = "(cast((julianday('now') - 2440587.5)*86400000 as integer))";
@@ -176,19 +173,8 @@ const DATA_TABLES = [
   "user",
 ] as const;
 
-const databasePaths = new WeakMap<object, string>();
-
-const removeDatabaseFiles = (path: string) => {
-  rmSync(path, { force: true });
-  rmSync(`${path}-shm`, { force: true });
-  rmSync(`${path}-wal`, { force: true });
-};
-
-export const createBillingTestDatabase = async (suiteName: string) => {
-  const databasePath = join(tmpdir(), `openstarter-billing-${process.pid}-${suiteName}.sqlite`);
-  removeDatabaseFiles(databasePath);
-  const database = createSqliteTestDb(`file:${databasePath}`);
-  databasePaths.set(database, databasePath);
+export const createBillingTestDatabase = async () => {
+  const database = await createSqliteTestDb();
   await CREATE_TABLE_STATEMENTS.reduce(async (previous, statement) => {
     await previous;
     await database.run(sql.raw(statement));
@@ -196,12 +182,8 @@ export const createBillingTestDatabase = async (suiteName: string) => {
   return database;
 };
 
-export const closeBillingTestDatabase = (database: Database) => {
-  const path = databasePaths.get(database);
-  if (path) {
-    removeDatabaseFiles(path);
-    databasePaths.delete(database);
-  }
+export const closeBillingTestDatabase = async (database: Database) => {
+  await disposeSqliteTestDb(database);
 };
 
 export const resetBillingTestDatabase = (database: Database) =>

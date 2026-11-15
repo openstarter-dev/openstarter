@@ -10,7 +10,7 @@
 // 任务 14.4 追加：`grantCreditsForNewUser`（受 Config 开关控制的新用户初始积分）。
 
 import { type Credit, credit, type NewCredit } from "@openstarter/db/schema";
-import { type Database, db } from "@openstarter/db/server";
+import { type Database, d1Transaction, db } from "@openstarter/db/server";
 import { getSnowId, getUuid } from "@openstarter/shared/id";
 import {
   and,
@@ -216,7 +216,7 @@ export interface ConsumedDetailItem {
  * 注入的 `tx` 完全一致。供 AI 任务（27.1）与 Webhook 成功编排（18.2）在其自身事务内
  * 调用 `consume`/`grant`/`createSubscription({ tx })`，实现「单事务」原子性。
  */
-export type BillingTransaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
+export type BillingTransaction = Database;
 
 export interface ConsumeCreditsParams {
   credits: number;
@@ -356,7 +356,7 @@ async function consumeInOwnTransaction(
 ): Promise<ConsumeCreditsResult> {
   for (let attempt = 1; attempt <= MAX_CONSUME_ATTEMPTS; attempt += 1) {
     try {
-      return await db().transaction((tx) => consumeWithinTransaction(tx, params));
+      return await d1Transaction(db(), (tx) => consumeWithinTransaction(tx, params));
     } catch (error) {
       if (!(error instanceof CreditContentionError) || attempt === MAX_CONSUME_ATTEMPTS) {
         throw error;
@@ -394,7 +394,7 @@ export interface RevokeCreditsParams {
 export async function revoke(params: RevokeCreditsParams): Promise<void> {
   const { consumeCreditId } = params;
 
-  await db().transaction(async (tx) => {
+  await d1Transaction(db(), async (tx) => {
     // 先原子抢占：只有把 active 改成 deleted 的事务才能执行返还。
     // 并发/重复调用时，后到者 affected rows 为 0，直接无操作。
     const [claimed] = await tx

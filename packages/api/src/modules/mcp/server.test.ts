@@ -65,7 +65,6 @@ describe("mcp module", () => {
   beforeAll(async () => {
     const { mcpHandler } = await import("./server");
     harness = await createMcpTestHarness(
-      "mcp-server",
       () => (request) =>
         mcpHandler.fetch(request, {
           authInfo: { clientId: getCurrentUserId(), scopes: ["mcp"], token: "" },

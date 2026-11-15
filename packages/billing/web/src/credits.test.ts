@@ -33,12 +33,12 @@ async function seedGrant(credits: number): Promise<void> {
 
 describe("credits concurrency", () => {
   beforeAll(async () => {
-    state.database = await createBillingTestDatabase("credits");
+    state.database = await createBillingTestDatabase();
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     if (state.database) {
-      closeBillingTestDatabase(state.database);
+      await closeBillingTestDatabase(state.database);
     }
   });
 

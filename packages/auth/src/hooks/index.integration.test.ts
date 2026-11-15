@@ -78,7 +78,7 @@ const invokeCreateAfterHook = async () => {
 };
 
 beforeAll(async () => {
-  state.database = await createAuthTestDatabase("new-user-hooks");
+  state.database = await createAuthTestDatabase();
 });
 
 beforeEach(async () => {
@@ -93,11 +93,11 @@ beforeEach(async () => {
   await seedCreatedUser();
 });
 
-afterAll(() => {
+afterAll(async () => {
   vi.unstubAllEnvs();
   vi.useRealTimers();
   if (state.database) {
-    closeAuthTestDatabase(state.database);
+    await closeAuthTestDatabase(state.database);
   }
 });
 

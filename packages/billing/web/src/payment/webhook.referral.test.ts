@@ -169,7 +169,7 @@ async function seedSubscription(subscriptionId: string, userId: string) {
 
 describe("webhook → 分销记账挂载", () => {
   beforeAll(async () => {
-    state.database = await createBillingTestDatabase("webhook-referral");
+    state.database = await createBillingTestDatabase();
   });
 
   beforeEach(async () => {
@@ -242,9 +242,9 @@ describe("webhook → 分销记账挂载", () => {
     expect(rows[0]!.commissionCredits).toBe(300); // 1000 × 30%
   });
 
-  afterAll(() => {
+  afterAll(async () => {
     if (state.database) {
-      closeBillingTestDatabase(state.database);
+      await closeBillingTestDatabase(state.database);
     }
   });
 });

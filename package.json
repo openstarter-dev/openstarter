@@ -34,10 +34,8 @@
     "package:desktop": "turbo -F desktop package",
     "release:desktop": "turbo -F desktop release",
     "env:init": "node scripts/setup-env.mjs",
-    "db:push": "turbo -F @openstarter/db db:push",
-    "db:studio": "turbo -F @openstarter/db db:studio",
     "db:generate": "turbo -F @openstarter/db db:generate",
-    "db:migrate": "turbo -F @openstarter/db db:migrate",
+    "db:migrate": "pnpm --filter web exec wrangler d1 migrations apply DB --local --persist-to .wrangler/state",
     "seed:admin": "turbo -F @openstarter/auth seed:admin",
     "gen:package": "node scripts/gen-package.mjs"
   },

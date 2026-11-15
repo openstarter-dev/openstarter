@@ -6,5 +6,6 @@ export default defineProject({
     include: ["src/**/*.test.ts"],
     name: "api",
     testTimeout: 30_000,
+    hookTimeout: 30_000,
   },
 });

@@ -5,10 +5,9 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "start": "node .output/server/index.mjs",
-    "serve": "vite preview",
-    "cf:build": "NITRO_PRESET=cloudflare_module vite build",
-    "cf:deploy": "pnpm cf:build && wrangler deploy",
+    "preview": "vite preview",
+    "deploy": "pnpm build && wrangler deploy",
+    "cf-typegen": "wrangler types",
     "generate:routes": "tsr generate",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
@@ -39,6 +38,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.69.1",
     "@mdx-js/rollup": "3.1.1",
     "@tanstack/react-query-devtools": "^5.91.1",
     "@tanstack/react-router-devtools": "^1.166.13",
@@ -50,10 +50,9 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^6.0.1",
     "jsdom": "^29.0.2",
-    "nitro": "3.0.260603-beta",
     "typescript": "catalog:",
     "vite": "^8.0.8",
     "vitest": "4.1.10",
-    "wrangler": "^4.98.0"
+    "wrangler": "^4.162.0"
   }
 }

@@ -92,11 +92,11 @@ const insertApiKey = async (values: {
 
 describe("getDashboardStats", () => {
   beforeAll(async () => {
-    state.database = await createApiTestDatabase("dashboard-stats");
+    state.database = await createApiTestDatabase();
   });
-  afterAll(() => {
+  afterAll(async () => {
     if (state.database) {
-      closeApiTestDatabase(state.database);
+      await closeApiTestDatabase(state.database);
     }
   });
   beforeEach(async () => {

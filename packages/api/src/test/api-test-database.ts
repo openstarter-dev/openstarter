@@ -1,8 +1,5 @@
-import { rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import type { Database } from "@openstarter/db";
-import { createSqliteTestDb } from "@openstarter/db/testing";
+import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
 import { sql } from "@openstarter/db/orm";
 
 const NOW_EXPR = "(cast((julianday('now') - 2440587.5)*86400000 as integer))";
@@ -194,19 +191,8 @@ const ALL_TABLES = [
   "user",
 ] as const;
 
-const databasePaths = new WeakMap<object, string>();
-
-const removeDatabaseFiles = (path: string) => {
-  rmSync(path, { force: true });
-  rmSync(`${path}-shm`, { force: true });
-  rmSync(`${path}-wal`, { force: true });
-};
-
-export const createApiTestDatabase = async (suiteName: string) => {
-  const databasePath = join(tmpdir(), `openstarter-api-${process.pid}-${suiteName}.sqlite`);
-  removeDatabaseFiles(databasePath);
-  const database = createSqliteTestDb(`file:${databasePath}`);
-  databasePaths.set(database, databasePath);
+export const createApiTestDatabase = async () => {
+  const database = await createSqliteTestDb();
   await CREATE_TABLE_STATEMENTS.reduce(async (previous, statement) => {
     await previous;
     await database.run(sql.raw(statement));
@@ -214,12 +200,8 @@ export const createApiTestDatabase = async (suiteName: string) => {
   return database;
 };
 
-export const closeApiTestDatabase = (database: Database) => {
-  const path = databasePaths.get(database);
-  if (path) {
-    removeDatabaseFiles(path);
-    databasePaths.delete(database);
-  }
+export const closeApiTestDatabase = async (database: Database) => {
+  await disposeSqliteTestDb(database);
 };
 
 export const resetApiTestDatabase = (database: Database) =>

@@ -73,16 +73,16 @@ const CREATE_REFERRAL_TABLES = [
 ];
 
 beforeAll(async () => {
-  state.database = await createApiTestDatabase("referral-service");
+  state.database = await createApiTestDatabase();
   const sql = (await import("@openstarter/db/orm")).sql;
   for (const stmt of CREATE_REFERRAL_TABLES) {
     await state.database.run(sql.raw(stmt));
   }
 });
 
-afterAll(() => {
+afterAll(async () => {
   if (state.database) {
-    closeApiTestDatabase(state.database);
+    await closeApiTestDatabase(state.database);
   }
   state.database = undefined;
 });

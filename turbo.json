@@ -11,25 +11,11 @@
     "build": {
       "dependsOn": ["^build", "transit"],
       "inputs": ["$TURBO_DEFAULT$"],
-      "outputs": ["dist/**", "src/routeTree.gen.ts", ".output/**", "**/*.tsbuildinfo"]
-    },
-    "cf:build": {
-      "dependsOn": ["^build", "transit"],
-      // wrangler.jsonc is git-ignored, so it is not part of $TURBO_DEFAULT$.
-      "inputs": ["$TURBO_DEFAULT$", "wrangler.jsonc"],
-      "outputs": [".output/**"]
-    },
-    "cf:deploy": {
-      // The script already runs `cf:build` itself, so no dependsOn here.
-      "cache": false
+      "outputs": ["dist/**", "src/routeTree.gen.ts", "**/*.tsbuildinfo"]
     },
     "zip": {
       "dependsOn": ["build"],
       "outputs": [".output/**"]
-    },
-    "start": {
-      "cache": false,
-      "persistent": true
     },
     "serve": {
       "cache": false,
@@ -64,18 +50,11 @@
       "cache": false,
       "persistent": true
     },
-    "db:push": {
-      "cache": false
-    },
     "db:generate": {
       "cache": false
     },
     "db:migrate": {
       "cache": false
-    },
-    "db:studio": {
-      "cache": false,
-      "persistent": true
     },
     "db:migrate:prod": {
       "cache": false
@@ -97,13 +76,11 @@
   // examples) — acceptable while caching is local + GitHub Actions only.
   "globalDependencies": ["apps/web/.env*"],
   "globalEnv": [
-    "DATABASE_URL",
     "VITE_APP_URL",
     "VITE_GOOGLE_CLIENT_ID",
     "VITE_GITHUB_ENABLED",
     "VITE_APPLE_ENABLED",
-    "OPENSTARTER_API_URL",
-    "NITRO_PRESET"
+    "OPENSTARTER_API_URL"
   ],
   "boundaries": {
     "tags": {

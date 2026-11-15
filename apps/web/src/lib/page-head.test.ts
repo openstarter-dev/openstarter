@@ -199,7 +199,11 @@ describe("buildPageHead", () => {
   });
 
   it("falls back to localhost when VITE_APP_URL is not set", () => {
-    delete process.env.VITE_APP_URL;
+    // worker-configuration.d.ts types process.env vars as required, so delete
+    // must go through Reflect to satisfy TS2790 (runtime behavior identical).
+    // worker-configuration.d.ts 将 vars 声明为必填，用 Reflect 删除以满足
+    // TS2790（运行时行为与 delete 完全一致）。
+    Reflect.deleteProperty(process.env, "VITE_APP_URL");
     const result = buildPageHead({ title: "Page", path: "/page" });
     expect(result.links).toContainEqual({
       rel: "canonical",

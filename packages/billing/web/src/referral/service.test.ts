@@ -62,7 +62,7 @@ async function seedReferralFixture(
 
 describe("recordCommission", () => {
   beforeAll(async () => {
-    state.database = await createBillingTestDatabase("referral-service");
+    state.database = await createBillingTestDatabase();
   });
 
   beforeEach(async () => {
@@ -183,8 +183,8 @@ describe("recordCommission", () => {
   });
 });
 
-afterAll(() => {
+afterAll(async () => {
   if (state.database) {
-    closeBillingTestDatabase(state.database);
+    await closeBillingTestDatabase(state.database);
   }
 });

@@ -1,4 +1,4 @@
-import type { createSqliteTestDb } from "@openstarter/db/testing";
+import type { Database } from "@openstarter/db";
 import { sql } from "@openstarter/db/orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
@@ -9,7 +9,7 @@ import {
   resetApiTestDatabase,
 } from "./api-test-database";
 
-const state: { database?: ReturnType<typeof createSqliteTestDb> } = {};
+const state: { database?: Database } = {};
 
 vi.mock("@openstarter/db/server", () => ({
   db: () => {
@@ -29,11 +29,11 @@ const getDatabase = (): NonNullable<typeof state.database> => {
 
 describe("api-test-database harness smoke", () => {
   beforeAll(async () => {
-    state.database = await createApiTestDatabase("smoke");
+    state.database = await createApiTestDatabase();
   });
-  afterAll(() => {
+  afterAll(async () => {
     if (state.database) {
-      closeApiTestDatabase(state.database);
+      await closeApiTestDatabase(state.database);
     }
   });
 

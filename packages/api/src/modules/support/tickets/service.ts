@@ -5,7 +5,7 @@ import {
   ticketMessage,
   user,
 } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import { d1Transaction, db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
 import { and, asc, count, desc, eq, inArray, like, or, type SQL } from "@openstarter/db/orm";
 
@@ -180,7 +180,7 @@ export function createTicket(params: CreateTicketParams): Promise<Ticket> {
   const ticketId = getUuid();
   const now = new Date();
 
-  return db().transaction(async (tx) => {
+  return d1Transaction(db(), async (tx) => {
     await tx.insert(ticket).values({
       id: ticketId,
       userId: params.userId,
@@ -213,7 +213,7 @@ export function addMessage(params: AddMessageParams): Promise<TicketMessage> {
   const now = new Date();
   const nextStatus = params.role === TICKET_ROLE.ADMIN ? TICKET_STATUS.REPLIED : TICKET_STATUS.OPEN;
 
-  return db().transaction(async (tx) => {
+  return d1Transaction(db(), async (tx) => {
     await tx.insert(ticketMessage).values({
       id: messageId,
       ticketId: params.ticketId,

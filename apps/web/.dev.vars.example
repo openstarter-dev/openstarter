@@ -1,0 +1,130 @@
+# openstarter 环境变量模板（全仓库唯一 env 事实源）
+# 用法：cp apps/web/.env.example apps/web/.env（或 pnpm env:init）
+# 留空即不启用；生产取值见 apps/web/.env.production.example
+
+# --- 基础 ---
+# 数据库为 Cloudflare D1：Workers 用 d1_databases 绑定；本地 dev/自托管/seed 由
+# getPlatformProxy 读取 apps/web/wrangler.jsonc 提供同一 binding（无需 env 配置）。
+
+# 应用名称与 origin：auth 回调、SSR canonical、邮件链接、其它端 API base 都以它为准
+
+# 生成：openssl rand -base64 48
+BETTER_AUTH_SECRET=replace-with-a-strong-secret-at-least-32-chars
+
+# --- 服务端认证开关（packages/auth 运行时读取）---
+# 关闭后密码登录/注册/密码重置全部禁用
+EMAIL_AUTH_ENABLED=true
+# 开启后新用户必须完成邮箱验证才能登录
+EMAIL_VERIFICATION_REQUIRED=false
+# 开启后所有新注册必须携带邀请码
+INVITE_CODE_REQUIRED=false
+# 匿名访客登录；默认关闭
+ANONYMOUS_AUTH_ENABLED=false
+# OAuth/Magic Link/OTP 开关；OAuth 省略时按对应 CLIENT_ID/SECRET 是否齐全自动判断
+# GOOGLE_AUTH_ENABLED=true
+GOOGLE_ONE_TAP_ENABLED=false
+# GITHUB_AUTH_ENABLED=true
+# APPLE_AUTH_ENABLED=true
+MAGIC_LINK_ENABLED=false
+EMAIL_OTP_ENABLED=false
+MAGIC_LINK_EXPIRES_IN=1800
+EMAIL_OTP_EXPIRES_IN=300
+# 新用户默认角色（可选）
+INITIAL_ROLE_ENABLED=false
+INITIAL_ROLE_NAME=
+
+# --- Web 前端全局配置（apps/web/src/config/index.ts 读取）---
+# Auth UI 按钮与表单显隐（需与上方服务端认证开关保持一致）
+# 仅 Google One Tap 前端弹窗需要公开 Client ID
+
+# Web 分析统计（GA4 / Plausible；留空不注入脚本）
+
+# Web 客服组件（Crisp / Tawk；填写对应 ID 后启用，设 false 可显式关闭）
+
+# --- 邮件（packages/email 运行时读取；留空则内容打到服务端日志）---
+# EMAIL_PROVIDER=resend（可选 resend | cloudflare）
+EMAIL_PROVIDER=resend
+RESEND_API_KEY=
+EMAIL_FROM=
+# Cloudflare Email Routing（当 EMAIL_PROVIDER=cloudflare 时填写）
+CLOUDFLARE_EMAIL_API_TOKEN=
+CLOUDFLARE_EMAIL_SENDER_EMAIL=
+
+# --- OAuth（成对填写才启用）---
+# 回调：${VITE_APP_URL}/api/auth/callback/google
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+
+# 回调：${VITE_APP_URL}/api/auth/callback/github
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+
+# client id = Services ID，secret = client_secret JWT
+APPLE_CLIENT_ID=
+APPLE_CLIENT_SECRET=
+APPLE_APP_BUNDLE_IDENTIFIER=
+
+# --- 积分、支付与返佣（packages/billing/web & packages/api 运行时读取）---
+# 新用户初始赠送积分
+INITIAL_CREDITS_ENABLED=false
+INITIAL_CREDITS_AMOUNT=0
+INITIAL_CREDITS_VALID_DAYS=0
+INITIAL_CREDITS_DESCRIPTION=
+
+# 返佣静态规则（已移除数据库 config 表，直接由 env 控制）
+REFERRAL_ENABLED=true
+# 基点制：1000 = 10%
+REFERRAL_DEFAULT_RATE_BPS=1000
+REFERRAL_MIN_SETTLE_CREDITS=100
+
+# 支付通道（DEFAULT_PAYMENT_PROVIDER 可选 stripe | paypal | alipay | wechat）
+DEFAULT_PAYMENT_PROVIDER=stripe
+STRIPE_SECRET_KEY=
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_SIGNING_SECRET=
+# PAYPAL_CLIENT_ID=
+# PAYPAL_CLIENT_SECRET=
+# PAYPAL_WEBHOOK_ID=
+# PAYPAL_ENVIRONMENT=sandbox
+# ALIPAY_APP_ID=
+# ALIPAY_PRIVATE_KEY=
+# ALIPAY_PUBLIC_KEY=
+# ALIPAY_NOTIFY_URL=
+# WECHAT_APP_ID=
+# WECHAT_MCH_ID=
+# WECHAT_PRIVATE_KEY=
+# WECHAT_API_V3_KEY=
+# WECHAT_SERIAL_NO=
+# WECHAT_NOTIFY_URL=
+# WECHAT_PLATFORM_CERT=
+# RevenueCat 移动端内购 Webhook（关闭或缺 secret 时 fail-closed）
+REVENUECAT_ENABLED=false
+REVENUECAT_WEBHOOK_SECRET=
+
+# --- 存储（packages/api/src/modules/storage 运行时读取）---
+# STORAGE_PROVIDER=r2 | s3；INLINE_IMAGE_MAX_KB 默认 500
+# STORAGE_ENDPOINT=
+# STORAGE_ACCESS_KEY=
+# STORAGE_SECRET_KEY=
+# STORAGE_BUCKET=
+# STORAGE_REGION=auto
+# STORAGE_PUBLIC_DOMAIN=
+# R2_ACCOUNT_ID=
+# R2_ACCESS_KEY=
+# R2_SECRET_KEY=
+# R2_BUCKET_NAME=
+# R2_DOMAIN=
+# R2_ENDPOINT=
+# R2_UPLOAD_PATH=
+# INLINE_IMAGE_MAX_KB=500
+
+# --- 跨端来源白名单（CSRF 原点校验）---
+# 默认只信任：VITE_APP_URL 自身 origin、MOBILE_APP_SCHEME://、Apple 登录域名。
+# 扩展以 Bearer 桥接会话时不需要下面两项；仅当浏览器扩展页面直接发起带 cookie 的
+# 请求时，才填具体扩展 ID。
+EXTENSION_ORIGIN=
+# 额外来源，逗号分隔；用于自建域名、局域网调试（如 http://192.168.1.10:3000）
+TRUSTED_ORIGINS=
+# 移动端深链 scheme，需与 apps/mobile/app.config.ts 的 scheme 一致
+MOBILE_APP_SCHEME=openstarter

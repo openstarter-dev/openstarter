@@ -1,3 +1,4 @@
+import type { Database } from "@openstarter/db";
 import {
   invitation,
   member,
@@ -9,13 +10,14 @@ import {
   twoFactor,
   user,
 } from "@openstarter/db/schema";
-import { createSqliteTestDb } from "@openstarter/db/testing";
+import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
 import { and, eq, sql } from "drizzle-orm";
-import { beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-const database = createSqliteTestDb(":memory:");
+let database: Database;
 
 beforeAll(async () => {
+  database = await createSqliteTestDb();
   await database.run(sql`
     CREATE TABLE user (
       id TEXT PRIMARY KEY NOT NULL,
@@ -129,6 +131,8 @@ beforeAll(async () => {
     )
   `);
 });
+
+afterAll(() => disposeSqliteTestDb(database));
 
 describe("Better Auth plugin SQLite production schema", () => {
   it("inserts, selects, and joins every enabled plugin model", async () => {
