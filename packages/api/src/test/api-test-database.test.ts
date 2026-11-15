@@ -1,5 +1,5 @@
 import type { createSqliteTestDb } from "@openstarter/db/testing";
-import { sql } from "drizzle-orm";
+import { sql } from "@openstarter/db/orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {

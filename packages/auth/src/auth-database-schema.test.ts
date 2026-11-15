@@ -4,7 +4,7 @@ import { admin } from "better-auth/plugins/admin";
 import { anonymous } from "better-auth/plugins/anonymous";
 import { organization } from "better-auth/plugins/organization";
 import { twoFactor } from "better-auth/plugins/two-factor";
-import { getTableColumns } from "drizzle-orm";
+import { getTableColumns } from "@openstarter/db/orm";
 import { describe, expect, it } from "vitest";
 
 import { authSchema, organizationTeams } from "./auth-database-schema";

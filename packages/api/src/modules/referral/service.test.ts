@@ -74,7 +74,7 @@ const CREATE_REFERRAL_TABLES = [
 
 beforeAll(async () => {
   state.database = await createApiTestDatabase("referral-service");
-  const sql = (await import("drizzle-orm")).sql;
+  const sql = (await import("@openstarter/db/orm")).sql;
   for (const stmt of CREATE_REFERRAL_TABLES) {
     await state.database.run(sql.raw(stmt));
   }
@@ -89,7 +89,7 @@ afterAll(() => {
 
 beforeEach(async () => {
   if (state.database) {
-    const sql = (await import("drizzle-orm")).sql;
+    const sql = (await import("@openstarter/db/orm")).sql;
     await state.database.run(sql.raw("DELETE FROM referral_relation"));
     await state.database.run(sql.raw("DELETE FROM commission"));
     await state.database.run(sql.raw("DELETE FROM referral"));
@@ -189,7 +189,7 @@ describe("getMyReferralStats", () => {
     await bindReferral({ code: codeA, userId: "userB" });
     await bindReferral({ code: codeA, userId: "userC" });
 
-    const sql = (await import("drizzle-orm")).sql;
+    const sql = (await import("@openstarter/db/orm")).sql;
     await db().run(sql`
       INSERT INTO commission (id, order_no, referrer_id, referred_user_id, base_amount, base_currency, rate, commission_credits, status)
       VALUES ('comm-1', 'order-1', 'userA', 'userB', 1000, 'USD', 1000, 100, 'pending')
@@ -213,7 +213,7 @@ describe("listMyCommissions", () => {
     await insertUser(db(), { email: "ref@example.com", id: "userA" });
     await insertUser(db(), { email: "ref1@example.com", id: "userB" });
 
-    const sql = (await import("drizzle-orm")).sql;
+    const sql = (await import("@openstarter/db/orm")).sql;
     for (let i = 0; i < 5; i++) {
       await db().run(sql`
         INSERT INTO commission (id, order_no, referrer_id, referred_user_id, base_amount, base_currency, rate, commission_credits, status)

@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { sql } from "drizzle-orm";
+import { sql } from "@openstarter/db/orm";
 import type { Database } from "@openstarter/db";
 import { createSqliteTestDb } from "@openstarter/db/testing";
 
@@ -182,7 +182,7 @@ afterAll(() => {
 beforeEach(async () => {
   state.mockGrant.mockClear();
   if (state.database) {
-    const drizzleSql = (await import("drizzle-orm")).sql;
+    const drizzleSql = (await import("@openstarter/db/orm")).sql;
     await state.database.run(drizzleSql.raw("DELETE FROM credit"));
     await state.database.run(drizzleSql.raw("DELETE FROM commission"));
     await state.database.run(drizzleSql.raw("DELETE FROM referral_relation"));

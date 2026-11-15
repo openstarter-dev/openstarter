@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { createSqliteTestDb } from "@openstarter/db/testing";
-import { sql } from "drizzle-orm";
+import { sql } from "@openstarter/db/orm";
 
 const CREATE_TABLE_STATEMENTS = [
   `create table user (

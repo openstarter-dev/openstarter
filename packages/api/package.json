@@ -30,7 +30,6 @@
     "@openstarter/shared": "workspace:*",
     "@tanstack/query-core": "^5.101.2",
     "aws4fetch": "1.0.20",
-    "drizzle-orm": "catalog:",
     "hono": "4.13.8",
     "zod": "catalog:"
   },

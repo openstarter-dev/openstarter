@@ -11,6 +11,9 @@
     "./server": {
       "default": "./src/server.ts"
     },
+    "./orm": {
+      "default": "./src/orm.ts"
+    },
     "./testing": {
       "default": "./src/testing/index.ts"
     }

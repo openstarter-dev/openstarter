@@ -7,7 +7,7 @@ import {
 } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
-import { and, asc, count, desc, eq, inArray, like, or, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, like, or, type SQL } from "@openstarter/db/orm";
 
 import {
   TICKET_ROLE,

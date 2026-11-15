@@ -1,6 +1,6 @@
 import { credit, user } from "@openstarter/db/schema";
 import type { Database } from "@openstarter/db/server";
-import { eq } from "drizzle-orm";
+import { eq } from "@openstarter/db/orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {

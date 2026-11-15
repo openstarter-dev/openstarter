@@ -710,9 +710,6 @@ importers:
       aws4fetch:
         specifier: 1.0.20
         version: 1.0.20
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.45.2(@cloudflare/workers-types@4.20260628.1)(@libsql/client@0.15.15)(@opentelemetry/api@1.9.1)(kysely@0.28.17)(mysql2@3.22.6(@types/node@26.0.1))(postgres@3.4.9)
       hono:
         specifier: 4.13.8
         version: 4.13.8
@@ -848,9 +845,6 @@ importers:
       '@openstarter/shared':
         specifier: workspace:*
         version: link:../../shared
-      drizzle-orm:
-        specifier: 'catalog:'
-        version: 0.45.2(@cloudflare/workers-types@4.20260628.1)(@libsql/client@0.15.15)(@opentelemetry/api@1.9.1)(kysely@0.28.17)(mysql2@3.22.6(@types/node@26.0.1))(postgres@3.4.9)
       stripe:
         specifier: ^18.5.0
         version: 18.5.0(@types/node@26.0.1)

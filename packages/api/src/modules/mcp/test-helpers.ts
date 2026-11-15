@@ -1,6 +1,6 @@
 import type { Database } from "@openstarter/db/server";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
-import { sql } from "drizzle-orm";
+import { sql } from "@openstarter/db/orm";
 import { vi } from "vitest";
 
 import {

@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "@openstarter/db/orm";
 
 import { CommissionStatus, getReferralConfig, type ReferralConfig } from "@openstarter/billing-web";
 import { grant } from "@openstarter/billing-web";

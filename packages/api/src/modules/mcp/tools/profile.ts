@@ -3,7 +3,7 @@ import { getBalance, getHistory, getSubscriptionStatusView } from "@openstarter/
 import { user as userTable } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import type { McpServer } from "@modelcontextprotocol/server";
-import { eq } from "drizzle-orm";
+import { eq } from "@openstarter/db/orm";
 
 import { creditHistoryQuerySchema } from "../../../schema/mcp";
 import { jsonContent, resolveUserId, toIsoString, withToolError } from "../shared";

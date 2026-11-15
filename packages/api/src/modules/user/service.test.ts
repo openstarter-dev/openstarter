@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { sql } from "@openstarter/db/orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Database } from "@openstarter/db";
 import { db } from "@openstarter/db/server";

@@ -1,7 +1,7 @@
 import { commission, referral, referralRelation } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
-import { count, desc, eq } from "drizzle-orm";
+import { count, desc, eq } from "@openstarter/db/orm";
 
 import { CommissionStatus } from "@openstarter/billing-web";
 
