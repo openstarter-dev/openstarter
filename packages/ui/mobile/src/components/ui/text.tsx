@@ -1,6 +1,6 @@
 import { cn } from "../../lib/utils";
 import { Slot } from "@rn-primitives/slot";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "@openstarter/ui-shared";
 import * as React from "react";
 import { Platform, Text as RNText, type Role } from "react-native";
 

@@ -16,13 +16,10 @@ catalog:
   react-dom: 19.2.7
 
   "@types/node": ^22.13.14
-  class-variance-authority: ^0.7.1
-  clsx: ^2.1.1
   dotenv: ^17.2.2
   drizzle-orm: ^0.45.1
   envin: ^1.2.0
   fast-check: 4.9.0
-  tailwind-merge: ^3.5.0
   typescript: ^6
   zod: ^4.1.13
 

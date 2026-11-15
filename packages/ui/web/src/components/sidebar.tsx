@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "@openstarter/ui-shared";
 import { PanelLeftIcon } from "lucide-react";
 import { Slot } from "radix-ui";
 

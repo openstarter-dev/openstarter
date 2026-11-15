@@ -2,7 +2,7 @@ import { Icon } from "./icon";
 import { TextClassContext } from "./text";
 import { cn } from "../../lib/utils";
 import * as TogglePrimitive from "@rn-primitives/toggle";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "@openstarter/ui-shared";
 import * as React from "react";
 import { Platform } from "react-native";
 

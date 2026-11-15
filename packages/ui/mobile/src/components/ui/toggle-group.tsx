@@ -3,7 +3,7 @@ import { TextClassContext } from "./text";
 import { toggleVariants } from "./toggle";
 import { cn } from "../../lib/utils";
 import * as ToggleGroupPrimitive from "@rn-primitives/toggle-group";
-import type { VariantProps } from "class-variance-authority";
+import type { VariantProps } from "@openstarter/ui-shared";
 import * as React from "react";
 import { Platform } from "react-native";
 

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva, type VariantProps } from "@openstarter/ui-shared";
 
 import { cn } from "@openstarter/ui-web/lib/utils";
 import { Button } from "@openstarter/ui-web/components/button";
