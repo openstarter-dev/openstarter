@@ -1,6 +1,6 @@
-import type { Database } from "@openstarter/db/server";
+import type { Database } from "../../db/server";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
-import { sql } from "@openstarter/db/orm";
+import { sql } from "../../db/orm";
 import { vi } from "vitest";
 
 import {
@@ -21,8 +21,8 @@ vi.mock("../auth", () => ({
 }));
 
 vi.mock(
-  "@openstarter/db/server",
-  async (importOriginal: () => Promise<typeof import("@openstarter/db/server")>) => {
+  "../../db/server",
+  async (importOriginal: () => Promise<typeof import("../../db/server")>) => {
     const actual = await importOriginal();
     return {
       ...actual,

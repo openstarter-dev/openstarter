@@ -1,7 +1,7 @@
 import { CreditStatus, CreditTransactionType } from "../billing/credits";
-import { apikey, credit, order, user as userTable } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
-import { and, count, desc, eq, gt, gte, isNull, or, sql } from "@openstarter/db/orm";
+import { apikey, credit, order, user as userTable } from "../../db/schema";
+import { db } from "../../db/server";
+import { and, count, desc, eq, gt, gte, isNull, or, sql } from "../../db/orm";
 
 export type UserOrder = typeof order.$inferSelect;
 

@@ -3,7 +3,7 @@
 // local D1 binding — the same engine and API as production Workers.
 // 本地 D1 binding 引导：Node 侧（vite dev SSR、自托管 Node、seed 脚本）在加载任何
 // 业务代码前调用 initLocalD1()，通过 getPlatformProxy 拿到与生产一致的本地 D1
-// binding，并写入 @openstarter/db/server 读取的 __CF_ENV__ 全局契约。
+// binding，并写入 @openstarter/api/db/server 读取的 __CF_ENV__ 全局契约。
 
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";

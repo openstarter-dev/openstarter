@@ -1,7 +1,7 @@
-import { type NewPost, type Post, post } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import { type NewPost, type Post, post } from "../../db/schema";
+import { db } from "../../db/server";
 import { getUuid } from "@openstarter/shared/id";
-import { and, count, desc, eq, isNull, like, or, type SQL } from "@openstarter/db/orm";
+import { and, count, desc, eq, isNull, like, or, type SQL } from "../../db/orm";
 
 import { SlugConflictError } from "./errors";
 import { PostStatus, PostType } from "../../schema/content/posts";

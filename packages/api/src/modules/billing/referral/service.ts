@@ -1,11 +1,11 @@
 // Referral commission ledger service (reads static/env referral rules, no DB config table).
 // 分销记账服务（从静态默认/环境变量读取返佣规则，不依赖数据库 config 表）。
 
-import type { Database } from "@openstarter/db/server";
-import { commission, referral, referralRelation } from "@openstarter/db/schema";
+import type { Database } from "../../../db/server";
+import { commission, referral, referralRelation } from "../../../db/schema";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
-import { eq } from "@openstarter/db/orm";
+import { eq } from "../../../db/orm";
 
 import { readBooleanEnv, readIntEnv } from "../../../lib/env";
 import {

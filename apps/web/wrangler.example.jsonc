@@ -63,7 +63,7 @@
       "binding": "DB",
       "database_name": "openstarter-db",
       "database_id": "<output-of-wrangler-d1-create>",
-      "migrations_dir": "../../packages/db/src/migrations/sqlite",
+      "migrations_dir": "../../packages/api/src/db/migrations/sqlite",
     },
   ],
 }

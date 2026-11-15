@@ -1,7 +1,7 @@
 import { CreditStatus, CreditTransactionType } from "../../billing/credits";
-import { credit, order, subscription, user } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
-import { and, count, eq, sum } from "@openstarter/db/orm";
+import { credit, order, subscription, user } from "../../../db/schema";
+import { db } from "../../../db/server";
+import { and, count, eq, sum } from "../../../db/orm";
 
 export interface AdminMetrics {
   creditsConsumed: number;

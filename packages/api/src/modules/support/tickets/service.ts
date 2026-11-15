@@ -1,13 +1,7 @@
-import {
-  type Ticket,
-  ticket,
-  type TicketMessage,
-  ticketMessage,
-  user,
-} from "@openstarter/db/schema";
-import { d1Transaction, db } from "@openstarter/db/server";
+import { type Ticket, ticket, type TicketMessage, ticketMessage, user } from "../../../db/schema";
+import { d1Transaction, db } from "../../../db/server";
 import { getUuid } from "@openstarter/shared/id";
-import { and, asc, count, desc, eq, inArray, like, or, type SQL } from "@openstarter/db/orm";
+import { and, asc, count, desc, eq, inArray, like, or, type SQL } from "../../../db/orm";
 
 import {
   TICKET_ROLE,

@@ -7,12 +7,12 @@
 //    持久化所选 `paymentProvider` 与结账会话标识 `paymentSessionId`（R10.5）。
 //  - 返回该渠道的结账链接/参数；微信支付另附二维码数据 `qrData`（R10.3）。
 //
-// 依赖分层：仅依赖 `@openstarter/db`（order 表 + db()）与 `@openstarter/shared`
+// 依赖分层：仅依赖 `../../../db`（order 表 + db()）与 `@openstarter/shared`
 // （id 生成），不依赖 api/auth；Webhook 成功编排（订阅创建/积分授予/置 paid）属
 // 任务 18，不在此实现。
 
-import { type NewOrder, order } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import { type NewOrder, order } from "../../../db/schema";
+import { db } from "../../../db/server";
 import { getUniSeq, getUuid } from "@openstarter/shared/id";
 import { getPaymentManager } from "./manager";
 import {

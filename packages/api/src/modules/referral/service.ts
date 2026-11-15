@@ -1,7 +1,7 @@
-import { commission, referral, referralRelation } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import { commission, referral, referralRelation } from "../../db/schema";
+import { db } from "../../db/server";
 import { getUuid } from "@openstarter/shared/id";
-import { count, desc, eq } from "@openstarter/db/orm";
+import { count, desc, eq } from "../../db/orm";
 
 import { CommissionStatus } from "../billing";
 

@@ -10,7 +10,7 @@ try {
 // deployed Workers alike) the official `cloudflare:workers` module exposes the
 // request env at module scope — grab it here so EVERY consumer (auth's top-level
 // db() included) sees the binding regardless of import order. On Node runtimes
-// the module does not exist: initLocalD1() (@openstarter/db/local, used by
+// the module does not exist: initLocalD1() (@openstarter/api/db/local, used by
 // seed-admin) or the test harness supplies the binding instead. The dynamic
 // import lives in cloudflare-env.mjs (see its header for why).
 // 自接线 Cloudflare env：workerd（dev 插件与线上）里官方 cloudflare:workers 模块在
@@ -30,9 +30,9 @@ import * as schema from "./schema";
 // One database engine everywhere: Drizzle's D1 driver. Workers get the binding
 // from the request env (set as __CF_ENV__ by the app entry); local dev,
 // self-hosted Node and seed scripts get a real local D1 via initLocalD1()
-// (@openstarter/db/local) BEFORE anything imports this module.
+// (@openstarter/api/db/local) BEFORE anything imports this module.
 // 统一使用 D1 驱动：Workers 从请求 env 拿 binding；本地/自托管/seed 必须先调用
-// initLocalD1()（@openstarter/db/local）再加载本模块。
+// initLocalD1()（@openstarter/api/db/local）再加载本模块。
 export type Database = DrizzleD1Database<typeof schema>;
 
 type D1Binding = {
@@ -64,7 +64,7 @@ function createDb(): Database {
 
   if (!binding) {
     throw new Error(
-      'D1 binding "DB" not found. Node runtimes (seed scripts) must call initLocalD1() from "@openstarter/db/local" before importing the db server module; Cloudflare Workers require a d1_databases binding named "DB".',
+      'D1 binding "DB" not found. Node runtimes (seed scripts) must call initLocalD1() from "@openstarter/api/db/local" before importing the db server module; Cloudflare Workers require a d1_databases binding named "DB".',
     );
   }
 

@@ -9,23 +9,10 @@
 // 任务 14.3 追加：`revoke`（原子返还并软删）、`getHistory`（分页流水）。
 // 任务 14.4 追加：`grantCreditsForNewUser`（受 Config 开关控制的新用户初始积分）。
 
-import { type Credit, credit, type NewCredit } from "@openstarter/db/schema";
-import { type Database, d1Transaction, db } from "@openstarter/db/server";
+import { type Credit, credit, type NewCredit } from "../../db/schema";
+import { type Database, d1Transaction, db } from "../../db/server";
 import { getSnowId, getUuid } from "@openstarter/shared/id";
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  gt,
-  gte,
-  isNotNull,
-  isNull,
-  ne,
-  or,
-  sql,
-  sum,
-} from "@openstarter/db/orm";
+import { and, asc, desc, eq, gt, gte, isNotNull, isNull, ne, or, sql, sum } from "../../db/orm";
 
 import { readBooleanEnv, readEnv, readIntEnv } from "../../lib/env";
 

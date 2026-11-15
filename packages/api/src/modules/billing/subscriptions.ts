@@ -1,7 +1,7 @@
 // @openstarter/api/modules/billing/subscriptions 子域（对齐 ShipAny `modules/subscriptions`）。
 //
 // 订阅生命周期管理（R11）。业务侧只依赖此处的服务函数与 `./payment/types` 的
-// 归一化 `SubscriptionStatus`，数据访问统一走 `@openstarter/db`。续费周期的积分
+// 归一化 `SubscriptionStatus`，数据访问统一走 `../../db`。续费周期的积分
 // 授予复用同包 `./credits` 的 `grant` + `calculateCreditExpirationTime`（不跨到
 // api/auth，保持依赖分层无环）。
 //
@@ -22,10 +22,10 @@ import {
   type NewSubscription,
   type Subscription,
   subscription,
-} from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+} from "../../db/schema";
+import { db } from "../../db/server";
 import { getSnowId, getUuid } from "@openstarter/shared/id";
-import { and, desc, eq, inArray } from "@openstarter/db/orm";
+import { and, desc, eq, inArray } from "../../db/orm";
 import {
   type BillingTransaction,
   calculateCreditExpirationTime,

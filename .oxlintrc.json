@@ -32,7 +32,7 @@
     },
     {
       "files": ["**/*.ts", "**/*.tsx"],
-      "excludeFiles": ["packages/db/**"],
+      "excludeFiles": ["packages/api/src/db/**"],
       "rules": {
         "no-restricted-imports": [
           "error",
@@ -40,13 +40,13 @@
             "paths": [
               {
                 "name": "drizzle-orm",
-                "message": "drizzle-orm is only allowed inside packages/db. Import query operators from '@openstarter/db/orm' instead. drizzle-orm 只允许在 packages/db 内直接使用，其他包请从 '@openstarter/db/orm' 导入。"
+                "message": "drizzle-orm is only allowed inside packages/api/src/db. Import query operators from '../db/orm' (or '@openstarter/api/db/orm') instead. drizzle-orm 只允许在 packages/api/src/db 内直接使用，其他代码请从 '../db/orm' 导入。"
               }
             ],
             "patterns": [
               {
                 "regex": "^drizzle-orm(/.*)?$",
-                "message": "drizzle-orm is only allowed inside packages/db. Import query operators from '@openstarter/db/orm' instead. drizzle-orm 只允许在 packages/db 内直接使用，其他包请从 '@openstarter/db/orm' 导入。"
+                "message": "drizzle-orm is only allowed inside packages/api/src/db. Import query operators from '../db/orm' (or '@openstarter/api/db/orm') instead. drizzle-orm 只允许在 packages/api/src/db 内直接使用，其他代码请从 '../db/orm' 导入。"
               }
             ]
           }

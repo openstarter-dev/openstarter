@@ -1,4 +1,4 @@
-import type { Database } from "@openstarter/db";
+import type { Database } from "../index";
 import {
   invitation,
   member,
@@ -9,8 +9,8 @@ import {
   teamMember,
   twoFactor,
   user,
-} from "@openstarter/db/schema";
-import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
+} from "./index";
+import { createSqliteTestDb, disposeSqliteTestDb } from "../testing";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 

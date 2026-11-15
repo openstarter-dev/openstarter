@@ -1,7 +1,7 @@
-import { sql } from "@openstarter/db/orm";
+import { sql } from "../../db/orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Database } from "@openstarter/db";
-import { db } from "@openstarter/db/server";
+import type { Database } from "../../db";
+import { db } from "../../db/server";
 import {
   closeApiTestDatabase,
   createApiTestDatabase,
@@ -14,8 +14,8 @@ const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
 }));
 
-vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
+vi.mock("../../db/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../db/server")>();
   return {
     ...actual,
     db: () => {

@@ -14,8 +14,8 @@ function requireEnv(name: string): string {
 
 // Production D1 migrations run over the d1-http driver; credentials come from CI.
 export default {
-  schema: "./src/schema/index.ts",
-  out: "./src/migrations/sqlite",
+  schema: "./src/db/schema/index.ts",
+  out: "./src/db/migrations/sqlite",
   dialect: "sqlite",
   driver: "d1-http",
   dbCredentials: {

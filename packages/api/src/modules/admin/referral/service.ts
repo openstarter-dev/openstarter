@@ -1,11 +1,11 @@
-import { and, count, desc, eq } from "@openstarter/db/orm";
+import { and, count, desc, eq } from "../../../db/orm";
 
 import { CommissionStatus, getReferralConfig, grant, type ReferralConfig } from "../../billing";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
 
-import { commission, referral, referralRelation } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import { commission, referral, referralRelation } from "../../../db/schema";
+import { db } from "../../../db/server";
 
 import { manualCreateBody } from "../../../schema/admin/referral";
 

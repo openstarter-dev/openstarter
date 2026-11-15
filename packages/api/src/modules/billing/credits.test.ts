@@ -1,4 +1,4 @@
-import type { Database } from "@openstarter/db/server";
+import type { Database } from "../../db/server";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { consume, getBalance, grant, revoke } from "./credits";
@@ -12,8 +12,8 @@ const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
 }));
 
-vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
+vi.mock("../../db/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../db/server")>();
   return {
     ...actual,
     db: () => {

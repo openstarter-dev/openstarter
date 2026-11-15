@@ -13,7 +13,7 @@ vi.mock("../lib/env", () => ({
   readEnv: vi.fn(() => state.nodeEnv),
 }));
 
-vi.mock("@openstarter/db/server", () => ({
+vi.mock("../db/server", () => ({
   db: () => state.database,
 }));
 

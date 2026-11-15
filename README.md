@@ -93,9 +93,9 @@ openstarter/
 │   ├── extension/   # Chrome browser extension (WXT + React)
 │   └── mini-app/    # WeChat mini-app (Taro)
 ├── packages/
-│   ├── api/         # Hono app (20+ routes) + AppType for RPC
-│   ├── auth/        # Better-Auth config + RBAC + API Keys + invite codes
-│   ├── db/          # Drizzle schema + dialect adapter
+│   ├── api/         # Hono app (20+ routes) + AppType for RPC; hosts the DB layer
+│   │                # (Drizzle schema, D1 migrations), better-auth server, billing
+│   ├── auth/        # Better-Auth clients (web/native/taro) + RBAC access definitions
 │   ├── shared/      # Response envelope, logging, ID, hash, config
 │   ├── ui/          # Shared UI components (web + mobile per-platform)
 │   ├── i18n/        # Internationalization (inlang/Paraglide)
@@ -121,7 +121,7 @@ pnpm dev
 
 `apps/web/.env` is the single environment source for the whole monorepo.
 Every entry point reads it directly — Vite for the web app, Node's built-in
-`process.loadEnvFile()` (in `packages/db`) for the server runtime, and each
+`process.loadEnvFile()` (in `packages/api`) for the server runtime, and each
 app's own build entry for the rest — so no global env wrapper is needed. Every
 app derives its API base URL from `VITE_APP_URL` (falling back to
 `http://localhost:3000`, so local dev needs no value). Better-auth's

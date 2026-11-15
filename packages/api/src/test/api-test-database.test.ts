@@ -1,5 +1,5 @@
-import type { Database } from "@openstarter/db";
-import { sql } from "@openstarter/db/orm";
+import type { Database } from "../db";
+import { sql } from "../db/orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
@@ -11,7 +11,7 @@ import {
 
 const state: { database?: Database } = {};
 
-vi.mock("@openstarter/db/server", () => ({
+vi.mock("../db/server", () => ({
   db: () => {
     if (!state.database) {
       throw new Error("test database not initialized");

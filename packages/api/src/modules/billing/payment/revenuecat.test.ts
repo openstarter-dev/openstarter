@@ -27,7 +27,7 @@ const dbState = vi.hoisted(() => ({
   lastQueriedTable: "" as string,
 }));
 
-vi.mock("@openstarter/db/server", () => ({
+vi.mock("../../../db/server", () => ({
   db: () => ({
     insert: () => ({
       values: (row: Record<string, unknown>) => {

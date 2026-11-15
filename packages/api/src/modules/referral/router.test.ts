@@ -1,14 +1,14 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { sql } from "@openstarter/db/orm";
-import type { Database } from "@openstarter/db";
-import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
+import { sql } from "../../db/orm";
+import type { Database } from "../../db";
+import { createSqliteTestDb, disposeSqliteTestDb } from "../../db/testing";
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
 }));
 
-vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
+vi.mock("../../db/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../db/server")>();
   return {
     ...actual,
     db: () => {
@@ -127,7 +127,7 @@ afterAll(async () => {
 
 beforeEach(async () => {
   if (state.database) {
-    const sql = (await import("@openstarter/db/orm")).sql;
+    const sql = (await import("../../db/orm")).sql;
     await state.database.run(sql.raw("DELETE FROM referral_relation"));
     await state.database.run(sql.raw("DELETE FROM commission"));
     await state.database.run(sql.raw("DELETE FROM referral"));

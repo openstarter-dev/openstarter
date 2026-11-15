@@ -1,5 +1,5 @@
-import type { Database } from "@openstarter/db/server";
-import { sql } from "@openstarter/db/orm";
+import type { Database } from "../../db/server";
+import { sql } from "../../db/orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 import {

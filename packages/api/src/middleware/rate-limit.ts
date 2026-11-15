@@ -1,9 +1,9 @@
-import { rateLimit as rateLimitTable } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import { rateLimit as rateLimitTable } from "../db/schema";
+import { db } from "../db/server";
 import { respErr } from "@openstarter/shared";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
-import { lt, sql } from "@openstarter/db/orm";
+import { lt, sql } from "../db/orm";
 import { createMiddleware } from "hono/factory";
 
 import { readEnv } from "../lib/env";

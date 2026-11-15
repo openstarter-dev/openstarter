@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import { sql } from "@openstarter/db/orm";
-import type { Database } from "@openstarter/db";
-import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
+import { sql } from "../../../db/orm";
+import type { Database } from "../../../db";
+import { createSqliteTestDb, disposeSqliteTestDb } from "../../../db/testing";
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
@@ -33,7 +33,7 @@ vi.mock("../../../middleware/rbac", () => {
   return { requirePermission };
 });
 
-vi.mock("@openstarter/db/server", () => {
+vi.mock("../../../db/server", () => {
   return {
     db: () => {
       if (!state.database) {
@@ -157,7 +157,7 @@ afterAll(async () => {
 beforeEach(async () => {
   state.mockGrant.mockClear();
   if (state.database) {
-    const drizzleSql = (await import("@openstarter/db/orm")).sql;
+    const drizzleSql = (await import("../../../db/orm")).sql;
     await state.database.run(drizzleSql.raw("DELETE FROM credit"));
     await state.database.run(drizzleSql.raw("DELETE FROM commission"));
     await state.database.run(drizzleSql.raw("DELETE FROM referral_relation"));

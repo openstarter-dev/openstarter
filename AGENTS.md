@@ -30,12 +30,12 @@ openstarter/
 │   └── mini-app/          # Taro (WeChat Mini App)
 │
 ├── packages/              # Shared libraries (published as @openstarter/*)
-│   ├── api/               # Hono RPC backend — the ONLY package that touches @openstarter/db
-│   │                      # (hosts better-auth server, credits, payment, subscriptions, referral)
+│   ├── api/               # Hono RPC backend — hosts the database layer (src/db: Drizzle
+│   │                      # schema, migrations, D1 client) plus better-auth server,
+│   │                      # credits, payment, subscriptions, referral
 │   ├── auth/              # Better-Auth clients only (client/{web,native,taro}) + rbac/access
 │   ├── billing/           # billing/mobile (Expo RevenueCat/Superwall client); server-side
 │   │                      # billing lives in packages/api (modules/billing)
-│   ├── db/                # Drizzle schema, migrations, seed scripts
 │   ├── email/             # React Email templates + providers (Resend, Cloudflare)
 │   ├── i18n/              # Per-platform i18n
 │   │   ├── web/           # @openstarter/i18n-web (web/auth/email, inlang/Paraglide)
@@ -55,6 +55,10 @@ The API is organized as modular domains under `src/modules/`, with each domain f
 ```
 src/
 ├── index.ts               # Hono app entry, route composition root
+├── db/                    # Database layer: Drizzle schema (schema/schema.sqlite.ts),
+│                          # D1 migrations (db/migrations/sqlite), runtime client
+│                          # (db/server.ts), local D1 bootstrap (db/local.ts),
+│                          # test factory (db/testing/)
 ├── middleware/            # Auth, RBAC, plan gating middleware
 ├── schema/                # All Zod validation schemas + domain value vocabularies
 │                          # (mirrors modules/: schema/user.ts, schema/admin/rbac.ts, schema/mcp.ts, ...)
@@ -140,18 +144,18 @@ import { inviteBatchBody, listQuery } from "../../../schema/admin/overview";
 
 ## Commands
 
-| Task                      | Command                                                    |
-| ------------------------- | ---------------------------------------------------------- |
-| **Install deps**          | `pnpm install`                                             |
-| **Dev (all/specific)**    | `pnpm dev` / `pnpm --filter web dev`                       |
-| **Build (all/specific)**  | `pnpm build` / `pnpm --filter api build`                   |
-| **Lint / Format**         | `pnpm lint` / `pnpm format`                                |
-| **Lint fix / Format fix** | `pnpm lint:fix` / `pnpm format:fix`                        |
-| **Test (all/specific)**   | `pnpm test` / `pnpm --filter @openstarter/api test`        |
-| **Test coverage**         | `pnpm test:coverage`                                       |
-| **Type check**            | `pnpm check-types`                                         |
-| **Database**              | `pnpm db:migrate` (local D1) / `pnpm -F @openstarter/db db:migrate:prod` |
-| **Services**              | `pnpm services:setup` / `services:start` / `services:stop` |
+| Task                      | Command                                                                   |
+| ------------------------- | ------------------------------------------------------------------------- |
+| **Install deps**          | `pnpm install`                                                            |
+| **Dev (all/specific)**    | `pnpm dev` / `pnpm --filter web dev`                                      |
+| **Build (all/specific)**  | `pnpm build` / `pnpm --filter api build`                                  |
+| **Lint / Format**         | `pnpm lint` / `pnpm format`                                               |
+| **Lint fix / Format fix** | `pnpm lint:fix` / `pnpm format:fix`                                       |
+| **Test (all/specific)**   | `pnpm test` / `pnpm --filter @openstarter/api test`                       |
+| **Test coverage**         | `pnpm test:coverage`                                                      |
+| **Type check**            | `pnpm check-types`                                                        |
+| **Database**              | `pnpm db:migrate` (local D1) / `pnpm -F @openstarter/api db:migrate:prod` |
+| **Services**              | `pnpm services:setup` / `services:start` / `services:stop`                |
 
 ## Environment
 
@@ -166,17 +170,18 @@ build-time `VITE_*` still come from `.env` via Vite. Vite's `.env.development` /
 
 - `apps/web` — Vite for the client; the server entry (`src/server.ts`, built
   via `@cloudflare/vite-plugin` with `main: @tanstack/react-start/server-entry`)
-  sets `__CF_ENV__` from the official `import { env } from "cloudflare:workers"`
-  module BEFORE dynamically importing `@openstarter/api`, because the
-  better-auth server (`packages/api/src/modules/auth/server.ts`) initializes
-  its db adapter at module top level. Vite `.env` is loaded for
+  imports `@openstarter/api` directly; `__CF_ENV__` is self-wired inside
+  `packages/api/src/db/server.ts` from the official
+  `import { env } from "cloudflare:workers"` module (the better-auth server in
+  `modules/auth/server.ts` initializes its db adapter at module top level, so
+  the binding must exist regardless of import order). Vite `.env` is loaded for
   `VITE_*` at build time; runtime vars come from wrangler `vars`/secrets and
   `.dev.vars` in dev
-- `packages/db` — `drizzle.shared.ts` (`loadWebEnv`) for drizzle-kit configs;
-  the runtime client (`src/server.ts`) is D1-only: it reads the `DB` binding
-  from `__CF_ENV__` (workerd request env, or the local one set by
-  `initLocalD1()` via wrangler `getPlatformProxy`)
-- `packages/api` — `scripts/seed-admin.ts` (pure Node; calls `initLocalD1()`)
+- `packages/api` — drizzle-kit configs at the package root (`drizzle.shared.ts`
+  provides `loadWebEnv`); the runtime db client (`src/db/server.ts`) is
+  D1-only: it reads the `DB` binding from `__CF_ENV__` (workerd request env,
+  or the local one set by `initLocalD1()` via wrangler `getPlatformProxy`);
+  `scripts/seed-admin.ts` (pure Node; calls `initLocalD1()`)
 - extension / mobile / mini-app — their build entries (`wxt.config.ts`,
   `scripts/env.mjs`, `config/index.ts`)
 
@@ -195,9 +200,9 @@ and deploy (official `@cloudflare/vite-plugin`), so bindings come from
 `wrangler.jsonc` directly; only seed scripts (pure Node) spin up a local D1 via
 `wrangler.getPlatformProxy` reading `apps/web/wrangler.jsonc` (state in
 `apps/web/.wrangler/state/v3`). There is no connection-string env key; tests run
-against in-memory miniflare D1 (`@openstarter/db/testing`). D1 rejects SQL
+against in-memory miniflare D1 (`@openstarter/api/db/testing`). D1 rejects SQL
 `BEGIN`/`SAVEPOINT`, so `db.transaction()` is unavailable — use `db.batch()`
-(atomic) or the `d1Transaction` helper from `@openstarter/db/server`
+(atomic) or the `d1Transaction` helper from `@openstarter/api/db/server`
 (non-atomic callback, callers stay idempotent).
 
 Extension / mobile / mini-app / cli / desktop read the web app address from
@@ -304,7 +309,7 @@ Apps share one Hono backend at `/api/*`. Deploy patterns:
 Database migrations: drizzle-kit only generates SQL (`db:generate`); applying
 runs through wrangler — `pnpm db:migrate` (`wrangler d1 migrations apply DB
 --local`) locally and `db:migrate:prod` (drizzle-kit d1-http) against the
-cloud database in `packages/db`.
+cloud database (drizzle-kit config lives in `packages/api`).
 
 ## Troubleshooting
 

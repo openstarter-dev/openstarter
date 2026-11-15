@@ -4,9 +4,9 @@
 // by billing service tests (subscription, order, credit, user) plus the
 // referral-domain tables (referral, referral_relation, commission).
 
-import type { Database } from "@openstarter/db";
-import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
-import { sql } from "@openstarter/db/orm";
+import type { Database } from "../db";
+import { createSqliteTestDb, disposeSqliteTestDb } from "../db/testing";
+import { sql } from "../db/orm";
 
 const NOW_EXPR = "(cast((julianday('now') - 2440587.5)*86400000 as integer))";
 

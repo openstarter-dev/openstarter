@@ -1,6 +1,6 @@
-import { credit, user } from "@openstarter/db/schema";
-import type { Database } from "@openstarter/db/server";
-import { eq } from "@openstarter/db/orm";
+import { credit, user } from "../../../db/schema";
+import type { Database } from "../../../db/server";
+import { eq } from "../../../db/orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -20,8 +20,8 @@ const state = vi.hoisted(() => ({
   snowSequence: 0,
 }));
 
-vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
+vi.mock("../../../db/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../db/server")>();
   return {
     ...actual,
     db: () => {

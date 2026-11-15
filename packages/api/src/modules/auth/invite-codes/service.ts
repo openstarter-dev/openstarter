@@ -1,11 +1,11 @@
 import { randomBytes } from "node:crypto";
-import type { InviteCode } from "@openstarter/db/schema";
-import { inviteCode, subscription, userInvite } from "@openstarter/db/schema";
-import { db } from "@openstarter/db/server";
+import type { InviteCode } from "../../../db/schema";
+import { inviteCode, subscription, userInvite } from "../../../db/schema";
+import { db } from "../../../db/server";
 import { getUuid } from "@openstarter/shared/id";
 import { NodeEnv } from "@openstarter/shared/constants";
 import { createTtlCache } from "@openstarter/shared/ttl-cache";
-import { and, asc, eq, sql } from "@openstarter/db/orm";
+import { and, asc, eq, sql } from "../../../db/orm";
 
 import { readEnv } from "../lib/runtime-env";
 

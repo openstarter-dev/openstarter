@@ -1,11 +1,11 @@
 import { PlatformRole } from "@openstarter/auth/rbac/access";
-import { account, user } from "@openstarter/db/schema";
+import { account, user } from "../src/db/schema";
 
-import { db } from "@openstarter/db/server";
+import { db } from "../src/db/server";
 import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 import { getUuid } from "@openstarter/shared/id";
 import { hashPassword } from "better-auth/crypto";
-import { and, eq } from "@openstarter/db/orm";
+import { and, eq } from "../src/db/orm";
 
 interface SeedOptions {
   email: string;

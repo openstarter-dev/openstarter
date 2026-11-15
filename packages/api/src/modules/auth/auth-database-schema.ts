@@ -13,7 +13,7 @@ import {
   twoFactor,
   user,
   verification,
-} from "@openstarter/db/schema";
+} from "../../db/schema";
 
 export const authSchema = {
   account,

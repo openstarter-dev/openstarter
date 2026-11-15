@@ -7,9 +7,8 @@ vi.mock("../../middleware/auth", () => ({
 
 const mapRevenueCatEventMock = vi.hoisted(() => vi.fn());
 vi.mock("./payment/revenuecat", async () => {
-  const actual = await vi.importActual<typeof import("./payment/revenuecat")>(
-    "./payment/revenuecat",
-  );
+  const actual =
+    await vi.importActual<typeof import("./payment/revenuecat")>("./payment/revenuecat");
   return {
     ...actual,
     mapRevenueCatEvent: (...args: unknown[]) => mapRevenueCatEventMock(...args),

@@ -1,12 +1,12 @@
 // 分销记账服务测试（db-backed，采用内存库注入模式）。
 //
-// 通过 vi.mock("@openstarter/db/server") 将 db() 重定向到内存 sqlite，再走正常 drizzle
+// 通过 vi.mock("../../../db/server") 将 db() 重定向到内存 sqlite，再走正常 drizzle
 // 查询断言 recordCommission 的记账行为（幂等 / 旁路 / 代理比例 / 关闭开关等）。
 
-import type { Database } from "@openstarter/db/server";
+import type { Database } from "../../../db/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { commission, referral, referralRelation } from "@openstarter/db/schema";
+import { commission, referral, referralRelation } from "../../../db/schema";
 import { getUuid } from "@openstarter/shared/id";
 
 import { recordCommission } from "./service";
@@ -22,8 +22,8 @@ const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
 }));
 
-vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
+vi.mock("../../../db/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../db/server")>();
   return {
     ...actual,
     db: () => {

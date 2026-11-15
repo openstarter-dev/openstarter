@@ -3,16 +3,10 @@
 // 验证 handlePaymentEvent 在 checkout.success / payment.success(renewal) 路径下自动调用 recordCommission，
 // 并在 commission 表生成 pending 记录。幂等性由 commission.orderNo 唯一约束兜底。
 
-import type { Database } from "@openstarter/db/server";
+import type { Database } from "../../../db/server";
 import { beforeAll, beforeEach, afterAll, describe, expect, it, vi } from "vitest";
 
-import {
-  commission,
-  order,
-  referral,
-  referralRelation,
-  subscription,
-} from "@openstarter/db/schema";
+import { commission, order, referral, referralRelation, subscription } from "../../../db/schema";
 import { getUuid } from "@openstarter/shared/id";
 
 import { handlePaymentEvent } from "./webhook";
@@ -30,8 +24,8 @@ const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
 }));
 
-vi.mock("@openstarter/db/server", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@openstarter/db/server")>();
+vi.mock("../../../db/server", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../db/server")>();
   return {
     ...actual,
     db: () => {

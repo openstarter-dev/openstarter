@@ -1,6 +1,6 @@
-import type { Database } from "@openstarter/db";
-import { createSqliteTestDb, disposeSqliteTestDb } from "@openstarter/db/testing";
-import { sql } from "@openstarter/db/orm";
+import type { Database } from "../db";
+import { createSqliteTestDb, disposeSqliteTestDb } from "../db/testing";
+import { sql } from "../db/orm";
 
 const CREATE_TABLE_STATEMENTS = [
   `create table user (

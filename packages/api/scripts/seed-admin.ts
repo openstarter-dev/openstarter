@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { initLocalD1 } from "@openstarter/db/local";
+import { initLocalD1 } from "../src/db/local";
 
 const ENV_FILE = fileURLToPath(new URL("../../../apps/web/.env", import.meta.url));
 if (!existsSync(ENV_FILE)) {
@@ -37,6 +37,6 @@ for (const line of content.split("\n")) {
 }
 
 // seed 写入的是本地 D1（与 dev 同一份数据），先取 binding 再加载业务实现
-// （seed-admin-impl 顶层经 @openstarter/db/server 拿 db）。
+// （seed-admin-impl 顶层经 ../src/db/server 拿 db）。
 await initLocalD1();
 await import("./seed-admin-impl");

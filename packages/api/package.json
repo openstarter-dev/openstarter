@@ -8,6 +8,9 @@
     "./auth": {
       "default": "./src/modules/auth/index.ts"
     },
+    "./db": {
+      "default": "./src/db/index.ts"
+    },
     "./client": {
       "default": "./src/client/index.ts"
     },
@@ -20,6 +23,8 @@
   },
   "scripts": {
     "seed:admin": "pnpm dlx tsx scripts/seed-admin.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:prod": "drizzle-kit migrate --config=drizzle.config.prod.ts",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "check-types": "tsc --noEmit"
@@ -33,19 +38,22 @@
     "@modelcontextprotocol/client": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0",
     "@openstarter/auth": "workspace:*",
-    "@openstarter/db": "workspace:*",
     "@openstarter/email": "workspace:*",
     "@openstarter/i18n-web": "workspace:*",
     "@openstarter/shared": "workspace:*",
     "@tanstack/query-core": "^5.101.2",
     "aws4fetch": "1.0.20",
     "better-auth": "1.7.22",
+    "drizzle-orm": "^0.45.1",
     "hono": "4.13.8",
     "stripe": "^18.5.0",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.31.8",
+    "miniflare": "4.20260714.0",
     "typescript": "catalog:",
-    "vitest": "4.1.10"
+    "vitest": "4.1.10",
+    "wrangler": "^4.98.0"
   }
 }
