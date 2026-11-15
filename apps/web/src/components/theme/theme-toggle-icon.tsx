@@ -1,6 +1,6 @@
 import { Button } from "@openstarter/ui-web/components/button";
 import { Moon, Sun } from "@openstarter/ui-web/icons";
-import { useTheme } from "next-themes";
+import { useTheme } from "@openstarter/ui-web/theme";
 import { useEffect, useState } from "react";
 
 export function ThemeToggleIcon() {

@@ -26,7 +26,7 @@ vi.mock("@/lib/auth-client", () => ({
   },
 }));
 
-vi.mock("next-themes", () => ({
+vi.mock("@openstarter/ui-web/theme", () => ({
   useTheme: () => ({ setTheme: vi.fn(), theme: "system" }),
 }));
 

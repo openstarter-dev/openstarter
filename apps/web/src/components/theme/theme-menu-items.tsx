@@ -3,7 +3,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from "@openstarter/ui-web/components/dropdown-menu";
-import { useTheme } from "next-themes";
+import { useTheme } from "@openstarter/ui-web/theme";
 import { useEffect, useState } from "react";
 
 const THEME_OPTIONS = [

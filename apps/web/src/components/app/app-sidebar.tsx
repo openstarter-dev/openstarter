@@ -26,7 +26,7 @@ import { Skeleton } from "@openstarter/ui-web/components/skeleton";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link, useMatchRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { Globe, LogOut, Moon, Sun, User, UserCog } from "@openstarter/ui-web/icons";
-import { useTheme } from "next-themes";
+import { useTheme } from "@openstarter/ui-web/theme";
 import { useEffect, useState } from "react";
 
 import { ManageAccountDialog } from "@/components/app/manage-account-dialog";
