@@ -1,5 +1,5 @@
+import type { InferResponseType } from "@openstarter/api/client";
 import { keepPreviousData, mutationOptions, queryOptions } from "@tanstack/react-query";
-import type { InferResponseType } from "hono/client";
 
 import { client, unwrapMutation, unwrapQuery, withAbort } from "@/lib/api";
 import { LIST_PAGE_SIZE } from "@/lib/list-search";

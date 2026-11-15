@@ -39,4 +39,22 @@ export function createApiClient({ baseUrl, ...options }: ApiClientOptions): ApiC
 /** Hono RPC 的 abort 参数写法，供 queryFn 透传 AbortSignal。 */
 export const withAbort = (signal: AbortSignal) => ({ init: { signal } }) as const;
 
+/** 类型工具透传：消费方从本包导入 RPC 类型工具，无需直接依赖 hono。 */
+export type { InferResponseType } from "hono/client";
+
+/** hc<AppType> 的原始 client 类型（不带全局错误包装），供 SSR 内部桥接使用。 */
+export type InternalRpcClient = ReturnType<typeof hc<AppType>>;
+
+/**
+ * SSR 内部 RPC client：请求经 app.fetch 进程内直达 Hono app，不产生真实网络往返。
+ * baseUrl 仅用于满足 Request 的绝对地址要求，可为任意假 host（如 http://blog.internal）。
+ */
+export async function createInternalRpc(baseUrl: string): Promise<InternalRpcClient> {
+  const { app } = await import("../index");
+  return hc<AppType>(baseUrl, {
+    fetch: (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
+      Promise.resolve(app.fetch(new Request(input, init))),
+  });
+}
+
 export * from "./errors";

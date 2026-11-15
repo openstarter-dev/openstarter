@@ -48,7 +48,6 @@
     "expo-updates": "~55.0.33",
     "expo-video": "~55.0.21",
     "expo-web-browser": "~55.0.20",
-    "hono": "catalog:",
     "react": "19.2.0",
     "react-native": "0.83.10",
     "react-native-css-interop": "0.2.6",

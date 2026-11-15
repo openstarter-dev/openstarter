@@ -1,6 +1,5 @@
-import type { AppType } from "@openstarter/api";
+import { createInternalRpc } from "@openstarter/api/client";
 import { baseLocale, locales, localizeUrl } from "@openstarter/i18n-web/runtime";
-import { hc } from "hono/client";
 
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";
 
@@ -83,17 +82,9 @@ function urlForLocale(origin: string, path: string, locale: Locale): string {
   return localizeUrl(`${origin}${path || "/"}`, { locale }).href;
 }
 
-async function createRpc() {
-  const { app } = await import("@openstarter/api");
-  return hc<AppType>(INTERNAL_RPC_BASE, {
-    fetch: (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
-      Promise.resolve(app.fetch(new Request(input, init))),
-  });
-}
-
 export async function fetchSeoArticles(): Promise<SeoArticle[]> {
   try {
-    const rpc = await createRpc();
+    const rpc = await createInternalRpc(INTERNAL_RPC_BASE);
     const res = await rpc.api.seo.articles.$get();
     if (!res.ok) {
       return [];
@@ -107,7 +98,7 @@ export async function fetchSeoArticles(): Promise<SeoArticle[]> {
 
 export async function fetchSeoArticlesWithContent(): Promise<SeoArticleWithContent[]> {
   try {
-    const rpc = await createRpc();
+    const rpc = await createInternalRpc(INTERNAL_RPC_BASE);
     const res = await rpc.api.seo.articles.full.$get();
     if (!res.ok) {
       return [];

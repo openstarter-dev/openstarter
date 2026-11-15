@@ -1,7 +1,6 @@
-import type { AppType } from "@openstarter/api";
+import { createInternalRpc } from "@openstarter/api/client";
 import { createTtlCache } from "@openstarter/shared/ttl-cache";
 import { createServerFn } from "@tanstack/react-start";
-import { hc } from "hono/client";
 import { z } from "zod";
 
 import { localeMiddleware } from "@/middleware/locale";
@@ -20,14 +19,6 @@ const blogListInput = z.object({
 const blogSlugInput = z.object({
   slug: z.string().min(1).max(200),
 });
-
-async function createRpc() {
-  const { app } = await import("@openstarter/api");
-  return hc<AppType>(INTERNAL_RPC_BASE, {
-    fetch: (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
-      Promise.resolve(app.fetch(new Request(input, init))),
-  });
-}
 
 function buildListQuery(input: z.infer<typeof blogListInput>): {
   category?: string;
@@ -48,7 +39,7 @@ function buildListQuery(input: z.infer<typeof blogListInput>): {
 }
 
 async function fetchBlogList(input: z.infer<typeof blogListInput>) {
-  const rpc = await createRpc();
+  const rpc = await createInternalRpc(INTERNAL_RPC_BASE);
   const res = await rpc.api.blog.$get({ query: buildListQuery(input) });
   if (!res.ok) {
     throw new Error(`Blog list request failed (HTTP ${res.status})`);
@@ -62,7 +53,7 @@ async function fetchBlogList(input: z.infer<typeof blogListInput>) {
 }
 
 async function fetchBlogPost(slug: string) {
-  const rpc = await createRpc();
+  const rpc = await createInternalRpc(INTERNAL_RPC_BASE);
   const res = await rpc.api.blog[":slug"].$get({ param: { slug } });
   if (res.status === NOT_FOUND_STATUS) {
     return null;

@@ -1,5 +1,5 @@
+import type { InferResponseType } from "@openstarter/api/client";
 import { mutationOptions } from "@tanstack/react-query";
-import type { InferResponseType } from "hono/client";
 
 import { client, unwrapMutation } from "@/lib/api";
 
