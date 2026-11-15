@@ -21,7 +21,6 @@ export default defineConfig({
     tsconfigPaths: true,
     alias: isCloudflareBuild
       ? {
-          mysql2: driverStub,
           "@libsql/client": driverStub,
           "drizzle-orm/libsql": driverStub,
           tslib: tslibEsm,

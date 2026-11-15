@@ -1,9 +1,9 @@
 import type { AppType } from "@openstarter/api";
+import { createTtlCache } from "@openstarter/shared/ttl-cache";
 import { createServerFn } from "@tanstack/react-start";
 import { hc } from "hono/client";
 import { z } from "zod";
 
-import { createTtlCache } from "@/lib/ttl-cache";
 import { localeMiddleware } from "@/middleware/locale";
 
 const INTERNAL_RPC_BASE = "http://blog.internal";

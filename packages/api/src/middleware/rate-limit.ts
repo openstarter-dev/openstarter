@@ -3,13 +3,21 @@ import { db } from "@openstarter/db/server";
 import { respErr } from "@openstarter/shared";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
-import { sql } from "drizzle-orm";
+import { lt, sql } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 
 import { readEnv } from "../lib/env";
 
 const MS_PER_SECOND = 1000;
 const STATUS_TOO_MANY_REQUESTS = 429;
+
+// Rows whose last hit is older than this can no longer affect any configured window
+// (windows in this repo are ≤ 60s); a sweep reclaims them so the table stays bounded.
+// 最后命中早于该时长的行已无法影响任何窗口（当前各窗口 ≤ 60s），定期回收防止表无界增长。
+const RATE_LIMIT_RETENTION_MS = 60 * 60 * 1000;
+// Run the sweep on ~1% of requests: amortized cost is negligible on D1.
+// 约 1% 的请求顺带执行回收：分摊后对 D1 的额外开销可忽略。
+const RATE_LIMIT_SWEEP_PROBABILITY = 0.01;
 
 export interface RateLimitOptions {
   /** Max requests allowed per window. */
@@ -60,6 +68,16 @@ async function hit(key: string, windowMs: number) {
 }
 
 /**
+ * Delete stale rows (also written by better-auth's DB rate limiter, which shares the table).
+ * 回收过期行（better-auth 的 DB 限流共用此表，一并覆盖）。
+ */
+async function sweepExpiredRows(now: number): Promise<void> {
+  await db()
+    .delete(rateLimitTable)
+    .where(lt(rateLimitTable.lastRequest, now - RATE_LIMIT_RETENTION_MS));
+}
+
+/**
  * Fixed-window rate limit backed by the shared `rate_limit` table.
  * Mount it after `requireAuth` to limit per user; otherwise it limits per client IP.
  * Fails open on storage errors and is disabled in tests.
@@ -83,6 +101,11 @@ export function rateLimit(options: RateLimitOptions) {
 
     try {
       const { count, lastRequest, now } = await hit(`api:${options.scope}:${identity}`, windowMs);
+      if (Math.random() < RATE_LIMIT_SWEEP_PROBABILITY) {
+        await sweepExpiredRows(now).catch((error) => {
+          logger.warn("[api] rate limit sweep failed", error);
+        });
+      }
       if (count > options.max) {
         const retryAfter = Math.max(1, Math.ceil((lastRequest + windowMs - now) / MS_PER_SECOND));
         c.header("Retry-After", String(retryAfter));

@@ -1,9 +1,6 @@
 import { createDb } from "./factory/create-db";
 import { env } from "./config/env";
-import { isCloudflareWorker } from "./utils/runtime";
 import type { Database, DbConfig } from "./types";
-
-let cachedDb: Database | null = null;
 
 function resolveDbConfigFromEnv(): DbConfig {
   return {
@@ -11,21 +8,11 @@ function resolveDbConfigFromEnv(): DbConfig {
   };
 }
 
+// Instance caching lives in drivers/d1.ts, keyed by the active D1 binding identity so
+// Workers reloads never reuse a stale binding; local dev caches the libsql client.
+// 实例缓存收敛在 drivers/d1.ts：按当前 D1 binding 身份缓存（Workers 热重载不会复用旧实例），本地开发缓存 libsql client。
 export function db(): Database {
-  if (cachedDb) {
-    return cachedDb;
-  }
-
-  const config = resolveDbConfigFromEnv();
-  const instance = createDb(config);
-
-  // Avoid module-level caching on Cloudflare Workers for both TCP and D1 bindings
-  // Cloudflare Workers 下跳过模块级缓存，避免跨请求复用过期的连接或 D1 binding
-  if (!isCloudflareWorker) {
-    cachedDb = instance;
-  }
-
-  return instance;
+  return createDb(resolveDbConfigFromEnv());
 }
 
 export { createDb } from "./factory/create-db";

@@ -3,7 +3,11 @@ import type { InviteCode } from "@openstarter/db/schema";
 import { inviteCode, subscription, userInvite } from "@openstarter/db/schema";
 import { db } from "@openstarter/db/server";
 import { getUuid } from "@openstarter/shared/id";
+import { NodeEnv } from "@openstarter/shared/constants";
+import { createTtlCache } from "@openstarter/shared/ttl-cache";
 import { and, asc, eq, sql } from "drizzle-orm";
+
+import { readEnv } from "../lib/runtime-env";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 12;
@@ -217,23 +221,34 @@ export async function redeemInviteCode(params: {
 
 export type UserPlan = "none" | "trial" | "expired" | "member";
 
-export async function getUserPlan(userId: string): Promise<{ plan: UserPlan; trialEndsAt?: Date }> {
+export interface UserPlanResult {
+  plan: UserPlan;
+  trialEndsAt?: Date;
+}
+
+// Per-isolate TTL cache: plan-gate runs on every authed request; subscription/trial changes
+// propagate within this TTL, which is acceptable for feature gating.
+// 单 isolate TTL 缓存：plan-gate 每个请求都会调用；套餐/试用变化在 TTL 内生效，门控可接受。
+const PLAN_CACHE_TTL_MS = 30_000;
+const planCache = createTtlCache<UserPlanResult>({ maxEntries: 1000, ttlMs: PLAN_CACHE_TTL_MS });
+
+async function computeUserPlan(userId: string): Promise<UserPlanResult> {
   const database = db();
 
-  const [activeSub] = await database
-    .select()
-    .from(subscription)
-    .where(and(eq(subscription.userId, userId), eq(subscription.status, "active")))
-    .limit(1);
-  if (activeSub) {
+  const [activeSubs, invites] = await Promise.all([
+    database
+      .select()
+      .from(subscription)
+      .where(and(eq(subscription.userId, userId), eq(subscription.status, "active")))
+      .limit(1),
+    database.select().from(userInvite).where(eq(userInvite.userId, userId)).limit(1),
+  ]);
+
+  if (activeSubs.length > 0) {
     return { plan: "member" };
   }
 
-  const [invite] = await database
-    .select()
-    .from(userInvite)
-    .where(eq(userInvite.userId, userId))
-    .limit(1);
+  const invite = invites[0];
   if (!invite) {
     return { plan: "none" };
   }
@@ -242,4 +257,11 @@ export async function getUserPlan(userId: string): Promise<{ plan: UserPlan; tri
     return { plan: "trial", trialEndsAt: invite.trialEndsAt };
   }
   return { plan: "expired", trialEndsAt: invite.trialEndsAt };
+}
+
+export async function getUserPlan(userId: string): Promise<UserPlanResult> {
+  if (readEnv("NODE_ENV") === NodeEnv.TEST) {
+    return computeUserPlan(userId);
+  }
+  return planCache.wrap(userId, () => computeUserPlan(userId));
 }

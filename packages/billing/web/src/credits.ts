@@ -251,24 +251,21 @@ async function consumeWithinTransaction(
   const { userId, credits: amount } = params;
   const now = new Date();
 
-  // 1. 事务内核对可用余额；不足则整体拒绝、不落任何变更（R13.5）。
-  const [balanceRow] = await tx
-    .select({ total: sum(credit.remainingCredits) })
-    .from(credit)
-    .where(validGrantConditions(userId, now));
-  if (toBalance(balanceRow?.total) < amount) {
-    return { success: false };
-  }
-
-  // 2. 取全部有效批次，按 `expiresAt ASC`（null 最后）排序：最早到期者优先（FIFO）。
+  // 1. 取全部有效批次，按 `expiresAt ASC`（null 最后）排序：最早到期者优先（FIFO）。
   //    `case when expires_at is null then 1 else 0 end` 在三方言下等价，保证 null 排最后。
+  //    余额即本结果之和 —— 单次扫描同时完成「余额核对」与「取批」（R13.3、R13.5）。
   const batches = await tx
     .select()
     .from(credit)
     .where(validGrantConditions(userId, now))
     .orderBy(sql`case when ${credit.expiresAt} is null then 1 else 0 end`, asc(credit.expiresAt));
 
-  // 3. 纯计算逐批扣减方案（无 I/O）：记录每批扣减额。
+  const balance = batches.reduce((total, batch) => total + batch.remainingCredits, 0);
+  if (balance < amount) {
+    return { success: false };
+  }
+
+  // 2. 纯计算逐批扣减方案（无 I/O）：记录每批扣减额。
   let remaining = amount;
   const plan: { amount: number; creditId: string }[] = [];
   for (const batch of batches) {
@@ -280,7 +277,7 @@ async function consumeWithinTransaction(
     remaining -= take;
   }
 
-  // 4. 逐批条件扣减：`remaining = remaining - take` 且要求余额仍足够。
+  // 3. 逐批条件扣减：`remaining = remaining - take` 且要求余额仍足够。
   //    并发消费者若先提交，后者的 affected rows 为 0，抛冲突并回滚整个事务。
   //    D1 下 `transaction` 不提供回滚，故失败时手动返还已扣批次。
   const applied: ConsumedDetailItem[] = [];
@@ -297,7 +294,7 @@ async function consumeWithinTransaction(
       applied.push(item);
     }
 
-    // 5. 写入一条 consume 流水，`consumedDetail` 保存逐批明细 `[{ creditId, amount }]`。
+    // 4. 写入一条 consume 流水，`consumedDetail` 保存逐批明细 `[{ creditId, amount }]`。
     const consumedCredit: NewCredit = {
       consumedDetail: JSON.stringify(plan),
       credits: -amount,

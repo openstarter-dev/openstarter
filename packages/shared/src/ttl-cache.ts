@@ -11,6 +11,10 @@ interface Entry<V> {
   value: V;
 }
 
+/**
+ * In-process TTL cache with FIFO eviction (per isolate/instance, no cross-process sync).
+ * 进程内 TTL 缓存（单 isolate/实例，不跨进程同步），FIFO 逐出。
+ */
 export function createTtlCache<V>(options: { ttlMs: number; maxEntries?: number }): TtlCache<V> {
   const { ttlMs } = options;
   const maxEntries = options.maxEntries ?? 128;

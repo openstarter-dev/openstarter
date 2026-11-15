@@ -135,6 +135,18 @@ function aggregateTrendByDay(
   return byDay;
 }
 
+const toNumber = (value: unknown): number => {
+  const parsed = typeof value === "number" ? value : Number.parseInt(String(value ?? "0"), 10);
+  return Number.isNaN(parsed) ? 0 : Math.abs(parsed);
+};
+
+/**
+ * Dashboard aggregates in 3 round trips instead of one query per metric:
+ * 1. credit window rows → 30-day trend buckets + grant/consume sums (JS aggregation)
+ * 2. orders grouped by currency → total/paid counts, per-currency paid totals, latest paid currency
+ * 3. active API keys count
+ * 仪表盘聚合压缩为 3 次往返：积分窗口行一次取回在 JS 聚合，订单按币种分组一次取全。
+ */
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const database = db();
 
@@ -146,69 +158,50 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
     eq(credit.status, CreditStatus.ACTIVE),
   );
 
-  const [grantedRows, consumedRows, ordersRows, paidRows, latestCurrencyRows, apikeyRows] =
-    await Promise.all([
-      database
-        .select({ value: sql<number>`coalesce(sum(${credit.credits}), 0)` })
-        .from(credit)
-        .where(and(creditWindow, eq(credit.transactionType, CreditTransactionType.GRANT))),
-      database
-        .select({ value: sql<number>`coalesce(sum(abs(${credit.credits})), 0)` })
-        .from(credit)
-        .where(and(creditWindow, eq(credit.transactionType, CreditTransactionType.CONSUME))),
-      database
-        .select({ value: count() })
-        .from(order)
-        .where(and(eq(order.userId, userId), isNull(order.deletedAt))),
-      database
-        .select({ value: count() })
-        .from(order)
-        .where(and(eq(order.userId, userId), isNull(order.deletedAt), eq(order.status, "paid"))),
-      database
-        .select({ currency: order.currency })
-        .from(order)
-        .where(and(eq(order.userId, userId), isNull(order.deletedAt), eq(order.status, "paid")))
-        .orderBy(desc(order.createdAt))
-        .limit(1),
-      database
-        .select({ value: count() })
-        .from(apikey)
-        .where(
-          and(
-            eq(apikey.referenceId, userId),
-            eq(apikey.enabled, true),
-            or(isNull(apikey.expiresAt), gt(apikey.expiresAt, new Date())),
-          ),
+  const [trendRows, orderGroups, apikeyRows] = await Promise.all([
+    database
+      .select({
+        createdAt: credit.createdAt,
+        credits: credit.credits,
+        transactionType: credit.transactionType,
+      })
+      .from(credit)
+      .where(creditWindow),
+    database
+      .select({
+        currency: order.currency,
+        ordersCount: count(),
+        paidCount: sql<number>`coalesce(sum(case when ${order.status} = 'paid' then 1 else 0 end), 0)`,
+        paidTotal: sql<number>`coalesce(sum(case when ${order.status} = 'paid' then ${order.amount} else 0 end), 0)`,
+        lastPaidAt: sql<
+          number | null
+        >`max(case when ${order.status} = 'paid' then ${order.createdAt} end)`,
+      })
+      .from(order)
+      .where(and(eq(order.userId, userId), isNull(order.deletedAt)))
+      .groupBy(order.currency),
+    database
+      .select({ value: count() })
+      .from(apikey)
+      .where(
+        and(
+          eq(apikey.referenceId, userId),
+          eq(apikey.enabled, true),
+          or(isNull(apikey.expiresAt), gt(apikey.expiresAt, new Date())),
         ),
-    ]);
+      ),
+  ]);
 
-  const latestCurrency = latestCurrencyRows[0]?.currency;
-  const spendRows = latestCurrency
-    ? await database
-        .select({ total: sql<number>`coalesce(sum(${order.amount}), 0)` })
-        .from(order)
-        .where(
-          and(
-            eq(order.userId, userId),
-            isNull(order.deletedAt),
-            eq(order.status, "paid"),
-            eq(order.currency, latestCurrency),
-          ),
-        )
-    : [];
-
-  // Fetch window rows and bucket in memory so every sqlite/D1 code path stays identical
-  // 拉取窗口期流水并在内存按天聚合，保证各 sqlite/D1 代码路径行为完全一致
-  const trendRows = await database
-    .select({
-      createdAt: credit.createdAt,
-      credits: credit.credits,
-      transactionType: credit.transactionType,
-    })
-    .from(credit)
-    .where(creditWindow);
-
+  // Bucket the window rows by day; the same rows also yield the 30-day grant/consume totals.
+  // 窗口行按天分桶；同一批行同时得出 30 天发放/消耗合计。
   const byDay = aggregateTrendByDay(trendRows);
+  let creditsGranted30d = 0;
+  let creditsConsumed30d = 0;
+  for (const entry of byDay.values()) {
+    creditsGranted30d += entry.granted;
+    creditsConsumed30d += entry.consumed;
+  }
+
   const trend: DashboardTrendPoint[] = Array.from({ length: DASHBOARD_WINDOW_DAYS }, (_, index) => {
     const date = toDateKey(
       new Date(Date.now() - (DASHBOARD_WINDOW_DAYS - 1 - index) * 24 * 60 * 60 * 1000),
@@ -221,20 +214,35 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
     };
   });
 
-  const toNumber = (value: unknown): number => {
-    const parsed = typeof value === "number" ? value : Number.parseInt(String(value ?? "0"), 10);
-    return Number.isNaN(parsed) ? 0 : Math.abs(parsed);
-  };
+  // Reduce currency groups: totals, paid totals, and the most recently paid currency.
+  // 归并币种分组：总数、paid 数、最近一次 paid 的币种及其消费合计。
+  let ordersCount = 0;
+  let paidOrdersCount = 0;
+  let latestPaidAt = Number.NEGATIVE_INFINITY;
+  let spendTotal: DashboardSpendTotal | null = null;
+
+  for (const group of orderGroups) {
+    const paidCount = toNumber(group.paidCount);
+    ordersCount += toNumber(group.ordersCount);
+    paidOrdersCount += paidCount;
+
+    const lastPaidAt = group.lastPaidAt === null ? undefined : Number(group.lastPaidAt);
+    if (lastPaidAt !== undefined && lastPaidAt > latestPaidAt) {
+      latestPaidAt = lastPaidAt;
+      spendTotal = {
+        currency: group.currency.toUpperCase(),
+        total: toNumber(group.paidTotal),
+      };
+    }
+  }
 
   return {
     activeApiKeys: toNumber(apikeyRows[0]?.value),
-    creditsConsumed30d: toNumber(consumedRows[0]?.value),
-    creditsGranted30d: toNumber(grantedRows[0]?.value),
-    ordersCount: toNumber(ordersRows[0]?.value),
-    paidOrdersCount: toNumber(paidRows[0]?.value),
-    spendTotal: latestCurrency
-      ? { currency: latestCurrency.toUpperCase(), total: toNumber(spendRows[0]?.total) }
-      : null,
+    creditsConsumed30d: creditsConsumed30d,
+    creditsGranted30d: creditsGranted30d,
+    ordersCount,
+    paidOrdersCount,
+    spendTotal,
     trend,
   };
 }
