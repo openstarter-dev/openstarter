@@ -4,7 +4,7 @@
 // by billing service tests (subscription, order, credit, user) plus the
 // referral-domain tables (referral, referral_relation, commission).
 
-import type { Database } from "../db";
+import type { Database } from "../db/server";
 import { createSqliteTestDb, disposeSqliteTestDb } from "../db/testing";
 import { sql } from "../db/orm";
 

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { sql } from "../../../db/orm";
-import type { Database } from "../../../db";
+import type { Database } from "../../../db/server";
 import { createSqliteTestDb, disposeSqliteTestDb } from "../../../db/testing";
 
 const state = vi.hoisted(() => ({

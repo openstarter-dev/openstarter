@@ -27,12 +27,6 @@ import { type DrizzleD1Database, drizzle } from "drizzle-orm/d1";
 import { tryGetCloudflareEnv } from "./cloudflare-env.mjs";
 import * as schema from "./schema";
 
-// One database engine everywhere: Drizzle's D1 driver. Workers get the binding
-// from the request env (set as __CF_ENV__ by the app entry); local dev,
-// self-hosted Node and seed scripts get a real local D1 via initLocalD1()
-// (@openstarter/api/db/local) BEFORE anything imports this module.
-// 统一使用 D1 驱动：Workers 从请求 env 拿 binding；本地/自托管/seed 必须先调用
-// initLocalD1()（@openstarter/api/db/local）再加载本模块。
 export type Database = DrizzleD1Database<typeof schema>;
 
 type D1Binding = {
@@ -55,8 +49,6 @@ function readCloudflareEnv(): CloudflareEnv | undefined {
 }
 
 let cachedInstance: Database | null = null;
-// Track the active D1 binding reference so Workers reloads never reuse a stale binding
-// 记录当前 D1 binding 引用，避免 Workers 环境下跨请求复用旧实例
 let cachedBinding: D1Binding | null = null;
 
 function createDb(): Database {

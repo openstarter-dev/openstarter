@@ -1,6 +1,6 @@
 import { sql } from "../../db/orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { Database } from "../../db";
+import type { Database } from "../../db/server";
 import { db } from "../../db/server";
 import {
   closeApiTestDatabase,

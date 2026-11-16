@@ -8,9 +8,6 @@
     "./auth": {
       "default": "./src/modules/auth/index.ts"
     },
-    "./db": {
-      "default": "./src/db/index.ts"
-    },
     "./client": {
       "default": "./src/client/index.ts"
     },

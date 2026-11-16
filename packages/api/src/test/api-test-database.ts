@@ -1,4 +1,4 @@
-import type { Database } from "../db";
+import type { Database } from "../db/server";
 import { createSqliteTestDb, disposeSqliteTestDb } from "../db/testing";
 import { sql } from "../db/orm";
 
