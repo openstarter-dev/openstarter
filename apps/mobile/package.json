@@ -59,7 +59,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@openstarter/api": "workspace:*",
     "@types/react": "catalog:",
     "nativewind": "4.2.6",
     "tailwindcss": "3.4.19",

@@ -66,11 +66,11 @@ src/
 ### 调用 API
 
 ```typescript
-import { request } from "@/services/client";
+import { client } from "@/services/client";
 
-const { data, error } = await request<MyType>("/api/your-endpoint", {
-  method: "GET",
-});
+const res = await client.get("/api/your-endpoint");
+if (!res.ok) throw new Error("请求失败");
+const { data } = (await res.json()) as { data: MyType };
 ```
 
 ### 添加新组件
@@ -79,14 +79,14 @@ const { data, error } = await request<MyType>("/api/your-endpoint", {
 
 ## 技术栈
 
-| 层       | 技术                            |
-| -------- | ------------------------------- |
-| 框架     | Taro v4 (React)                 |
-| 状态管理 | zustand                         |
-| API      | @openstarter/api (Hono RPC)     |
-| 认证     | @openstarter/auth (better-auth) |
-| 样式     | SCSS                            |
-| 平台     | 微信小程序                      |
+| 层       | 技术                              |
+| -------- | --------------------------------- |
+| 框架     | Taro v4 (React)                   |
+| 状态管理 | zustand                           |
+| API      | 手写 fetch 封装 (services/client) |
+| 认证     | @openstarter/auth (better-auth)   |
+| 样式     | SCSS                              |
+| 平台     | 微信小程序                        |
 
 ## 关于 openstarter
 

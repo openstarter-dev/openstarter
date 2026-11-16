@@ -14,7 +14,7 @@ vi.mock("@/lib/auth-client", () => ({
   },
 }));
 vi.mock("@/services/client", () => ({
-  client: { api: { profile: { $get: mockGetProfile } } },
+  client: { get: mockGetProfile },
 }));
 vi.mock("@/stores/auth-store", () => ({
   useAuthStore: {
@@ -38,8 +38,8 @@ describe("profileQueries.detail", () => {
 
     expect(data).toEqual(profile);
     expect(options.queryKey).toEqual(["profile", "detail"]);
-    expect(mockGetProfile).toHaveBeenCalledWith(undefined, {
-      init: { signal: controller.signal },
+    expect(mockGetProfile).toHaveBeenCalledWith("/api/profile", {
+      signal: controller.signal,
     });
   });
 

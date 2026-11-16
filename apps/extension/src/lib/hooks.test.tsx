@@ -19,13 +19,8 @@ function mockResponse<T>(
 
 function createMockApi() {
   return {
-    api: {
-      user: {
-        credits: { $get: vi.fn() },
-        plan: { $get: vi.fn() },
-        subscription: { $get: vi.fn() },
-      },
-    },
+    get: vi.fn(),
+    post: vi.fn(),
   };
 }
 
@@ -53,7 +48,7 @@ function createTestWrapper(mockApi: ReturnType<typeof createMockApi>) {
 describe("useCreditsQuery", () => {
   it("returns loading state initially", () => {
     const mockApi = createMockApi();
-    mockApi.api.user.credits.$get.mockResolvedValue(mockResponse({ data: { balance: 100 } }));
+    mockApi.get.mockResolvedValue(mockResponse({ data: { balance: 100 } }));
 
     const { result } = renderHook(() => useCreditsQuery(), {
       wrapper: createTestWrapper(mockApi),
@@ -65,7 +60,7 @@ describe("useCreditsQuery", () => {
 
   it("returns credits balance on success", async () => {
     const mockApi = createMockApi();
-    mockApi.api.user.credits.$get.mockResolvedValue(mockResponse({ data: { balance: 100 } }));
+    mockApi.get.mockResolvedValue(mockResponse({ data: { balance: 100 } }));
 
     const { result } = renderHook(() => useCreditsQuery(), {
       wrapper: createTestWrapper(mockApi),
@@ -76,12 +71,12 @@ describe("useCreditsQuery", () => {
     });
 
     expect(result.current.data).toBe(100);
-    expect(mockApi.api.user.credits.$get).toHaveBeenCalledWith({ query: {} });
+    expect(mockApi.get).toHaveBeenCalledWith("/api/user/credits");
   });
 
   it("returns error state when API call fails", async () => {
     const mockApi = createMockApi();
-    mockApi.api.user.credits.$get.mockResolvedValue(mockResponse({ data: null }, false));
+    mockApi.get.mockResolvedValue(mockResponse({ data: null }, false));
 
     const { result } = renderHook(() => useCreditsQuery(), {
       wrapper: createTestWrapper(mockApi),
@@ -99,7 +94,7 @@ describe("useCreditsQuery", () => {
 describe("usePlanQuery", () => {
   it("returns loading state initially", () => {
     const mockApi = createMockApi();
-    mockApi.api.user.plan.$get.mockResolvedValue(mockResponse({ data: { plan: "member" } }));
+    mockApi.get.mockResolvedValue(mockResponse({ data: { plan: "member" } }));
 
     const { result } = renderHook(() => usePlanQuery(), {
       wrapper: createTestWrapper(mockApi),
@@ -111,7 +106,7 @@ describe("usePlanQuery", () => {
 
   it("returns plan on success", async () => {
     const mockApi = createMockApi();
-    mockApi.api.user.plan.$get.mockResolvedValue(mockResponse({ data: { plan: "member" } }));
+    mockApi.get.mockResolvedValue(mockResponse({ data: { plan: "member" } }));
 
     const { result } = renderHook(() => usePlanQuery(), {
       wrapper: createTestWrapper(mockApi),
@@ -122,12 +117,12 @@ describe("usePlanQuery", () => {
     });
 
     expect(result.current.data).toBe("member");
-    expect(mockApi.api.user.plan.$get).toHaveBeenCalled();
+    expect(mockApi.get).toHaveBeenCalled();
   });
 
   it("returns error state when API call fails", async () => {
     const mockApi = createMockApi();
-    mockApi.api.user.plan.$get.mockResolvedValue(mockResponse({ data: null }, false));
+    mockApi.get.mockResolvedValue(mockResponse({ data: null }, false));
 
     const { result } = renderHook(() => usePlanQuery(), {
       wrapper: createTestWrapper(mockApi),
@@ -145,7 +140,7 @@ describe("usePlanQuery", () => {
 describe("useSubscriptionQuery", () => {
   it("returns loading state initially", () => {
     const mockApi = createMockApi();
-    mockApi.api.user.subscription.$get.mockResolvedValue(
+    mockApi.get.mockResolvedValue(
       mockResponse({
         data: {
           hasSubscription: true,
@@ -172,7 +167,7 @@ describe("useSubscriptionQuery", () => {
       planName: "Pro",
       nextBillingDate: null,
     };
-    mockApi.api.user.subscription.$get.mockResolvedValue(mockResponse({ data: subscriptionData }));
+    mockApi.get.mockResolvedValue(mockResponse({ data: subscriptionData }));
 
     const { result } = renderHook(() => useSubscriptionQuery(), {
       wrapper: createTestWrapper(mockApi),
@@ -183,12 +178,12 @@ describe("useSubscriptionQuery", () => {
     });
 
     expect(result.current.data).toEqual(subscriptionData);
-    expect(mockApi.api.user.subscription.$get).toHaveBeenCalled();
+    expect(mockApi.get).toHaveBeenCalled();
   });
 
   it("returns error state when API call fails", async () => {
     const mockApi = createMockApi();
-    mockApi.api.user.subscription.$get.mockResolvedValue(mockResponse({ data: null }, false));
+    mockApi.get.mockResolvedValue(mockResponse({ data: null }, false));
 
     const { result } = renderHook(() => useSubscriptionQuery(), {
       wrapper: createTestWrapper(mockApi),

@@ -43,9 +43,7 @@ export async function bindReferralAfterSignup(): Promise<void> {
   const code = readStoredReferralCode();
   if (!code) return;
   try {
-    const res = await apiClient.api.referral.bind.$post({
-      json: { code },
-    });
+    const res = await apiClient.post("/api/referral/bind", { code });
     if (res.ok || res.status === 409 || res.status === 422) {
       await clearReferralAttribution();
     }

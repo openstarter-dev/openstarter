@@ -1,12 +1,25 @@
 import { mutationOptions, queryOptions } from "@tanstack/react-query";
-import { type InferResponseType, unwrapQuery, withAbort } from "@openstarter/api/client";
 import { authClient } from "@/lib/auth-client";
 import { client } from "@/services/client";
 import { useAuthStore, type UserInfo } from "@/stores/auth-store";
 
-const getProfile = client.api.profile.$get;
+interface ProfileData {
+  createdAt: string | null;
+  email: string;
+  id: string;
+  name: string;
+}
 
-type ProfileData = NonNullable<InferResponseType<typeof getProfile, 200>["data"]>;
+async function unwrapQuery<TData>(
+  res: { json: () => Promise<unknown>; ok: boolean },
+  fallbackMessage: string,
+): Promise<TData | undefined> {
+  const json = (await res.json().catch(() => null)) as { data?: TData; message?: string } | null;
+  if (!res.ok) {
+    throw new Error(json?.message || fallbackMessage);
+  }
+  return json?.data;
+}
 
 export const profileKeys = {
   all: ["profile"] as const,
@@ -19,7 +32,7 @@ export const profileQueries = {
       queryKey: profileKeys.detail(),
       queryFn: async ({ signal }) =>
         unwrapQuery<ProfileData>(
-          await getProfile(undefined, withAbort(signal)),
+          await client.get("/api/profile", { signal }),
           "Failed to load profile",
         ),
     }),

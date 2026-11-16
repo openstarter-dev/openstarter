@@ -12,7 +12,7 @@ export function useUserPlan() {
   return useQuery({
     queryFn: (): Promise<ApiResult<UserPlanView>> =>
       runRequest(
-        () => apiClient.api.user.plan.$get(),
+        () => apiClient.get("/api/user/plan"),
         (body) => {
           const { data } = body as {
             data: { plan: string; trialEndsAt?: string };
@@ -37,7 +37,7 @@ export function useUserSubscription() {
   return useQuery({
     queryFn: (): Promise<ApiResult<UserSubscriptionView>> =>
       runRequest(
-        () => apiClient.api.user.subscription.$get(),
+        () => apiClient.get("/api/user/subscription"),
         (body) => {
           const { data } = body as {
             data: {
@@ -81,8 +81,8 @@ export function useUserCredits() {
     queryFn: (): Promise<ApiResult<UserCreditsView>> =>
       runRequest(
         () =>
-          apiClient.api.user.credits.$get({
-            query: { limit: String(CREDITS_HISTORY_LIMIT), offset: "0" },
+          apiClient.get("/api/user/credits", {
+            query: { limit: CREDITS_HISTORY_LIMIT, offset: 0 },
           }),
         (body) => {
           const { data } = body as {
@@ -120,15 +120,14 @@ export function useUserOrders(page: number) {
     queryFn: (): Promise<ApiResult<UserOrdersPage>> =>
       runRequest(
         () =>
-          apiClient.api.user.orders.$get({
-            query: { page: String(page), pageSize: String(PAGE_SIZE) },
+          apiClient.get("/api/user/orders", {
+            query: { page, pageSize: PAGE_SIZE },
           }),
         (body) => {
-          const envelope = body as {
-            data?: UserOrdersPage["items"];
-            total?: number;
+          const { data } = body as {
+            data?: { items?: UserOrdersPage["items"]; total?: number };
           };
-          return { items: envelope.data ?? [], total: envelope.total ?? 0 };
+          return { items: data?.items ?? [], total: data?.total ?? 0 };
         },
       ),
     queryKey: ["user-orders", page],
@@ -141,7 +140,7 @@ export function useBillingPortalMutation() {
   return useMutation({
     mutationFn: async (): Promise<ApiResult<{ billingUrl: string }>> =>
       runRequest(
-        () => apiClient.api.user["billing-portal"].$post(),
+        () => apiClient.post("/api/user/billing-portal"),
         (body) => {
           const { data } = body as { data?: { billingUrl?: string } };
           return { billingUrl: data?.billingUrl ?? "" };

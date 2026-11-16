@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useApiClient } from "./api-context";
+import type { SubscriptionStatusView, UserPlan } from "./types";
 
 /**
  * Build an Error carrying HTTP status so QueryCache can detect 401 and trigger sign-out.
@@ -16,9 +17,9 @@ export function useCreditsQuery() {
   return useQuery({
     queryKey: ["credits"],
     queryFn: async () => {
-      const res = await api.api.user.credits.$get({ query: {} });
+      const res = await api.get("/api/user/credits");
       if (!res.ok) throw createHttpError(res.status);
-      const json = await res.json();
+      const json = (await res.json()) as { data?: { balance: number } };
       if (!json.data) throw new Error("Missing credits data in response");
       return json.data.balance;
     },
@@ -30,9 +31,9 @@ export function usePlanQuery() {
   return useQuery({
     queryKey: ["plan"],
     queryFn: async () => {
-      const res = await api.api.user.plan.$get();
+      const res = await api.get("/api/user/plan");
       if (!res.ok) throw createHttpError(res.status);
-      const json = await res.json();
+      const json = (await res.json()) as { data?: { plan: UserPlan } };
       if (!json.data) throw new Error("Missing plan data in response");
       return json.data.plan;
     },
@@ -44,9 +45,9 @@ export function useSubscriptionQuery() {
   return useQuery({
     queryKey: ["subscription"],
     queryFn: async () => {
-      const res = await api.api.user.subscription.$get();
+      const res = await api.get("/api/user/subscription");
       if (!res.ok) throw createHttpError(res.status);
-      const json = await res.json();
+      const json = (await res.json()) as { data?: SubscriptionStatusView };
       return json.data;
     },
   });

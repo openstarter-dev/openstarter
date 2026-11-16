@@ -13,6 +13,7 @@
     "@babel/runtime": "^7",
     "@openstarter/auth": "workspace:*",
     "@openstarter/shared": "workspace:*",
+    "@tanstack/query-core": "^5.99.0",
     "@tanstack/react-query": "^5.99.0",
     "@tarojs/components": "^4.2.1",
     "@tarojs/runtime": "^4.2.1",
@@ -24,7 +25,6 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^8.0.1",
-    "@openstarter/api": "workspace:*",
     "@tarojs/cli": "^4",
     "@tarojs/plugin-framework-react": "^4",
     "@tarojs/plugin-platform-weapp": "^4",

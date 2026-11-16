@@ -10,6 +10,29 @@ import { apiClient } from "@/lib/api";
 
 const PAGE_SIZE = 20;
 
+interface ReferralMe {
+  code: string;
+  link: string;
+  stats: {
+    pendingCredits: number;
+    referredCount: number;
+    settledCredits: number;
+    totalCredits: number;
+  };
+}
+
+interface CommissionItem {
+  id: string;
+  status: string;
+  commissionCredits: number;
+  createdAt: string;
+}
+
+interface CommissionsPage {
+  items: CommissionItem[];
+  total: number;
+}
+
 type CommissionFilter = "all" | "pending" | "settled" | "void";
 
 const FILTERS: readonly CommissionFilter[] = ["all", "pending", "settled", "void"];
@@ -58,9 +81,9 @@ export default function ReferralScreen() {
 
   const meQuery = useQuery({
     queryFn: async () => {
-      const res = await apiClient.api.referral.me.$get();
+      const res = await apiClient.get("/api/referral/me");
       if (!res.ok) throw new Error("Failed to load referral info");
-      return (await res.json()).data;
+      return ((await res.json()) as { data: ReferralMe }).data;
     },
     queryKey: ["referral", "me"],
   });
@@ -68,11 +91,11 @@ export default function ReferralScreen() {
   const [commissionsPage, setCommissionsPage] = useState(1);
   const commissionsQuery = useQuery({
     queryFn: async () => {
-      const res = await apiClient.api.referral.commissions.$get({
-        query: { page: String(commissionsPage), pageSize: String(PAGE_SIZE) },
+      const res = await apiClient.get("/api/referral/commissions", {
+        query: { page: commissionsPage, pageSize: PAGE_SIZE },
       });
       if (!res.ok) throw new Error("Failed to load commissions");
-      return (await res.json()).data;
+      return ((await res.json()) as { data: CommissionsPage }).data;
     },
     queryKey: ["referral", "commissions", commissionsPage],
   });
@@ -181,36 +204,29 @@ export default function ReferralScreen() {
                 {t("settings.referral.no_records")}
               </Text>
             ) : (
-              filtered.map(
-                (item: {
-                  id: string;
-                  status: string;
-                  commissionCredits: number;
-                  createdAt: string;
-                }) => (
-                  <View className="flex-row items-center justify-between py-1.5" key={item.id}>
-                    <View className="flex-1 flex-col">
-                      <Text className="text-foreground text-sm dark:text-dark-foreground">
-                        {t(COMMISSION_STATUS_LABEL[item.status] ?? item.status)}
-                      </Text>
-                      <Text className="text-muted-foreground text-xs dark:text-dark-muted-foreground">
-                        {item.createdAt}
-                      </Text>
-                    </View>
-                    <Text
-                      className={
-                        item.status === "settled"
-                          ? "font-medium text-sm text-success dark:text-dark-success"
-                          : item.status === "void"
-                            ? "font-medium text-sm text-destructive dark:text-dark-destructive"
-                            : "font-medium text-sm text-muted-foreground dark:text-dark-muted-foreground"
-                      }
-                    >
-                      {item.commissionCredits}
+              filtered.map((item) => (
+                <View className="flex-row items-center justify-between py-1.5" key={item.id}>
+                  <View className="flex-1 flex-col">
+                    <Text className="text-foreground text-sm dark:text-dark-foreground">
+                      {t(COMMISSION_STATUS_LABEL[item.status] ?? item.status)}
+                    </Text>
+                    <Text className="text-muted-foreground text-xs dark:text-dark-muted-foreground">
+                      {item.createdAt}
                     </Text>
                   </View>
-                ),
-              )
+                  <Text
+                    className={
+                      item.status === "settled"
+                        ? "font-medium text-sm text-success dark:text-dark-success"
+                        : item.status === "void"
+                          ? "font-medium text-sm text-destructive dark:text-dark-destructive"
+                          : "font-medium text-sm text-muted-foreground dark:text-dark-muted-foreground"
+                    }
+                  >
+                    {item.commissionCredits}
+                  </Text>
+                </View>
+              ))
             )}
             {commissionsTotal > 0 && (
               <View className="flex-row justify-end gap-2 mt-3">

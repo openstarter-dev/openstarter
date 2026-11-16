@@ -27,21 +27,16 @@ const MISCONFIGURED_LABEL = /VITE_APP_URL is not set/i;
 
 function createMockApi() {
   return {
-    api: {
-      user: {
-        credits: {
-          $get: vi
-            .fn()
-            .mockResolvedValue({ ok: true, json: async () => ({ data: { balance: 42 } }) }),
-        },
-        plan: {
-          $get: vi
-            .fn()
-            .mockResolvedValue({ ok: true, json: async () => ({ data: { plan: "member" } }) }),
-        },
-        subscription: {
-          $get: vi.fn().mockResolvedValue({
+    get: vi.fn().mockImplementation(async (path: string) => {
+      switch (path) {
+        case "/api/user/credits":
+          return { ok: true, status: 200, json: async () => ({ data: { balance: 42 } }) };
+        case "/api/user/plan":
+          return { ok: true, status: 200, json: async () => ({ data: { plan: "member" } }) };
+        case "/api/user/subscription":
+          return {
             ok: true,
+            status: 200,
             json: async () => ({
               data: {
                 hasSubscription: true,
@@ -50,10 +45,11 @@ function createMockApi() {
                 status: "active",
               },
             }),
-          }),
-        },
-      },
-    },
+          };
+        default:
+          return { ok: false, status: 404, json: async () => ({}) };
+      }
+    }),
     getSession: vi.fn().mockResolvedValue({
       data: { user: { name: "Ada", email: "user@example.com" } },
     }),
@@ -178,9 +174,7 @@ describe("App", () => {
 
   it("shows loading state while queries are pending", async () => {
     const mockApi = createMockApi();
-    mockApi.api.user.credits.$get.mockReturnValue(new Promise(() => {}));
-    mockApi.api.user.plan.$get.mockReturnValue(new Promise(() => {}));
-    mockApi.api.user.subscription.$get.mockReturnValue(new Promise(() => {}));
+    mockApi.get.mockReturnValue(new Promise(() => {}));
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false, staleTime: Infinity } },
     });
@@ -196,10 +190,11 @@ describe("App", () => {
 
   it("shows error state when a query fails", async () => {
     const mockApi = createMockApi();
-    mockApi.api.user.credits.$get.mockResolvedValue({
-      ok: false,
-      status: 500,
-      json: async () => ({ message: "Server error" }),
+    mockApi.get.mockImplementation(async (path: string) => {
+      if (path === "/api/user/credits") {
+        return { ok: false, status: 500, json: async () => ({ message: "Server error" }) };
+      }
+      return { ok: true, status: 200, json: async () => ({ data: null }) };
     });
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false } },
