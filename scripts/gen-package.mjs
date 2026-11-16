@@ -2,11 +2,11 @@
 //
 // 用法：
 //   pnpm gen:package storage                 # packages/storage          → @openstarter/storage
-//   pnpm gen:package analytics/web           # packages/analytics/web    → @openstarter/analytics-web
+//   pnpm gen:package i18n/web                # packages/i18n/web         → @openstarter/i18n-web
 //   pnpm gen:package storage --tag core      # 显式指定 boundaries 标签
 //   pnpm gen:package storage --dry           # 只打印将生成的文件，不落盘
 //
-// 生成的包遵循仓库既有约定（JIT 包，对齐 packages/shared、packages/analytics/mobile）：
+// 生成的包遵循仓库既有约定（JIT 包，对齐 packages/shared、packages/i18n/mobile）：
 //   - exports 以 TS 源码直出（"./*" 通配），由消费方 bundler 编译
 //   - scripts 仅 test / test:coverage / check-types
 //   - devDependencies: typescript（catalog:）
@@ -212,8 +212,8 @@ function printUsage() {
 
 示例:
   pnpm gen:package storage            # packages/storage        → @openstarter/storage (core)
-  pnpm gen:package analytics/web      # packages/analytics/web  → @openstarter/analytics-web (platform:web)
-  pnpm gen:package analytics/mobile    # packages/analytics/mobile → @openstarter/analytics-mobile (platform:mobile)
+  pnpm gen:package i18n/web           # packages/i18n/web       → @openstarter/i18n-web (platform:web)
+  pnpm gen:package i18n/mobile        # packages/i18n/mobile    → @openstarter/i18n-mobile (platform:mobile)
   pnpm gen:package storage --tag core # 显式指定 boundaries 标签
   pnpm gen:package storage --dry      # 预览将生成的文件，不落盘
 

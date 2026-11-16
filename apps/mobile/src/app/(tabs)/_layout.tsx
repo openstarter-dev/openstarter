@@ -3,7 +3,6 @@ import { Redirect, Tabs } from "expo-router";
 import { useTranslation } from "@openstarter/i18n-mobile";
 
 import { Spinner } from "@/components/ui/spinner";
-import { useScreenTracking } from "@/lib/analytics";
 import { authClient } from "@/lib/auth-client";
 import { deriveAuthGate } from "@/lib/auth-gate";
 
@@ -11,7 +10,6 @@ export default function TabsLayout() {
   const { data: session, isPending } = authClient.useSession();
   const { t } = useTranslation();
   const gate = deriveAuthGate({ isPending, session });
-  useScreenTracking();
 
   if (gate === "loading") {
     return <Spinner />;

@@ -2,8 +2,6 @@
 // Web 应用全局配置管理模块，统一从 Web 端环境变量读取并校验配置。
 
 import { BRAND_NAME } from "@/lib/branding";
-import type { AnalyticsConfig } from "@openstarter/analytics-web";
-import type { HeadScript } from "@openstarter/analytics-web/scripts";
 import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 
 declare global {
@@ -23,9 +21,6 @@ declare global {
     readonly VITE_ANONYMOUS_AUTH_ENABLED?: string;
     readonly VITE_GOOGLE_ONE_TAP_ENABLED?: string;
     readonly VITE_GOOGLE_CLIENT_ID?: string;
-    readonly VITE_GA_MEASUREMENT_ID?: string;
-    readonly VITE_PLAUSIBLE_DOMAIN?: string;
-    readonly VITE_PLAUSIBLE_SRC?: string;
     readonly VITE_CRISP_ENABLED?: string;
     readonly VITE_CRISP_WEBSITE_ID?: string;
     readonly VITE_TAWK_ENABLED?: string;
@@ -65,8 +60,16 @@ export interface WebSupportConfig {
   tawk: WebTawkConfig;
 }
 
+// TanStack Router `head().scripts` 单项：`src` → 外部脚本；`children` → 内联内容。
+export interface HeadScript {
+  async?: boolean;
+  children?: string;
+  defer?: boolean;
+  id?: string;
+  src?: string;
+}
+
 export interface WebHeadConfig {
-  analytics: AnalyticsConfig;
   support: WebSupportConfig;
 }
 
@@ -74,7 +77,6 @@ export interface WebConfig {
   appName: string;
   appUrl: string;
   auth: WebAuthConfig;
-  analytics: AnalyticsConfig;
   support: WebSupportConfig;
 }
 
@@ -133,7 +135,7 @@ export function isValidSupportWidgetId(id: string): boolean {
   return WIDGET_ID_PATTERN.test(id);
 }
 
-// Registry pattern matching @openstarter/analytics-web/scripts to add/toggle widgets cleanly.
+// Registry pattern to add/toggle support widgets cleanly.
 // 使用策略注册表管理客服脚本供应商，保持低圈复杂度并易于扩展。
 const SUPPORT_WIDGET_PROVIDERS: readonly SupportWidgetProvider[] = [
   {
@@ -185,7 +187,7 @@ export function buildSupportHeadScripts(support: WebSupportConfig | undefined): 
 
 /**
  * Read Web global configuration from static Vite env and SSR/Worker runtime env.
- * 读取 Web 端全局配置（认证展示开关、分析统计、客服组件及基础品牌信息）。
+ * 读取 Web 端全局配置（认证展示开关、客服组件及基础品牌信息）。
  */
 export function getWebConfig(): WebConfig {
   const emailVerificationRaw =
@@ -255,14 +257,6 @@ export function getWebConfig(): WebConfig {
         false,
       ),
       googleClientId: resolveEnv("VITE_GOOGLE_CLIENT_ID", import.meta.env.VITE_GOOGLE_CLIENT_ID),
-    },
-    analytics: {
-      googleAnalyticsId: resolveEnv(
-        "VITE_GA_MEASUREMENT_ID",
-        import.meta.env.VITE_GA_MEASUREMENT_ID,
-      ),
-      plausibleDomain: resolveEnv("VITE_PLAUSIBLE_DOMAIN", import.meta.env.VITE_PLAUSIBLE_DOMAIN),
-      plausibleSrc: resolveEnv("VITE_PLAUSIBLE_SRC", import.meta.env.VITE_PLAUSIBLE_SRC),
     },
     support: {
       crisp: {

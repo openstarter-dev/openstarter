@@ -7,7 +7,6 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import "../../global.css";
 
-import { initAnalyticsFromEnv } from "@/lib/analytics";
 import { ConfigError } from "@/components/config-error";
 import { getEnv } from "@/lib/env";
 import { BillingProvider } from "@/lib/use-billing";
@@ -21,10 +20,6 @@ export default function RootLayout() {
 
   useThemePreference();
   const { locale } = useAppLocale();
-
-  useEffect(() => {
-    void initAnalyticsFromEnv();
-  }, []);
 
   useEffect(() => {
     (async () => {

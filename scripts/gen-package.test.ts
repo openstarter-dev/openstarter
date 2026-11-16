@@ -33,20 +33,20 @@ describe("parseSpec", () => {
   });
 
   it("嵌套变体：packages/<parent>/<variant>，名称拼接，tag 按变体名推断", () => {
-    const spec = parseSpec("analytics/web");
-    expect(spec.dir).toBe("packages/analytics/web");
-    expect(spec.pkgName).toBe("@openstarter/analytics-web");
-    expect(spec.vitestName).toBe("analytics-web");
+    const spec = parseSpec("i18n/web");
+    expect(spec.dir).toBe("packages/i18n/web");
+    expect(spec.pkgName).toBe("@openstarter/i18n-web");
+    expect(spec.vitestName).toBe("i18n-web");
     expect(spec.tag).toBe("platform:web");
     expect(spec.tsconfigExt).toBe("../../../tsconfig.base.json");
   });
 
   it("mobile 变体推断为 platform:mobile", () => {
-    expect(parseSpec("analytics/mobile").tag).toBe("platform:mobile");
+    expect(parseSpec("i18n/mobile").tag).toBe("platform:mobile");
   });
 
   it("--tag 显式覆盖自动推断", () => {
-    expect(parseSpec("analytics/web", { tag: "core" }).tag).toBe("core");
+    expect(parseSpec("i18n/web", { tag: "core" }).tag).toBe("core");
   });
 
   it("非法名称（大写/下划线/开头数字/连字符边界）被拒绝", () => {
@@ -82,15 +82,15 @@ describe("renderFiles", () => {
   });
 
   it("turbo.json：extends 根配置并携带 boundaries 标签", () => {
-    const spec = parseSpec("analytics/mobile");
+    const spec = parseSpec("i18n/mobile");
     const turbo = renderFiles(spec).find((f) => f.relPath === "turbo.json")?.content ?? "";
     expect(JSON.parse(turbo)).toEqual({ extends: ["//"], tags: ["platform:mobile"] });
   });
 
   it("vitest.config.ts：node 环境，项目名与包对应", () => {
-    const spec = parseSpec("analytics/web");
+    const spec = parseSpec("i18n/web");
     const vitest = renderFiles(spec).find((f) => f.relPath === "vitest.config.ts")?.content ?? "";
-    expect(vitest).toContain('name: "analytics-web"');
+    expect(vitest).toContain('name: "i18n-web"');
     expect(vitest).toContain('environment: "node"');
   });
 

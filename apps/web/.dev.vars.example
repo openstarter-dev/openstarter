@@ -37,8 +37,6 @@ INITIAL_ROLE_NAME=
 # Auth UI 按钮与表单显隐（需与上方服务端认证开关保持一致）
 # 仅 Google One Tap 前端弹窗需要公开 Client ID
 
-# Web 分析统计（GA4 / Plausible；留空不注入脚本）
-
 # Web 客服组件（Crisp / Tawk；填写对应 ID 后启用，设 false 可显式关闭）
 
 # --- 邮件（packages/email 运行时读取；留空则内容打到服务端日志）---

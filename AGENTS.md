@@ -39,7 +39,6 @@ openstarter/
 │   │   ├── extension/     # @openstarter/i18n-extension (extension, @wxt-dev/i18n)
 │   │   └── mobile/        # @openstarter/i18n-mobile (mobile-specific, i18next)
 │   ├── shared/            # Constants, validators, utilities, logger, config
-│   ├── analytics/         # Event tracking; one type contract (shared) + per-platform impls analytics/{web,mobile,extension} (mobile: OpenPanel + GA4 Firebase; web: gtag + Plausible; extension: Plausible HTTP)
 │   └── ui/                # shadcn components + Tailwind; split by platform into ui/{web,mobile}
 │
 └── scripts/               # gen-package scaffolder, desktop runner, shared vitest config

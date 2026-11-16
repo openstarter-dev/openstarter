@@ -49,7 +49,7 @@ boring 80% that every SaaS needs but nobody wants to build:
   browser extension, or a mini-app eventually. They're already in the monorepo,
   sharing auth and API.
 - **Batteries included, swappable** — Cloudflare D1 by default (sqlite locally,
-  no external database needed), pluggable analytics and email providers.
+  no external database needed), pluggable email providers.
 - **Indie-hacker friendly** — One `.env` (`apps/web/.env`) for the shared API URL,
   one command to run everything, deploy anywhere Node runs.
 
@@ -99,10 +99,9 @@ openstarter/
 │   ├── auth/        # Better-Auth clients (web/native/taro) + RBAC access definitions
 │   ├── shared/      # Response envelope, logging, ID, hash, config
 │   ├── ui/          # Shared UI components (web + mobile per-platform)
-│   ├── i18n/        # Internationalization (inlang/Paraglide)
-│   │   ├── web/     # @openstarter/i18n-web — web app + api shared
-│   │   └── mobile/  # @openstarter/i18n-mobile — mobile-specific messages
-│   ├── analytics/   # Analytics provider abstraction (web + mobile)
+│   └── i18n/        # Internationalization (inlang/Paraglide)
+│       ├── web/     # @openstarter/i18n-web — web app + api shared
+│       └── mobile/  # @openstarter/i18n-mobile — mobile-specific messages
 ```
 
 ## Quick Start

@@ -1,5 +1,3 @@
-import { buildAnalyticsHeadScripts } from "@openstarter/analytics-web/scripts";
-
 import { buildSupportHeadScripts } from "@/config";
 import { m } from "@openstarter/i18n-web/messages";
 import { getLocale } from "@openstarter/i18n-web/runtime";
@@ -10,7 +8,7 @@ import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanst
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import { getWebHeadConfigFn } from "@/functions/analytics";
+import { getWebHeadConfigFn } from "@/functions/head-config";
 import { BRAND_NAME } from "@/lib/branding";
 
 import appCss from "../index.css?url";
@@ -30,10 +28,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
       { title: BRAND_NAME },
     ],
     links: [{ href: appCss, rel: "stylesheet" }],
-    scripts: [
-      ...buildAnalyticsHeadScripts(loaderData?.analytics),
-      ...buildSupportHeadScripts(loaderData?.support),
-    ],
+    scripts: [...buildSupportHeadScripts(loaderData?.support)],
   }),
   loader: () => getWebHeadConfigFn(),
   staleTime: 60 * 1000,

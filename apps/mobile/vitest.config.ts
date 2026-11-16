@@ -6,7 +6,7 @@ export default defineProject({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts", "plugins/**/*.test.js"],
+    include: ["src/**/*.test.ts"],
     name: "mobile",
   },
 });

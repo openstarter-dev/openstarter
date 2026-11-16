@@ -11,9 +11,6 @@ dist
 !.env.example
 .DS_Store
 *.tsbuildinfo
-# Firebase 原生配置：fork 者各自的项目凭据，不入库（模板见 *.example）
-google-services.json
-GoogleService-Info.plist
 # Logs
 *.log
 # Turbo

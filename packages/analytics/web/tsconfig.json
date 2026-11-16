@@ -1,9 +1,0 @@
-{
-  "extends": "../../../tsconfig.base.json",
-  "compilerOptions": {
-    "noEmit": true,
-    // Cross-package source references require DOM libs for browser script/strategy helpers.
-    // 源码互引架构下需具备 DOM lib 以类型检查浏览器脚本与策略工具。
-    "lib": ["ESNext", "DOM", "DOM.Iterable"]
-  }
-}
