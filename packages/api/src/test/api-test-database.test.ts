@@ -1,5 +1,5 @@
 import type { Database } from "../db/server";
-import { sql } from "../db/orm";
+import { sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import {

@@ -20,7 +20,7 @@
 import { type NewOrder, order } from "../../../db/schema";
 import { d1Transaction, db } from "../../../db/server";
 import { getUniSeq, getUuid } from "@openstarter/shared/id";
-import { and, eq, inArray, isNull, or, type SQL } from "../../../db/orm";
+import { and, eq, inArray, isNull, or, type SQL } from "drizzle-orm";
 import { calculateCreditExpirationTime, CreditTransactionScene, grant } from "../credits";
 import { recordCommission } from "../referral/service";
 import {

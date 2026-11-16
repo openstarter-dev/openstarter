@@ -5,7 +5,7 @@ import { db } from "../../../db/server";
 import { getUuid } from "@openstarter/shared/id";
 import { NodeEnv } from "@openstarter/shared/constants";
 import { createTtlCache } from "@openstarter/shared/ttl-cache";
-import { and, asc, eq, sql } from "../../../db/orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 
 import { readEnv } from "../lib/runtime-env";
 

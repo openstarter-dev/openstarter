@@ -1,6 +1,6 @@
 import type { Database } from "../../db/server";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
-import { sql } from "../../db/orm";
+import { sql } from "drizzle-orm";
 import { vi } from "vitest";
 
 import {

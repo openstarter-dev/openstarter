@@ -1,7 +1,7 @@
 import { CreditStatus, CreditTransactionType } from "../billing/credits";
 import { apikey, credit, order, user as userTable } from "../../db/schema";
 import { db } from "../../db/server";
-import { and, count, desc, eq, gt, gte, isNull, or, sql } from "../../db/orm";
+import { and, count, desc, eq, gt, gte, isNull, or, sql } from "drizzle-orm";
 
 export type UserOrder = typeof order.$inferSelect;
 

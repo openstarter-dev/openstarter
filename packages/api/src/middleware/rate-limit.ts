@@ -3,7 +3,7 @@ import { db } from "../db/server";
 import { respErr } from "@openstarter/shared";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
-import { lt, sql } from "../db/orm";
+import { lt, sql } from "drizzle-orm";
 import { createMiddleware } from "hono/factory";
 
 import { readEnv } from "../lib/env";

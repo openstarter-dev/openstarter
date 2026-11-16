@@ -21,7 +21,7 @@ import { type NewOrder, order, user } from "../../../db/schema";
 import { db } from "../../../db/server";
 import { getUniSeq, getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
-import { eq } from "../../../db/orm";
+import { eq } from "drizzle-orm";
 
 import { ORDER_NO_METADATA_KEY, OrderStatus } from "./checkout";
 import {

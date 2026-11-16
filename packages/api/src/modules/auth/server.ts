@@ -21,7 +21,7 @@ import { oneTap } from "better-auth/plugins/one-tap";
 import { organization } from "better-auth/plugins/organization";
 import { twoFactor } from "better-auth/plugins/two-factor";
 import { tanstackStartCookies } from "better-auth/tanstack-start";
-import { eq } from "../../db/orm";
+import { eq } from "drizzle-orm";
 import { MAGIC_LINK_EXPIRES_IN, OTP_EXPIRES_IN } from "./auth.config";
 import { authSchema, organizationTeams } from "./auth-database-schema";
 import { createAuthEmailCallbacks, createChangeEmailOptions } from "./email-callbacks";

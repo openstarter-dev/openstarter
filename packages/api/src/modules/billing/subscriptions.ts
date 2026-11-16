@@ -25,7 +25,7 @@ import {
 } from "../../db/schema";
 import { db } from "../../db/server";
 import { getSnowId, getUuid } from "@openstarter/shared/id";
-import { and, desc, eq, inArray } from "../../db/orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import {
   type BillingTransaction,
   calculateCreditExpirationTime,

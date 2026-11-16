@@ -1,6 +1,6 @@
 import { credit, user } from "../../../db/schema";
 import type { Database } from "../../../db/server";
-import { eq } from "../../../db/orm";
+import { eq } from "drizzle-orm";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {

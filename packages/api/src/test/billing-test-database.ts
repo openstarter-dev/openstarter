@@ -6,7 +6,7 @@
 
 import type { Database } from "../db/server";
 import { createSqliteTestDb, disposeSqliteTestDb } from "../db/testing";
-import { sql } from "../db/orm";
+import { sql } from "drizzle-orm";
 
 const NOW_EXPR = "(cast((julianday('now') - 2440587.5)*86400000 as integer))";
 

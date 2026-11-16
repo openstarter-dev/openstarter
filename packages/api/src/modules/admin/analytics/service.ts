@@ -1,7 +1,7 @@
 import { CreditStatus, CreditTransactionType } from "../../billing/credits";
 import { credit, order, subscription, user } from "../../../db/schema";
 import { db } from "../../../db/server";
-import { and, count, eq, sum } from "../../../db/orm";
+import { and, count, eq, sum } from "drizzle-orm";
 
 export interface AdminMetrics {
   creditsConsumed: number;

@@ -29,29 +29,6 @@
       "rules": {
         "import/namespace": "off"
       }
-    },
-    {
-      "files": ["**/*.ts", "**/*.tsx"],
-      "excludeFiles": ["packages/api/src/db/**"],
-      "rules": {
-        "no-restricted-imports": [
-          "error",
-          {
-            "paths": [
-              {
-                "name": "drizzle-orm",
-                "message": "drizzle-orm is only allowed inside packages/api/src/db. Import query operators from '../db/orm' (or '@openstarter/api/db/orm') instead. drizzle-orm 只允许在 packages/api/src/db 内直接使用，其他代码请从 '../db/orm' 导入。"
-              }
-            ],
-            "patterns": [
-              {
-                "regex": "^drizzle-orm(/.*)?$",
-                "message": "drizzle-orm is only allowed inside packages/api/src/db. Import query operators from '../db/orm' (or '@openstarter/api/db/orm') instead. drizzle-orm 只允许在 packages/api/src/db 内直接使用，其他代码请从 '../db/orm' 导入。"
-              }
-            ]
-          }
-        ]
-      }
     }
   ]
 }

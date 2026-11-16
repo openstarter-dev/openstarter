@@ -1,7 +1,7 @@
 import { type NewTaxonomy, type Taxonomy, taxonomy } from "../../db/schema";
 import { db } from "../../db/server";
 import { getUuid } from "@openstarter/shared/id";
-import { and, asc, count, eq, isNull, type SQL } from "../../db/orm";
+import { and, asc, count, eq, isNull, type SQL } from "drizzle-orm";
 
 import { SlugConflictError } from "./errors";
 import { TaxonomyStatus } from "../../schema/content/taxonomy";

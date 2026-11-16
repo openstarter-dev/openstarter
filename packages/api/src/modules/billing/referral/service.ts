@@ -5,7 +5,7 @@ import type { Database } from "../../../db/server";
 import { commission, referral, referralRelation } from "../../../db/schema";
 import { getUuid } from "@openstarter/shared/id";
 import { logger } from "@openstarter/shared/logger";
-import { eq } from "../../../db/orm";
+import { eq } from "drizzle-orm";
 
 import { readBooleanEnv, readIntEnv } from "../../../lib/env";
 import {

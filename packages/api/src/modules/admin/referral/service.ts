@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from "../../../db/orm";
+import { and, count, desc, eq } from "drizzle-orm";
 
 import { CommissionStatus, getReferralConfig, grant, type ReferralConfig } from "../../billing";
 import { getUuid } from "@openstarter/shared/id";

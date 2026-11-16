@@ -3,7 +3,7 @@ import { getBalance, getHistory, getSubscriptionStatusView } from "../../billing
 import { user as userTable } from "../../../db/schema";
 import { db } from "../../../db/server";
 import type { McpServer } from "@modelcontextprotocol/server";
-import { eq } from "../../../db/orm";
+import { eq } from "drizzle-orm";
 
 import { creditHistoryQuerySchema } from "../../../schema/mcp";
 import { jsonContent, resolveUserId, toIsoString, withToolError } from "../shared";

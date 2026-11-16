@@ -5,7 +5,7 @@ import { db } from "../src/db/server";
 import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 import { getUuid } from "@openstarter/shared/id";
 import { hashPassword } from "better-auth/crypto";
-import { and, eq } from "../src/db/orm";
+import { and, eq } from "drizzle-orm";
 
 interface SeedOptions {
   email: string;

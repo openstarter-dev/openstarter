@@ -1,7 +1,7 @@
 import { user } from "../../../db/schema";
 import { db } from "../../../db/server";
 import { logger } from "@openstarter/shared/logger";
-import { eq } from "../../../db/orm";
+import { eq } from "drizzle-orm";
 
 import { readBooleanEnv, readEnv } from "../lib/runtime-env";
 import { isKnownRole } from "@openstarter/auth/rbac/access";

@@ -1,6 +1,6 @@
 import type { Database } from "../db/server";
 import { createSqliteTestDb, disposeSqliteTestDb } from "../db/testing";
-import { sql } from "../db/orm";
+import { sql } from "drizzle-orm";
 
 const CREATE_TABLE_STATEMENTS = [
   `create table user (
