@@ -1,7 +1,7 @@
-// @openstarter/email/server —— 事务性邮件服务端入口（Email_Service，R22）。
+// 事务性邮件服务端入口（Email_Service，R22；原 @openstarter/email/server，已并入 api）。
 //
 // 导出 sendEmail / EmailManager / EmailProvider，精确满足 Auth_Service 现有引用
-// （packages/auth/src/server.ts 的 `import { sendEmail } from "@openstarter/email/server"`）。
+// （src/modules/auth/server.ts 的 `import { sendEmail } from "../email/server"`）。
 //
 // 依赖分层：位于 auth 依赖层之下，仅向下依赖 @openstarter/shared（logger），
 // 运行时凭证直接读取服务端环境变量（来源于 apps/web/.env 或 Worker bindings），

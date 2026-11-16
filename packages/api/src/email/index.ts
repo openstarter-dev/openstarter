@@ -1,4 +1,4 @@
-// @openstarter/email 包入口 —— 导出事务性邮件的模板枚举。
+// 事务性邮件模板枚举入口（原 @openstarter/email 包入口，已并入 api）。
 // 位于 auth 依赖层之下，不依赖 packages/api、packages/auth（避免环依赖）。
 // 服务端发送入口（sendEmail/EmailManager/EmailProvider）由 ./server 提供（任务 4.2）。
 // Requirements: 22.2、22.6。

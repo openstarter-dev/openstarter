@@ -32,13 +32,12 @@ openstarter/
 ├── packages/              # Shared libraries (published as @openstarter/*)
 │   ├── api/               # Hono RPC backend — hosts the database layer (src/db: Drizzle
 │   │                      # schema, migrations, D1 client) plus better-auth server,
-│   │                      # credits, payment, subscriptions, referral
+│   │                      # credits, payment, subscriptions, referral, transactional email
 │   ├── auth/              # Better-Auth clients only (client/{web,native,taro}) + rbac/access
 │   ├── billing/           # billing/mobile (Expo RevenueCat/Superwall client); server-side
 │   │                      # billing lives in packages/api (modules/billing)
-│   ├── email/             # React Email templates + providers (Resend, Cloudflare)
 │   ├── i18n/              # Per-platform i18n
-│   │   ├── web/           # @openstarter/i18n-web (web/auth/email, inlang/Paraglide)
+│   │   ├── web/           # @openstarter/i18n-web (web app + api server-side locale, inlang/Paraglide)
 │   │   ├── extension/     # @openstarter/i18n-extension (extension, @wxt-dev/i18n)
 │   │   └── mobile/        # @openstarter/i18n-mobile (mobile-specific, i18next)
 │   ├── shared/            # Constants, validators, utilities, logger, config
@@ -59,6 +58,8 @@ src/
 │                          # D1 migrations (db/migrations/sqlite), runtime client
 │                          # (db/server.ts), local D1 bootstrap (db/local.ts),
 │                          # test factory (db/testing/)
+├── email/                 # Transactional email: React Email templates + Resend/
+│                          # Cloudflare Mailchannels providers (sendEmail)
 ├── middleware/            # Auth, RBAC, plan gating middleware
 ├── schema/                # All Zod validation schemas + domain value vocabularies
 │                          # (mirrors modules/: schema/user.ts, schema/admin/rbac.ts, schema/mcp.ts, ...)

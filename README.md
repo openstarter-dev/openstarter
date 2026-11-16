@@ -94,15 +94,15 @@ openstarter/
 │   └── mini-app/    # WeChat mini-app (Taro)
 ├── packages/
 │   ├── api/         # Hono app (20+ routes) + AppType for RPC; hosts the DB layer
-│   │                # (Drizzle schema, D1 migrations), better-auth server, billing
+│   │                # (Drizzle schema, D1 migrations), better-auth server, billing,
+│   │                # transactional email (React Email templates)
 │   ├── auth/        # Better-Auth clients (web/native/taro) + RBAC access definitions
 │   ├── shared/      # Response envelope, logging, ID, hash, config
 │   ├── ui/          # Shared UI components (web + mobile per-platform)
 │   ├── i18n/        # Internationalization (inlang/Paraglide)
-│   │   ├── web/     # @openstarter/i18n-web — web/extension/auth/email shared
+│   │   ├── web/     # @openstarter/i18n-web — web app + api shared
 │   │   └── mobile/  # @openstarter/i18n-mobile — mobile-specific messages
-│   ├── email/       # React Email templates (7 templates, bilingual)
-│   ├── billing/     # Subscriptions, credits, payment providers
+│   ├── billing/     # Mobile billing client (Expo RevenueCat/Superwall)
 │   ├── analytics/   # Analytics provider abstraction (web + mobile)
 ```
 

@@ -1,5 +1,5 @@
-import { EmailTemplate } from "@openstarter/email";
-import type { SendEmailParams } from "@openstarter/email/server";
+import { EmailTemplate } from "../../email";
+import type { SendEmailParams } from "../../email/server";
 import { getTestInstance } from "better-auth/test";
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 
