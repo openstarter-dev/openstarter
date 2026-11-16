@@ -13,9 +13,6 @@
     },
     "./client/*": {
       "default": "./src/client/*.ts"
-    },
-    "./*": {
-      "default": "./src/*.ts"
     }
   },
   "scripts": {

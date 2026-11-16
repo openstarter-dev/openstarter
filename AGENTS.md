@@ -200,9 +200,10 @@ and deploy (official `@cloudflare/vite-plugin`), so bindings come from
 `wrangler.jsonc` directly; only seed scripts (pure Node) spin up a local D1 via
 `wrangler.getPlatformProxy` reading `apps/web/wrangler.jsonc` (state in
 `apps/web/.wrangler/state/v3`). There is no connection-string env key; tests run
-against in-memory miniflare D1 (`@openstarter/api/db/testing`). D1 rejects SQL
+against in-memory miniflare D1 (`src/db/testing`). D1 rejects SQL
 `BEGIN`/`SAVEPOINT`, so `db.transaction()` is unavailable — use `db.batch()`
-(atomic) or the `d1Transaction` helper from `@openstarter/api/db/server`
+(atomic) or the `d1Transaction` helper from `src/db/server`. The db layer is
+internal to the api package (no exports subpath) — only api code can import it.
 (non-atomic callback, callers stay idempotent).
 
 Extension / mobile / mini-app / cli / desktop read the web app address from

@@ -10,7 +10,7 @@ try {
 // deployed Workers alike) the official `cloudflare:workers` module exposes the
 // request env at module scope — grab it here so EVERY consumer (auth's top-level
 // db() included) sees the binding regardless of import order. On Node runtimes
-// the module does not exist: initLocalD1() (@openstarter/api/db/local, used by
+// the module does not exist: initLocalD1() (src/db/local, used by
 // seed-admin) or the test harness supplies the binding instead. The dynamic
 // import lives in cloudflare-env.mjs (see its header for why).
 // 自接线 Cloudflare env：workerd（dev 插件与线上）里官方 cloudflare:workers 模块在
@@ -56,7 +56,7 @@ function createDb(): Database {
 
   if (!binding) {
     throw new Error(
-      'D1 binding "DB" not found. Node runtimes (seed scripts) must call initLocalD1() from "@openstarter/api/db/local" before importing the db server module; Cloudflare Workers require a d1_databases binding named "DB".',
+      'D1 binding "DB" not found. Node runtimes (seed scripts) must call initLocalD1() from "../local" (src/db/local.ts) before importing the db server module; Cloudflare Workers require a d1_databases binding named "DB".',
     );
   }
 
