@@ -1,4 +1,4 @@
-import { isAvailable, useCustomer } from "@openstarter/billing-mobile";
+import { isAvailable, useCustomer } from "@/billing";
 import { Button, Card, CardContent, CardTitle, Text } from "@openstarter/ui-mobile";
 import { useTranslation } from "@openstarter/i18n-mobile";
 import { useEffect, useState } from "react";

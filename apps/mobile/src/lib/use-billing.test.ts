@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@openstarter/billing-mobile", () => ({
+vi.mock("@/billing", () => ({
   Provider: ({ children }: { children: React.ReactNode }) => children,
   useCustomer: () => ({
     customer: null,

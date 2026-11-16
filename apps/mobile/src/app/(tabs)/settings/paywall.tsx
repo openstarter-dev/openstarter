@@ -1,4 +1,4 @@
-import { usePaywall } from "@openstarter/billing-mobile";
+import { usePaywall } from "@/billing";
 import { useTranslation } from "@openstarter/i18n-mobile";
 import { Button, Text } from "@openstarter/ui-mobile";
 import { useRouter } from "expo-router";

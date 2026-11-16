@@ -102,7 +102,6 @@ openstarter/
 │   ├── i18n/        # Internationalization (inlang/Paraglide)
 │   │   ├── web/     # @openstarter/i18n-web — web app + api shared
 │   │   └── mobile/  # @openstarter/i18n-mobile — mobile-specific messages
-│   ├── billing/     # Mobile billing client (Expo RevenueCat/Superwall)
 │   ├── analytics/   # Analytics provider abstraction (web + mobile)
 ```
 

@@ -42,7 +42,7 @@ describe("parseSpec", () => {
   });
 
   it("mobile 变体推断为 platform:mobile", () => {
-    expect(parseSpec("billing/mobile").tag).toBe("platform:mobile");
+    expect(parseSpec("analytics/mobile").tag).toBe("platform:mobile");
   });
 
   it("--tag 显式覆盖自动推断", () => {
@@ -82,7 +82,7 @@ describe("renderFiles", () => {
   });
 
   it("turbo.json：extends 根配置并携带 boundaries 标签", () => {
-    const spec = parseSpec("billing/mobile");
+    const spec = parseSpec("analytics/mobile");
     const turbo = renderFiles(spec).find((f) => f.relPath === "turbo.json")?.content ?? "";
     expect(JSON.parse(turbo)).toEqual({ extends: ["//"], tags: ["platform:mobile"] });
   });

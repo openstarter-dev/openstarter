@@ -34,8 +34,6 @@ openstarter/
 │   │                      # schema, migrations, D1 client) plus better-auth server,
 │   │                      # credits, payment, subscriptions, referral, transactional email
 │   ├── auth/              # Better-Auth clients only (client/{web,native,taro}) + rbac/access
-│   ├── billing/           # billing/mobile (Expo RevenueCat/Superwall client); server-side
-│   │                      # billing lives in packages/api (modules/billing)
 │   ├── i18n/              # Per-platform i18n
 │   │   ├── web/           # @openstarter/i18n-web (web app + api server-side locale, inlang/Paraglide)
 │   │   ├── extension/     # @openstarter/i18n-extension (extension, @wxt-dev/i18n)
@@ -68,7 +66,8 @@ src/
     │                      # invite codes, rbac service, types) mounted at /api/auth/*
     ├── billing/           # Checkout + payment providers/webhooks, credits (FIFO),
     │                      # subscriptions, referral commissioning (billing/referral —
-    │                      # distinct from user-facing modules/referral)
+    │                      # distinct from user-facing modules/referral); the mobile
+    │                      # client billing (RevenueCat/Superwall) lives in apps/mobile/src/billing
     ├── config/            # Public config endpoint
     ├── storage/           # Image upload (S3/R2)
     ├── mcp/               # MCP server mounted at /api/mcp (read-only + ticket writes)
