@@ -11,9 +11,7 @@ function handleUnauthorized() {
   Taro.reLaunch({ url: "/pages/login/index" });
 }
 
-export function createClient() {
-  return createApiClient({
-    baseUrl: getApiBaseUrl(),
-    fetch: createTaroFetch(handleUnauthorized),
-  });
-}
+export const client = createApiClient({
+  baseUrl: getApiBaseUrl(),
+  fetch: createTaroFetch(handleUnauthorized),
+});

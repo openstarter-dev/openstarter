@@ -1,4 +1,4 @@
-import { createInternalRpc } from "@openstarter/api/client";
+import { createInternalRpc } from "@openstarter/api/client/internal";
 import { createTtlCache } from "@openstarter/shared/ttl-cache";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";

@@ -16,9 +16,6 @@ vi.mock("@tarojs/taro", () => ({
 vi.mock("@/utils/storage", () => ({
   getToken: vi.fn(() => "test-token"),
 }));
-vi.mock("@/utils/storage", () => ({
-  getToken: vi.fn(() => "test-token"),
-}));
 
 describe("taro-fetch", () => {
   beforeEach(() => {
@@ -91,5 +88,53 @@ describe("taro-fetch", () => {
 
     await fetch("https://api.example.com/test");
     expect(onUnauth).toHaveBeenCalled();
+  });
+
+  it("should reject without requesting when signal is already aborted", async () => {
+    const mod = await import("../../src/services/taro-fetch");
+    const fetch = mod.createTaroFetch();
+    const controller = new AbortController();
+    controller.abort();
+
+    await expect(
+      fetch("https://api.example.com/test", { signal: controller.signal as any }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+    expect(mockRequest).not.toHaveBeenCalled();
+  });
+
+  it("should abort the RequestTask and reject when signal aborts mid-flight", async () => {
+    const mod = await import("../../src/services/taro-fetch");
+    const fetch = mod.createTaroFetch();
+
+    const abort = vi.fn();
+    const task = Object.assign(new Promise(() => {}), { abort });
+    mockRequest.mockReturnValue(task);
+
+    const controller = new AbortController();
+    const pending = fetch("https://api.example.com/test", { signal: controller.signal as any });
+    controller.abort();
+
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    expect(abort).toHaveBeenCalled();
+  });
+
+  it("should remove the abort listener after completion", async () => {
+    const mod = await import("../../src/services/taro-fetch");
+    const fetch = mod.createTaroFetch();
+
+    const abort = vi.fn();
+    const task = Object.assign(Promise.resolve({ statusCode: 200, data: {}, header: {} }), {
+      abort,
+    });
+    mockRequest.mockReturnValue(task);
+
+    const controller = new AbortController();
+    const removeSpy = vi.spyOn(controller.signal, "removeEventListener");
+
+    await fetch("https://api.example.com/test", { signal: controller.signal as any });
+
+    expect(removeSpy).toHaveBeenCalledWith("abort", expect.any(Function));
+    controller.abort();
+    expect(abort).not.toHaveBeenCalled();
   });
 });

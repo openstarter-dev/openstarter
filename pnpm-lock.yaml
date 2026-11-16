@@ -242,6 +242,9 @@ importers:
       '@openstarter/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@tanstack/react-query':
+        specifier: ^5.99.0
+        version: 5.101.2(react@18.3.1)
       '@tarojs/components':
         specifier: ^4.2.1
         version: 4.2.1(@tarojs/helper@4.2.1)(@types/react@19.2.17)(html-webpack-plugin@5.6.8(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15)))(postcss@8.5.15)(rollup@3.30.0)(webpack-chain@6.5.1)(webpack-dev-server@4.15.2(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15)))(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15))
@@ -252,17 +255,17 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
       react:
-        specifier: 'catalog:'
-        version: 19.2.7
+        specifier: 18.3.1
+        version: 18.3.1
       react-dom:
-        specifier: 'catalog:'
-        version: 19.2.7(react@19.2.7)
+        specifier: 18.3.1
+        version: 18.3.1(react@18.3.1)
       zod:
         specifier: 'catalog:'
         version: 4.4.3
       zustand:
         specifier: ^5
-        version: 5.0.14(@types/react@19.2.17)(immer@11.1.16)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7))
+        version: 5.0.14(@types/react@19.2.17)(immer@11.1.16)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1))
     devDependencies:
       '@babel/preset-react':
         specifier: ^8.0.1
@@ -275,13 +278,13 @@ importers:
         version: 4.2.1(@types/node@26.0.1)
       '@tarojs/plugin-framework-react':
         specifier: ^4
-        version: 4.2.1(@tarojs/helper@4.2.1)(@tarojs/runtime@4.2.1)(@tarojs/shared@4.2.1)(@vitejs/plugin-react@4.7.0(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0)))(react@19.2.7)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15))
+        version: 4.2.1(@tarojs/helper@4.2.1)(@tarojs/runtime@4.2.1)(@tarojs/shared@4.2.1)(@vitejs/plugin-react@4.7.0(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0)))(react@18.3.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15))
       '@tarojs/plugin-platform-weapp':
         specifier: ^4
         version: 4.2.1(@tarojs/service@4.2.1)(@tarojs/shared@4.2.1)
       '@tarojs/react':
         specifier: ^4
-        version: 4.2.1(react@19.2.7)
+        version: 4.2.1(react@18.3.1)
       '@tarojs/taro':
         specifier: ^4
         version: 4.2.1(@tarojs/components@4.2.1(@tarojs/helper@4.2.1)(@types/react@19.2.17)(html-webpack-plugin@5.6.8(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15)))(postcss@8.5.15)(rollup@3.30.0)(webpack-chain@6.5.1)(webpack-dev-server@4.15.2(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15)))(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15)))(@tarojs/helper@4.2.1)(@tarojs/shared@4.2.1)(@types/react@19.2.17)(html-webpack-plugin@5.6.8(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15)))(postcss@8.5.15)(rollup@3.30.0)(webpack-chain@6.5.1)(webpack-dev-server@4.15.2(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15)))(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15))
@@ -13288,6 +13291,11 @@ packages:
   react-devtools-core@6.1.5:
     resolution: {integrity: sha512-ePrwPfxAnB+7hgnEr8vpKxL9cmnp7F322t8oqcPshbIQQhDKgFDW4tjhF2wjVbdXF9O/nyuy3sQWd9JGpiLPvA==}
 
+  react-dom@18.3.1:
+    resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
+    peerDependencies:
+      react: ^18.3.1
+
   react-dom@19.2.7:
     resolution: {integrity: sha512-t0BRVXvbiE/o20Hfw669rLbMCDWtYZLvmJigy2f0MxsXF+71pxhR3xOkspmsO8h3ZlNzyibAmtCa3l4lYKk6gQ==}
     peerDependencies:
@@ -13549,6 +13557,10 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  react@18.3.1:
+    resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
+    engines: {node: '>=0.10.0'}
 
   react@19.2.0:
     resolution: {integrity: sha512-tmbWg6W31tQLeB5cdIBOicJDJRR2KzXsV7uSK9iNfLWQ5bIZfxuPEHp7M8wiHyHnn0DD1i7w3Zmin0FtkrwoCQ==}
@@ -22094,6 +22106,11 @@ snapshots:
       '@tanstack/react-query': 5.101.2(react@19.2.7)
       react: 19.2.7
 
+  '@tanstack/react-query@5.101.2(react@18.3.1)':
+    dependencies:
+      '@tanstack/query-core': 5.101.2
+      react: 18.3.1
+
   '@tanstack/react-query@5.101.2(react@19.2.0)':
     dependencies:
       '@tanstack/query-core': 5.101.2
@@ -22571,7 +22588,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@tarojs/plugin-framework-react@4.2.1(@tarojs/helper@4.2.1)(@tarojs/runtime@4.2.1)(@tarojs/shared@4.2.1)(@vitejs/plugin-react@4.7.0(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0)))(react@19.2.7)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15))':
+  '@tarojs/plugin-framework-react@4.2.1(@tarojs/helper@4.2.1)(@tarojs/runtime@4.2.1)(@tarojs/shared@4.2.1)(@vitejs/plugin-react@4.7.0(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0)))(react@18.3.1)(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))(webpack@5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15))':
     dependencies:
       '@tarojs/helper': 4.2.1
       '@tarojs/runtime': 4.2.1
@@ -22582,7 +22599,7 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@vitejs/plugin-react': 4.7.0(vite@8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0))
-      react: 19.2.7
+      react: 18.3.1
       vite: 8.1.0(@types/node@26.0.1)(esbuild@0.28.2)(jiti@2.7.0)(less@3.13.1)(sass@1.102.0)(stylus@0.64.0)(terser@5.51.2)(tsx@4.22.4)(yaml@2.9.0)
       webpack: 5.91.0(@swc/core@1.3.96)(esbuild@0.28.2)(postcss@8.5.15)
 
@@ -22591,12 +22608,12 @@ snapshots:
       '@tarojs/service': 4.2.1
       '@tarojs/shared': 4.2.1
 
-  '@tarojs/react@4.2.1(react@19.2.7)':
+  '@tarojs/react@4.2.1(react@18.3.1)':
     dependencies:
       '@tarojs/runtime': 4.2.1
       '@tarojs/shared': 4.2.1
-      react: 19.2.7
-      react-reconciler: 0.29.0(react@19.2.7)
+      react: 18.3.1
+      react-reconciler: 0.29.0(react@18.3.1)
 
   '@tarojs/runner-utils@4.2.1':
     dependencies:
@@ -30255,6 +30272,12 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  react-dom@18.3.1(react@18.3.1):
+    dependencies:
+      loose-envify: 1.4.0
+      react: 18.3.1
+      scheduler: 0.23.2
+
   react-dom@19.2.7(react@19.2.0):
     dependencies:
       react: 19.2.0
@@ -30571,10 +30594,10 @@ snapshots:
       - utf-8-validate
     optional: true
 
-  react-reconciler@0.29.0(react@19.2.7):
+  react-reconciler@0.29.0(react@18.3.1):
     dependencies:
       loose-envify: 1.4.0
-      react: 19.2.7
+      react: 18.3.1
       scheduler: 0.23.2
 
   react-refresh@0.14.2: {}
@@ -30653,6 +30676,10 @@ snapshots:
       tslib: 2.8.1
     optionalDependencies:
       '@types/react': 19.2.17
+
+  react@18.3.1:
+    dependencies:
+      loose-envify: 1.4.0
 
   react@19.2.0: {}
 
@@ -32275,6 +32302,11 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.17
 
+  use-sync-external-store@1.6.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
+    optional: true
+
   use-sync-external-store@1.6.0(react@19.2.0):
     dependencies:
       react: 19.2.0
@@ -33082,18 +33114,18 @@ snapshots:
 
   zod@4.6.7: {}
 
+  zustand@5.0.14(@types/react@19.2.17)(immer@11.1.16)(react@18.3.1)(use-sync-external-store@1.6.0(react@18.3.1)):
+    optionalDependencies:
+      '@types/react': 19.2.17
+      immer: 11.1.16
+      react: 18.3.1
+      use-sync-external-store: 1.6.0(react@18.3.1)
+
   zustand@5.0.14(@types/react@19.2.17)(immer@11.1.16)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0)):
     optionalDependencies:
       '@types/react': 19.2.17
       immer: 11.1.16
       react: 19.2.0
       use-sync-external-store: 1.6.0(react@19.2.0)
-
-  zustand@5.0.14(@types/react@19.2.17)(immer@11.1.16)(react@19.2.7)(use-sync-external-store@1.6.0(react@19.2.7)):
-    optionalDependencies:
-      '@types/react': 19.2.17
-      immer: 11.1.16
-      react: 19.2.7
-      use-sync-external-store: 1.6.0(react@19.2.7)
 
   zwitch@2.0.4: {}

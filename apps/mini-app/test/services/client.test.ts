@@ -26,15 +26,9 @@ vi.mock("@/stores/auth-store", () => ({
 }));
 
 describe("API client", () => {
-  it("should create client with Hono RPC", async () => {
+  it("should export a Hono RPC client singleton", async () => {
     const mod = await import("../../src/services/client");
-    const client = mod.createClient();
-    expect(client).toBeDefined();
-  });
-
-  it("should have type-safe RPC methods", async () => {
-    const mod = await import("../../src/services/client");
-    const client = mod.createClient();
-    expect(typeof client).toBe("function");
+    expect(mod.client).toBeDefined();
+    expect(typeof mod.client).toBe("function");
   });
 });

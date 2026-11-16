@@ -1,4 +1,4 @@
-import { createInternalRpc } from "@openstarter/api/client";
+import { createInternalRpc } from "@openstarter/api/client/internal";
 import { baseLocale, locales, localizeUrl } from "@openstarter/i18n-web/runtime";
 
 import { BRAND_DESCRIPTION, BRAND_NAME } from "@/lib/branding";

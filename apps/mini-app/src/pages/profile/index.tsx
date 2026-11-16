@@ -1,6 +1,8 @@
 import { View, Text } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { useAuth } from "@/hooks/use-auth";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { authMutations, profileQueries } from "@/lib/queries";
+import { useAuthStore } from "@/stores/auth-store";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Layout from "@/components/Layout";
 import Button from "@/components/Button";
@@ -8,14 +10,18 @@ import Icon from "@/components/Icon";
 import "./index.scss";
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
+  const storeUser = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const profileQuery = useQuery({ ...profileQueries.detail(), enabled: isAuthenticated });
+  const logout = useMutation({
+    ...authMutations.logout(),
+    onSuccess: () => {
+      useAuthStore.getState().logout();
+      Taro.reLaunch({ url: "/pages/index/index" });
+    },
+  });
 
-  // Revoke server session as well as clearing local token store
-  // 登出时同步注销服务端会话并清理本地凭据
-  const handleLogout = async () => {
-    await logout();
-    Taro.reLaunch({ url: "/pages/index/index" });
-  };
+  const user = profileQuery.data ?? storeUser;
 
   return (
     <ProtectedRoute>
@@ -46,9 +52,8 @@ export default function ProfilePage() {
             <Button
               variant="secondary"
               fullWidth
-              onClick={() => {
-                void handleLogout();
-              }}
+              loading={logout.isPending}
+              onClick={() => logout.mutate()}
             >
               Sign Out
             </Button>

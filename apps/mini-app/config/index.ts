@@ -63,6 +63,13 @@ const config: IProjectConfig = {
     API_BASE_URL: JSON.stringify(resolveApiBaseUrl()),
   },
   mini: {
+    // workspace 包以 TS 源码导出，pnpm 软链解析后落在 packages/ 真实路径，
+    // 需显式纳入 babel 编译（默认排除 node_modules）。
+    compile: {
+      include: [
+        (modulePath: string) => modulePath.startsWith(path.resolve(__dirname, "../../../packages")),
+      ],
+    },
     miniCssExtractPluginOption: {
       ignoreOrder: true,
     },

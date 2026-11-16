@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { View, Text } from "@tarojs/components";
 import Taro from "@tarojs/taro";
-import { useAuth } from "@/hooks/use-auth";
+import { useMutation } from "@tanstack/react-query";
+import { authMutations } from "@/lib/queries";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
 import Layout from "@/components/Layout";
@@ -10,29 +11,24 @@ import "./index.scss";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const { login } = useAuth();
+  const [validationError, setValidationError] = useState("");
+  const login = useMutation({
+    ...authMutations.login(),
+    onSuccess: () => {
+      Taro.reLaunch({ url: "/pages/index/index" });
+    },
+  });
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     if (!email.trim() || !password) {
-      setError("Please enter email and password");
+      setValidationError("Please enter email and password");
       return;
     }
-
-    setLoading(true);
-    setError("");
-
-    const result = await login(email.trim(), password);
-
-    if (result.error) {
-      setError(result.error);
-      setLoading(false);
-      return;
-    }
-
-    Taro.reLaunch({ url: "/pages/index/index" });
+    setValidationError("");
+    login.mutate({ email: email.trim(), password });
   };
+
+  const error = validationError || login.error?.message || "";
 
   return (
     <Layout className="login-page">
@@ -59,7 +55,7 @@ export default function LoginPage() {
 
         {error && <Text className="login-page__error">{error}</Text>}
 
-        <Button variant="primary" fullWidth loading={loading} onClick={handleLogin}>
+        <Button variant="primary" fullWidth loading={login.isPending} onClick={handleLogin}>
           Sign In
         </Button>
       </View>

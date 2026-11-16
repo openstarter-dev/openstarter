@@ -38,20 +38,54 @@ export function createTaroFetch(onUnauthorized?: () => void) {
     }
 
     const body = parseBody(init?.body);
+    const signal = init?.signal;
 
-    const res = await Taro.request({
+    if (signal?.aborted) {
+      throw abortError(signal);
+    }
+
+    const task = Taro.request({
       url,
       method: (init?.method || "GET") as any,
       header: headers,
       data: body,
     });
 
-    if (res.statusCode === 401) {
-      onUnauthorized?.();
-    }
+    let onAbort: (() => void) | undefined;
+    try {
+      // abort 与请求完成竞速：部分 Taro 版本 abort() 不会 reject 底层 promise，
+      // 不主动 reject 会让 react-query 的 queryFn 悬挂。
+      const res = await (signal
+        ? new Promise<Awaited<typeof task>>((resolve, reject) => {
+            onAbort = () => {
+              task.abort();
+              reject(abortError(signal));
+            };
+            signal.addEventListener("abort", onAbort, { once: true });
+            task.then(resolve, reject);
+          })
+        : task);
 
-    return new MiniResponse(res.data, res.statusCode, res.header || {}) as any as Response;
+      if (res.statusCode === 401) {
+        onUnauthorized?.();
+      }
+
+      return new MiniResponse(res.data, res.statusCode, res.header || {}) as any as Response;
+    } finally {
+      if (signal && onAbort) {
+        signal.removeEventListener("abort", onAbort);
+      }
+    }
   };
+}
+
+function abortError(signal: AbortSignal): unknown {
+  if (signal.reason !== undefined) {
+    return signal.reason;
+  }
+  const error = new Error("Aborted");
+  error.name = "AbortError";
+  return error;
 }
 
 function normalizeHeaders(
