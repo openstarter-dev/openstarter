@@ -177,10 +177,13 @@ build-time `VITE_*` still come from `.env` via Vite. Vite's `.env.development` /
   the binding must exist regardless of import order). Vite `.env` is loaded for
   `VITE_*` at build time; runtime vars come from wrangler `vars`/secrets and
   `.dev.vars` in dev
-- `packages/api` — drizzle-kit configs at the package root (`drizzle.shared.ts`
-  provides `loadWebEnv`); the runtime db client (`src/db/server.ts`) is
-  D1-only: it reads the `DB` binding from `__CF_ENV__` (workerd request env,
-  or the local one set by `initLocalD1()` via wrangler `getPlatformProxy`);
+- `packages/api` — drizzle-kit configs at the package root (`db:generate`
+  needs no env; `db:migrate:prod` reads CLOUDFLARE_ACCOUNT_ID /
+  CLOUDFLARE_DATABASE_ID / CLOUDFLARE_API_TOKEN injected by CI — see
+  apps/web/.env.production.example); the runtime db client
+  (`src/db/server.ts`) is D1-only: it reads the `DB` binding from
+  `__CF_ENV__` (workerd request env, or the local one set by
+  `initLocalD1()` via wrangler `getPlatformProxy`);
   `scripts/seed-admin.ts` (pure Node; calls `initLocalD1()`)
 - extension / mobile / mini-app — their build entries (`wxt.config.ts`,
   `scripts/env.mjs`, `config/index.ts`)
