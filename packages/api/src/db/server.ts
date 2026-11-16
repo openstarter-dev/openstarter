@@ -1,18 +1,10 @@
-// Load apps/web/.env (cwd) into process.env for the Node runtime (dev SSR,
-// self-hosted Node); no-op on Cloudflare Workers where env comes from bindings.
-try {
-  process.loadEnvFile();
-} catch {
-  // .env missing or runtime without fs (Workers) — env must come from the real environment.
-}
-
 // Self-wiring the Cloudflare env: in workerd (dev via @cloudflare/vite-plugin and
 // deployed Workers alike) the official `cloudflare:workers` module exposes the
 // request env at module scope — grab it here so EVERY consumer (auth's top-level
 // db() included) sees the binding regardless of import order. On Node runtimes
-// the module does not exist: initLocalD1() (src/db/local, used by
-// seed-admin) or the test harness supplies the binding instead. The dynamic
-// import lives in cloudflare-env.mjs (see its header for why).
+// the module does not exist: initLocalD1() (src/db/local, used by seed-admin) or
+// the test harness supplies the binding instead. The dynamic import lives in
+// cloudflare-env.mjs (see its header for why).
 // 自接线 Cloudflare env：workerd（dev 插件与线上）里官方 cloudflare:workers 模块在
 // 模块作用域暴露 env，在此处统一捕获，任何消费方（含 auth 顶层 db()）不依赖入口
 // 的 import 顺序。Node 侧无该模块，由 initLocalD1()（seed-admin 用）或测试基建提供。
@@ -41,11 +33,7 @@ type CloudflareEnv = {
 };
 
 function readCloudflareEnv(): CloudflareEnv | undefined {
-  const scope = globalThis as {
-    __CF_ENV__?: CloudflareEnv;
-    __env__?: CloudflareEnv;
-  };
-  return scope.__CF_ENV__ ?? scope.__env__;
+  return (globalThis as { __CF_ENV__?: CloudflareEnv }).__CF_ENV__;
 }
 
 let cachedInstance: Database | null = null;

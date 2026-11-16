@@ -98,9 +98,3 @@ export function initLocalD1(): Promise<void> {
 
   return initPromise;
 }
-
-export async function disposeLocalD1(): Promise<void> {
-  await proxyHandle?.dispose();
-  proxyHandle = null;
-  initPromise = null;
-}
