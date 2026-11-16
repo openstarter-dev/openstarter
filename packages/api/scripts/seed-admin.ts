@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { initLocalD1 } from "../src/db/local";
+import { createLocalDatabase } from "../src/db/local";
 
 const ENV_FILE = fileURLToPath(new URL("../../../apps/web/.env", import.meta.url));
 if (!existsSync(ENV_FILE)) {
@@ -36,5 +36,15 @@ for (const line of content.split("\n")) {
   }
 }
 
-await initLocalD1();
-await import("./seed-admin-impl");
+const local = await createLocalDatabase();
+
+try {
+  const { runSeedAdmin } = await import("./seed-admin-impl");
+  await runSeedAdmin(local.database);
+  await local.dispose();
+  process.exit(0);
+} catch (error) {
+  console.error("[seed-admin] failed:", error);
+  await local.dispose().catch(() => {});
+  process.exit(1);
+}

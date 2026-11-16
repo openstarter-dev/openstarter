@@ -3,7 +3,7 @@ import { db } from "../../../db/server";
 import { logger } from "@openstarter/shared/logger";
 import { eq } from "drizzle-orm";
 
-import { readBooleanEnv, readEnv } from "../lib/runtime-env";
+import { readBooleanEnv, readEnv } from "../../../lib/env";
 import { isKnownRole } from "@openstarter/auth/rbac/access";
 
 export async function grantRoleForNewUser(params: { userId: string }): Promise<void> {

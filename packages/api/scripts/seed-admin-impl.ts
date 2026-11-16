@@ -1,7 +1,7 @@
 import { PlatformRole } from "@openstarter/auth/rbac/access";
 import { account, user } from "../src/db/schema";
 
-import { db } from "../src/db/server";
+import type { Database } from "../src/db/server";
 import { DEFAULT_APP_URL } from "@openstarter/shared/constants";
 import { getUuid } from "@openstarter/shared/id";
 import { hashPassword } from "better-auth/crypto";
@@ -59,30 +59,30 @@ const ADMIN_EMAIL = overrides.email ?? process.env.SEED_EMAIL ?? "admin@openstar
 const ADMIN_PASSWORD = overrides.password ?? process.env.SEED_PASSWORD ?? "Admin@123456";
 const ADMIN_NAME = overrides.name ?? "Admin";
 
-if (!ADMIN_EMAIL.includes("@") || ADMIN_PASSWORD.length < 8) {
-  console.error("[seed-admin] 参数校验失败:email 需合法、密码至少 8 位。当前值被拒绝。");
-  console.error(`  email:    ${ADMIN_EMAIL}`);
-  console.error(`  password: ${"*".repeat(ADMIN_PASSWORD.length)}`);
-  process.exit(1);
-}
+export async function runSeedAdmin(database: Database): Promise<void> {
+  if (!ADMIN_EMAIL.includes("@") || ADMIN_PASSWORD.length < 8) {
+    console.error("[seed-admin] 参数校验失败:email 需合法、密码至少 8 位。当前值被拒绝。");
+    console.error(`  email:    ${ADMIN_EMAIL}`);
+    console.error(`  password: ${"*".repeat(ADMIN_PASSWORD.length)}`);
+    process.exit(1);
+  }
 
-async function seedAdmin(options: SeedOptions): Promise<void> {
-  const { email, password, name } = options;
+  const { email, password, name } = { email: ADMIN_EMAIL, name: ADMIN_NAME, password: ADMIN_PASSWORD };
   const passwordHash = await hashPassword(password);
   const now = new Date();
 
-  const [existingUser] = await db().select().from(user).where(eq(user.email, email)).limit(1);
+  const [existingUser] = await database.select().from(user).where(eq(user.email, email)).limit(1);
   let userId: string;
   if (existingUser) {
     userId = existingUser.id;
-    await db()
+    await database
       .update(user)
       .set({ emailVerified: true, name, role: PlatformRole.ADMIN, updatedAt: now })
       .where(eq(user.id, userId));
     console.log(`[seed-admin] updated existing user: ${email}`);
   } else {
     userId = getUuid();
-    await db().insert(user).values({
+    await database.insert(user).values({
       banned: false,
       createdAt: now,
       email,
@@ -100,19 +100,19 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
     console.log(`[seed-admin] created user: ${email}`);
   }
 
-  const [existingAccountRow] = await db()
+  const [existingAccountRow] = await database
     .select()
     .from(account)
     .where(and(eq(account.userId, userId), eq(account.providerId, "credential")))
     .limit(1);
   if (existingAccountRow) {
-    await db()
+    await database
       .update(account)
       .set({ password: passwordHash, updatedAt: now })
       .where(eq(account.id, existingAccountRow.id));
     console.log("[seed-admin] updated credential account password");
   } else {
-    await db().insert(account).values({
+    await database.insert(account).values({
       accountId: userId,
       createdAt: now,
       id: getUuid(),
@@ -134,12 +134,3 @@ async function seedAdmin(options: SeedOptions): Promise<void> {
   console.log(`  Password  : ${password}`);
   console.log("=====================================================");
 }
-
-seedAdmin({ email: ADMIN_EMAIL, name: ADMIN_NAME, password: ADMIN_PASSWORD })
-  .then(() => {
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error("[seed-admin] failed:", error);
-    process.exit(1);
-  });

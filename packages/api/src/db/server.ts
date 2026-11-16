@@ -1,11 +1,6 @@
-const cloudflareEnv = await tryGetCloudflareEnv();
-if (cloudflareEnv) {
-  (globalThis as unknown as { __CF_ENV__?: unknown }).__CF_ENV__ = cloudflareEnv;
-}
-
 import { type DrizzleD1Database, drizzle } from "drizzle-orm/d1";
 
-import { tryGetCloudflareEnv } from "./cloudflare-env.mjs";
+import { env } from "../lib/env";
 import * as schema from "./schema";
 
 export type Database = DrizzleD1Database<typeof schema>;
@@ -17,23 +12,15 @@ type D1Binding = {
   dump(): Promise<ArrayBuffer>;
 };
 
-type CloudflareEnv = {
-  DB?: unknown;
-};
-
-function readCloudflareEnv(): CloudflareEnv | undefined {
-  return (globalThis as { __CF_ENV__?: CloudflareEnv }).__CF_ENV__;
-}
-
 let cachedInstance: Database | null = null;
 let cachedBinding: D1Binding | null = null;
 
 function createDb(): Database {
-  const binding = readCloudflareEnv()?.DB as D1Binding | undefined;
+  const binding = env.DB as D1Binding | undefined;
 
   if (!binding) {
     throw new Error(
-      'D1 binding "DB" not found. Node runtimes (seed scripts) must call initLocalD1() from "../local" (src/db/local.ts) before importing the db server module; Cloudflare Workers require a d1_databases binding named "DB".',
+      'D1 binding "DB" not found in the Workers env. Cloudflare Workers require a d1_databases binding named "DB" (wrangler.jsonc); pure Node scripts should build their own local D1 via createLocalDatabase() from src/db/local.ts.',
     );
   }
 

@@ -3,6 +3,7 @@ import { createElement, type ReactElement } from "react";
 
 import { logger } from "@openstarter/shared/logger";
 
+import { readEnv } from "../lib/env";
 import { EmailTemplate } from "./index";
 import { ChangeEmail } from "./templates/change-email";
 import { ConfirmEmail } from "./templates/confirm-email";
@@ -242,16 +243,6 @@ export class EmailManager {
     return provider.sendEmail(message);
   }
 }
-
-const readEnv = (key: string): string => {
-  const fromProcess = typeof process !== "undefined" ? process.env[key] : undefined;
-  if (typeof fromProcess === "string") {
-    return fromProcess.trim();
-  }
-  const cfEnv = (globalThis as { __CF_ENV__?: Record<string, unknown> }).__CF_ENV__;
-  const fromCf = cfEnv?.[key];
-  return typeof fromCf === "string" ? fromCf.trim() : "";
-};
 
 const buildManagerFromEnv = (): EmailManager => {
   const manager = new EmailManager();

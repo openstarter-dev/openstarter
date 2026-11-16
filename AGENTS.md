@@ -170,9 +170,9 @@ build-time `VITE_*` still come from `.env` via Vite. Vite's `.env.development` /
 
 - `apps/web` — Vite for the client; the server entry (`src/server.ts`, built
   via `@cloudflare/vite-plugin` with `main: @tanstack/react-start/server-entry`)
-  imports `@openstarter/api` directly; `__CF_ENV__` is self-wired inside
-  `packages/api/src/db/server.ts` from the official
-  `import { env } from "cloudflare:workers"` module (the better-auth server in
+  imports `@openstarter/api` directly; api code reads the official Workers
+  `env` (bindings, vars, secrets) from `cloudflare:workers` via
+  `packages/api/src/lib/env.ts` — no manual wiring (the better-auth server in
   `modules/auth/server.ts` initializes its db adapter at module top level, so
   the binding must exist regardless of import order). Vite `.env` is loaded for
   `VITE_*` at build time; runtime vars come from wrangler `vars`/secrets and
@@ -181,10 +181,11 @@ build-time `VITE_*` still come from `.env` via Vite. Vite's `.env.development` /
   needs no env; `db:migrate:prod` reads CLOUDFLARE_ACCOUNT_ID /
   CLOUDFLARE_DATABASE_ID / CLOUDFLARE_API_TOKEN injected by CI — see
   apps/web/.env.production.example); the runtime db client
-  (`src/db/server.ts`) is D1-only: it reads the `DB` binding from
-  `__CF_ENV__` (workerd request env, or the local one set by
-  `initLocalD1()` via wrangler `getPlatformProxy`);
-  `scripts/seed-admin.ts` (pure Node; calls `initLocalD1()`)
+  (`src/db/server.ts`) is D1-only: it reads the `DB` binding from the
+  `cloudflare:workers` env (see `src/lib/env.ts`; rolldown cannot resolve
+  `cloudflare:*` statically, so the import stays dynamic there);
+  `scripts/seed-admin.ts` (pure Node; builds its own local D1 via
+  `createLocalDatabase()` from `src/db/local.ts`)
 - extension / mobile / mini-app — their build entries (`wxt.config.ts`,
   `scripts/env.mjs`, `config/index.ts`)
 

@@ -7,7 +7,7 @@ import { NodeEnv } from "@openstarter/shared/constants";
 import { createTtlCache } from "@openstarter/shared/ttl-cache";
 import { and, asc, eq, sql } from "drizzle-orm";
 
-import { readEnv } from "../lib/runtime-env";
+import { readEnv } from "../../../lib/env";
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const CODE_LENGTH = 12;

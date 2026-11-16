@@ -28,7 +28,7 @@ import { createAuthEmailCallbacks, createChangeEmailOptions } from "./email-call
 import { env } from "./env";
 import { hooks } from "./hooks";
 import { redeemInviteCode, validateInviteCode } from "./invite-codes";
-import { readBooleanEnv, readEnv, readPositiveIntEnv } from "./lib/runtime-env";
+import { readBooleanEnv, readEnv, readPositiveNumberEnv } from "../../lib/env";
 import {
   getAppUrl,
   getUrl,
@@ -72,8 +72,8 @@ const emailVerificationRequired = readBooleanEnv(
 const inviteCodeRequired = readBooleanEnv("INVITE_CODE_REQUIRED", false);
 export const anonymousAuthEnabled = readBooleanEnv("ANONYMOUS_AUTH_ENABLED", false);
 
-const magicLinkExpiresIn = readPositiveIntEnv("MAGIC_LINK_EXPIRES_IN", MAGIC_LINK_EXPIRES_IN);
-const otpExpiresIn = readPositiveIntEnv("EMAIL_OTP_EXPIRES_IN", OTP_EXPIRES_IN);
+const magicLinkExpiresIn = readPositiveNumberEnv("MAGIC_LINK_EXPIRES_IN", MAGIC_LINK_EXPIRES_IN);
+const otpExpiresIn = readPositiveNumberEnv("EMAIL_OTP_EXPIRES_IN", OTP_EXPIRES_IN);
 
 const appUrl = getAppUrl();
 const isHttpsAppUrl = appUrl.startsWith("https://");

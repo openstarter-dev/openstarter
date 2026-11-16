@@ -1,6 +1,11 @@
 import { existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
+import { drizzle } from "drizzle-orm/d1";
+
+import * as schema from "./schema";
+import type { Database } from "./server";
+
 const CONFIG_DIR = "apps/web";
 const CONFIG_FILE = "wrangler.jsonc";
 const EXAMPLE_CONFIG_FILE = "wrangler.example.jsonc";
@@ -16,18 +21,9 @@ type GetPlatformProxy = (options?: {
   persist?: { path: string } | boolean;
 }) => Promise<PlatformProxy>;
 
-let initPromise: Promise<void> | null = null;
-let proxyHandle: PlatformProxy | null = null;
-
-function isWorkerRuntime(): boolean {
-  const cloudflareGlobal = globalThis as {
-    navigator?: { userAgent?: string };
-    Cloudflare?: unknown;
-  };
-  return (
-    cloudflareGlobal.navigator?.userAgent === "Cloudflare-Workers" ||
-    "Cloudflare" in cloudflareGlobal
-  );
+export interface LocalDatabase {
+  database: Database;
+  dispose: () => Promise<void>;
 }
 
 function resolveWebConfig(): string {
@@ -48,34 +44,33 @@ function resolveWebConfig(): string {
     dir = parent;
   }
   throw new Error(
-    "apps/web/wrangler.jsonc not found — copy apps/web/wrangler.example.jsonc (initLocalD1 needs a D1 binding named DB).",
+    "apps/web/wrangler.jsonc not found — copy apps/web/wrangler.example.jsonc (createLocalDatabase needs a D1 binding named DB).",
   );
 }
 
-export function initLocalD1(): Promise<void> {
-  if (isWorkerRuntime()) {
-    return Promise.resolve();
+/**
+ * Pure Node only (seed scripts): spin up a local D1 via wrangler's
+ * getPlatformProxy and return a drizzle instance over its DB binding, plus a
+ * dispose handle. Worker code must use the regular db() client instead.
+ */
+export async function createLocalDatabase(): Promise<LocalDatabase> {
+  const { getPlatformProxy } = (await import("wrangler")) as {
+    getPlatformProxy: GetPlatformProxy;
+  };
+
+  const configPath = resolveWebConfig();
+
+  const persistPath = resolve(dirname(configPath), ".wrangler", "state", "v3");
+  const proxy = await getPlatformProxy({ configPath, persist: { path: persistPath } });
+
+  const binding = proxy.env.DB;
+  if (!binding) {
+    await proxy.dispose();
+    throw new Error('No D1 binding "DB" in the wrangler config — add a d1_databases entry.');
   }
 
-  initPromise ??= (async () => {
-    const { getPlatformProxy } = (await import("wrangler")) as {
-      getPlatformProxy: GetPlatformProxy;
-    };
-
-    const configPath = resolveWebConfig();
-
-    const persistPath = resolve(dirname(configPath), ".wrangler", "state", "v3");
-    proxyHandle = await getPlatformProxy({ configPath, persist: { path: persistPath } });
-
-    const env = proxyHandle.env;
-    if (!env.DB) {
-      await proxyHandle.dispose();
-      proxyHandle = null;
-      throw new Error('No D1 binding "DB" in the wrangler config — add a d1_databases entry.');
-    }
-
-    (globalThis as unknown as { __CF_ENV__?: unknown }).__CF_ENV__ = env;
-  })();
-
-  return initPromise;
+  return {
+    database: drizzle(binding as Parameters<typeof drizzle>[0], { schema }),
+    dispose: () => proxy.dispose(),
+  };
 }

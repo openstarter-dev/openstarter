@@ -78,7 +78,18 @@ export interface WebConfig {
   support: WebSupportConfig;
 }
 
-type RuntimeEnvRecord = Record<string, unknown>;
+// Prefer runtime env (workerd populates process.env with vars/secrets under
+// nodejs_compat; Node/Vitest work natively), then the Vite statically replaced value.
+function readRuntimeOverride(key: string): string | undefined {
+  if (typeof process !== "undefined" && typeof process.env === "object") {
+    const procValue = process.env[key];
+    if (typeof procValue === "string") {
+      return procValue;
+    }
+  }
+
+  return undefined;
+}
 
 // Strictly allow safe widget identifiers so inline head script interpolation cannot break quotes/tags.
 // 严格白名单校验客服组件 ID，防止内联脚本插值导致 XSS 注入。
@@ -88,23 +99,6 @@ const DEFAULT_TAWK_WIDGET_ID = "default";
 interface SupportWidgetProvider {
   readonly isConfigured: (support: WebSupportConfig) => boolean;
   readonly headScripts: (support: WebSupportConfig) => HeadScript[];
-}
-
-function readRuntimeOverride(key: string): string | undefined {
-  const cfEnv = (globalThis as { __CF_ENV__?: RuntimeEnvRecord }).__CF_ENV__;
-  const cfValue = cfEnv?.[key];
-  if (typeof cfValue === "string") {
-    return cfValue;
-  }
-
-  if (typeof process !== "undefined" && typeof process.env === "object") {
-    const procValue = process.env[key];
-    if (typeof procValue === "string") {
-      return procValue;
-    }
-  }
-
-  return undefined;
 }
 
 function resolveEnv(runtimeKey: string, viteValue: string | undefined, fallback = ""): string {
