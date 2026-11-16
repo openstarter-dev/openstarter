@@ -1,7 +1,6 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/query-core";
 import type { Query } from "@tanstack/query-core";
 
-/** mutation 成功后需要失效的 query key，通过 `meta: { invalidates: [...] }` 声明。 */
 export type InvalidatesMeta =
   | readonly (readonly unknown[])[]
   | ((variables: never) => readonly (readonly unknown[])[]);
@@ -13,7 +12,6 @@ declare module "@tanstack/query-core" {
 }
 
 export interface CreateQueryClientOptions {
-  /** 默认 60s，与 web 现有行为一致。 */
   staleTimeMs?: number;
   retry?: (failureCount: number, error: Error) => boolean;
   retryDelayMs?: number;
@@ -33,10 +31,6 @@ function defaultRetry(failureCount: number, error: Error): boolean {
   return failureCount < 1;
 }
 
-/**
- * 多端统一的 QueryClient 默认值；提示文案等平台差异通过回调注入。
- * `meta.invalidates` 的自动失效也在这里统一处理。
- */
 export function createQueryClient(options: CreateQueryClientOptions = {}): QueryClient {
   const {
     staleTimeMs = DEFAULT_STALE_TIME_MS,

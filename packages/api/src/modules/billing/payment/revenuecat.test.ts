@@ -1,10 +1,3 @@
-// RevenueCat webhook 模块测试（验签 + 事件映射）。
-//
-// 验签：按 RC 官方协议 —— `X-RevenueCat-Webhook-Signature: t=<unix秒>,v1=<hex HMAC-SHA256>`，
-// HMAC 以 webhook signing secret 对 "<t>.<rawBody>"（原始字节）计算。
-// 事件映射：表驱动断言 8 类 RC 事件 → 归一化 PaymentEvent；INITIAL_PURCHASE 先合成
-// created 订单再交 handlePaymentEvent（建订阅+授积分+置 paid 全部复用既有编排）。
-
 import { createHmac } from "node:crypto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -18,8 +11,6 @@ vi.mock("./webhook", async () => {
   };
 });
 
-// mock 订单/用户查询与插入：INITIAL_PURCHASE 幂等预检与订单合成需要 db。
-// select 链按查询表区分：order 表走 existingOrders，user 表走 existingUsers。
 const dbState = vi.hoisted(() => ({
   existingOrders: [] as Array<Record<string, unknown>>,
   existingUsers: [] as Array<Record<string, unknown>>,
@@ -37,7 +28,6 @@ vi.mock("../../../db/server", () => ({
     }),
     select: () => ({
       from: (table: Record<symbol, unknown>) => {
-        // drizzle 表对象带 Symbol(drizzle:Name) 标识。
         const name = String(table[Symbol.for("drizzle:Name")] ?? "unknown");
         dbState.lastQueriedTable = name;
         const rows = name === "user" ? dbState.existingUsers : dbState.existingOrders;
@@ -55,7 +45,6 @@ import { mapRevenueCatEvent, verifyRevenueCatWebhook } from "./revenuecat";
 
 const SECRET = "whsec_test_secret";
 
-// 注入测试 resolver：任何商品 ID 反查到 pro_monthly 目录条目（金额/积分与真实目录一致）。
 import { configureRevenueCatProducts } from "./revenuecat";
 configureRevenueCatProducts((iapProductId) => ({
   amount: 2900,
@@ -69,7 +58,6 @@ configureRevenueCatProducts((iapProductId) => ({
   ...(iapProductId ? {} : {}),
 }));
 
-/** 以测试 secret 为指定 body 生成合法签名头。 */
 function signBody(t: number, rawBody: string): string {
   const v1 = createHmac("sha256", SECRET).update(`${t}.${rawBody}`).digest("hex");
   return `t=${t},v1=${v1}`;
@@ -99,8 +87,6 @@ beforeEach(() => {
 });
 
 describe("verifyRevenueCatWebhook", () => {
-  // 固定时间戳会被 5 分钟容差拒绝，故合法签名用「当前时间」生成；
-  // 过期/篡改等反例另行构造。
   const NOW_T = () => Math.floor(Date.now() / 1000);
 
   it("accepts a valid signature over the raw body", () => {
@@ -129,7 +115,6 @@ describe("verifyRevenueCatWebhook", () => {
   });
 
   it("rejects a stale timestamp even with a valid HMAC (fixed-time body)", () => {
-    // 用 2023 年的固定时间戳签名：HMAC 本身合法，但超出容差 → 拒绝。
     const header = signBody(1_700_000_000, RAW_BODY);
     expect(verifyRevenueCatWebhook({ rawBody: RAW_BODY, secret: SECRET, signature: header })).toBe(
       false,
@@ -183,7 +168,6 @@ describe("mapRevenueCatEvent", () => {
   }
 
   it("INITIAL_PURCHASE synthesizes a created order then emits payment.success (create)", async () => {
-    // 用户表按 app_user_id 归属订单：先登记 user-1。
     dbState.existingUsers = [{ id: "user-1" }];
     await mapRevenueCatEvent(
       rcEvent("INITIAL_PURCHASE", {
@@ -192,7 +176,6 @@ describe("mapRevenueCatEvent", () => {
       }),
     );
 
-    // 订单合成：金额取目录（2900 分）、provider 固定 revenuecat。
     expect(dbState.insertedOrders).toHaveLength(1);
     const inserted = dbState.insertedOrders[0] as Record<string, unknown>;
     expect(inserted.paymentProvider).toBe("revenuecat");
@@ -206,7 +189,6 @@ describe("mapRevenueCatEvent", () => {
     expect(inserted.userId).toBe("user-1");
     expect(String(inserted.orderNo)).toMatch(/^ORD/);
 
-    // 归一化事件交给既有编排。
     expect(handlePaymentEventMock).toHaveBeenCalledTimes(1);
     const [event, provider] = handlePaymentEventMock.mock.calls[0] as [
       { eventType: string; paymentSession?: Record<string, unknown> },
@@ -227,7 +209,6 @@ describe("mapRevenueCatEvent", () => {
   });
 
   it("INITIAL_PURCHASE with unknown app_user_id is skipped (no order, no event)", async () => {
-    // 用户表查询返回空：无法归属 → 跳过。
     await mapRevenueCatEvent(rcEvent("INITIAL_PURCHASE"));
     expect(dbState.insertedOrders).toHaveLength(0);
     expect(handlePaymentEventMock).not.toHaveBeenCalled();

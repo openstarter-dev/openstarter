@@ -1,8 +1,3 @@
-// @openstarter/api/modules/billing/payment/customer-portal —— Stripe 账单门户测试。
-//
-// 验证 StripeProvider.getPaymentBilling 正确调用 billingPortal.sessions.create
-// 并返回归一化 { billingUrl }。
-
 import { describe, expect, it, vi } from "vitest";
 
 import { StripeProvider } from "./stripe";
@@ -11,7 +6,6 @@ describe("StripeProvider.getPaymentBilling", () => {
   it("creates a billing portal session and returns the billing URL", async () => {
     const mockUrl = "https://billing.stripe.com/session/test_123";
 
-    // 模拟 Stripe 客户端：billingPortal.sessions.create
     const mockCreate = vi.fn().mockResolvedValue({ url: mockUrl });
     const mockClient = {
       billingPortal: { sessions: { create: mockCreate } },
@@ -20,7 +14,7 @@ describe("StripeProvider.getPaymentBilling", () => {
     const provider = new StripeProvider({
       secretKey: "sk_test_mock",
     });
-    // 替换内部的 this.client 为模拟对象
+
     (provider as unknown as { client: typeof mockClient }).client = mockClient;
 
     const result = await provider.getPaymentBilling({

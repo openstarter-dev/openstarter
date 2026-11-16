@@ -1,7 +1,3 @@
-// EmailTemplate.ORGANIZATION_INVITATION —— 组织邀请邮件。
-// Auth 触发点：organization.sendInvitationEmail（变量：url、inviter、organization）。
-// Requirements: 22.2、22.5。
-
 import {
   ActionButton,
   EmailLayout,

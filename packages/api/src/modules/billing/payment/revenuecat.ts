@@ -1,20 +1,3 @@
-// RevenueCat webhook 模块（验签 + 事件映射 → 既有编排管线）。
-//
-// 定位：RC 是「商店代扣集成」，不是支付渠道 —— PaymentProvider 的必备方法
-// （createPayment/getPaymentSession）对它无意义，故不进 PaymentManager，本模块
-// 与四渠道并列，仅提供两个纯能力：
-//   1. verifyRevenueCatWebhook：HMAC 验签（RC 官方协议 ——
-//      头 `X-RevenueCat-Webhook-Signature: t=<unix秒>,v1=<hex HMAC-SHA256>`，
-//      对 "<t>.<rawBody>" 原始字节计算；timingSafeEqual + 5 分钟时间容差防重放）。
-//   2. mapRevenueCatEvent：把 RC 事件映射为归一化 PaymentEvent 交给既有
-//      handlePaymentEvent 编排 —— 首期先合成 created 订单（幂等按
-//      (transactionId, paymentProvider) 预检），建订阅+授积分+置 paid 的单事务、
-//      续费去重等业务逻辑全部复用 webhook.ts，零重复实现。
-//
-// 金额/积分一律取服务端产品目录（server-side pricing 唯一事实来源）；RC 回报的
-// 原始金额仅存 paymentResult 供审计。app_user_id 即 better-auth userId（移动端
-// Purchases.logIn(user.id) 注入），查无此人则记日志跳过（无法归属）。
-
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { type NewOrder, order, user } from "../../../db/schema";
@@ -37,10 +20,6 @@ import {
 } from "./types";
 import { handlePaymentEvent } from "./webhook";
 
-/**
- * 商店商品 → 目录条目反查（由路由层注入，避免本包反向依赖 api 的产品目录）。
- * 金额/积分/周期的唯一事实来源是服务端目录；查不到（未上架商店）返回 undefined。
- */
 export type IapProductResolver = (iapProductId: string) =>
   | {
       amount: number;
@@ -55,24 +34,12 @@ export type IapProductResolver = (iapProductId: string) =>
     }
   | undefined;
 
-/** RC webhook 签名头名。 */
 const SIGNATURE_HEADER = "x-revenuecat-webhook-signature";
 
-/** 时间容差（秒）：RC 官方建议防重放窗口。 */
 const TIMESTAMP_TOLERANCE_SECONDS = 5 * 60;
 
 export { SIGNATURE_HEADER };
 
-// ─── 验签（Signature verification） ─────────────────────────────────────────
-
-/**
- * 验证 RC webhook 签名（v2 HMAC 方案）。
- *
- * @param rawBody 原始请求体字节（**不得**先 JSON 解析再重序列化 —— 会破坏签名）。
- * @param signature 头 `X-RevenueCat-Webhook-Signature` 的完整值，形如 `t=...,v1=...`。
- * @param secret 后台配置的 `revenuecat_webhook_secret`。
- * @returns 签名合法且时间戳在容差内时 true；任何解析失败一律 false（fail-closed）。
- */
 export function verifyRevenueCatWebhook(params: {
   rawBody: string;
   secret: string;
@@ -83,7 +50,6 @@ export function verifyRevenueCatWebhook(params: {
     return false;
   }
 
-  // 解析 "t=<秒>,v1=<hex>"；字段缺失即拒绝。
   const parts = new Map<string, string>(
     signature.split(",").map((pair) => {
       const eq = pair.indexOf("=");
@@ -96,7 +62,6 @@ export function verifyRevenueCatWebhook(params: {
     return false;
   }
 
-  // 时间容差：过期签名拒绝（防重放）。
   const signedAt = Number.parseInt(timestamp, 10);
   if (!Number.isFinite(signedAt)) {
     return false;
@@ -106,7 +71,6 @@ export function verifyRevenueCatWebhook(params: {
     return false;
   }
 
-  // HMAC-SHA256("<t>.<rawBody>", secret) 与 v1 常量时比较。
   const expected = createHmac("sha256", secret).update(`${timestamp}.${rawBody}`).digest("hex");
   const expectedBytes = Buffer.from(expected, "hex");
   const providedBytes = Buffer.from(digest, "hex");
@@ -115,8 +79,6 @@ export function verifyRevenueCatWebhook(params: {
   }
   return timingSafeEqual(expectedBytes, providedBytes);
 }
-
-// ─── RC 事件载荷（最小类型化：只声明消费到的字段） ─────────────────────────────
 
 interface RevenueCatEventPayload {
   app_user_id?: string;
@@ -131,17 +93,10 @@ interface RevenueCatEventPayload {
   type?: string;
 }
 
-// ─── 事件映射（Event mapping → 既有编排） ───────────────────────────────────
-
 const RC_PROVIDER = "revenuecat";
 
-/**
- * 模块级 resolver 槽位：由路由层在挂载时注入（`configureRevenueCatProducts`），
- * 本包保持「不依赖 api」的分层方向（依赖倒置而非反向 import）。
- */
 let resolveIapProduct: IapProductResolver | undefined;
 
-/** 注入商店商品 → 目录条目的反查函数（api 路由层用 resolveProductByIapId 调用）。 */
 export function configureRevenueCatProducts(resolver: IapProductResolver): void {
   resolveIapProduct = resolver;
 }
@@ -154,12 +109,6 @@ function lookupProduct(iapProductId: string): ReturnType<IapProductResolver> | u
   return resolveIapProduct(iapProductId);
 }
 
-/**
- * 处理一条已验签的 RC webhook 载荷：映射为归一化事件并交给既有编排管线。
- *
- * 未登记的商店商品 / 无法归属的用户 / 重复投递均**记日志跳过**（不抛错 ——
- * RC 对非 2xx 响应会指数退避重试，跳过即等价确认；真实错误抛给路由层统一处理）。
- */
 export async function mapRevenueCatEvent(payload: RevenueCatEventPayload): Promise<void> {
   const event = payload.event ?? {};
   const type = typeof event.type === "string" ? event.type : (payload.type ?? "");
@@ -222,7 +171,6 @@ export async function mapRevenueCatEvent(payload: RevenueCatEventPayload): Promi
       });
       return;
     case "NON_RENEWING_PURCHASE":
-      // 一次性/不再续订的购买：权益保留到期，按 pending_cancel 呈现。
       await emitSubscriptionUpdate({
         event,
         originalTransactionId,
@@ -232,17 +180,14 @@ export async function mapRevenueCatEvent(payload: RevenueCatEventPayload): Promi
       });
       return;
     case "PRODUCT_CHANGE":
-      // v1：仅更新计费周期，不补差价积分（目录单产品下罕见）。
       await emitSubscriptionUpdate({ event, originalTransactionId, status: undefined });
       return;
     default:
-      // BILLING_ISSUE / TEST / 未知类型：最小副作用，跳过。
       logger.warn(`[revenuecat] ignored webhook event type: ${type}`);
       return;
   }
 }
 
-/** 首期购买：幂等合成 created 订单 → 合成 payment.success(create) 事件。 */
 async function handleInitialPurchase(args: {
   appUserId?: string;
   event?: { [key: string]: unknown };
@@ -266,7 +211,6 @@ async function handleInitialPurchase(args: {
     return;
   }
 
-  // 幂等预检：同一 (transactionId, provider) 的订单已存在即跳过（RC 至少一次投递）。
   const [existing] = await db()
     .select({ id: order.id })
     .from(order)
@@ -277,7 +221,6 @@ async function handleInitialPurchase(args: {
     return;
   }
 
-  // 归属校验：app_user_id 即 better-auth userId；查无此人无法归属，跳过。
   const [owner] = await db()
     .select({ id: user.id })
     .from(user)
@@ -305,7 +248,7 @@ async function handleInitialPurchase(args: {
     paymentType: PaymentType.SUBSCRIPTION,
     paymentProvider: RC_PROVIDER,
     paymentSessionId: transactionId,
-    // RC 续费/退款按原始交易归集，订单落库即记录 original_transaction_id。
+
     subscriptionId: originalTransactionId,
     checkoutInfo: "",
     description: `IAP ${product.productName}`,
@@ -325,7 +268,6 @@ async function handleInitialPurchase(args: {
   });
 }
 
-/** 合成 payment.success 归一化事件并交既有编排（create 走建订阅管线、renew 走续费管线）。 */
 async function emitPaymentSuccess(args: {
   event?: { [key: string]: unknown };
   expirationAtMs?: number | null;
@@ -375,7 +317,7 @@ async function emitPaymentSuccess(args: {
     provider: RC_PROVIDER,
     paymentStatus: PaymentStatus.SUCCESS,
     paymentInfo,
-    // RC 原始事件存审计（含 store 侧金额），不参与定价。
+
     paymentResult: args.event ?? {},
     subscriptionId: args.originalTransactionId,
     subscriptionInfo,
@@ -390,7 +332,6 @@ async function emitPaymentSuccess(args: {
   await handlePaymentEvent(event, RC_PROVIDER);
 }
 
-/** 合成 subscribe.updated 事件（取消自动续订/恢复/暂停）。 */
 async function emitSubscriptionUpdate(args: {
   canceledEndAtMs?: number | null;
   canceledReason?: string;
@@ -427,7 +368,6 @@ async function emitSubscriptionUpdate(args: {
   await handlePaymentEvent(event, RC_PROVIDER);
 }
 
-/** 合成 subscribe.canceled 事件（到期/系统收回权益）。 */
 async function emitSubscriptionCanceled(args: {
   event?: { [key: string]: unknown };
   expirationAtMs?: number | null;

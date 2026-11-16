@@ -113,10 +113,6 @@ function toDateKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-/**
- * Aggregate 30-day credit grants and consumptions by UTC date in JS to avoid dialect-specific SQL.
- * 在应用层按 UTC 日期聚合 30 天积分发放与消耗，避免依赖 SQLite 专属时间函数。
- */
 function aggregateTrendByDay(
   rows: readonly { createdAt: Date; credits: number; transactionType: string }[],
 ): Map<string, { consumed: number; granted: number }> {
@@ -140,13 +136,6 @@ const toNumber = (value: unknown): number => {
   return Number.isNaN(parsed) ? 0 : Math.abs(parsed);
 };
 
-/**
- * Dashboard aggregates in 3 round trips instead of one query per metric:
- * 1. credit window rows → 30-day trend buckets + grant/consume sums (JS aggregation)
- * 2. orders grouped by currency → total/paid counts, per-currency paid totals, latest paid currency
- * 3. active API keys count
- * 仪表盘聚合压缩为 3 次往返：积分窗口行一次取回在 JS 聚合，订单按币种分组一次取全。
- */
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
   const database = db();
 
@@ -192,8 +181,6 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
       ),
   ]);
 
-  // Bucket the window rows by day; the same rows also yield the 30-day grant/consume totals.
-  // 窗口行按天分桶；同一批行同时得出 30 天发放/消耗合计。
   const byDay = aggregateTrendByDay(trendRows);
   let creditsGranted30d = 0;
   let creditsConsumed30d = 0;
@@ -214,8 +201,6 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
     };
   });
 
-  // Reduce currency groups: totals, paid totals, and the most recently paid currency.
-  // 归并币种分组：总数、paid 数、最近一次 paid 的币种及其消费合计。
   let ordersCount = 0;
   let paidOrdersCount = 0;
   let latestPaidAt = Number.NEGATIVE_INFINITY;

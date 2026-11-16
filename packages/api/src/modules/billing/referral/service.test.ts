@@ -1,8 +1,3 @@
-// 分销记账服务测试（db-backed，采用内存库注入模式）。
-//
-// 通过 vi.mock("../../../db/server") 将 db() 重定向到内存 sqlite，再走正常 drizzle
-// 查询断言 recordCommission 的记账行为（幂等 / 旁路 / 代理比例 / 关闭开关等）。
-
 import type { Database } from "../../../db/server";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -15,8 +10,6 @@ import {
   createBillingTestDatabase,
   resetBillingTestDatabase,
 } from "../../../test/billing-test-database";
-
-// ─── 测试夹具状态 ────────────────────────────────────────────────────────────────
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
@@ -35,21 +28,20 @@ vi.mock("../../../db/server", async (importOriginal) => {
   };
 });
 
-/** 在内存库中插入 userA(referrer) + userB(referred) + 推荐关系。 */
 async function seedReferralFixture(
   overrides: {
     customRate?: number | null;
   } = {},
 ) {
   const db = state.database!;
-  // 推荐人 A 的 referral 行
+
   await db.insert(referral).values({
     code: "abc",
     customRate: overrides.customRate ?? null,
     id: getUuid(),
     userId: "userA",
   });
-  // 被推荐人 B 的关系
+
   await db.insert(referralRelation).values({
     code: "abc",
     id: getUuid(),
@@ -57,8 +49,6 @@ async function seedReferralFixture(
     referredUserId: "userB",
   });
 }
-
-// ─── 套件 ───────────────────────────────────────────────────────────────────────
 
 describe("recordCommission", () => {
   beforeAll(async () => {
@@ -88,7 +78,7 @@ describe("recordCommission", () => {
     const rows = await tx.select().from(commission);
     expect(rows).toHaveLength(1);
     expect(rows[0]!.status).toBe("pending");
-    expect(rows[0]!.commissionCredits).toBe(100); // 1000 × 1000bps / 10000
+    expect(rows[0]!.commissionCredits).toBe(100);
   });
 
   it("同 orderNo 重试 → 幂等不重复记账", async () => {

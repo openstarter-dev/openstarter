@@ -1,19 +1,3 @@
-// 事务性邮件服务端入口（Email_Service，R22；原 @openstarter/email/server，已并入 api）。
-//
-// 导出 sendEmail / EmailManager / EmailProvider，精确满足 Auth_Service 现有引用
-// （src/modules/auth/server.ts 的 `import { sendEmail } from "../email/server"`）。
-//
-// 依赖分层：位于 auth 依赖层之下，仅向下依赖 @openstarter/shared（logger），
-// 运行时凭证直接读取服务端环境变量（来源于 apps/web/.env 或 Worker bindings），
-// 模板本地化复用本包 ./templates/locale（零外部依赖）。**不依赖 packages/api、packages/auth**，
-// 杜绝环依赖（对应 ultracite「prevent import cycles」）。
-//
-// 渠道：Resend 为主、Cloudflare 邮件通道为备选（R22.1）。两者均以 fetch 调用各自 HTTP API，
-// 不引入 SDK 依赖，Node 与 Cloudflare Workers 运行时通用。
-//
-// 失败与日志（R22.4）：sendEmail 以结构化 EmailSendResult 回传成功/失败；投递失败经
-// @openstarter/shared/logger 记录、**不抛未捕获异常**（渲染/网络异常一并被捕获转为失败结果）。
-
 import { render } from "@react-email/components";
 import { createElement, type ReactElement } from "react";
 
@@ -29,33 +13,27 @@ import { OrganizationInvitationEmail } from "./templates/organization-invitation
 import { ResetPasswordEmail } from "./templates/reset-password";
 import { SignInOtpEmail } from "./templates/sign-in-otp";
 
-// ─── 类型（Types）──────────────────────────────────────────────────────────
-
-/** 单封邮件的投递载荷（已渲染）。 */
 export type EmailMessage = {
   to: string;
   subject: string;
   html: string;
 };
 
-/** 投递结果信封：无论成功/失败均结构化返回，便于调用方与日志追溯（R22.3）。 */
 export type EmailSendResult = {
   success: boolean;
-  /** 实际投递渠道名（none 表示无可用渠道）。 */
+
   provider: string;
-  /** 成功时的渠道消息 id（部分渠道无返回则省略）。 */
+
   messageId?: string;
-  /** 失败时的可读错误信息。 */
+
   error?: string;
 };
 
-/** 邮件渠道抽象：一个具名的可投递渠道（Resend / Cloudflare 等）。 */
 export type EmailProvider = {
   readonly name: string;
   sendEmail(message: EmailMessage): Promise<EmailSendResult>;
 };
 
-/** sendEmail 顶层入参：渲染指定模板并投递。 */
 export type SendEmailParams = {
   to: string;
   template: EmailTemplate;
@@ -63,21 +41,12 @@ export type SendEmailParams = {
   variables: Record<string, string>;
 };
 
-// ─── 模板渲染（Rendering，R22.2/R22.5）──────────────────────────────────────
-
-// 兜底应用名（Config 未提供 app_name 时使用）。
 const DEFAULT_APP_NAME = "OpenStarter";
 
-// 穷尽性守卫：EmailTemplate 联合已在上方 switch 全部覆盖，运行时非法值在此抛出（由 sendEmail 捕获）。
 const assertNeverTemplate = (value: never): never => {
   throw new Error(`Unhandled email template: ${String(value)}`);
 };
 
-/**
- * 依模板类型构造对应的 React Email 元素。
- * 各模板按 locale 选择文案（模板内部经 resolveEmailLocale 收敛）。
- * variables 为字符串键值，缺失键以空串兜底，避免渲染期抛错。
- */
 const buildTemplateElement = (
   template: EmailTemplate,
   locale: string,
@@ -120,7 +89,6 @@ const buildTemplateElement = (
   }
 };
 
-// 各模板的主题行（按 en/zh 本地化，与模板 preview/文案一致）。
 const SUBJECTS: Record<EmailTemplate, Record<EmailLocale, string>> = {
   [EmailTemplate.DELETE_ACCOUNT]: {
     en: "Confirm your account deletion",
@@ -152,17 +120,13 @@ const SUBJECTS: Record<EmailTemplate, Record<EmailLocale, string>> = {
   },
 };
 
-// 依 locale 取主题行（locale 经 resolveEmailLocale 收敛为 en/zh）。
 const getSubject = (template: EmailTemplate, locale: string): string =>
   SUBJECTS[template][resolveEmailLocale(locale)];
 
-// ─── 渠道实现（Providers，R22.1）─────────────────────────────────────────────
-
 const RESEND_ENDPOINT = "https://api.resend.com/emails";
-// Cloudflare 邮件通道经 MailChannels 事务发送 API（Cloudflare Workers 邮件的标准路径）。
+
 const CLOUDFLARE_EMAIL_ENDPOINT = "https://api.mailchannels.net/tx/v1/send";
 
-// 安全读取错误响应体：读取失败时回落到状态码描述，绝不抛出。
 const readErrorDetail = async (response: Response): Promise<string> => {
   try {
     const text = await response.text();
@@ -172,14 +136,9 @@ const readErrorDetail = async (response: Response): Promise<string> => {
   }
 };
 
-// 归一化异常为可读信息（用于日志与 EmailSendResult.error）。
 const toErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
-/**
- * Resend 渠道（主）：POST /emails，Bearer 鉴权。成功返回 `{ id }`。
- * 任何失败（非 2xx 或网络异常）都记日志并返回失败结果，不抛出。
- */
 const createResendProvider = (apiKey: string, from: string): EmailProvider => ({
   name: "resend",
   async sendEmail(message: EmailMessage): Promise<EmailSendResult> {
@@ -214,10 +173,6 @@ const createResendProvider = (apiKey: string, from: string): EmailProvider => ({
   },
 });
 
-/**
- * Cloudflare 邮件通道（备选）：经 MailChannels 事务发送 API。
- * 同样以失败结果 + 日志处理任何异常，不抛出。
- */
 const createCloudflareProvider = (apiKey: string, from: string): EmailProvider => ({
   name: "cloudflare",
   async sendEmail(message: EmailMessage): Promise<EmailSendResult> {
@@ -251,12 +206,6 @@ const createCloudflareProvider = (apiKey: string, from: string): EmailProvider =
   },
 });
 
-// ─── 渠道管理器（EmailManager，R22.1）────────────────────────────────────────
-
-/**
- * 邮件渠道管理器：注册若干渠道并按默认渠道投递。
- * 首个注册的渠道或显式标记者成为默认渠道；无默认渠道时投递返回失败结果（不抛出）。
- */
 export class EmailManager {
   readonly #providers = new Map<string, EmailProvider>();
   #defaultProvider: string | null = null;
@@ -294,10 +243,6 @@ export class EmailManager {
   }
 }
 
-/**
- * Read a runtime environment variable from `process.env` or Cloudflare Worker bindings.
- * 从 `process.env` 或 Cloudflare Worker 绑定读取运行时环境变量。
- */
 const readEnv = (key: string): string => {
   const fromProcess = typeof process !== "undefined" ? process.env[key] : undefined;
   if (typeof fromProcess === "string") {
@@ -308,14 +253,6 @@ const readEnv = (key: string): string => {
   return typeof fromCf === "string" ? fromCf.trim() : "";
 };
 
-/**
- * Assemble EmailManager directly from runtime environment variables:
- * - `EMAIL_PROVIDER` selects default provider (defaults to "resend");
- * - Resend requires `RESEND_API_KEY` + sender (`RESEND_SENDER_EMAIL` / `RESEND_EMAIL_FROM` / `EMAIL_FROM`);
- * - Cloudflare requires `CLOUDFLARE_EMAIL_API_TOKEN` + sender (`CLOUDFLARE_EMAIL_SENDER_EMAIL` / `EMAIL_FROM`).
- *
- * 从环境变量装配邮件渠道管理器：缺省凭证的渠道跳过注册，无可用渠道时返回结构化失败结果。
- */
 const buildManagerFromEnv = (): EmailManager => {
   const manager = new EmailManager();
   const selected = readEnv("EMAIL_PROVIDER") || "resend";
@@ -339,15 +276,6 @@ const buildManagerFromEnv = (): EmailManager => {
   return manager;
 };
 
-// ─── 服务端入口（sendEmail，R22.3/R22.4/R22.5）──────────────────────────────
-
-/**
- * Render the email template and deliver via the configured environment provider.
- * Reads `VITE_APP_NAME` (or `APP_NAME`) and provider credentials directly from env,
- * returns structured {@link EmailSendResult}, and never throws uncaught errors.
- *
- * 渲染指定模板并经默认渠道投递事务性邮件；从环境变量读取品牌名与渠道凭证并结构化返回结果。
- */
 export const sendEmail = async (params: SendEmailParams): Promise<EmailSendResult> => {
   try {
     const appName = readEnv("VITE_APP_NAME") || readEnv("APP_NAME") || DEFAULT_APP_NAME;

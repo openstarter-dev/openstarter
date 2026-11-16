@@ -6,10 +6,6 @@ import { eq } from "drizzle-orm";
 import { readBooleanEnv, readEnv } from "../lib/runtime-env";
 import { isKnownRole } from "@openstarter/auth/rbac/access";
 
-/**
- * Grant a default RBAC role to a newly registered user when `INITIAL_ROLE_ENABLED=true`.
- * 当 `INITIAL_ROLE_ENABLED=true` 时，为新注册用户授予 `INITIAL_ROLE_NAME` 指定的初始角色。
- */
 export async function grantRoleForNewUser(params: { userId: string }): Promise<void> {
   const { userId } = params;
 

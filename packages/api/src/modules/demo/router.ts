@@ -18,7 +18,7 @@ const notes: Note[] = [];
 let noteIdCounter = 1;
 
 export const demoRouter = new Hono()
-  // Private data endpoint (demo)
+
   .get("/private-data", requireAuth, (c) => {
     const session = c.get("session");
     if (!session) {
@@ -26,7 +26,7 @@ export const demoRouter = new Hono()
     }
     return c.json(respData({ message: "This is private", user: session.user }));
   })
-  // Notes endpoints (demo)
+
   .get("/notes", requireAuth, zValidator("query", listQuery), (c) => {
     const { limit } = c.req.valid("query");
     const userId = c.get("userId");

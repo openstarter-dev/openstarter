@@ -1,7 +1,3 @@
-// EmailTemplate.SIGN_IN_OTP —— 登录一次性验证码邮件。
-// Auth 触发点：emailOTP.sendVerificationOTP（type=sign-in；变量：otp）。
-// Requirements: 22.2、22.5。
-
 import { EmailLayout, ExpiryNote, Footnote, OtpCode, Paragraph, Title } from "./layout";
 import { resolveEmailLocale } from "./locale";
 

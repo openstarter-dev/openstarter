@@ -23,10 +23,6 @@ type RunValidator = (
   options?: unknown,
 ) => MiddlewareHandler;
 
-/**
- * Workspace-wide zValidator. Uses the API response envelope for validation
- * failures instead of @hono/zod-validator's default { success, error } shape.
- */
 export const zValidator = ((target: unknown, schema: unknown, hook?: unknown, options?: unknown) =>
   (honoZValidator as unknown as RunValidator)(
     target,

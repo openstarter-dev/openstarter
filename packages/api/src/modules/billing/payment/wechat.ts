@@ -1,10 +1,3 @@
-// 微信支付（WeChat Pay Native, V3）渠道实现（对齐 ShipAny `core/payment/wechat.ts`）。
-//
-// 以 fetch + V3 API 实现（不引入 SDK）：createPayment 走 Native 下单，返回前端
-// 渲染二维码所需数据（R10.3）；getPaymentSession 查询订单；getPaymentEvent 校验
-// V3 回调签名（RSA-SHA256 + 平台证书，fail-closed + 时间窗校验）并用 AES-256-GCM
-// 解密通知内容。
-
 import { Buffer } from "node:buffer";
 import { createDecipheriv, createSign, createVerify, randomBytes } from "node:crypto";
 import {
@@ -17,7 +10,6 @@ import {
   PaymentStatus,
 } from "./types";
 
-/** 微信支付渠道配置。 */
 export interface WechatPayConfigs {
   appId: string;
   mchId: string;
@@ -59,7 +51,6 @@ const MS_PER_SECOND = 1000;
 const TIMESTAMP_WINDOW_SECONDS = 300;
 const GCM_AUTH_TAG_LENGTH = 16;
 
-/** 微信支付渠道 provider。 */
 export class WechatPayProvider implements PaymentProvider {
   readonly name = "wechat";
 
@@ -69,9 +60,6 @@ export class WechatPayProvider implements PaymentProvider {
     this.configs = configs;
   }
 
-  /**
-   * Native 下单：返回 `code_url` 及前端渲染二维码所需数据（R10.3）。
-   */
   async createPayment({ order }: { order: PaymentOrder }): Promise<CheckoutSession> {
     if (!order.price) {
       throw new Error("price is required for WeChat payment");
@@ -100,8 +88,6 @@ export class WechatPayProvider implements PaymentProvider {
       throw new Error(result.message || "WeChat Pay create order failed");
     }
 
-    // Native 支付返回 code_url（weixin://wxpay/bizpayurl?pr=xxx）；前端将其渲染为
-    // 二维码供用户扫码。qrData 即「前端渲染二维码所需数据」（R10.3）。
     return {
       provider: this.name,
       checkoutParams: payload,
@@ -134,19 +120,17 @@ export class WechatPayProvider implements PaymentProvider {
     if (!(timestamp && nonce && signature)) {
       throw new Error("Missing WeChat Pay webhook headers");
     }
-    // fail-closed：无平台证书拒绝处理回调。
+
     if (!this.configs.platformCert) {
       throw new Error("WeChat platform certificate not configured");
     }
 
-    // 拒绝过期/未来时间戳（±5 分钟窗口）。
     const tsNum = Number.parseInt(timestamp, 10);
     const nowSec = Math.floor(Date.now() / MS_PER_SECOND);
     if (!Number.isFinite(tsNum) || Math.abs(nowSec - tsNum) > TIMESTAMP_WINDOW_SECONDS) {
       throw new Error("WeChat webhook timestamp outside acceptable window");
     }
 
-    // 验签：签名载荷为 `timestamp\nnonce\nbody\n`，用平台证书公钥校验（RSA-SHA256）。
     const signedPayload = `${timestamp}\n${nonce}\n${body}\n`;
     if (!this.verifySignature(signedPayload, signature)) {
       throw new Error("Invalid WeChat webhook signature");
@@ -170,8 +154,6 @@ export class WechatPayProvider implements PaymentProvider {
       paymentSession: this.buildSession(trade),
     };
   }
-
-  // ─── 私有辅助 ────────────────────────────────────────────────────────────
 
   private buildSession(trade: WechatTradeResult): PaymentSession {
     return {
@@ -266,8 +248,6 @@ export class WechatPayProvider implements PaymentProvider {
   }
 }
 
-// ─── 纯辅助（模块级） ────────────────────────────────────────────────────────
-
 function parseAttach(attach: string | undefined): Record<string, unknown> | undefined {
   if (!attach) {
     return undefined;
@@ -307,7 +287,6 @@ function normalizePlatformCert(cert: string): string {
   return `-----BEGIN CERTIFICATE-----\n${cert}\n-----END CERTIFICATE-----`;
 }
 
-/** 依配置创建微信支付 provider。 */
 export function createWechatPayProvider(configs: WechatPayConfigs): WechatPayProvider {
   return new WechatPayProvider(configs);
 }

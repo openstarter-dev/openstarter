@@ -1,9 +1,3 @@
-// 支付宝（Alipay）支付渠道实现（对齐 ShipAny `core/payment/alipay.ts`）。
-//
-// 以 fetch + RSA2 签名实现（不引入 SDK）：createPayment 生成签名后的电脑网站
-// 支付跳转链接；getPaymentSession 查询交易状态；getPaymentEvent 验签异步通知
-// （用支付宝公钥校验 RSA 签名，fail-closed）。
-
 import { createSign, createVerify } from "node:crypto";
 import {
   type CheckoutSession,
@@ -15,7 +9,6 @@ import {
   PaymentStatus,
 } from "./types";
 
-/** 支付宝渠道配置。 */
 export interface AlipayConfigs {
   appId: string;
   privateKey: string;
@@ -42,7 +35,6 @@ interface AlipayTradeQueryResponse {
 const ALIPAY_GATEWAY = "https://openapi.alipay.com/gateway.do";
 const CENTS_PER_UNIT = 100;
 
-/** 支付宝渠道 provider。 */
 export class AlipayProvider implements PaymentProvider {
   readonly name = "alipay";
 
@@ -166,8 +158,6 @@ export class AlipayProvider implements PaymentProvider {
     return { eventType, eventResult: params, paymentSession };
   }
 
-  // ─── 私有辅助 ────────────────────────────────────────────────────────────
-
   private async execute(
     method: string,
     bizContent: Record<string, unknown>,
@@ -231,9 +221,6 @@ export class AlipayProvider implements PaymentProvider {
   }
 }
 
-// ─── 纯辅助（模块级） ────────────────────────────────────────────────────────
-
-/** 按键名字典序拼接 `k=v&...`，排除空值与 `exclude` 中的键。 */
 function buildSignString(params: Record<string, string>, exclude: string[]): string {
   return Object.keys(params)
     .filter((k) => !exclude.includes(k))
@@ -296,7 +283,6 @@ function normalizePublicKey(key: string): string {
   return `-----BEGIN PUBLIC KEY-----\n${key}\n-----END PUBLIC KEY-----`;
 }
 
-/** 依配置创建支付宝 provider。 */
 export function createAlipayProvider(configs: AlipayConfigs): AlipayProvider {
   return new AlipayProvider(configs);
 }

@@ -102,10 +102,6 @@ export interface UploadBatchResult {
   urls: string[];
 }
 
-/**
- * Resolve maximum inline-image upload size in KB from `INLINE_IMAGE_MAX_KB` env var.
- * 从环境变量 `INLINE_IMAGE_MAX_KB` 解析内联图片体积上限（KB），默认 2048 KB。
- */
 export async function resolveUploadLimitKb(): Promise<number> {
   return readPositiveNumberEnv("INLINE_IMAGE_MAX_KB", DEFAULT_MAX_KB);
 }

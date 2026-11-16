@@ -1,9 +1,3 @@
-// In-memory SQLite test harness for packages/billing property tests.
-//
-// Returns a createDb()-backed handle with the subset of Phase 0-5 tables used
-// by billing service tests (subscription, order, credit, user) plus the
-// referral-domain tables (referral, referral_relation, commission).
-
 import type { Database } from "../db/server";
 import { createSqliteTestDb, disposeSqliteTestDb } from "../db/testing";
 import { sql } from "drizzle-orm";

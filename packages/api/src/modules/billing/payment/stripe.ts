@@ -1,10 +1,3 @@
-// Stripe 支付渠道实现（对齐 ShipAny `core/payment/stripe.ts`）。
-//
-// 使用官方 `stripe` SDK 的稳定 API 发起结账（create）、查询会话（retrieve）与
-// 验签（constructEventAsync，异步实现以兼容 Node 与边缘运行时）。读取渠道原生
-// 响应时，统一以本文件内的最小形状接口 + 断言解耦 SDK 具体版本的类型细节，
-// 只声明本实现真正读取的字段，避免随 SDK 版本演进而失配。
-
 import Stripe from "stripe";
 import {
   type CheckoutSession,
@@ -22,7 +15,6 @@ import {
   PaymentType,
 } from "./types";
 
-/** Stripe 渠道配置（凭证与结账选项）。 */
 export interface StripeConfigs {
   secretKey: string;
   publishableKey?: string;
@@ -30,8 +22,6 @@ export interface StripeConfigs {
   allowedPaymentMethods?: string[];
   allowPromotionCodes?: boolean;
 }
-
-// ─── 渠道原生响应的最小读取形状（与 SDK 版本解耦） ───────────────────────────
 
 type StripeSessionStatus = "complete" | "expired" | "open";
 type StripePaymentStatus = "paid" | "unpaid" | "no_payment_required";
@@ -100,7 +90,6 @@ interface StripeInvoiceShape {
 
 const MS_PER_SECOND = 1000;
 
-/** 把归一化周期映射为 Stripe recurring interval（订阅不会是 one-time）。 */
 function toStripeInterval(interval: PaymentInterval): "day" | "week" | "month" | "year" {
   switch (interval) {
     case "day":
@@ -114,9 +103,6 @@ function toStripeInterval(interval: PaymentInterval): "day" | "week" | "month" |
   }
 }
 
-/**
- * Stripe 渠道 provider。
- */
 export class StripeProvider implements PaymentProvider {
   readonly name = "stripe";
 
@@ -212,7 +198,6 @@ export class StripeProvider implements PaymentProvider {
       throw new Error("Signing secret not configured");
     }
 
-    // 验签：SDK 依 signingSecret 校验请求真实性（安全边界）。
     const event = await this.client.webhooks.constructEventAsync(
       rawBody,
       signature,
@@ -238,8 +223,6 @@ export class StripeProvider implements PaymentProvider {
     });
     return { billingUrl: session.url };
   }
-
-  // ─── 私有辅助（Private helpers） ──────────────────────────────────────────
 
   private async resolveCustomerId(order: PaymentOrder): Promise<string> {
     const email = order.customer?.email;
@@ -305,7 +288,7 @@ export class StripeProvider implements PaymentProvider {
     ) {
       return this.buildSessionFromInvoice(object as unknown as StripeInvoiceShape, eventType);
     }
-    // SUBSCRIBE_UPDATED / SUBSCRIBE_CANCELED
+
     return this.buildSessionFromSubscription(object as unknown as StripeSubscriptionShape);
   }
 
@@ -396,8 +379,6 @@ export class StripeProvider implements PaymentProvider {
     });
   }
 }
-
-// ─── 纯映射函数（模块级，无 I/O） ────────────────────────────────────────────
 
 function mapStripeEventType(eventType: string): PaymentEventType {
   switch (eventType) {
@@ -502,7 +483,6 @@ function applyStripeCancelInfo(
   info.status = SubscriptionStatus.ACTIVE;
 }
 
-/** 依配置创建 Stripe provider。 */
 export function createStripeProvider(configs: StripeConfigs): StripeProvider {
   return new StripeProvider(configs);
 }

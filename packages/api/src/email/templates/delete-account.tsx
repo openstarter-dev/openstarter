@@ -1,7 +1,3 @@
-// EmailTemplate.DELETE_ACCOUNT —— 删账号确认邮件。
-// Auth 触发点：user.deleteUser.sendDeleteAccountVerification（变量：url）。
-// Requirements: 22.2、22.5。
-
 import {
   ActionButton,
   EmailLayout,

@@ -226,9 +226,6 @@ export interface UserPlanResult {
   trialEndsAt?: Date;
 }
 
-// Per-isolate TTL cache: plan-gate runs on every authed request; subscription/trial changes
-// propagate within this TTL, which is acceptable for feature gating.
-// 单 isolate TTL 缓存：plan-gate 每个请求都会调用；套餐/试用变化在 TTL 内生效，门控可接受。
 const PLAN_CACHE_TTL_MS = 30_000;
 const planCache = createTtlCache<UserPlanResult>({ maxEntries: 1000, ttlMs: PLAN_CACHE_TTL_MS });
 

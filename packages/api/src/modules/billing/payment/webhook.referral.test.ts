@@ -1,8 +1,3 @@
-// Webhook → 分销记账挂载测试（db-backed，对齐 service.test.ts 的内存库注入模式）。
-//
-// 验证 handlePaymentEvent 在 checkout.success / payment.success(renewal) 路径下自动调用 recordCommission，
-// 并在 commission 表生成 pending 记录。幂等性由 commission.orderNo 唯一约束兜底。
-
 import type { Database } from "../../../db/server";
 import { beforeAll, beforeEach, afterAll, describe, expect, it, vi } from "vitest";
 
@@ -17,8 +12,6 @@ import {
 } from "../../../test/billing-test-database";
 import { OrderStatus } from "./checkout";
 import { PaymentEventType, SubscriptionCycleType } from "./types";
-
-// ─── 测试夹具状态 ────────────────────────────────────────────────────────────────
 
 const state = vi.hoisted(() => ({
   database: undefined as Database | undefined,
@@ -37,21 +30,20 @@ vi.mock("../../../db/server", async (importOriginal) => {
   };
 });
 
-/** 在内存库中插入 userA(referrer) + userB(referred) + 推荐关系。 */
 async function seedReferralFixture(
   overrides: {
     customRate?: number | null;
   } = {},
 ) {
   const db = state.database!;
-  // 推荐人 A 的 referral 行
+
   await db.insert(referral).values({
     code: "abc",
     customRate: overrides.customRate ?? null,
     id: getUuid(),
     userId: "userA",
   });
-  // 被推荐人 B 的关系
+
   await db.insert(referralRelation).values({
     code: "abc",
     id: getUuid(),
@@ -60,7 +52,6 @@ async function seedReferralFixture(
   });
 }
 
-/** 在内存库中插入一条待支付订单（供 handleCheckoutSuccess 回关）。 */
 async function seedOrder(orderNo: string, userId: string) {
   const db = state.database!;
   await db.insert(order).values({
@@ -83,7 +74,6 @@ async function seedOrder(orderNo: string, userId: string) {
   });
 }
 
-/** 构造 CHECKOUT_SUCCESS 事件（orderNo 匹配 seedOrder 插入的订单）。 */
 function createCheckoutSuccessEvent(orderNo: string, paymentAmount: number) {
   return {
     eventType: PaymentEventType.CHECKOUT_SUCCESS,
@@ -102,7 +92,6 @@ function createCheckoutSuccessEvent(orderNo: string, paymentAmount: number) {
   } as const;
 }
 
-/** 构造 RENEWAL 事件（userB 订阅续费，orderNo: ORD_W2）。 */
 function createRenewalEvent(orderNo: string, paymentAmount: number) {
   return {
     eventType: PaymentEventType.PAYMENT_SUCCESS,
@@ -129,7 +118,6 @@ function createRenewalEvent(orderNo: string, paymentAmount: number) {
   } as const;
 }
 
-/** 插入 subscription 记录供 handleSubscriptionRenewal 查找。 */
 async function seedSubscription(subscriptionId: string, userId: string) {
   const db = state.database!;
   await db.insert(subscription).values({
@@ -159,8 +147,6 @@ async function seedSubscription(subscriptionId: string, userId: string) {
   });
 }
 
-// ─── 套件 ───────────────────────────────────────────────────────────────────────
-
 describe("webhook → 分销记账挂载", () => {
   beforeAll(async () => {
     state.database = await createBillingTestDatabase();
@@ -182,12 +168,12 @@ describe("webhook → 分销记账挂载", () => {
 
     const rows = await db.select().from(commission);
     expect(rows).toHaveLength(1);
-    expect(rows[0]!.commissionCredits).toBe(200); // 2000 × 10%
+    expect(rows[0]!.commissionCredits).toBe(200);
     expect(rows[0]!.status).toBe("pending");
     expect(rows[0]!.orderNo).toBe("ORD_W1");
     expect(rows[0]!.referredUserId).toBe("userB");
     expect(rows[0]!.referrerId).toBe("userA");
-    expect(rows[0]!.rate).toBe(1000); // 默认比例
+    expect(rows[0]!.rate).toBe(1000);
     expect(rows[0]!.baseAmount).toBe(2000);
     expect(rows[0]!.baseCurrency).toBe("usd");
   });
@@ -199,7 +185,7 @@ describe("webhook → 分销记账挂载", () => {
 
     const event = createCheckoutSuccessEvent("ORD_W1", 2000);
     await handlePaymentEvent(event, "stripe");
-    await handlePaymentEvent(event, "stripe"); // 重复投递
+    await handlePaymentEvent(event, "stripe");
 
     const rows = await db.select().from(commission);
     expect(rows).toHaveLength(1);
@@ -233,7 +219,7 @@ describe("webhook → 分销记账挂载", () => {
     const rows = await db.select().from(commission);
     expect(rows).toHaveLength(1);
     expect(rows[0]!.rate).toBe(3000);
-    expect(rows[0]!.commissionCredits).toBe(300); // 1000 × 30%
+    expect(rows[0]!.commissionCredits).toBe(300);
   });
 
   afterAll(async () => {

@@ -1,7 +1,3 @@
-// EmailTemplate.CONFIRM_EMAIL —— 邮箱验证邮件。
-// Auth 触发点：emailVerification.sendVerificationEmail（变量：url）。
-// Requirements: 22.2、22.5。
-
 import {
   ActionButton,
   EmailLayout,

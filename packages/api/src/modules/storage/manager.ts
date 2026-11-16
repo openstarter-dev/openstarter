@@ -82,8 +82,6 @@ const STORAGE_ENV_KEYS = [
 
 type StorageAssembler = () => StorageProvider | null;
 
-// Declarative storage provider registry; builds S3/R2 only when required credentials are present.
-// 存储渠道注册表；仅当必需凭证环境变量齐备时装配 S3/R2 实例。
 const STORAGE_ASSEMBLERS: readonly StorageAssembler[] = [
   () => {
     const endpoint = readEnv("STORAGE_ENDPOINT");
@@ -126,10 +124,6 @@ function computeEnvHash(): string {
   return JSON.stringify(STORAGE_ENV_KEYS.map((key) => readEnv(key)));
 }
 
-/**
- * Assemble configured storage providers from runtime environment variables with fingerprint cache.
- * 从运行时环境变量装配存储渠道，并按配置指纹缓存管理器实例。
- */
 export async function getStorage(): Promise<StorageManager | null> {
   const hash = computeEnvHash();
 

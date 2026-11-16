@@ -101,8 +101,6 @@ describe("credits concurrency", () => {
       (result) => result.status === "fulfilled" && result.value.success,
     ).length;
 
-    // SQLite/libsql may reject one contender with SQLITE_BUSY; the invariant is
-    // that at most one consume commits and the balance never goes negative.
     expect(successes).toBeLessThanOrEqual(1);
     await expect(getBalance(USER_ID)).resolves.toBe(100 - successes * 60);
   });

@@ -2,7 +2,6 @@ type ApiResponseBody = { data?: unknown; message?: string };
 
 export type ApiErrorCode = string | number;
 
-/** 从错误对象上读取业务错误码（我们的响应信封是 `{ code, message, data }`）。 */
 export function getApiErrorCode(error: unknown): ApiErrorCode | undefined {
   if (typeof error === "object" && error !== null && "code" in error) {
     const code = (error as { code: unknown }).code;

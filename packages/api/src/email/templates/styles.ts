@@ -1,7 +1,3 @@
-// 事务性邮件模板的内联样式集合。
-// 邮件客户端普遍不支持外部样式表/类名，React Email 约定使用内联 style 对象。
-// 由 layout 与各模板共享，保证 7 个模板视觉一致。
-
 import type { CSSProperties } from "react";
 
 export const styles: Record<string, CSSProperties> = {

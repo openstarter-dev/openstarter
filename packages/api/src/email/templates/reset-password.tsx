@@ -1,7 +1,3 @@
-// EmailTemplate.RESET_PASSWORD —— 密码重置邮件。
-// Auth 触发点：emailAndPassword.sendResetPassword（变量：url）。
-// Requirements: 22.2、22.5。
-
 import {
   ActionButton,
   EmailLayout,

@@ -202,10 +202,6 @@ export async function listRelations(params: ListRelationsParams): Promise<ListRe
   return { items, total: Number(totalRows[0]?.value ?? 0) };
 }
 
-/**
- * Read active static/env referral configuration for admin inspection.
- * 读取当前生效的静态/环境变量分销规则配置供管理端查看。
- */
 export async function getReferralConfigForAdmin(): Promise<ReferralConfigResult> {
   const cfg = await getReferralConfig();
   return { ok: true, data: cfg };

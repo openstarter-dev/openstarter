@@ -22,12 +22,12 @@ const PERMISSION_ADMIN = "admin.*";
 export const referralAdminRouter = new Hono()
   .use(requireAuth)
   .use(requirePermission(PERMISSION_ADMIN))
-  // ── 静态分销规则配置读取 ──────────────────────────────────────────────────────
+
   .get("/config", async (c) => {
     const result = await getReferralConfigForAdmin();
     return c.json(respData(result.data));
   })
-  // ── 佣金管理 ────────────────────────────────────────────────────────────────
+
   .get("/commissions", zValidator("query", commissionsQuery), async (c) => {
     const { page, pageSize, status } = c.req.valid("query");
     const { items, total } = await listCommissions({ page, pageSize, status });
@@ -64,13 +64,13 @@ export const referralAdminRouter = new Hono()
     const result = await manualCreateCommission(body);
     return c.json(respData(result.data));
   })
-  // ── 关系列表 ────────────────────────────────────────────────────────────────
+
   .get("/relations", zValidator("query", paginationSchema), async (c) => {
     const { page, pageSize } = c.req.valid("query");
     const { items, total } = await listRelations({ page, pageSize });
     return c.json(respPage(items, total));
   })
-  // ── 代理比例 ────────────────────────────────────────────────────────────────
+
   .put("/users/:id/rate", zValidator("param", idParam), zValidator("json", rateBody), async (c) => {
     const { id } = c.req.valid("param");
     const { customRate } = c.req.valid("json");

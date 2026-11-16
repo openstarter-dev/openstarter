@@ -15,10 +15,6 @@ type DeleteUserHooks = Pick<DeleteUserOptions, "beforeDelete" | "afterDelete">;
 
 type OrganizationHooks = NonNullable<OrganizationOptions["organizationHooks"]>;
 
-/**
- * Initialize role & welcome credits for newly created users from server environment config.
- * 注册完成后依环境变量配置为新用户初始化角色与欢迎积分。
- */
 const runNewUserInitialization: UserCreateAfterHook = async (createdUser) => {
   const results = await Promise.allSettled([
     grantRoleForNewUser({ userId: createdUser.id }),

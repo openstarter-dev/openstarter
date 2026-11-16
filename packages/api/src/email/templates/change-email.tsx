@@ -1,7 +1,3 @@
-// EmailTemplate.CHANGE_EMAIL —— 改邮箱确认邮件。
-// Auth 触发点：user.changeEmail.sendChangeEmailConfirmation（变量：url、newEmail）。
-// Requirements: 22.2、22.5。
-
 import {
   ActionButton,
   EmailLayout,

@@ -1,7 +1,3 @@
-// EmailTemplate.MAGIC_LINK —— magic link 登录邮件。
-// Auth 触发点：magicLink.sendMagicLink（变量：url）。
-// Requirements: 22.2、22.5。
-
 import {
   ActionButton,
   EmailLayout,

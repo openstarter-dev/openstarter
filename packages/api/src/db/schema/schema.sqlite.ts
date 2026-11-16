@@ -104,8 +104,6 @@ export const verification = table(
   (t) => [index("idx_verification_identifier").on(t.identifier)],
 );
 
-// Shared fixed-window counters: better-auth rate limiter + API rate-limit middleware
-// 共享固定窗口计数表：better-auth 限流与 API 限流中间件共用
 export const rateLimit = table("rate_limit", {
   count: integer("count").notNull(),
   id: text("id").primaryKey(),
@@ -587,7 +585,7 @@ export const referral = table(
   "referral",
   {
     code: text("code").notNull().unique(),
-    // Align timestamp_ms with sqliteNowMs (milliseconds) / 毫秒时间戳对齐 sqliteNowMs
+
     createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
     customRate: integer("custom_rate"),
     id: text("id").primaryKey(),
@@ -605,7 +603,7 @@ export const referralRelation = table(
   "referral_relation",
   {
     code: text("code").notNull(),
-    // Align timestamp_ms with sqliteNowMs (milliseconds) / 毫秒时间戳对齐 sqliteNowMs
+
     createdAt: integer("created_at", { mode: "timestamp_ms" }).default(sqliteNowMs).notNull(),
     id: text("id").primaryKey(),
     referrerId: text("referrer_id")

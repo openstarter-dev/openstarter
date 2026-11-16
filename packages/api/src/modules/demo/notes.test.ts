@@ -26,10 +26,7 @@ function request(path: string, init: RequestInit & { userId?: string } = {}) {
   });
 }
 
-beforeEach(() => {
-  // 笔记为进程内数组，跨测试共享。在每个用例前重置不便（模块闭包未暴露），
-  // 故测试设计为单调递增的创建并断言"至少包含本测试创建的笔记"而非精确计数。
-});
+beforeEach(() => {});
 
 describe("notes routes", () => {
   it("POST /notes creates a note under the envelope", async () => {

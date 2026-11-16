@@ -157,9 +157,6 @@ const userCreateBefore = async (_createdUser: CreatedUser, context: HookContext)
 
 const userCreateAfter: UserCreateAfter = async (createdUser, context) => {
   if (inviteCodeRequired) {
-    // Re-read from the same request (header/body/cookie); no in-memory state, so it is safe
-    // across Workers isolates and serverless instances.
-    // 从同一请求重新读取邀请码（header/body/cookie），不依赖内存状态，适用于多实例/Workers
     const code = readInviteCode(context);
 
     if (!code) {
@@ -321,8 +318,7 @@ export const auth = betterAuth({
   rateLimit: {
     enabled: env.NODE_ENV !== NodeEnv.TEST,
     max: 100,
-    // Persist counters in the DB (rate_limit table) so limits hold across isolates/instances
-    // 计数持久化到数据库（rate_limit 表），多实例/Workers 下限流仍然有效
+
     storage: "database",
     window: 60,
   },

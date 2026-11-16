@@ -17,7 +17,7 @@ const PERMISSION_ADMIN = "admin.*";
 export const overviewRouter = new Hono()
   .use(requireAuth)
   .use(requirePermission(PERMISSION_ADMIN))
-  // ── 数据列表 ──────────────────────────────────────────────────────────────────
+
   .get("/users", zValidator("query", listQuery), async (c) => {
     const { page, pageSize, search } = c.req.valid("query");
     const { items, total } = await listUsers({ page, pageSize, search });
@@ -38,7 +38,7 @@ export const overviewRouter = new Hono()
     const { items, total } = await listCredits({ page, pageSize, status });
     return c.json(respPage(items, total));
   })
-  // ── 邀请码管理 ────────────────────────────────────────────────────────────────
+
   .get("/invite-codes", async (c) => {
     const items = await listInviteCodes();
     return c.json(respData(items));

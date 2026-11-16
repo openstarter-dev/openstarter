@@ -1,9 +1,3 @@
-// PayPal 支付渠道实现（对齐 ShipAny `core/payment/paypal.ts`）。
-//
-// 以 fetch + REST API 实现（避免引入过重/不稳定的 SDK）：OAuth 客户端凭证换取
-// access token，创建一次性订单或订阅，查询会话，并在 Webhook 中经 PayPal 的
-// verify-webhook-signature 接口验签（fail-closed：缺少签名头一律拒绝）。
-
 import { Buffer } from "node:buffer";
 import {
   type CheckoutSession,
@@ -19,15 +13,12 @@ import {
   PaymentType,
 } from "./types";
 
-/** PayPal 渠道配置。 */
 export interface PayPalConfigs {
   clientId: string;
   clientSecret: string;
   webhookId?: string;
   environment?: "sandbox" | "production";
 }
-
-// ─── REST 响应的最小读取形状 ─────────────────────────────────────────────────
 
 interface PayPalLink {
   rel: string;
@@ -96,7 +87,6 @@ interface PayPalWebhookEvent {
 
 const CENTS_PER_UNIT = 100;
 
-/** PayPal 渠道 provider。 */
 export class PayPalProvider implements PaymentProvider {
   readonly name = "paypal";
 
@@ -137,7 +127,6 @@ export class PayPalProvider implements PaymentProvider {
         "GET",
       )) as PayPalOrderResource;
 
-      // APPROVED 表示用户已授权但未捕获，触发一次捕获。
       if (orderResult.status === "APPROVED") {
         orderResult = (await this.makeRequest(
           `/v2/checkout/orders/${sessionId}/capture`,
@@ -180,8 +169,6 @@ export class PayPalProvider implements PaymentProvider {
 
     return { eventType, eventResult: event, paymentSession };
   }
-
-  // ─── 结账（Create） ────────────────────────────────────────────────────────
 
   private async createOneTimePayment(order: PaymentOrder): Promise<CheckoutSession> {
     const price = order.price;
@@ -310,8 +297,6 @@ export class PayPalProvider implements PaymentProvider {
     };
   }
 
-  // ─── 事件与会话构建 ──────────────────────────────────────────────────────
-
   private buildSessionForEvent(
     eventType: PaymentEventType,
     resource: Record<string, unknown>,
@@ -334,7 +319,7 @@ export class PayPalProvider implements PaymentProvider {
         paymentResult: resource,
       });
     }
-    // PAYMENT_SUCCESS / PAYMENT_REFUNDED（capture 事件）
+
     return Promise.resolve(this.buildSessionFromCapture(resource as PayPalCapture));
   }
 
@@ -413,8 +398,6 @@ export class PayPalProvider implements PaymentProvider {
     };
   }
 
-  // ─── HTTP / 验签辅助 ─────────────────────────────────────────────────────
-
   private async ensureAccessToken(): Promise<void> {
     if (this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
       return;
@@ -479,7 +462,6 @@ export class PayPalProvider implements PaymentProvider {
     const transmissionSig = header("paypal-transmission-sig");
     const transmissionTime = header("paypal-transmission-time");
 
-    // fail-closed：缺少任一签名头即拒绝，不区分环境。
     if (!(authAlgo && transmissionId && transmissionSig && transmissionTime)) {
       throw new Error("Missing PayPal webhook signature headers");
     }
@@ -501,8 +483,6 @@ export class PayPalProvider implements PaymentProvider {
     }
   }
 }
-
-// ─── 纯映射与解析辅助（模块级） ──────────────────────────────────────────────
 
 function findApprovalUrl(links: PayPalLink[] | undefined): string {
   return links?.find((link) => link.rel === "approve")?.href ?? "";
@@ -613,7 +593,6 @@ function mapIntervalToPayPal(interval: PaymentInterval): "DAY" | "WEEK" | "MONTH
   }
 }
 
-/** 依配置创建 PayPal provider。 */
 export function createPayPalProvider(configs: PayPalConfigs): PayPalProvider {
   return new PayPalProvider(configs);
 }

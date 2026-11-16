@@ -1,6 +1,3 @@
-// 事务性邮件的共享布局与展示原语，供 7 个模板复用，保证结构与视觉一致。
-// 仅承载呈现，不含业务逻辑；文案由各模板按 locale 传入。
-
 import {
   Body,
   Button,
@@ -24,10 +21,6 @@ type EmailLayoutProps = {
   readonly children: ReactNode;
 };
 
-/**
- * 邮件外层骨架：Html(lang) → Head → Preview → 卡片容器。
- * `lang` 用于无障碍与邮件客户端语言标注，应传入已解析的 locale。
- */
 export const EmailLayout = ({ lang, preview, appName, children }: EmailLayoutProps) => (
   <Html lang={lang}>
     <Head />
@@ -96,9 +89,6 @@ type FallbackLinkProps = {
   readonly intro: string;
 };
 
-/**
- * 按钮不可用时的兜底：提示语 + 原始可复制链接。
- */
 export const FallbackLink = ({ url, intro }: FallbackLinkProps) => (
   <Section>
     <Hr style={styles.divider} />

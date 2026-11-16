@@ -2,10 +2,6 @@ import * as z from "zod";
 
 import { NodeEnv } from "@openstarter/shared/constants";
 
-/**
- * auth 服务端环境变量：模块加载即校验（fail-fast），缺失或非法值直接启动报错。
- * 取代原 envin defineEnv —— 未用到 client 前缀强制，直接以 zod 校验 process.env。
- */
 const envSchema = z.object({
   NODE_ENV: z.enum(NodeEnv).default(NodeEnv.DEVELOPMENT),
 
