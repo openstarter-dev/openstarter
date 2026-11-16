@@ -1,26 +1,19 @@
-import { type DrizzleD1Database, drizzle } from "drizzle-orm/d1";
+import { type AnyD1Database, type DrizzleD1Database, drizzle } from "drizzle-orm/d1";
 
 import { env } from "../lib/env";
 import * as schema from "./schema";
 
 export type Database = DrizzleD1Database<typeof schema>;
 
-type D1Binding = {
-  prepare(query: string): unknown;
-  batch(statements: unknown[]): Promise<unknown[]>;
-  exec(query: string): Promise<unknown>;
-  dump(): Promise<ArrayBuffer>;
-};
-
 let cachedInstance: Database | null = null;
-let cachedBinding: D1Binding | null = null;
+let cachedBinding: AnyD1Database | null = null;
 
-function createDb(): Database {
-  const binding = env.DB as D1Binding | undefined;
+export function db(): Database {
+  const binding = env.DB as AnyD1Database | undefined;
 
   if (!binding) {
     throw new Error(
-      'D1 binding "DB" not found in the Workers env. Cloudflare Workers require a d1_databases binding named "DB" (wrangler.jsonc); pure Node scripts should build their own local D1 via createLocalDatabase() from src/db/local.ts.',
+      'D1 binding "DB" not found in the Workers env. Cloudflare Workers require a d1_databases binding named "DB" (wrangler.jsonc).',
     );
   }
 
@@ -28,13 +21,9 @@ function createDb(): Database {
     return cachedInstance;
   }
 
-  cachedInstance = drizzle(binding as unknown as Parameters<typeof drizzle>[0], { schema });
+  cachedInstance = drizzle(binding, { schema });
   cachedBinding = binding;
   return cachedInstance;
-}
-
-export function db(): Database {
-  return createDb();
 }
 
 export function d1Transaction<T>(

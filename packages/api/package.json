@@ -16,7 +16,6 @@
     }
   },
   "scripts": {
-    "seed:admin": "pnpm dlx tsx scripts/seed-admin.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate:prod": "drizzle-kit migrate --config=drizzle.config.prod.ts",
     "test": "vitest --run",
@@ -51,7 +50,6 @@
     "drizzle-kit": "^0.31.8",
     "miniflare": "4.20260714.0",
     "typescript": "catalog:",
-    "vitest": "4.1.10",
-    "wrangler": "^4.98.0"
+    "vitest": "4.1.10"
   }
 }

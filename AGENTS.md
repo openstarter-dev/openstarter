@@ -52,10 +52,9 @@ The API is organized as modular domains under `src/modules/`, with each domain f
 ```
 src/
 ├── index.ts               # Hono app entry, route composition root
-├── db/                    # Database layer: Drizzle schema (schema/schema.sqlite.ts),
+├── db/                    # Database layer: Drizzle schema (schema.ts),
 │                          # D1 migrations (db/migrations/sqlite), runtime client
-│                          # (db/server.ts), local D1 bootstrap (db/local.ts),
-│                          # test factory (db/testing/)
+│                          # (db/server.ts), test factory (db/testing/)
 ├── email/                 # Transactional email: React Email templates + Resend/
 │                          # Cloudflare Mailchannels providers (sendEmail)
 ├── middleware/            # Auth, RBAC, plan gating middleware
@@ -183,9 +182,7 @@ build-time `VITE_*` still come from `.env` via Vite. Vite's `.env.development` /
   apps/web/.env.production.example); the runtime db client
   (`src/db/server.ts`) is D1-only: it reads the `DB` binding from the
   `cloudflare:workers` env (see `src/lib/env.ts`; rolldown cannot resolve
-  `cloudflare:*` statically, so the import stays dynamic there);
-  `scripts/seed-admin.ts` (pure Node; builds its own local D1 via
-  `createLocalDatabase()` from `src/db/local.ts`)
+  `cloudflare:*` statically, so the import stays dynamic there)
 - extension / mobile / mini-app — their build entries (`wxt.config.ts`,
   `scripts/env.mjs`, `config/index.ts`)
 
@@ -201,9 +198,7 @@ Required variables:
 
 Database: one D1 binding (`DB`) everywhere — web runs in workerd for dev, build
 and deploy (official `@cloudflare/vite-plugin`), so bindings come from
-`wrangler.jsonc` directly; only seed scripts (pure Node) spin up a local D1 via
-`wrangler.getPlatformProxy` reading `apps/web/wrangler.jsonc` (state in
-`apps/web/.wrangler/state/v3`). There is no connection-string env key; tests run
+`wrangler.jsonc` directly. There is no connection-string env key; tests run
 against in-memory miniflare D1 (`src/db/testing`). D1 rejects SQL
 `BEGIN`/`SAVEPOINT`, so `db.transaction()` is unavailable — use `db.batch()`
 (atomic) or the `d1Transaction` helper from `src/db/server`. The db layer is

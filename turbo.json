@@ -59,9 +59,6 @@
     "db:migrate:prod": {
       "cache": false
     },
-    "seed:admin": {
-      "cache": false
-    },
     "package": {
       "dependsOn": ["build"],
       "cache": false

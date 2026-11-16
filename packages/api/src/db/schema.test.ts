@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 const columnsOf = (table: unknown): Record<string, unknown> =>
   (table as Record<symbol, unknown>)[Symbol.for("drizzle:Columns")] as Record<string, unknown>;
 
-import { commission, referral, referralRelation } from "./schema.sqlite";
+import { commission, referral, referralRelation } from "./schema";
 
 describe("referral schema 表结构", () => {
   it("referral: userId/code 唯一约束存在", () => {
